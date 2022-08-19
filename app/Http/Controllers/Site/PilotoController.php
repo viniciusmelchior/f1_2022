@@ -1,0 +1,296 @@
+<?php
+
+namespace App\Http\Controllers\Site;
+
+use App\Http\Controllers\Controller;
+use App\Models\Site\Piloto;
+use App\Models\Site\Pais;
+use App\Models\Site\Resultado;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use App\Exports\PilotosExport;
+use App\Models\Site\Corrida;
+use App\Models\Site\PilotoEquipe;
+use Maatwebsite\Excel\Facades\Excel;
+
+class PilotoController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        $pilotos = Piloto::where('user_id', Auth::user()->id)->get();
+
+        return view('site.pilotos.index', compact('pilotos'));
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        $paises = Pais::where('user_id', Auth::user()->id)->get();
+        return view('site.pilotos.form', compact('paises'));
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        $piloto = new Piloto();
+        $piloto->nome = $request->nome;
+        $piloto->sobrenome = $request->sobrenome;
+        $piloto->user_id = Auth::user()->id;
+        $piloto->pais_id = $request->pais_id;
+        if ($request->has('flg_ativo')) {
+            $piloto->flg_ativo = $request->flg_ativo;
+        } else {
+            $piloto->flg_ativo = 'N';
+        }
+
+        $piloto->save();
+
+        return redirect()->back()->with('status', 'O piloto '.$piloto->nome.' '.$piloto->sobrenome.' foi registrado');
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {   
+        //Dados do Piloto 
+        $modelPiloto = Piloto::where('id', $id)
+                        ->where('user_id', Auth::user()->id)
+                        ->first();
+        
+        //total de corridas
+        $resultados = Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                    ->where('resultados.user_id', Auth::user()->id)
+                                    ->where('corridas.flg_sprint', 'N')
+                                    ->get(); 
+
+        $totCorridas = 0;
+        foreach($resultados as $resultado){
+            if($resultado->pilotoEquipe->piloto->id == $id){
+                $totCorridas++;
+            }
+        }
+        //dd($totCorridas);
+
+        //total de vitorias
+        $resultados =  Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                    ->where('resultados.user_id', Auth::user()->id)
+                                    ->where('corridas.flg_sprint', 'N')
+                                    ->where('chegada', 1)
+                                    ->get();
+        $totVitorias = 0;
+        foreach($resultados as $resultado){
+            if($resultado->pilotoEquipe->piloto->id == $id){
+                $totVitorias++;
+            }
+        }
+
+        //total de poles
+        $resultados =  Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                    ->where('resultados.user_id', Auth::user()->id)
+                                    ->where('corridas.flg_sprint', 'N')
+                                    ->where('largada', 1)
+                                    ->get();
+        $totPoles = 0;
+        foreach($resultados as $resultado){
+            if($resultado->pilotoEquipe->piloto->id == $id){
+                $totPoles++;
+            }
+        }
+
+        //podios 
+        $resultados = Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                ->where('resultados.user_id', Auth::user()->id)
+                                ->where('corridas.flg_sprint', 'N')
+                                ->where('chegada', '<=', 3)
+                                ->get();
+        $totPodios = 0;
+        foreach($resultados as $resultado){
+            if($resultado->pilotoEquipe->piloto->id == $id){
+                $totPodios++;
+            }
+        }
+
+        //chegadas no top 10 
+        $resultados =  Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                ->where('resultados.user_id', Auth::user()->id)
+                                ->where('corridas.flg_sprint', 'N')
+                                ->where('chegada', '<=', 10)
+                                ->get();
+        $totTopTen = 0;
+        foreach($resultados as $resultado){
+            if($resultado->pilotoEquipe->piloto->id == $id){
+                $totTopTen++;
+            }
+        }
+
+        //melhor posição de largada
+        $resultados =  Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                    ->where('resultados.user_id', Auth::user()->id)
+                                    ->where('corridas.flg_sprint', 'N')
+                                    ->get();
+        $melhorPosicaoLargada = 22;
+        foreach($resultados as $resultado){
+            if($resultado->pilotoEquipe->piloto->id == $id){
+                if($resultado->largada <= $melhorPosicaoLargada){
+                    $melhorPosicaoLargada = $resultado->largada;
+                }    
+            }
+        }
+
+        //pior posição de largada
+        $resultados =  Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                    ->where('resultados.user_id', Auth::user()->id)
+                                    ->where('corridas.flg_sprint', 'N')
+                                    ->get();
+        $piorPosicaoLargada = 0;
+        foreach($resultados as $resultado){
+            if($resultado->pilotoEquipe->piloto->id == $id){
+                if($resultado->largada > $piorPosicaoLargada){
+                    $piorPosicaoLargada = $resultado->largada;
+                }    
+            }
+        }
+
+        //melhor posição de chegada
+        $resultados =  Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                    ->where('resultados.user_id', Auth::user()->id)
+                                    ->where('corridas.flg_sprint', 'N')
+                                    ->get();
+        $melhorPosicaoChegada = 22;
+        foreach($resultados as $resultado){
+            if($resultado->pilotoEquipe->piloto->id == $id){
+                if($resultado->chegada <= $melhorPosicaoChegada){
+                    $melhorPosicaoChegada = $resultado->chegada;
+                }    
+            }
+        }
+
+        //pior posição de chegada 
+        $resultados =  Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                    ->where('resultados.user_id', Auth::user()->id)
+                                    ->where('corridas.flg_sprint', 'N')
+                                    ->get();
+        $piorPosicaoChegada = 0;
+        foreach($resultados as $resultado){
+            if($resultado->pilotoEquipe->piloto->id == $id){
+                if($resultado->chegada > $piorPosicaoChegada){
+                    $piorPosicaoChegada = $resultado->chegada;
+                }    
+            }
+        }
+
+        //Total de Pontos
+        $resultados =  Resultado::where('user_id', Auth::user()->id)->get();                     
+        $totPontos = 0;
+        foreach($resultados as $resultado){
+        if($resultado->pilotoEquipe->piloto->id == $id){
+                $totPontos += $resultado->pontuacao;
+            }
+        }
+
+        $pilotoEquipe = PilotoEquipe::where('piloto_id', $id)
+                                    ->where('user_id', Auth::user()->id)
+                                    ->get();
+    
+        $ids = [];
+        foreach($pilotoEquipe as $pilotoId){
+            array_push($ids, $pilotoId->id);
+        }
+        //dd($ids);
+
+       $resultado = Corrida::where('user_id', Auth::user()->id)
+                                ->where('flg_sprint', 'N')
+                                ->where('volta_rapida', '!=', null)
+                                ->whereIn('volta_rapida', $ids)
+                                ->get();
+    
+        $totVoltasRapidas = count($resultado);
+        //dd($totVoltasRapidas);
+        //$totVoltasRapidas = 0;             
+       
+        return view('site.pilotos.show', compact('modelPiloto', 'totCorridas', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas'));
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        $model = Piloto::where('id', $id)->where('user_id', Auth::user()->id)->first();
+        $paises = Pais::where('user_id', Auth::user()->id)->get();
+        return view('site.pilotos.form', compact('model','paises'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        $piloto = Piloto::where('id', $id)->where('user_id', Auth::user()->id)->first();
+        $piloto->nome = $request->nome;
+        $piloto->sobrenome = $request->sobrenome;
+        $piloto->user_id = Auth::user()->id;
+        $piloto->pais_id = $request->pais_id;
+        if ($request->has('flg_ativo')) {
+            $piloto->flg_ativo = $request->flg_ativo;
+        } else {
+            $piloto->flg_ativo = 'N';
+        }
+
+        $piloto->update();
+
+        return redirect()->route('pilotos.index');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        $piloto = Piloto::where('id', $id)->where('user_id', Auth::user()->id)->first();
+        $piloto->delete();
+        return redirect()->back();
+    }
+
+    public function export($id) 
+    {   
+        //Pesquisa qual Piloto Estamos Queremos 
+        $modelPiloto = Piloto::where('id', $id)
+                                ->where('user_id', Auth::user()->id)
+                                ->first();
+
+        //Gera o nome do Arquivo com Data Atual 
+        $nomeArquivo = $modelPiloto->nome." ".$modelPiloto->sobrenome."_".date('Y');
+
+
+        return Excel::download(new PilotosExport($id), $nomeArquivo.'.xlsx');
+    }
+}

@@ -1,0 +1,135 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    list-style-type: none;
+}
+
+.coluna_acoes{
+   display: flex;
+   justify-content: space-around;
+}
+
+.left_table{
+    max-width: 50%;
+}
+
+.center_table{
+    margin: 0 auto;
+    max-width: 50%;
+}
+
+#tabelaPilotos td, th{
+    text-align: center;
+}
+
+.breadcrumb li > a{
+    text-decoration: none;
+    color: black;
+}
+
+.f1-logo-wrapper{
+    width: 120px;
+    height: 50px;
+}
+
+.f1-logo{
+    width: 100%;
+    height: 100%;
+}
+
+.main-header{
+    background-color: black;
+}
+
+.navbar-main{
+    display: flex;
+    color: white;
+    justify-content: space-between;
+    align-items: center;
+    height: 90px;
+    padding: 20px;
+}
+
+.navbar-main ul{
+    display: flex;
+}
+
+.navbar-main ul li{
+    margin-right: 30px;
+}
+
+.navbar-main ul li a{
+   color: white;
+   text-decoration: none;
+}
+
+.navbar-main ul li a:hover{
+    color: red;
+    text-decoration: none;
+ }
+
+footer{
+    background-color: black;
+    color: white;
+    text-align: center;
+    padding: 2em;
+    /* margin-top: 1em; */
+}
+
+/*Dashboard Sidebar*/
+.sidebar{
+    width: 290px;
+    top:0;
+    left: 0;
+    bottom: 0;
+    background: black;
+    padding-top: 50px;
+ }
+ 
+ .sidebar h1{
+    display: block;
+    padding: 10px 20px;
+    color: #fff;
+    text-decoration: none;
+    /* font-family: "Rubik"; */
+    letter-spacing: 2px;
+    font-weight: 400;
+    margin: 0;
+    font-size: 25px;
+    text-transform: uppercase;
+ }
+ 
+ .sidebar a{
+    display: block;
+    padding: 10px 20px;
+    color: #bbb;
+    text-decoration: none;
+    /* font-family: "Rubik"; */
+    letter-spacing: 2px;
+ }
+ 
+ .sidebar a:hover{
+    color: #fff;
+    margin-left: 20px;
+    transition: 0.4s;
+ }
+ 
+ .sidebar .dropdown a{
+    display: block;
+    padding: 10px 20px;
+    color: #bbb;
+    text-decoration: none;
+   /*  font-family: "Rubik"; */
+    letter-spacing: 2px;
+ }
+ 
+ .sidebar .dropdown a:hover{
+    color: #fff;
+    margin-left: 20px;
+    transition: 0.4s;
+ }
+
+ /*Países*/
+
+
