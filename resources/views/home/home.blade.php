@@ -55,10 +55,10 @@ color: #fff;
 
 @section('section')
     <div class="container">
-        <div class="header-tabelas m-3">Pilotos</div>
+        <div class="header-tabelas m-3">Vitórias</div>
         <div class="d-flex">
             <div>
-               <h1>Vitórias</h1>
+               <h1>Pilotos</h1>
                <table class="m-5">
                     <tr>
                         <th>#</th>
@@ -88,7 +88,7 @@ color: #fff;
             </div>
 
             <div>
-                <h1>Vitórias</h1>
+                <h1>Equipes</h1>
                 <table class="m-5">
                      <tr>
                          <th>#</th>
@@ -120,11 +120,11 @@ color: #fff;
 
         <hr class="separador">
 
-        <div class="header-tabelas m-3">Equipes</div>
+        <div class="header-tabelas m-3">Pole Positions</div>
 
         <div class="d-flex">
             <div>
-               <h1>Pole Positions</h1>
+               <h1>Pilotos</h1>
                <table class="m-5">
                     <tr>
                         <th>#</th>
@@ -154,7 +154,7 @@ color: #fff;
             </div>
 
             <div>
-                <h1>Pole Positions</h1>
+                <h1>Equipes</h1>
                 <table class="m-5">
                      <tr>
                          <th>#</th>

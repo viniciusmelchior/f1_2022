@@ -1,0 +1,3 @@
+- Colocar se teve safety car e quantidade (por padrão 0)
+
+- pensar nos abandonos

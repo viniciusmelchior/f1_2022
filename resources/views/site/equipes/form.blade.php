@@ -10,6 +10,12 @@
 @endphp
 
 @section('section')
+    @if (session('status'))
+        <div class="alert alert-success text-center">
+            {{ session('status') }}
+        </div>
+    @endif
+
    <div class="container">
     <form method="POST" action="{{ $route }}" class="col-md-6 mt-3 mb-3">
         {{ $method }}

@@ -88,6 +88,9 @@ class ResultadoController extends Controller
         $corrida = Corrida::where('id', $id)->where('user_id', Auth::user()->id)->first();
         $corrida->volta_rapida = $request->volta_rapida;
         $corrida->condicao_id = $request->condicao_id;
+        $corrida->qtd_safety_car = $request->qtd_safety_car;
+        $corrida->observacoes = $request->observacoes;
+
         if ($request->has('flg_sprint')) {
             $corrida->flg_sprint = $request->flg_sprint;
         } else {

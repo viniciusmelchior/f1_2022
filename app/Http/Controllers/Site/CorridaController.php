@@ -40,6 +40,7 @@ class CorridaController extends Controller
         $corrida->pista_id = $request->pista_id;
         $corrida->ordem = $request->ordem;
         $corrida->user_id = Auth::user()->id;
+        $corrida->qtd_safety_car = $request->qtd_safety_car;
 
         $corrida->save();
 

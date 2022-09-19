@@ -69,6 +69,7 @@ route::get('/equipes/create', [EquipeController::class, 'create'])->name('equipe
 route::post('/equipes/store', [EquipeController::class, 'store'])->name('equipes.store')->middleware('auth');
 route::get('/equipes/index', [EquipeController::class, 'index'])->name('equipes.index')->middleware('auth');
 route::get('/equipes/edit/{id}', [EquipeController::class, 'edit'])->name('equipes.edit')->middleware('auth');
+route::get('/equipes/show/{id}', [EquipeController::class, 'show'])->name('equipes.show')->middleware('auth');
 route::put('/equipes/update/{id}', [EquipeController::class, 'update'])->name('equipes.update')->middleware('auth');
 route::get('/equipes/delete/{id}', [EquipeController::class, 'destroy'])->name('equipes.delete')->middleware('auth');
 

@@ -21,7 +21,7 @@
 @section('section')
    <div class="container">
         <div>
-            <h2>GP de {{$corrida->pista->nome}}</h2>
+            <h2>GP de {{$corrida->pista->nome}} - {{$corrida->temporada->ano->ano}}</h2>
         </div>
     <form method="POST" action="{{ $route }}" class="col-md-6 mt-3 mb-3">
         {{ $method }}
@@ -33,6 +33,19 @@
                     <option value="{{$condicaoClimatica->id}}" {{-- @if(isset($model) && $model->condicaoClimatica->id == $condicaoClimatica->id) selected @endif --}}>{{$condicaoClimatica->descricao}}</option>
                 @endforeach
             </select>
+        </div>
+        <div class="mb-3">
+            <label for="qtd_safety_car" class="form-label">Quantidade Safety Car</label>
+            <input
+                type="number"
+                name="qtd_safety_car" 
+                id="qtd_safety_car" 
+                style="width:30px; height:30px;" 
+                @if(isset($corrida->qtd_safety_car))
+                    value="{{$corrida->qtd_safety_car}}"
+                @else 
+                    value="">
+                @endif 
         </div>
         <table class="table">
             <thead>
@@ -120,7 +133,16 @@
             @if(isset($corrida) && $corrida->flg_sprint == 'S') checked @endif
             >
             <label class="form-check-label" for="flg_ativo">Corrida Sprint</label>
-          </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="observacoes" class="form-label">Observações</label>
+            <textarea class="form-control" name="observacoes" id="observacoes" rows="3">
+                @if($corrida->observacoes)
+                {{$corrida->observacoes}}
+                @endif
+            </textarea>
+        </div>
 
         <button type="submit" class="btn btn-primary">Salvar</button>
         <a href="{{route('temporadas.index')}}" class="btn btn-secondary ml-3">Voltar</a>

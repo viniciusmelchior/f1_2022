@@ -1,9 +1,15 @@
 @extends('layouts.main')
 
+<style>
+    .TrvoltaRapida{
+        color: purple
+    }
+</style>
+
 @section('section')
     <div class="container mt-3 mb-3">
         <div>
-            <h2>GP de {{$corrida->pista->nome}}</h2>
+            <h2>GP de {{$corrida->pista->nome}} - {{$corrida->temporada->ano->ano}}</h2>
         </div>
         <table class="table">
             <thead>
@@ -29,5 +35,16 @@
                 @endforeach
             </tbody>
         </table>
+        <div class="mb-3">
+            Quantidade de Safety Car:  {{$corrida->qtd_safety_car}}
+        </div>
+        <div class="mb-3">
+            <label for="observacoes" class="form-label">Observações</label>
+            <textarea class="form-control" name="observacoes" id="observacoes" rows="5">
+                @if($corrida->observacoes)
+                    {{$corrida->observacoes}}
+                @endif
+            </textarea>
+        </div>
     </div>
 @endsection

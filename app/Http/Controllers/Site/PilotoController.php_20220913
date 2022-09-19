@@ -70,7 +70,6 @@ class PilotoController extends Controller
      */
     public function show($id)
     {   
-
         //Dados do Piloto 
         $modelPiloto = Piloto::where('id', $id)
                         ->where('user_id', Auth::user()->id)
@@ -83,78 +82,122 @@ class PilotoController extends Controller
                                     ->get(); 
 
         $totCorridas = 0;
-        $totVitorias = 0;
-        $totPoles = 0;
-        $totPodios = 0;
-        $totTopTen = 0;
-        $melhorPosicaoLargada = 22;
-        $piorPosicaoLargada = 0;
-        $melhorPosicaoChegada = 22;
-        $piorPosicaoChegada = 0;
-        
         foreach($resultados as $resultado){
             if($resultado->pilotoEquipe->piloto->id == $id){
                 $totCorridas++;
             }
+        }
+        //dd($totCorridas);
 
-            //calculo do total de vitórias
-            if($resultado->chegada == 1){
-                if($resultado->pilotoEquipe->piloto->id == $id){
-                    $totVitorias++;
-                }
+        //total de vitorias
+        $resultados =  Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                    ->where('resultados.user_id', Auth::user()->id)
+                                    ->where('corridas.flg_sprint', 'N')
+                                    ->where('chegada', 1)
+                                    ->get();
+        $totVitorias = 0;
+        foreach($resultados as $resultado){
+            if($resultado->pilotoEquipe->piloto->id == $id){
+                $totVitorias++;
             }
+        }
 
-            //calculo do total de pole positions
-            if($resultado->largada == 1){
-                if($resultado->pilotoEquipe->piloto->id == $id){
-                    $totPoles++;
-                }
+        //total de poles
+        $resultados =  Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                    ->where('resultados.user_id', Auth::user()->id)
+                                    ->where('corridas.flg_sprint', 'N')
+                                    ->where('largada', 1)
+                                    ->get();
+        $totPoles = 0;
+        foreach($resultados as $resultado){
+            if($resultado->pilotoEquipe->piloto->id == $id){
+                $totPoles++;
             }
+        }
 
-             //calculo de podios
-             if($resultado->chegada <= 3){
-                if($resultado->pilotoEquipe->piloto->id == $id){
-                    $totPodios++;
-                }
+        //podios 
+        $resultados = Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                ->where('resultados.user_id', Auth::user()->id)
+                                ->where('corridas.flg_sprint', 'N')
+                                ->where('chegada', '<=', 3)
+                                ->get();
+        $totPodios = 0;
+        foreach($resultados as $resultado){
+            if($resultado->pilotoEquipe->piloto->id == $id){
+                $totPodios++;
             }
+        }
 
-            //calculo de chegadas no top 10
-            if($resultado->chegada <= 10){
-                if($resultado->pilotoEquipe->piloto->id == $id){
-                    $totTopTen++;
-                }
+        //chegadas no top 10 
+        $resultados =  Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                ->where('resultados.user_id', Auth::user()->id)
+                                ->where('corridas.flg_sprint', 'N')
+                                ->where('chegada', '<=', 10)
+                                ->get();
+        $totTopTen = 0;
+        foreach($resultados as $resultado){
+            if($resultado->pilotoEquipe->piloto->id == $id){
+                $totTopTen++;
             }
+        }
 
-            //calculo de melhor posição de largada
+        //melhor posição de largada
+        $resultados =  Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                    ->where('resultados.user_id', Auth::user()->id)
+                                    ->where('corridas.flg_sprint', 'N')
+                                    ->get();
+        $melhorPosicaoLargada = 22;
+        foreach($resultados as $resultado){
             if($resultado->pilotoEquipe->piloto->id == $id){
                 if($resultado->largada <= $melhorPosicaoLargada){
                     $melhorPosicaoLargada = $resultado->largada;
                 }    
             }
+        }
 
-            //calculo pior posição de largada
+        //pior posição de largada
+        $resultados =  Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                    ->where('resultados.user_id', Auth::user()->id)
+                                    ->where('corridas.flg_sprint', 'N')
+                                    ->get();
+        $piorPosicaoLargada = 0;
+        foreach($resultados as $resultado){
             if($resultado->pilotoEquipe->piloto->id == $id){
                 if($resultado->largada > $piorPosicaoLargada){
                     $piorPosicaoLargada = $resultado->largada;
                 }    
             }
+        }
 
-            //calculo melhor posição de chegada
+        //melhor posição de chegada
+        $resultados =  Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                    ->where('resultados.user_id', Auth::user()->id)
+                                    ->where('corridas.flg_sprint', 'N')
+                                    ->get();
+        $melhorPosicaoChegada = 22;
+        foreach($resultados as $resultado){
             if($resultado->pilotoEquipe->piloto->id == $id){
                 if($resultado->chegada <= $melhorPosicaoChegada){
                     $melhorPosicaoChegada = $resultado->chegada;
                 }    
             }
+        }
 
-            //calculo pior posição de chegada 
+        //pior posição de chegada 
+        $resultados =  Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                    ->where('resultados.user_id', Auth::user()->id)
+                                    ->where('corridas.flg_sprint', 'N')
+                                    ->get();
+        $piorPosicaoChegada = 0;
+        foreach($resultados as $resultado){
             if($resultado->pilotoEquipe->piloto->id == $id){
                 if($resultado->chegada > $piorPosicaoChegada){
                     $piorPosicaoChegada = $resultado->chegada;
                 }    
             }
         }
-    
-        //Total de Pontos tem cálculo diferente pois envolve sprints
+
+        //Total de Pontos
         $resultados =  Resultado::where('user_id', Auth::user()->id)->get();                     
         $totPontos = 0;
         foreach($resultados as $resultado){
@@ -218,7 +261,7 @@ class PilotoController extends Controller
 
         $piloto->update();
 
-        return redirect()->route('pilotos.index')->with('status', 'O piloto '.$piloto->nomeCompleto().' foi editado');
+        return redirect()->route('pilotos.index');
     }
 
     /**
