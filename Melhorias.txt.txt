@@ -1,3 +1,9 @@
-- Colocar se teve safety car e quantidade (por padrão 0)
-
 - pensar nos abandonos
+
+## Tela de Temporadas/Corridas
+- trocar icones ok
+- pesquisa - avaliar necessidade
+- breadcrumbs ok 
+- corrigir redireceionamento do botao de adicionar ok
+
+- modal delete (assistir videos para estudo)

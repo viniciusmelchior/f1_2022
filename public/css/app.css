@@ -27,6 +27,14 @@
     text-align: center;
 }
 
+#tabelaTemporadas td, th{
+    text-align: center;
+}
+
+#tabelaCorridas td, th{
+    text-align: center;
+}
+
 .breadcrumb li > a{
     text-decoration: none;
     color: black;
