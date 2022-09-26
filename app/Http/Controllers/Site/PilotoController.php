@@ -227,11 +227,13 @@ class PilotoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
-    {
+    public function destroy(Request $request)
+    {   
+        $id = $request-> piloto_id;
         $piloto = Piloto::where('id', $id)->where('user_id', Auth::user()->id)->first();
         $piloto->delete();
-        return redirect()->back();
+    
+        return redirect()->route('pilotos.index')->with('status', 'O piloto '.$piloto->nomeCompleto().' foi excluído com sucesso');
     }
 
     public function export($id) 

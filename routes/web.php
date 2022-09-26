@@ -62,7 +62,7 @@ route::get('/pilotos/index', [PilotoController::class, 'index'])->name('pilotos.
 route::get('/pilotos/edit/{id}', [PilotoController::class, 'edit'])->name('pilotos.edit')->middleware('auth');
 route::get('/pilotos/show/{id}', [PilotoController::class, 'show'])->name('pilotos.show')->middleware('auth');
 route::put('/pilotos/update/{id}', [PilotoController::class, 'update'])->name('pilotos.update')->middleware('auth');
-route::get('/pilotos/delete/{id}', [PilotoController::class, 'destroy'])->name('pilotos.delete')->middleware('auth');
+route::get('/pilotos/delete', [PilotoController::class, 'destroy'])->name('pilotos.delete')->middleware('auth');
 
 /**Equipes */
 route::get('/equipes/create', [EquipeController::class, 'create'])->name('equipes.create')->middleware('auth');

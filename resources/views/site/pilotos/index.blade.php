@@ -49,7 +49,7 @@
                             <td class="coluna_acoes">
                                 <a href="{{route('pilotos.show', [$piloto->id])}}"><i class="bi bi-eye-fill"></i></a>
                                 <a href="{{route('pilotos.edit', [$piloto->id])}}"><i class="bi bi-pencil-fill"></i></a>
-                                <a class="" href="{{route('pilotos.delete', [$piloto->id])}}"><i class="bi bi-trash-fill"></i></a>
+                                <button type="button" class="deletePiloto btn btn-link p-0" value="{{$piloto->id}}"><i class="bi bi-trash-fill"></i></button>
                             </td>
                         </tr>
                     @endforeach
@@ -63,10 +63,35 @@
     </div>
   </div>
 
+  <!-- Modal exclsão -->
+<form id="deleteForm" method="get" action="{{ route('pilotos.delete') }}">
+    <input type="hidden" name="_method" value="DELETE">
+    <input type="hidden" name="_token" value="{{csrf_token()}}">
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Confirmar</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Deseja confirmar a exclusão do piloto?</p>
+                </div>
+                <input type="hidden" name="piloto_id" id="piloto_id">
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                    <button type="submit" class="btn btn-danger">Deletar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
   <script>
     let caixaBusca = document.getElementById('caixaBusca');
     let tabelaPilotos = document.getElementById('tabelaPilotos');
-    console.log(caixaBusca, tabelaPilotos)
 
     caixaBusca.addEventListener("keyup",function(){
     var keyword = this.value;
@@ -89,7 +114,17 @@
             }
         }
     }
-})
+    })
+
+    $(document).ready(function () {
+        $('.deletePiloto').click(function (e) { 
+            e.preventDefault();
+            var piloto_id = $(this).val();
+            $('#piloto_id').val(piloto_id);
+            $('#exampleModal').modal('show');
+        });
+    });
+
 </script>
 
 @endsection
