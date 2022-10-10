@@ -13,7 +13,7 @@ class Piloto extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['nome', 'sobrenome', 'pais_id', 'user_id', 'flg_ativo'];
+    protected $fillable = ['nome', 'sobrenome','imagem', 'pais_id', 'user_id', 'flg_ativo'];
 
     public function nomeCompleto(){
         return $this->nome.' '.$this->sobrenome;

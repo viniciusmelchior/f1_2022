@@ -23,7 +23,9 @@
         <div>
             <nav class="navbar-main container">
                 <div class="f1-logo-wrapper">
-                    <a href="{{route('home')}}"><img src="{{asset('images/F1_logo_PNG1.png')}}" alt="logo-da-f1" class="f1-logo"></a>
+                   {{--  <a href="{{route('home')}}"><img src="{{asset('images/F1_logo_PNG1.png')}}" alt="logo-da-f1" class="f1-logo"></a> --}}
+                   @php $teste = 'F1_logo_PNG1.png' @endphp
+                    <a href="{{route('home')}}"><img src="{{asset('images/'.$teste)}}" alt="logo-da-f1" class="f1-logo"></a>
                 </div>
                 @if(Auth::guest())
                 <ul>

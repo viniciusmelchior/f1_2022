@@ -45,7 +45,8 @@ class PilotoController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {
+    {   
+
         $piloto = new Piloto();
         $piloto->nome = $request->nome;
         $piloto->sobrenome = $request->sobrenome;
@@ -56,6 +57,15 @@ class PilotoController extends Controller
         } else {
             $piloto->flg_ativo = 'N';
         }
+
+        if($request->imagem == ''){
+            $newImageName = '';
+        } else {
+           $newImageName = time().'-'.$request->nome.'.'.$request->imagem->extension();
+           $request->imagem->move(public_path('images'), $newImageName);
+        }
+
+        $piloto->imagem = $newImageName;
 
         $piloto->save();
 
@@ -216,6 +226,20 @@ class PilotoController extends Controller
             $piloto->flg_ativo = 'N';
         }
 
+        //se tiver foto criar span no form pra nao precisar alterar,  caso queira, apagar a antiga e colocar outra
+        if($request->imagem == ''){
+            $newImageName = '';
+        } else {
+            if(file_exists(public_path('images/'.$piloto->imagem))){
+                if($piloto->imagem != null){
+                    unlink(public_path('images/'.$piloto->imagem));
+                }
+            }
+           $newImageName = time().'-'.$request->nome.'.'.$request->imagem->extension();
+           $request->imagem->move(public_path('images'), $newImageName);
+           $piloto->imagem = $newImageName;
+        }
+
         $piloto->update();
 
         return redirect()->route('pilotos.index')->with('status', 'O piloto '.$piloto->nomeCompleto().' foi editado');
@@ -232,18 +256,22 @@ class PilotoController extends Controller
         $id = $request-> piloto_id;
         $piloto = Piloto::where('id', $id)->where('user_id', Auth::user()->id)->first();
         $piloto->delete();
+
+        //apagando a foto do usuário
+        if(file_exists(public_path('images/'.$piloto->imagem))){
+            unlink(public_path('images/'.$piloto->imagem));
+        }
     
         return redirect()->route('pilotos.index')->with('status', 'O piloto '.$piloto->nomeCompleto().' foi excluído com sucesso');
     }
 
     public function export($id) 
     {   
-        //Pesquisa qual Piloto Estamos Queremos 
+
         $modelPiloto = Piloto::where('id', $id)
                                 ->where('user_id', Auth::user()->id)
                                 ->first();
 
-        //Gera o nome do Arquivo com Data Atual 
         $nomeArquivo = $modelPiloto->nome." ".$modelPiloto->sobrenome."_".date('Y');
 
 

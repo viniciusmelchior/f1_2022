@@ -17,7 +17,7 @@
     @endif
 
    <div class="container">
-    <form method="POST" action="{{ $route }}" class="col-md-6 mt-3 mb-3">
+    <form method="POST" action="{{ $route }}" class="col-md-6 mt-3 mb-3" enctype="multipart/form-data">
         {{ $method }}
         @csrf
         <div class="mb-3">
@@ -35,6 +35,15 @@
                     <option value="{{$pais->id}}" @if(isset($model) && $model->pais->id == $pais->id) selected @endif>{{$pais->des_nome}}</option>
                 @endforeach
             </select>
+        </div>
+        <div class="mb-3">
+            <label for="sobrenome" class="form-label">Imagem de Perfil</label>
+            <input type="file" class="form-control" id="imagem" name="imagem">
+            @if(isset($model))
+                @if($model->imagem != '')
+                    <span style="color:red;">Piloto ja tem uma imagem de perfil registrada</span>
+                @endif
+            @endif
         </div>
         <div class="form-group form-check mb-3">
             <input

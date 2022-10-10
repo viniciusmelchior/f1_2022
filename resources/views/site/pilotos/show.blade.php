@@ -48,11 +48,24 @@
         font-weight: bolder;
         color: white;
     }
+
+    .image-wrapper{
+        max-width: 250px;
+        margin: auto;
+    }
+
+    .image-wrapper img{
+        max-width: 100%;
+        border-radius: 2%;
+    }
     
 </style>
    <div class="container">
     {{-- <h1 class="mt-3">{{$modelPiloto->nome}} {{$modelPiloto->sobrenome}}</h1> --}}
-        <table class="mt-5 mb-5">
+    <div class="image-wrapper mt-3">
+        <img src="{{asset('images/'.$modelPiloto->imagem)}}" alt="">
+    </div>
+        <table class="mt-2 mb-5">
             <tr>
                 <th colspan="2">{{$modelPiloto->nome}} {{$modelPiloto->sobrenome}}</th>
             </tr>
@@ -116,11 +129,32 @@
             </tr>
         </table>
 
-        {{--Gráficos--}}
+        @php 
+            $resultados = Resultado::where('user_id', Auth::user()->id)->get();
+        @endphp
 
-        {{-- <div class="my-5" style="width: 400px; height:400px;">
-            <canvas id="myChart" width="200" height="200"></canvas>
-        </div> --}}
+        {{--Tabela de Largada e chegada--}}
+        <h1>Resultados por Corrida</h1>
+        <table class="mt-5 mb-5">
+            <tr>
+                <th></th>
+                <th>Largada</th>
+                <th>Chegada</th>
+                <th>Variação</th>
+            </tr>
+            @foreach($resultados as $resultado)
+                <tr>
+                    @if($resultado->pilotoEquipe->piloto->id == $modelPiloto->id)
+                        <td>{{$resultado->corrida->pista->nome}} - {{$resultado->corrida->temporada->ano->ano}}</td>
+                        <td>{{$resultado->largada}}</td>
+                        <td>{{$resultado->chegada}}</td>
+                        <td>{{$resultado->largada-$resultado->chegada}}</td>
+                    @endif
+                </tr>
+            @endforeach
+        </table>
+
+        {{--Gráficos--}}
         <div>
             <canvas id="myChart"></canvas>
         </div>
@@ -135,39 +169,25 @@
                     <a href="{{route('pilotos.export', [$modelPiloto->id])}}" class="btn btn-secondary">Gerar Excel</a>
                 </div>
             </div>
-        </div>
+        </div>   
    </div>
 
    @php 
-    $labels = [];
-    $corridas = Corrida::where('user_id', Auth::user()->id)->orderBy('temporada_id')->orderBy('ordem')->get();
-    foreach($corridas as $corrida){
-        if($corrida->flg_sprint == 'S'){
-            $corrida->pista->nome =  $corrida->pista->nome." - Sprint";
-        }
-        array_push($labels, $corrida->pista->nome);
-    }
-
     $chegada = [];
-    // $resultados = Corrida::where('user_id', Auth::user()->id)->orderBy('temporada_id')->orderBy('ordem')->get();
-    $resultados = Resultado::where('user_id', Auth::user()->id)->get();
+    $labels = [];
     foreach($resultados as $resultado){
         if($resultado->pilotoEquipe->piloto->id == $modelPiloto->id){
             array_push($chegada, $resultado->chegada);
+            array_push($labels, $resultado->corrida->pista->nome);
         }
     }
 
     $largada = [];
-    // $resultados = Corrida::where('user_id', Auth::user()->id)->orderBy('temporada_id')->orderBy('ordem')->get();
-    $resultados = Resultado::where('user_id', Auth::user()->id)->get();
     foreach($resultados as $resultado){
         if($resultado->pilotoEquipe->piloto->id == $modelPiloto->id){
             array_push($largada, $resultado->largada);
         }
     }
-
-    //dd($modelPiloto);
-    //dd($chegada);
 
    @endphp
    

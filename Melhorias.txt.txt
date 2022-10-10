@@ -7,3 +7,10 @@
 - corrigir redireceionamento do botao de adicionar ok
 
 - modal delete (assistir videos para estudo)
+
+* Revisar inclusao de piloto Equipe *
+- verificar se pra mesma equipe existe dois ativos na mesma temporada. Se tiver, retornar com a mensagem "Já existe uma dupla cadastrada para a equipe tal na temporada tal"
+
+--Trabalhar inserção do campeao. 
+
+1º adicionar flg para finalizar temporada. Caso ela esteja finalizada, o botão de adicionar corrida fica desabilitado. Campao pode ser inserido de acordo com o respectivo piloto equipe
