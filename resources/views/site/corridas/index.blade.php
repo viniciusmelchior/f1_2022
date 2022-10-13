@@ -10,7 +10,7 @@
             <li class="breadcrumb-item active" aria-current="page">Temporada {{$temporada->ano->ano}}</li>
         </ol>
     </nav>
-
+    
     <div class="left_table">
         @if(count($corridas) > 0)
         <table class="table" id="tabelaCorridas">
@@ -18,6 +18,7 @@
                 <tr>
                     <th>#</th>
                     <th>Pista</th>
+                    <th>Dificuldade IA</th>
                     <th>Ações</th>
                 </tr>
             </thead>
@@ -26,6 +27,7 @@
                     <tr @if($corrida->flg_sprint == 'S') style="color:red;" @endif>
                         <td>@if($corrida->flg_sprint != 'S') {{$corrida->ordem}} @endif</td>
                         <td>{{$corrida->pista->nome}} @if($corrida->flg_sprint == 'S') - Sprint @endif</td>
+                        <td>0</td>
                         <td class="d-flex" style="justify-content: space-around;">
                             <a data-toggle="tooltip" data-placement="top" title="Visualizar resultados" href="{{route('resultados.show', [$corrida->id])}}"><i class="bi bi-eye-fill"></i></a>
                             <a data-toggle="tooltip" data-placement="top" title="Inserir Resultados" class="" href="{{route('resultados.edit', [$corrida->id])}}"><i class="bi bi-plus-circle-fill"></i></a>
