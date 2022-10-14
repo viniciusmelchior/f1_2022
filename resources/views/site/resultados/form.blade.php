@@ -47,6 +47,19 @@
                     value="">
                 @endif 
         </div>
+        <div class="mb-3">
+            <label for="dificuldade_ia" class="form-label">Dificuldade IA</label>
+            <input
+                type="number"
+                name="dificuldade_ia" 
+                id="dificuldade_ia" 
+                style="width:30px; height:30px;" 
+                @if(isset($corrida->dificuldade_ia))
+                    value="{{$corrida->dificuldade_ia}}"
+                @else 
+                    value="">
+                @endif 
+        </div>
         <table class="table">
             <thead>
                 <tr>

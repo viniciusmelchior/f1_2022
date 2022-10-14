@@ -89,6 +89,7 @@ class ResultadoController extends Controller
         $corrida->volta_rapida = $request->volta_rapida;
         $corrida->condicao_id = $request->condicao_id;
         $corrida->qtd_safety_car = $request->qtd_safety_car;
+        $corrida->dificuldade_ia = $request->dificuldade_ia;
         $corrida->observacoes = $request->observacoes;
 
         if ($request->has('flg_sprint')) {

@@ -11,6 +11,9 @@
         <div>
             <h2>GP de {{$corrida->pista->nome}} - {{$corrida->temporada->ano->ano}}</h2>
         </div>
+        <div class="mb-3">
+           Dificuldade IA:  {{$corrida->dificuldade_ia}}
+        </div>
         <table class="table">
             <thead>
                 <tr>
