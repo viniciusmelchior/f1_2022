@@ -39,7 +39,7 @@
             </tbody>
         </table>
         @else
-            <p>Nenhuma pista cadastrada</p>
+            <p>Nenhuma temporada cadastrada</p>
         @endif
     </div>
     <a href="{{route('temporadas.create')}}" class="btn btn-primary">Adicionar temporada</a>
