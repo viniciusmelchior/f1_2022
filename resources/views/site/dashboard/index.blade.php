@@ -66,6 +66,16 @@
 
           <div class="dropdown">
             <a class="dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+             Anos
+            </a>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+              <a class="dropdown-item" href="{{route('anos.index')}}">Visualizar</a>
+              <a class="dropdown-item" href="{{route('anos.create')}}">Cadastrar</a>
+            </div>
+          </div>
+
+          <div class="dropdown">
+            <a class="dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
               Temporadas
             </a>
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">

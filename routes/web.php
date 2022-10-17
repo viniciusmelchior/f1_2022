@@ -8,6 +8,7 @@ use App\Http\Controllers\Site\PistaController;
 use App\Http\Controllers\Site\PilotoEquipeController;
 use App\Http\Controllers\Site\CondicaoClimaticaController;
 use App\Http\Controllers\Site\CorridaController;
+use App\Http\Controllers\Site\AnoController;
 use App\Http\Controllers\Site\ResultadoController;
 use App\Http\Controllers\Site\TemporadaController;
 use App\Http\Controllers\Site\PDFController;
@@ -130,5 +131,14 @@ Route::get('pilotos/export/{id}', [PilotoController::class, 'export'])->name('pi
 
 /**Disparo de Email */
 Route::get('send-email-pdf', [PDFController::class, 'index']);
+
+/**Anos */
+route::get('/anos/create', [AnoController::class, 'create'])->name('anos.create')->middleware('auth');
+route::post('/anos/store', [AnoController::class, 'store'])->name('anos.store')->middleware('auth');
+route::get('/anos/index/', [AnoController::class, 'index'])->name('anos.index')->middleware('auth');
+route::get('/anos/edit/{id}', [AnoController::class, 'edit'])->name('anos.edit')->middleware('auth');
+route::put('/anos/update/{id}', [AnoController::class, 'update'])->name('anos.update')->middleware('auth');
+route::get('/anos/delete/{id}', [AnoController::class, 'destroy'])->name('anos.delete')->middleware('auth');
+
 
 

@@ -11,6 +11,8 @@ class Ano extends Model
     
     public $timestamps = false;
 
+    protected $fillable = ['ano', 'user_id', 'flg_ativo'];
+
     /**Relacionamentos */
     public function pilotoEquipe(){
         return $this->hasMany(PilotoEquipe::class);
