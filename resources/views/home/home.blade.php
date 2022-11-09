@@ -405,4 +405,10 @@ color: #fff;
 
         });
    });
+
+   
+3
+$(document).ready( function () {
+    //$('#tabelaClassificacaoPilotos').DataTable();
+} );
 </script>

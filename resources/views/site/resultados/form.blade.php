@@ -23,7 +23,7 @@
         <div>
             <h2>GP de {{$corrida->pista->nome}} - {{$corrida->temporada->ano->ano}}</h2>
         </div>
-    <form method="POST" action="{{ $route }}" class="col-md-6 mt-3 mb-3">
+    <form method="POST" action="{{ $route }}" class="col-md-8 mt-3 mb-3">
         {{ $method }}
         @csrf
         <div class="mb-3">
@@ -67,6 +67,9 @@
                     <th>Largada</th>
                     <th>Chegada</th>
                     <th>Pontuação</th>
+                    <th>Clássica</th>
+                    <th>Personalizada</th>
+                    <th>Invertida</th>
                 </tr>
             </thead>
             <tbody>
@@ -115,6 +118,45 @@
                             style="width:30px; height:30px;" 
                             @if(isset($infoPiloto->pontuacao))
                                 value="{{$infoPiloto->pontuacao}}"
+                            @else 
+                                value="">
+                            @endif 
+                        </td>
+                        <td>
+                            <input 
+                            type="number" 
+                            class="chegada" disabled 
+                            name="" 
+                            id="chegada" 
+                            style="width:30px; height:30px;" 
+                            @if(isset($infoPiloto->pontuacao_classica))
+                                value="{{$infoPiloto->pontuacao_classica}}"
+                            @else 
+                                value="">
+                            @endif 
+                        </td>
+                        <td>
+                            <input 
+                            type="number" 
+                            class="chegada" disabled 
+                            name="" 
+                            id="chegada" 
+                            style="width:30px; height:30px;" 
+                            @if(isset($infoPiloto->pontuacao_personalizada))
+                                value="{{$infoPiloto->pontuacao_personalizada}}"
+                            @else 
+                                value="">
+                            @endif 
+                        </td>
+                        <td>
+                            <input 
+                            type="number" 
+                            class="chegada" disabled 
+                            name="" 
+                            id="chegada" 
+                            style="width:30px; height:30px;" 
+                            @if(isset($infoPiloto->pontuacao_invertida))
+                                value="{{$infoPiloto->pontuacao_invertida}}"
                             @else 
                                 value="">
                             @endif 

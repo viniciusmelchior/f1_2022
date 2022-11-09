@@ -109,6 +109,9 @@ class ResultadoController extends Controller
                     $model->chegada = $chegada;
                     if($corrida->flg_sprint == 'N'){
                         $model->pontuacao = $this->calcularPontuacao($model, $chegada);
+                        $model->pontuacao_classica = $this->calcularPontuacaoClassica($model, $chegada);
+                        $model->pontuacao_personalizada = $this->calcularPontuacaoPersonalizada($model, $chegada);
+                        $model->pontuacao_invertida = $this->calcularPontuacaoInvertida($model, $chegada);
                     }else{
                         $model->pontuacao = $this->calcularPontuacaoSprint($model, $chegada);
                     }
@@ -124,6 +127,9 @@ class ResultadoController extends Controller
                     $model->chegada = $chegada;
                     if($corrida->flg_sprint == 'N'){
                         $model->pontuacao = $this->calcularPontuacao($model, $chegada);
+                        $model->pontuacao_classica = $this->calcularPontuacaoClassica($model, $chegada);
+                        $model->pontuacao_personalizada = $this->calcularPontuacaoPersonalizada($model, $chegada);
+                        $model->pontuacao_invertida = $this->calcularPontuacaoInvertida($model, $chegada);
                     }else{
                         $model->pontuacao = $this->calcularPontuacaoSprint($model, $chegada);
                     }
@@ -220,6 +226,238 @@ class ResultadoController extends Controller
         }
 
         return $model->pontuacao;
+    }
+
+    public function calcularPontuacaoClassica($model, $chegada){
+        $primeiro = 10;
+        $segundo = 6;
+        $terceiro = 4;
+        $quarto = 3;
+        $quinto = 2;
+        $sexto = 1;
+
+        switch ($chegada) {
+            case 1:
+                $model->pontuacao_classica = $primeiro;
+                break;
+            case 2:
+                $model->pontuacao_classica = $segundo;
+                break;
+            case 3:
+                $model->pontuacao_classica = $terceiro;
+                break;
+            case 4:
+                $model->pontuacao_classica = $quarto;
+                break;
+            case 5:
+                $model->pontuacao_classica = $quinto;
+                break;
+            case 6:
+                $model->pontuacao_classica = $sexto;
+                break; 
+            default:
+            $model->pontuacao_classica = 0;
+        }
+
+        return $model->pontuacao_classica;
+    }
+
+    public function calcularPontuacaoPersonalizada($model, $chegada){
+        $primeiro = 50;
+        $segundo = 40;
+        $terceiro = 35;
+        $quarto = 28;
+        $quinto = 26;
+        $sexto = 24;
+        $setimo = 22;
+        $oitavo = 20;
+        $nono = 18;
+        $decimo = 16; 
+        $decimoPrimeiro = 12; 
+        $decimoSegundo = 11; 
+        $decimoTerceiro = 10; 
+        $decimoQuarto = 9; 
+        $decimoQuinto = 8; 
+        $decimoSexto = 7; 
+        $decimoSetimo = 6; 
+        $decimoOitavo = 5; 
+        $decimoNono = 4; 
+        $vigesimo = 3;
+        $vigesimoPrimeiro = 2;
+        $vigesimoSegundo = 1;
+
+
+        switch ($chegada) {
+            case 1:
+                $model->pontuacao_personalizada = $primeiro;
+                break;
+            case 2:
+                $model->pontuacao_personalizada = $segundo;
+                break;
+            case 3:
+                $model->pontuacao_personalizada = $terceiro;
+                break;
+            case 4:
+                $model->pontuacao_personalizada = $quarto;
+                break;
+            case 5:
+                $model->pontuacao_personalizada = $quinto;
+                break;
+            case 6:
+                $model->pontuacao_personalizada = $sexto;
+                break;
+            case 7:
+                $model->pontuacao_personalizada = $setimo;
+                break;
+            case 8:
+                $model->pontuacao_personalizada = $oitavo;
+                break;
+            case 9:
+                $model->pontuacao_personalizada = $nono;
+                break;
+            case 10:
+                $model->pontuacao_personalizada = $decimo;
+                break;
+            case 11:
+                $model->pontuacao_personalizada = $decimoPrimeiro;
+                break;
+            case 12:
+                $model->pontuacao_personalizada = $decimoSegundo;
+                break;
+            case 13:
+                $model->pontuacao_personalizada = $decimoTerceiro;
+                break;
+            case 14:
+                $model->pontuacao_personalizada = $decimoQuarto;
+                break;
+            case 15:
+                $model->pontuacao_personalizada = $decimoQuinto;
+                break;
+            case 16:
+                $model->pontuacao_personalizada = $decimoSexto;
+                break;
+            case 17:
+                $model->pontuacao_personalizada = $decimoSetimo;
+                break;
+            case 18:
+                $model->pontuacao_personalizada = $decimoOitavo;
+                break;
+            case 19:
+                $model->pontuacao_personalizada = $decimoNono;
+                break;
+            case 20:
+                $model->pontuacao_personalizada = $vigesimo;
+                break;
+            case 21:
+                $model->pontuacao_personalizada = $vigesimoPrimeiro;
+                break;
+            case 22:
+                $model->pontuacao_personalizada = $vigesimoSegundo;
+                break;
+            default:
+            $model->pontuacao_personalizada = 0;
+        }
+
+        return $model->pontuacao_personalizada;
+    }
+
+    public function calcularPontuacaoInvertida($model, $chegada){
+        $primeiro = 1;
+        $segundo = 2;
+        $terceiro = 3;
+        $quarto = 4;
+        $quinto = 5;
+        $sexto = 6;
+        $setimo = 7;
+        $oitavo = 8;
+        $nono = 9;
+        $decimo = 10; 
+        $decimoPrimeiro = 11; 
+        $decimoSegundo = 12; 
+        $decimoTerceiro = 16; 
+        $decimoQuarto = 18; 
+        $decimoQuinto = 20; 
+        $decimoSexto = 22; 
+        $decimoSetimo = 24; 
+        $decimoOitavo = 26; 
+        $decimoNono = 28; 
+        $vigesimo = 35;
+        $vigesimoPrimeiro = 40;
+        $vigesimoSegundo = 50;
+
+
+        switch ($chegada) {
+            case 1:
+                $model->pontuacao_invertida = $primeiro;
+                break;
+            case 2:
+                $model->pontuacao_invertida = $segundo;
+                break;
+            case 3:
+                $model->pontuacao_invertida = $terceiro;
+                break;
+            case 4:
+                $model->pontuacao_invertida = $quarto;
+                break;
+            case 5:
+                $model->pontuacao_invertida = $quinto;
+                break;
+            case 6:
+                $model->pontuacao_invertida = $sexto;
+                break;
+            case 7:
+                $model->pontuacao_invertida = $setimo;
+                break;
+            case 8:
+                $model->pontuacao_invertida = $oitavo;
+                break;
+            case 9:
+                $model->pontuacao_invertida = $nono;
+                break;
+            case 10:
+                $model->pontuacao_invertida = $decimo;
+                break;
+            case 11:
+                $model->pontuacao_invertida = $decimoPrimeiro;
+                break;
+            case 12:
+                $model->pontuacao_invertida = $decimoSegundo;
+                break;
+            case 13:
+                $model->pontuacao_invertida = $decimoTerceiro;
+                break;
+            case 14:
+                $model->pontuacao_invertida = $decimoQuarto;
+                break;
+            case 15:
+                $model->pontuacao_invertida = $decimoQuinto;
+                break;
+            case 16:
+                $model->pontuacao_invertida = $decimoSexto;
+                break;
+            case 17:
+                $model->pontuacao_invertida = $decimoSetimo;
+                break;
+            case 18:
+                $model->pontuacao_invertida = $decimoOitavo;
+                break;
+            case 19:
+                $model->pontuacao_invertida = $decimoNono;
+                break;
+            case 20:
+                $model->pontuacao_invertida = $vigesimo;
+                break;
+            case 21:
+                $model->pontuacao_invertida = $vigesimoPrimeiro;
+                break;
+            case 22:
+                $model->pontuacao_invertida = $vigesimoSegundo;
+                break;
+            default:
+            $model->pontuacao_invertida = 0;
+        }
+
+        return $model->pontuacao_invertida;
     }
 
     public function calcularPontuacaoSprint($model, $chegada){
