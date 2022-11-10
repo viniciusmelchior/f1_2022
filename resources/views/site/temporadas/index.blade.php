@@ -18,6 +18,7 @@
                     <th>#</th>
                     <th>Descrição</th>
                     <th>Ano</th>
+                    <th>Status</th>
                     <th>Ações</th>
                 </tr>
             </thead>
@@ -27,6 +28,7 @@
                         <td>{{$key+1}}</td>
                         <td>{{$temporada->des_temporada}}</td>
                         <td>{{$temporada->ano->ano}}</td>
+                        <td>@if($temporada->flg_finalizada == 'S')<i class="bi bi-check-square-fill"></i>@else Em Andamento @endif</td>
                         <td class="d-flex" style="justify-content: space-between;">
                             <a data-toggle="tooltip" data-placement="top" title="Classificação" href="{{route('temporadas.classificacao', [$temporada->id])}}"><i class="bi bi-table"></i></a>
                             <a data-toggle="tooltip" data-placement="top" title="Editar Temporada" href="{{route('temporadas.edit', [$temporada->id])}}"><i class="bi bi-pencil-fill"></i></a>

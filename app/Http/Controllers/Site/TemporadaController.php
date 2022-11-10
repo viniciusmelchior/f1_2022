@@ -46,6 +46,7 @@ class TemporadaController extends Controller
         $temporada->des_temporada = $request->des_temporada;
         $temporada->user_id = Auth::user()->id;
         $temporada->ano_id = $request->ano_id;
+        $temporada->flg_finalizada = 'N';
 
         $temporada->save();
 
@@ -117,6 +118,11 @@ class TemporadaController extends Controller
         $temporada->des_temporada = $request->des_temporada;
         $temporada->user_id = Auth::user()->id;
         $temporada->ano_id = $request->ano_id;
+        if ($request->has('flg_finalizada')) {
+            $temporada->flg_finalizada = $request->flg_finalizada;
+        } else {
+            $temporada->flg_finalizada = 'N';
+        }
 
         $temporada->update();
 

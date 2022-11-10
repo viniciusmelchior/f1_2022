@@ -26,6 +26,21 @@
                 @endforeach
             </select>
         </div>
+
+        {{--Form aparece apenas rota de edit--}}
+        @if(Route::currentRouteName() == 'temporadas.edit')
+            <div class="form-group form-check mb-3">
+                <input
+                type="checkbox"
+                class="form-check-input"
+                id="flg_finalizada"
+                name="flg_finalizada"
+                value="S"
+                @if(isset($model) && $model->flg_finalizada == 'S') checked @endif
+                >
+                <label class="form-check-label" for="flg_ativo">Finalizar Temporada</label>
+            </div>
+        @endif
     
         <button type="submit" class="btn btn-primary">Salvar</button>
         <a href="{{route('temporadas.index')}}" class="btn btn-secondary ml-3">Voltar</a>
