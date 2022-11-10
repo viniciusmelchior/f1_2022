@@ -103,6 +103,7 @@ route::get('/temporadas/create', [TemporadaController::class, 'create'])->name('
 route::post('/temporadas/store', [TemporadaController::class, 'store'])->name('temporadas.store')->middleware('auth');
 route::get('/temporadas/index', [TemporadaController::class, 'index'])->name('temporadas.index')->middleware('auth');
 route::get('/temporadas/edit/{id}', [TemporadaController::class, 'edit'])->name('temporadas.edit')->middleware('auth');
+route::get('/temporadas/classificacao/{id}', [TemporadaController::class, 'classificacao'])->name('temporadas.classificacao')->middleware('auth');
 route::put('/temporadas/update/{id}', [TemporadaController::class, 'update'])->name('temporadas.update')->middleware('auth');
 route::get('/temporadas/delete/{id}', [TemporadaController::class, 'destroy'])->name('temporadas.delete')->middleware('auth');
 

@@ -18,7 +18,7 @@
                     <th>#</th>
                     <th>Descrição</th>
                     <th>Ano</th>
-                    <th>ações</th>
+                    <th>Ações</th>
                 </tr>
             </thead>
             <tbody>
@@ -28,7 +28,7 @@
                         <td>{{$temporada->des_temporada}}</td>
                         <td>{{$temporada->ano->ano}}</td>
                         <td class="d-flex" style="justify-content: space-between;">
-                            <a data-toggle="tooltip" data-placement="top" title="Classificação" href="{{route('temporadas.edit', [$temporada->id])}}"><i class="bi bi-table"></i></a>
+                            <a data-toggle="tooltip" data-placement="top" title="Classificação" href="{{route('temporadas.classificacao', [$temporada->id])}}"><i class="bi bi-table"></i></a>
                             <a data-toggle="tooltip" data-placement="top" title="Editar Temporada" href="{{route('temporadas.edit', [$temporada->id])}}"><i class="bi bi-pencil-fill"></i></a>
                             <a data-toggle="tooltip" data-placement="top" title="Visualizar Corridas" href="{{route('corridas.index', [$temporada->id])}}"><i class="bi bi-eye-fill"></i></a>
                             <a data-toggle="tooltip" data-placement="top" title="Adicionar Corridas" class="" href="{{route('corridas.adicionar', [$temporada->id])}}"><i class="bi bi-plus-circle-fill"></i></a>
