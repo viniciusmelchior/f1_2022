@@ -23,8 +23,8 @@ class PilotoController extends Controller
     public function index()
     {
         $pilotos = Piloto::where('user_id', Auth::user()->id)
-                            ->orderBy('id', 'ASC')
                             ->orderBy('flg_ativo', 'DESC')
+                            ->orderBy('id')
                             ->get();
 
         return view('site.pilotos.index', compact('pilotos'));
