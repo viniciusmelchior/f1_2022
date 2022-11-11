@@ -76,7 +76,7 @@ class TemporadaController extends Controller
         $usuario = Auth::user()->id;
         $model = Temporada::where('id', $id)->where('user_id', Auth::user()->id)->first();
         $anos = Ano::where('user_id', Auth::user()->id)->get();
-        //$retorno = $this->montaClassificacao($usuario, $model);
+        $retorno = $this->montaClassificacao($usuario, $model);
 
         return view('site.temporadas.form', compact('model','anos'));
     }
