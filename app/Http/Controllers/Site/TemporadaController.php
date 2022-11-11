@@ -76,7 +76,7 @@ class TemporadaController extends Controller
         $usuario = Auth::user()->id;
         $model = Temporada::where('id', $id)->where('user_id', Auth::user()->id)->first();
         $anos = Ano::where('user_id', Auth::user()->id)->get();
-        $retorno = $this->montaClassificacao($usuario, $model);
+        //$retorno = $this->montaClassificacao($usuario, $model);
 
         return view('site.temporadas.form', compact('model','anos'));
     }
@@ -103,7 +103,7 @@ class TemporadaController extends Controller
                 and resultados.user_id = '.$usuario.'
                 group by piloto_equipes.piloto_id
                 order by total desc');
-                //dd($resultadosPilotos[0]);
+                //dd($resultadosPilotos);
 
                 $resultadosEquipes = DB::select('select equipe_id, equipes.nome as nome, sum(pontuacao) as total from resultados
                 join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
@@ -114,13 +114,15 @@ class TemporadaController extends Controller
                 and resultados.user_id = '.$usuario.'
                 group by piloto_equipes.equipe_id
                 order by total desc');
-                //dd($resultadosEquipes[0]);
+                //dd(count($resultadosEquipes));
 
                 return [
                     'resultadoPilotos' => $resultadosPilotos,
                     'resultadoEquipes' => $resultadosEquipes,
-                    'piloto_campeao' => $resultadosPilotos[0],
-                    'equipe_campea' => $resultadosEquipes[0]
+                    // 'piloto_campeao' => $resultadosPilotos[0],
+                    // 'equipe_campea' => $resultadosEquipes[0]
+                    'piloto_campeao' => $resultadosPilotos,
+                    'equipe_campea' => $resultadosEquipes
                 ];
     }
 
@@ -144,12 +146,14 @@ class TemporadaController extends Controller
         if ($request->has('flg_finalizada')) {
             $temporada->flg_finalizada = $request->flg_finalizada;
             //criar o título
-            $titulo = new Titulo();
-            $titulo->temporada_id = $temporada->id;
-            $titulo->pilotoEquipe_id = $retorno['piloto_campeao']->pilotoEquipe_id;
-            $titulo->equipe_id = $retorno['equipe_campea']->equipe_id;
-            $titulo->user_id = Auth::user()->id;
-            $titulo->save();
+            if(count($retorno['piloto_campeao']) > 0){
+                $titulo = new Titulo();
+                $titulo->temporada_id = $temporada->id;
+                $titulo->pilotoEquipe_id = $retorno['piloto_campeao'][0]->pilotoEquipe_id;
+                $titulo->equipe_id = $retorno['equipe_campea'][0]->equipe_id;
+                $titulo->user_id = Auth::user()->id;
+                $titulo->save();
+            }
         } else {
             $temporada->flg_finalizada = 'N';
 

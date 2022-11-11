@@ -62,13 +62,19 @@
                         <th>Piloto</th>
                         <th>Pontos</th>
                     </tr>
-                    @foreach($resultadosPilotos as $key => $piloto) 
+                    @if(count($resultadosPilotos) > 0)
+                        @foreach($resultadosPilotos as $key => $piloto) 
+                            <tr>
+                                <td>{{$key+1}}</td>
+                                <td>{{$piloto->nome}}</td>
+                                <td>{{$piloto->total}}</td>
+                            </tr>
+                        @endforeach
+                    @else 
                         <tr>
-                            <td>{{$key+1}}</td>
-                            <td>{{$piloto->nome}}</td>
-                            <td>{{$piloto->total}}</td>
+                            <td colspan="3">Sem dados registrados</td>
                         </tr>
-                    @endforeach
+                    @endif
                 </table>
             </div>
            
@@ -79,13 +85,19 @@
                         <th>Equipe</th>
                         <th>Pontos</th>
                     </tr>
-                    @foreach($resultadosEquipes as $key => $equipe) 
+                    @if(count($resultadosEquipes) > 0)
+                        @foreach($resultadosEquipes as $key => $equipe) 
+                            <tr>
+                                <td>{{$key+1}}</td>
+                                <td>{{$equipe->nome}}</td>
+                                <td>{{$equipe->total}}</td>
+                            </tr>
+                        @endforeach
+                    @else 
                         <tr>
-                            <td>{{$key+1}}</td>
-                            <td>{{$equipe->nome}}</td>
-                            <td>{{$equipe->total}}</td>
+                            <td colspan="3">Sem dados registrados</td>
                         </tr>
-                    @endforeach
+                    @endif
                 </table>
             </div>
         </div>
