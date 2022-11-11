@@ -41,7 +41,7 @@
                 </thead>
                 <tbody>
                     @foreach ($pilotos as $key => $piloto)
-                        <tr>
+                        <tr style="<?= $piloto->flg_ativo == 'N' ? "color:red;" : "" ?>">
                             <td>{{$key+1}}</td>
                             <td>{{$piloto->nome}} {{$piloto->sobrenome}}</td>
                             <td>{{$piloto->pais->des_nome}}</td>

@@ -22,7 +22,7 @@ class PilotoController extends Controller
      */
     public function index()
     {
-        $pilotos = Piloto::where('user_id', Auth::user()->id)->get();
+        $pilotos = Piloto::where('user_id', Auth::user()->id)->orderBy('flg_ativo', 'DESC')->get();
 
         return view('site.pilotos.index', compact('pilotos'));
     }
