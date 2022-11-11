@@ -1,6 +1,7 @@
 @php 
     use App\Models\Site\Resultado;
     use App\Models\Site\Temporada;
+    use App\Models\Site\Titulo;
     use App\Models\Site\Corrida;
     use App\Models\Site\PilotoEquipe;
 @endphp
@@ -162,7 +163,7 @@ color: #fff;
                          <th>Poles</th>
                      </tr>
                      @php 
-                         $poleEquipes = Resultado::where('user_id', Auth::user()->id)->where('largada', 1)->get();
+                        $poleEquipes = Resultado::where('user_id', Auth::user()->id)->where('largada', 1)->get();
                         $poles = [];
                         foreach($poleEquipes as $item){
                             if($item->corrida->flg_sprint == 'N'){
@@ -183,6 +184,70 @@ color: #fff;
                 </table>
              </div>
         </div>
+
+        <hr class="separador">
+
+        <div class="header-tabelas m-3">Títulos</div>
+
+        <div class="d-flex">
+           
+            <div>
+                <h1>Pilotos</h1>
+                <table class="m-5">
+                     <tr>
+                         <th>#</th>
+                         <th>Equipe</th>
+                         <th>Títulos</th>
+                     </tr>
+                     @php 
+                        $titulosPilotos = Titulo::where('user_id', Auth::user()->id)->get();
+                        $titulos = [];
+                        foreach($titulosPilotos as $item){
+                            array_push($titulos, $item->pilotoEquipe->piloto->nomeCompleto());
+                        }
+
+                        $totPorPiloto= array_count_values($titulos);
+                        arsort($totPorPiloto);
+                     @endphp
+                    @foreach($totPorPiloto as $key => $value)
+                     <tr>
+                         <td>#</td>
+                         <td>{{$key}}</td>
+                         <td>{{$value}}</td>
+                     </tr>
+                  @endforeach
+                </table>
+            </div> 
+            <div>
+                <h1>Equipes</h1>
+                <table class="m-5">
+                     <tr>
+                         <th>#</th>
+                         <th>Piloto</th>
+                         <th>Títulos</th>
+                     </tr>
+                     @php 
+                        $titulosEquipes = Titulo::where('user_id', Auth::user()->id)->get();
+                        $titulos = [];
+                        foreach($titulosEquipes as $item){
+                            array_push($titulos, $item->equipe->nome);
+                        }
+
+                        $totPorEquipe= array_count_values($titulos);
+                        arsort($totPorEquipe);
+                     @endphp
+                      @foreach($totPorEquipe as $key => $value)
+                      <tr>
+                          <td>#</td>
+                          <td>{{$key}}</td>
+                          <td>{{$value}}</td>
+                      </tr>
+                   @endforeach
+                </table>
+            </div>
+        </div>
+
+
 
         <hr class="separador">
         @php 
