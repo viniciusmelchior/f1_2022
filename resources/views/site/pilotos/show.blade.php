@@ -156,7 +156,7 @@
         <div id="driver-stats">
            <div>
                 <h4>Campeonato de Pilotos</h4>
-                <p>0</p>
+                <p>{{ $totTitulos }}</p>
            </div>
             <div>
                 <h4>Vitórias</h4>

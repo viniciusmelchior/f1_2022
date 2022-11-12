@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Exports\PilotosExport;
 use App\Models\Site\Corrida;
 use App\Models\Site\PilotoEquipe;
+use App\Models\Site\Titulo;
 use Maatwebsite\Excel\Facades\Excel;
 
 class PilotoController extends Controller
@@ -104,6 +105,7 @@ class PilotoController extends Controller
         $piorPosicaoLargada = 0;
         $melhorPosicaoChegada = 22;
         $piorPosicaoChegada = 0;
+        $totTitulos = 0;
         
         foreach($resultados as $resultado){
             if($resultado->pilotoEquipe->piloto->id == $id){
@@ -166,6 +168,12 @@ class PilotoController extends Controller
                 }    
             }
         }
+
+        //calculo de títulos 
+        $totTitulos = count(Titulo::join('piloto_equipes', 'piloto_equipes.id', '=', 'titulos.pilotoEquipe_id')
+                                ->where('titulos.user_id', Auth::user()->id)
+                                ->where('piloto_equipes.piloto_id', $id)
+                                ->get());
     
         //Total de Pontos tem cálculo diferente pois envolve sprints
         $resultados =  Resultado::where('user_id', Auth::user()->id)->get();                     
@@ -193,7 +201,7 @@ class PilotoController extends Controller
     
         $totVoltasRapidas = count($resultado);           
        
-        return view('site.pilotos.show', compact('modelPiloto', 'totCorridas', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas'));
+        return view('site.pilotos.show', compact('modelPiloto','totTitulos', 'totCorridas', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas'));
     }
 
     /**

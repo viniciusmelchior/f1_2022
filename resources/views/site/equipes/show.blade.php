@@ -65,6 +65,14 @@
                 <td>{{$totVitorias}}</td>
             </tr>
             <tr>
+                <td>Titulos de Construtores</td>
+                <td>{{$totTitulos}}</td>
+            </tr>
+            <tr>
+                <td>Titulos de Pilotos</td>
+                <td>{{$totTitulosPilotos}}</td>
+            </tr>
+            <tr>
                 <td>Pole Positions</td>
                 <td>{{$totPoles}}</td>
             </tr>

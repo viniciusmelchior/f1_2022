@@ -9,6 +9,7 @@ use App\Models\Site\Pais;
 use App\Models\Site\Piloto;
 use App\Models\Site\PilotoEquipe;
 use App\Models\Site\Resultado;
+use App\Models\Site\Titulo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -90,6 +91,7 @@ class EquipeController extends Controller
         $piorPosicaoLargada = 0;
         $melhorPosicaoChegada = 22;
         $piorPosicaoChegada = 0;
+        $totTitulos = 0;
 
         $totVoltasRapidas = 0;
 
@@ -158,6 +160,15 @@ class EquipeController extends Controller
             }
         }
 
+        //calculo de titulo de construtores
+        $totTitulos = count(Titulo::where('equipe_id', $id)->where('user_id', Auth::user()->id)->get());
+
+        //calculo do titulo de pilotos
+        $totTitulosPilotos = count(Titulo::join('piloto_equipes', 'piloto_equipes.id', '=', 'titulos.pilotoEquipe_id')
+                                            ->where('titulos.user_id', Auth::user()->id)
+                                            ->where('piloto_equipes.equipe_id', $id)
+                                            ->get());
+
         //Total de Pontos tem cálculo diferente pois envolve sprints
         $resultados =  Resultado::where('user_id', Auth::user()->id)->get();                     
         $totPontos = 0;
@@ -185,7 +196,7 @@ class EquipeController extends Controller
         $totVoltasRapidas = count($resultado); 
 
         
-        return view('site.equipes.show', compact('modelEquipe', 'totCorridas', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas'));
+        return view('site.equipes.show', compact('modelEquipe','totTitulos', 'totCorridas','totTitulosPilotos', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas'));
     }
 
     /**
