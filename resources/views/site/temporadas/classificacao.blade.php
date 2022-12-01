@@ -56,18 +56,20 @@
 
         <div class="d-flex">
             <div class="montaTabelaPilotos">
-                <table class="m-5" id="tabelaClassificacaoPilotos">
+                <table class="m-5" id="tabelaClassificacaoPilotos" style="">
                     <tr>
-                        <th>Posição</th>
+                        <th style="width:5%">Posição</th>
                         <th>Piloto</th>
-                        <th>Pontos</th>
+                        <th style="width:5%">Pontos</th>
+                        <th style="width:5%">Diferença</th>
                     </tr>
                     @if(count($resultadosPilotos) > 0)
                         @foreach($resultadosPilotos as $key => $piloto) 
                             <tr>
-                                <td>{{$key+1}}</td>
+                                <td style="width:5%">{{$key+1}}</td>
                                 <td>{{$piloto->nome}}</td>
-                                <td>{{$piloto->total}}</td>
+                                <td class="pontosPiloto" style="width:5%">{{$piloto->total}}</td>
+                                <td class="diferencaPontosPiloto" style="width:5%"></td>
                             </tr>
                         @endforeach
                     @else 
@@ -79,18 +81,20 @@
             </div>
            
             <div class="montaTabelaEquipes">
-                <table class="m-5" id="tabelaClassificacaoEquipes">
+                <table class="m-5" id="tabelaClassificacaoEquipes" style="">
                     <tr>
-                        <th>Posição</th>
+                        <th style="width:5%">Posição</th>
                         <th>Equipe</th>
-                        <th>Pontos</th>
+                        <th style="width:5%">Pontos</th>
+                        <th style="width:5%">Diferença</th>
                     </tr>
                     @if(count($resultadosEquipes) > 0)
                         @foreach($resultadosEquipes as $key => $equipe) 
                             <tr>
-                                <td>{{$key+1}}</td>
+                                <td style="width:5%">{{$key+1}}</td>
                                 <td>{{$equipe->nome}}</td>
-                                <td>{{$equipe->total}}</td>
+                                <td class="pontosEquipe" style="width:5%">{{$equipe->total}}</td>
+                                <td class="diferencaPontosEquipe" style="width:5%"></td>
                             </tr>
                         @endforeach
                     @else 
@@ -105,3 +109,31 @@
     <a href="{{route('temporadas.index')}}" class="btn btn-primary">Voltar</a>
   </div>
 @endsection
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer">
+</script>
+
+<script>
+    $(document).ready(function () {
+        tdPontuacaoPilotos = document.querySelectorAll('.pontosPiloto');
+        tdDiferencaPilotos = document.querySelectorAll('.diferencaPontosPiloto')
+        tdPontuacaoEquipes = document.querySelectorAll('.pontosEquipe');
+        tdDiferencaEquipes = document.querySelectorAll('.diferencaPontosEquipe')
+        
+        contadorPilotos = tdPontuacaoPilotos.length-2
+        contadorEquipes = tdPontuacaoEquipes.length-2
+        //pega o penultimo e soma adiciona no ultimo. Por isso tem ser o total -2()
+        for(let i = 0; i < tdPontuacaoPilotos.length; i = i + 1 ) {
+            if(i <= contadorPilotos){
+                diferencaPilotos = parseInt(tdPontuacaoPilotos[0].innerText) - parseInt(tdPontuacaoPilotos[i+1].innerText ) 
+                tdDiferencaPilotos[i+1].innerText = ` - ${diferencaPilotos}`;
+            }
+        }
+        
+        for(let j = 0; j < tdPontuacaoEquipes.length; j = j + 1 ) {
+            if(j <= contadorEquipes){
+                diferencaEquipes = parseInt(tdPontuacaoEquipes[0].innerText) - parseInt(tdPontuacaoEquipes[j+1].innerText ) 
+                tdDiferencaEquipes[j+1].innerText = ` - ${diferencaEquipes}`;
+            }
+        }
+    });
+</script>
