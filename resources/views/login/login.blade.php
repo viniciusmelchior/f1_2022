@@ -1,12 +1,12 @@
 @extends('layouts.main')
 
 @section('section')
-    @if ($errors->has('email'))
-        <span class="invalid-feedback">
-            <strong>{{ $errors->first('email') }}</strong>
-        </span>
-    @endif
-    <div class="container mt-3 mb-3">
+  <div class="container mt-3 mb-3">
+      @if ($error = $errors->first('erro'))
+        <div class="alert alert-danger">
+          {{ $error }}
+        </div>
+      @endif
         <form method="POST" action="{{route('user.authenticate')}}">
             @csrf
             <div class="mb-3">

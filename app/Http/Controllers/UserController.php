@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\MessageBag;
 use Illuminate\Validation\Rule;
+use Symfony\Component\Console\Input\Input;
 
 class UserController extends Controller
 {
@@ -101,7 +104,7 @@ class UserController extends Controller
     }
 
     public function authenticate(Request $request)
-    {
+    {   
         $formFields = $request->validate([
             'email' => ['required', 'email'],
             'password' => 'required'
@@ -109,6 +112,11 @@ class UserController extends Controller
 
         if (auth()->attempt($formFields)) {
             $request->session()->regenerate();
+        }else{
+            // return redirect()->back()->with('message', 'your message,here');   
+            $errors = new MessageBag(['erro' => ['Usuário e/ou senha inválidos']]); // if Auth::attempt fails (wrong credentials) create a new message bag instance.
+
+            return Redirect::back()->withErrors($errors);
         }
 
         return redirect()->route('home');
