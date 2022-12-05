@@ -17,11 +17,15 @@ class Corrida extends Model
 
     /**Relacionamentos */
 
-     public function pista(){
+    public function pista(){
         return $this->belongsTo(Pista::class);
     }
 
     public function temporada(){
         return $this->belongsTo(Temporada::class);
+    }
+
+    public function condicao(){
+        return $this->belongsTo(CondicaoClimatica::class);
     }
 }
