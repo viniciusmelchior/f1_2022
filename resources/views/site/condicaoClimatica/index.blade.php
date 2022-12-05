@@ -8,6 +8,7 @@
             <tr>
                 <th>#</th>
                 <th>Descrição</th>
+                <th>Ícone</th>
                 <th>Ações</th>
             </tr>
         </thead>
@@ -16,6 +17,7 @@
                 <tr>
                     <td>{{$key+1}}</td>
                     <td>{{$condicaoClimatica->descricao}}</td>
+                    <td><i class="{{$condicaoClimatica->des_icone}}"></i></td>
                     <td>
                         <a href="{{route('condicaoClimatica.edit', [$condicaoClimatica->id])}}">Editar</a>
                         <a class="" href="{{route('condicaoClimatica.delete', [$condicaoClimatica->id])}}">Excluir</a>

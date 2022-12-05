@@ -18,6 +18,10 @@
             <label for="descricao" class="form-label">Descrição</label>
             <input type="text" class="form-control" id="descricao" name="descricao" value="@if(isset($model)) {{$model->descricao}}  @endif">
         </div>
+        <div class="mb-3">
+            <label for="des_icone" class="form-label">Ícone</label>
+            <input type="text" class="form-control" id="des_icone" name="des_icone" value="@if(isset($model)) {{$model->des_icone}}  @endif">
+        </div>
         <button type="submit" class="btn btn-primary">Salvar</button>
         <a href="{{route('condicaoClimatica.index')}}" class="btn btn-secondary ml-3">Voltar</a>
       </form>
