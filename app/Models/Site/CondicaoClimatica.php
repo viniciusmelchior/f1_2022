@@ -13,7 +13,10 @@ class CondicaoClimatica extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['descricao', 'user_id'];
+    protected $fillable = ['descricao', 'user_id','des_icone'];
 
     /**relacionamentos */
+    public function corrida(){
+        return $this->hasMany(Corrida::class);
+    }
 }
