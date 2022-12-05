@@ -89,7 +89,19 @@ class TemporadaController extends Controller
         $resultadosPilotos = $retorno['resultadoPilotos'];
         $resultadosEquipes = $retorno['resultadoEquipes'];
 
-        return view('site.temporadas.classificacao', compact('temporada', 'resultadosPilotos','resultadosEquipes'));
+        $retornoClassico = $this->montaClassificacaoClassica($usuario, $temporada);
+        $resultadosPilotosClassico = $retornoClassico['resultadoPilotosClassico'];
+        $resultadosEquipesClassico = $retornoClassico['resultadoEquipesClassico'];
+
+        $retornoInvertida = $this->montaClassificacaoInvertida($usuario, $temporada);
+        $resultadosPilotosInvertida = $retornoInvertida['resultadoPilotosInvertida'];
+        $resultadosEquipesInvertida = $retornoInvertida['resultadoEquipesInvertida'];
+
+        $retornoAlternativa = $this->montaClassificacaoAlternativa($usuario, $temporada);
+        $resultadosPilotosAlternativa = $retornoAlternativa['resultadoPilotosAlternativa'];
+        $resultadosEquipesAlternativa = $retornoAlternativa['resultadoEquipesAlternativa'];
+
+        return view('site.temporadas.classificacao', compact('temporada', 'resultadosPilotos','resultadosEquipes','resultadosPilotosClassico','resultadosEquipesClassico','resultadosPilotosInvertida','resultadosEquipesInvertida','resultadosPilotosAlternativa','resultadosEquipesAlternativa'));
     } 
 
     public function montaClassificacao($usuario, $temporada){
@@ -103,7 +115,6 @@ class TemporadaController extends Controller
                 and resultados.user_id = '.$usuario.'
                 group by piloto_equipes.piloto_id
                 order by total desc');
-                //dd($resultadosPilotos);
 
                 $resultadosEquipes = DB::select('select equipe_id, equipes.nome as nome, sum(pontuacao) as total from resultados
                 join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
@@ -114,15 +125,95 @@ class TemporadaController extends Controller
                 and resultados.user_id = '.$usuario.'
                 group by piloto_equipes.equipe_id
                 order by total desc');
-                //dd(count($resultadosEquipes));
 
                 return [
                     'resultadoPilotos' => $resultadosPilotos,
                     'resultadoEquipes' => $resultadosEquipes,
-                    // 'piloto_campeao' => $resultadosPilotos[0],
-                    // 'equipe_campea' => $resultadosEquipes[0]
                     'piloto_campeao' => $resultadosPilotos,
                     'equipe_campea' => $resultadosEquipes
+                ];
+    }
+    public function montaClassificacaoClassica($usuario, $temporada){
+                $resultadosPilotosClassico = DB::select('select piloto_id,piloto_equipes.id as pilotoEquipe_id, concat(pilotos.nome, " ", pilotos.sobrenome) as nome, equipes.nome as equipe, sum(pontuacao_classica) as total from resultados
+                join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
+                join pilotos on pilotos.id = piloto_equipes.piloto_id
+                join equipes on equipes.id = piloto_equipes.equipe_id
+                join corridas on corridas.id = resultados.corrida_id
+                join temporadas on temporadas.id = corridas.temporada_id
+                where temporadas.id = '.$temporada->id.'
+                and resultados.user_id = '.$usuario.'
+                group by piloto_equipes.piloto_id
+                order by total desc');
+
+                $resultadosEquipesClassico = DB::select('select equipe_id, equipes.nome as nome, sum(pontuacao_classica) as total from resultados
+                join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
+                join equipes on equipes.id = piloto_equipes.equipe_id
+                join corridas on corridas.id = resultados.corrida_id
+                join temporadas on temporadas.id = corridas.temporada_id
+                where temporadas.id = '.$temporada->id.'
+                and resultados.user_id = '.$usuario.'
+                group by piloto_equipes.equipe_id
+                order by total desc');
+
+                return [
+                    'resultadoPilotosClassico' => $resultadosPilotosClassico,
+                    'resultadoEquipesClassico' => $resultadosEquipesClassico,
+                ];
+    }
+
+    public function montaClassificacaoInvertida($usuario, $temporada){
+                $resultadosPilotosInvertida = DB::select('select piloto_id,piloto_equipes.id as pilotoEquipe_id, concat(pilotos.nome, " ", pilotos.sobrenome) as nome, equipes.nome as equipe, sum(pontuacao_invertida) as total from resultados
+                join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
+                join pilotos on pilotos.id = piloto_equipes.piloto_id
+                join equipes on equipes.id = piloto_equipes.equipe_id
+                join corridas on corridas.id = resultados.corrida_id
+                join temporadas on temporadas.id = corridas.temporada_id
+                where temporadas.id = '.$temporada->id.'
+                and resultados.user_id = '.$usuario.'
+                group by piloto_equipes.piloto_id
+                order by total desc');
+
+                $resultadosEquipesInvertida = DB::select('select equipe_id, equipes.nome as nome, sum(pontuacao_invertida) as total from resultados
+                join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
+                join equipes on equipes.id = piloto_equipes.equipe_id
+                join corridas on corridas.id = resultados.corrida_id
+                join temporadas on temporadas.id = corridas.temporada_id
+                where temporadas.id = '.$temporada->id.'
+                and resultados.user_id = '.$usuario.'
+                group by piloto_equipes.equipe_id
+                order by total desc');
+
+                return [
+                    'resultadoPilotosInvertida' => $resultadosPilotosInvertida,
+                    'resultadoEquipesInvertida' => $resultadosEquipesInvertida,
+                ];
+    }
+
+    public function montaClassificacaoAlternativa($usuario, $temporada){
+                $resultadosPilotosAlternativa = DB::select('select piloto_id,piloto_equipes.id as pilotoEquipe_id, concat(pilotos.nome, " ", pilotos.sobrenome) as nome, equipes.nome as equipe, sum(pontuacao_personalizada) as total from resultados
+                join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
+                join pilotos on pilotos.id = piloto_equipes.piloto_id
+                join equipes on equipes.id = piloto_equipes.equipe_id
+                join corridas on corridas.id = resultados.corrida_id
+                join temporadas on temporadas.id = corridas.temporada_id
+                where temporadas.id = '.$temporada->id.'
+                and resultados.user_id = '.$usuario.'
+                group by piloto_equipes.piloto_id
+                order by total desc');
+
+                $resultadosEquipesAlternativa = DB::select('select equipe_id, equipes.nome as nome, sum(pontuacao_personalizada) as total from resultados
+                join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
+                join equipes on equipes.id = piloto_equipes.equipe_id
+                join corridas on corridas.id = resultados.corrida_id
+                join temporadas on temporadas.id = corridas.temporada_id
+                where temporadas.id = '.$temporada->id.'
+                and resultados.user_id = '.$usuario.'
+                group by piloto_equipes.equipe_id
+                order by total desc');
+
+                return [
+                    'resultadoPilotosAlternativa' => $resultadosPilotosAlternativa,
+                    'resultadoEquipesAlternativa' => $resultadosEquipesAlternativa,
                 ];
     }
 

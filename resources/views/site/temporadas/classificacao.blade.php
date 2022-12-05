@@ -53,7 +53,7 @@
     </nav>
     <div class="container">
         {{-- <h1 id="tituloClassificacao">Classificação Geral - {{$temporada->ano->ano}}</h1> --}}
-
+        <div class="header-tabelas m-3">Pontuação Normal</div>
         <div class="d-flex">
             <div class="montaTabelaPilotos">
                 <table class="m-5" id="tabelaClassificacaoPilotos" style="">
@@ -95,6 +95,165 @@
                                 <td>{{$equipe->nome}}</td>
                                 <td class="pontosEquipe" style="width:5%">{{$equipe->total}}</td>
                                 <td class="diferencaPontosEquipe" style="width:5%"></td>
+                            </tr>
+                        @endforeach
+                    @else 
+                        <tr>
+                            <td colspan="3">Sem dados registrados</td>
+                        </tr>
+                    @endif
+                </table>
+            </div>
+        </div>
+        <hr>
+        <div class="header-tabelas m-3">Pontuação Clássica</div>
+        <div class="d-flex">
+            <div class="montaTabelaPilotos">
+                <table class="m-5" id="tabelaClassificacaoPilotos" style="">
+                    <tr>
+                        <th style="width:5%">Posição</th>
+                        <th>Piloto</th>
+                        <th style="width:5%">Pontos</th>
+                       {{--  <th style="width:5%">Diferença</th> --}}
+                    </tr>
+                    @if(count($resultadosPilotosClassico) > 0)
+                        @foreach($resultadosPilotosClassico as $key => $piloto) 
+                            <tr>
+                                <td style="width:5%">{{$key+1}}</td>
+                                <td>{{$piloto->nome}}</td>
+                                <td class="" style="width:5%">{{$piloto->total}}</td>
+                               {{--  <td class="" style="width:5%"></td> --}}
+                            </tr>
+                        @endforeach
+                    @else 
+                        <tr>
+                            <td colspan="3">Sem dados registrados</td>
+                        </tr>
+                    @endif
+                </table>
+            </div>
+           
+            <div class="montaTabelaEquipes">
+                <table class="m-5" id="tabelaClassificacaoEquipes" style="">
+                    <tr>
+                        <th style="width:5%">Posição</th>
+                        <th>Equipe</th>
+                        <th style="width:5%">Pontos</th>
+                       {{--  <th style="width:5%">Diferença</th> --}}
+                    </tr>
+                    @if(count($resultadosEquipesClassico) > 0)
+                        @foreach($resultadosEquipesClassico as $key => $equipe) 
+                            <tr>
+                                <td style="width:5%">{{$key+1}}</td>
+                                <td>{{$equipe->nome}}</td>
+                                <td class="" style="width:5%">{{$equipe->total}}</td>
+                             {{--    <td class="" style="width:5%"></td> --}}
+                            </tr>
+                        @endforeach
+                    @else 
+                        <tr>
+                            <td colspan="3">Sem dados registrados</td>
+                        </tr>
+                    @endif
+                </table>
+            </div>
+        </div>
+        <hr>
+        <div class="header-tabelas m-3">Pontuação Invertida</div>
+        <div class="d-flex">
+            <div class="montaTabelaPilotos">
+                <table class="m-5" id="tabelaClassificacaoPilotos" style="">
+                    <tr>
+                        <th style="width:5%">Posição</th>
+                        <th>Piloto</th>
+                        <th style="width:5%">Pontos</th>
+                       {{--  <th style="width:5%">Diferença</th> --}}
+                    </tr>
+                    @if(count($resultadosPilotosInvertida) > 0)
+                        @foreach($resultadosPilotosInvertida as $key => $piloto) 
+                            <tr>
+                                <td style="width:5%">{{$key+1}}</td>
+                                <td>{{$piloto->nome}}</td>
+                                <td class="" style="width:5%">{{$piloto->total}}</td>
+                               {{--  <td class="" style="width:5%"></td> --}}
+                            </tr>
+                        @endforeach
+                    @else 
+                        <tr>
+                            <td colspan="3">Sem dados registrados</td>
+                        </tr>
+                    @endif
+                </table>
+            </div>
+           
+            <div class="montaTabelaEquipes">
+                <table class="m-5" id="tabelaClassificacaoEquipes" style="">
+                    <tr>
+                        <th style="width:5%">Posição</th>
+                        <th>Equipe</th>
+                        <th style="width:5%">Pontos</th>
+                       {{--  <th style="width:5%">Diferença</th> --}}
+                    </tr>
+                    @if(count($resultadosEquipesInvertida) > 0)
+                        @foreach($resultadosEquipesInvertida as $key => $equipe) 
+                            <tr>
+                                <td style="width:5%">{{$key+1}}</td>
+                                <td>{{$equipe->nome}}</td>
+                                <td class="" style="width:5%">{{$equipe->total}}</td>
+                             {{--    <td class="" style="width:5%"></td> --}}
+                            </tr>
+                        @endforeach
+                    @else 
+                        <tr>
+                            <td colspan="3">Sem dados registrados</td>
+                        </tr>
+                    @endif
+                </table>
+            </div>
+        </div>
+        <hr>
+        <div class="header-tabelas m-3">Pontuação Alternativa</div>
+        <div class="d-flex">
+            <div class="montaTabelaPilotos">
+                <table class="m-5" id="tabelaClassificacaoPilotos" style="">
+                    <tr>
+                        <th style="width:5%">Posição</th>
+                        <th>Piloto</th>
+                        <th style="width:5%">Pontos</th>
+                       {{--  <th style="width:5%">Diferença</th> --}}
+                    </tr>
+                    @if(count($resultadosPilotosAlternativa) > 0)
+                        @foreach($resultadosPilotosAlternativa as $key => $piloto) 
+                            <tr>
+                                <td style="width:5%">{{$key+1}}</td>
+                                <td>{{$piloto->nome}}</td>
+                                <td class="" style="width:5%">{{$piloto->total}}</td>
+                               {{--  <td class="" style="width:5%"></td> --}}
+                            </tr>
+                        @endforeach
+                    @else 
+                        <tr>
+                            <td colspan="3">Sem dados registrados</td>
+                        </tr>
+                    @endif
+                </table>
+            </div>
+           
+            <div class="montaTabelaEquipes">
+                <table class="m-5" id="tabelaClassificacaoEquipes" style="">
+                    <tr>
+                        <th style="width:5%">Posição</th>
+                        <th>Equipe</th>
+                        <th style="width:5%">Pontos</th>
+                       {{--  <th style="width:5%">Diferença</th> --}}
+                    </tr>
+                    @if(count($resultadosEquipesAlternativa) > 0)
+                        @foreach($resultadosEquipesAlternativa as $key => $equipe) 
+                            <tr>
+                                <td style="width:5%">{{$key+1}}</td>
+                                <td>{{$equipe->nome}}</td>
+                                <td class="" style="width:5%">{{$equipe->total}}</td>
+                             {{--    <td class="" style="width:5%"></td> --}}
                             </tr>
                         @endforeach
                     @else 
