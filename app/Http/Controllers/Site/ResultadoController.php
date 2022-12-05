@@ -107,6 +107,14 @@ class ResultadoController extends Controller
                 if($model){
                     $model->largada = $largada;
                     $model->chegada = $chegada;
+                    $model->flg_abandono = 'N';
+                    if($request->input('flg_abandono')){
+                        foreach($request->input('flg_abandono') as $isAbandono){
+                            if($isAbandono == $pilotoEquipe){
+                                $model->flg_abandono = 'S';
+                            }
+                        }
+                    }
                     if($corrida->flg_sprint == 'N'){
                         $model->pontuacao = $this->calcularPontuacao($model, $chegada);
                         $model->pontuacao_classica = $this->calcularPontuacaoClassica($model, $chegada);
@@ -125,6 +133,13 @@ class ResultadoController extends Controller
                     $model->user_id = Auth::user()->id;
                     $model->largada = $largada;
                     $model->chegada = $chegada;
+                    if($request->input('flg_abandono')){
+                        foreach($request->input('flg_abandono') as $isAbandono){
+                            if($isAbandono == $pilotoEquipe){
+                                $model->flg_abandono = 'S';
+                            }
+                        }
+                    }
                     if($corrida->flg_sprint == 'N'){
                         $model->pontuacao = $this->calcularPontuacao($model, $chegada);
                         $model->pontuacao_classica = $this->calcularPontuacaoClassica($model, $chegada);
@@ -152,17 +167,17 @@ class ResultadoController extends Controller
         }
 
         //Enviar Email Avisando que o resultado foi inserido
-        $data["email"] = "vmelchior.93@gmail.com";
-        $data["title"] = "Teste Email";
-        $data["body"] = "Corpo do Email Teste";
+        // $data["email"] = "vmelchior.93@gmail.com";
+        // $data["title"] = "Teste Email";
+        // $data["body"] = "Corpo do Email Teste";
         
-        $pdf = PDF::loadView('emails.teste', $data);
+        // $pdf = PDF::loadView('emails.teste', $data);
   
-        Mail::send('emails.teste', $data, function($message)use($data, $pdf) {
-            $message->to($data["email"], $data["email"])
-                    ->subject($data["title"])
-                    ->attachData($pdf->output(), "text.pdf");
-        });              
+        // Mail::send('emails.teste', $data, function($message)use($data, $pdf) {
+        //     $message->to($data["email"], $data["email"])
+        //             ->subject($data["title"])
+        //             ->attachData($pdf->output(), "text.pdf");
+        // });              
 
         return redirect()->back();
     }

@@ -4,6 +4,11 @@
     .TrvoltaRapida{
         color: purple
     }
+
+    .trAbandono{
+        color: red;
+        font-style: italic;
+    }
 </style>
 
 @section('section')
@@ -27,7 +32,7 @@
             </thead>
             <tbody>
                 @foreach($model as $key => $item)
-                    <tr>
+                    <tr <?= $item->flg_abandono == 'S' ? "class='trAbandono'" : "" ?>>
                         <td>{{$key+1}}</td>
                         <td>{{$item->pilotoEquipe->piloto->nome}} {{$item->pilotoEquipe->piloto->sobrenome}}</td>
                         <td>{{$item->pilotoEquipe->equipe->nome}}</td>

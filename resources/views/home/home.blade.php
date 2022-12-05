@@ -252,6 +252,71 @@ color: #fff;
 
         <hr class="separador">
 
+        <div class="header-tabelas m-3">Abandonos</div>
+
+        <div class="d-flex">
+            <div>
+                <h1>Pilotos</h1>
+                <table class="m-5">
+                    <tr>
+                        <th>#</th>
+                        <th>Equipe</th>
+                        <th>Chegadas</th>
+                    </tr>
+                    @php 
+                        $abandonos = Resultado::where('user_id', Auth::user()->id)->where('flg_abandono', 'S')->get();
+                        $totAbandonos = [];
+                        foreach($abandonos as $item){
+                            if($item->corrida->flg_sprint == 'N'){
+                                array_push($totAbandonos, $item->pilotoEquipe->piloto->nomeCompleto());
+                            }
+                        }
+
+                        $totPorPiloto = array_count_values($totAbandonos);
+                        arsort($totPorPiloto);
+                    @endphp
+                    @foreach($totPorPiloto as $key => $value)
+                        <tr>
+                            <td>#</td>
+                            <td>{{$key}}</td>
+                            <td>{{$value}}</td>
+                        </tr>
+                    @endforeach
+                </table>
+            </div>
+            <div>
+                <h1>Equipes</h1>
+                <table class="m-5">
+                    <tr>
+                        <th>#</th>
+                        <th>Equipe</th>
+                        <th>Chegadas</th>
+                    </tr>
+                    @php 
+                        $abandonoEquipes = Resultado::where('user_id', Auth::user()->id)->where('flg_abandono','S')->get();
+                        $totAbandonosEquipes = [];
+                        foreach($abandonoEquipes as $item){
+                            if($item->corrida->flg_sprint == 'N'){
+                                array_push($totAbandonosEquipes, $item->pilotoEquipe->equipe->nome);
+                            }
+                        }
+
+                        $totPorEquipe= array_count_values($totAbandonosEquipes);
+                        arsort($totPorEquipe);
+                     @endphp
+                     @foreach($totPorEquipe as $key => $value)
+                        <tr>
+                            <td>#</td>
+                            <td>{{$key}}</td>
+                            <td>{{$value}}</td>
+                        </tr>
+                     @endforeach
+                </table>
+            </div>
+        </div>
+
+        <hr class="separador">
+
         <div class="header-tabelas m-3">Chegadas TOP 10</div>
 
         <div class="d-flex">
@@ -426,6 +491,8 @@ color: #fff;
     @php 
         //dados das corridas
     $resultadoCorridas = Corrida::where('user_id', Auth::user()->id)->orderBy('temporada_id')->orderBy('ordem')->get();
+    //$corrida = $resultadoCorridas->first();
+    //dd($corrida->condicao->descricao);
     @endphp
 
     <hr>
@@ -434,9 +501,9 @@ color: #fff;
     <div class="montaTabelaEquipes">
         <table class="mb-5 mt-5" id="tabelaClassificacaoEquipes">
             <tr>
-                <th>#</th>
-                <th>Temporada</th>
-                <th>Pista</th>
+                <th style="width: 5%;">#</th>
+                <th style="width: 5%;">Temporada</th>
+                <th style="width: 15%;">Pista</th>
                 <th>Pole Position</th>
                 <th>Primeiro</th>
                 <th>Segundo</th>
@@ -464,7 +531,14 @@ color: #fff;
                     <td>
                         {{$resultadoCorrida->temporada->ano->ano}}
                     </td>
-                    <td>{{$resultadoCorrida->pista->nome}}</td>
+                    <td>{{$resultadoCorrida->pista->nome}}
+                        @if(isset($resultadoCorrida->condicao_id))
+                            <i class="{{$resultadoCorrida->condicao->des_icone}}"></i>
+                        @endif
+                        @if($resultadoCorrida->qtd_safety_car > 0)
+                            <i class="bi bi-car-front-fill mt-3"></i>
+                        @endif
+                        </td>
                     <td>
                         @if(isset($polePosition))
                         <span style="color:{{$polePosition->pilotoEquipe->equipe->des_cor}};">

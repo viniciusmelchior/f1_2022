@@ -13,7 +13,7 @@ class Resultado extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['corrida_id','pilotoEquipe_id', 'largada','chegada','pontuacao','pontuacao_classica','pontuacao_personalizada','pontuacao_invertida', 'user_id'];
+    protected $fillable = ['corrida_id','pilotoEquipe_id', 'largada','chegada','flg_abandono','pontuacao','pontuacao_classica','pontuacao_personalizada','pontuacao_invertida', 'user_id'];
 
     /**Relacionamentos */
 

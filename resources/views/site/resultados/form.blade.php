@@ -30,7 +30,7 @@
             <label for="condicao_id" class="form-label">Condição Climática</label>
             <select name="condicao_id" id="condicao_id" class="form-control">
                 @foreach($condicoesClimaticas as $condicaoClimatica)
-                    <option value="{{$condicaoClimatica->id}}" {{-- @if(isset($model) && $model->condicaoClimatica->id == $condicaoClimatica->id) selected @endif --}}>{{$condicaoClimatica->descricao}}</option>
+                    <option value="{{$condicaoClimatica->id}}" @if(isset($corrida) && $corrida->condicao_id == $condicaoClimatica->id) selected @endif>{{$condicaoClimatica->descricao}}</option>
                 @endforeach
             </select>
         </div>
@@ -66,6 +66,7 @@
                     <th>Piloto</th>
                     <th>Largada</th>
                     <th>Chegada</th>
+                    <th>Abandono</th>
                     <th>Pontuação</th>
                     <th>Clássica</th>
                     <th>Personalizada</th>
@@ -108,6 +109,21 @@
                             @else 
                                 value="">
                             @endif 
+                        </td>
+                        <td>
+                           {{--  <input type="hidden" value="N" name="flg_abandono[]" class="flg_abandono"> --}}
+                            <input 
+                            type="checkbox" 
+                            class="flg_abandono" 
+                            name="flg_abandono[]" id="flg_abandono" 
+                            style="width:30px; height:30px;" 
+                            value="<?= $pilotoEquipe->id ?>"
+                            @if(isset($infoPiloto->flg_abandono) && $infoPiloto->flg_abandono == 'S')
+                               checked
+                            @else 
+                                
+                            @endif 
+                            >
                         </td>
                         <td>
                             <input 
@@ -206,6 +222,11 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
-     
+       /*  $('.flg_abandono').click(function (e) { 
+            e.preventDefault();
+            //alert(this.value);
+            this.value = 'S';
+           // alert(this.value)
+        }); */
     </script>
 @endsection

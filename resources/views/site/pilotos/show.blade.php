@@ -198,6 +198,10 @@
                 <h4>pior Chegada</h4>
                 <p>{{ $piorPosicaoChegada }}º</p>
            </div>
+            <div class="other-stats">
+                <h4>Abandonos</h4>
+                <p>{{ $totAbandonos }}</p>
+           </div>
         </div>
     </div>
 
@@ -222,7 +226,7 @@
                             <td> {{$resultado->corrida->temporada->ano->ano}} </td>
                             <td>{{$resultado->corrida->pista->nome}} @if($resultado->corrida->flg_sprint == 'S') - Sprint @endif</td>
                             <td>{{$resultado->largada}}</td>
-                            <td>{{$resultado->chegada}}</td>
+                            <td>{{$resultado->chegada}} <?= $resultado->flg_abandono ? ' - Abandonou' : '' ?></td>
                             <td>{{$resultado->largada-$resultado->chegada}}</td>
                         @endif
                     </tr>

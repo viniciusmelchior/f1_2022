@@ -106,6 +106,7 @@ class PilotoController extends Controller
         $melhorPosicaoChegada = 22;
         $piorPosicaoChegada = 0;
         $totTitulos = 0;
+        $totAbandonos = 0;
         
         foreach($resultados as $resultado){
             if($resultado->pilotoEquipe->piloto->id == $id){
@@ -137,6 +138,13 @@ class PilotoController extends Controller
             if($resultado->chegada <= 10){
                 if($resultado->pilotoEquipe->piloto->id == $id){
                     $totTopTen++;
+                }
+            }
+
+            //calculo de total de abandonos
+            if($resultado->flg_abandono == 'S'){
+                if($resultado->pilotoEquipe->piloto->id == $id){
+                    $totAbandonos++;
                 }
             }
 
@@ -201,7 +209,7 @@ class PilotoController extends Controller
     
         $totVoltasRapidas = count($resultado);           
        
-        return view('site.pilotos.show', compact('modelPiloto','totTitulos', 'totCorridas', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas'));
+        return view('site.pilotos.show', compact('modelPiloto','totTitulos','totAbandonos', 'totCorridas', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas'));
     }
 
     /**
