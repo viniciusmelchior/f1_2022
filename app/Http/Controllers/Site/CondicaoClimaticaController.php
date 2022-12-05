@@ -41,6 +41,7 @@ class CondicaoClimaticaController extends Controller
     {
         $condicaoClimatica = new CondicaoClimatica();
         $condicaoClimatica->descricao = $request->descricao;
+        $condicaoClimatica->des_icone = $request->des_icone;
         $condicaoClimatica->user_id = Auth::user()->id;
         $condicaoClimatica->save();
 
@@ -81,6 +82,7 @@ class CondicaoClimaticaController extends Controller
     {
         $condicaoClimatica = CondicaoClimatica::where('id', $id)->where('user_id', Auth::user()->id)->first();
         $condicaoClimatica->descricao = $request->descricao;
+        $condicaoClimatica->des_icone = $request->des_icone;
         $condicaoClimatica->update();
 
         return redirect()->route('condicaoClimatica.index');
