@@ -56,8 +56,8 @@ color: #fff;
 
 @section('section')
     <div class="container">
-        <div class="header-tabelas m-3">Vitórias</div>
-        <div class="d-flex">
+        <div class="header-tabelas m-3">Vitórias <span id="toggle_vitorias"><i class="bi bi-plus-circle"></i></span></div>
+        <div class="d-flex" id="div_vitorias">
             <div>
                <h1>Pilotos</h1>
                <table class="m-5">
@@ -121,9 +121,9 @@ color: #fff;
 
         <hr class="separador">
 
-        <div class="header-tabelas m-3">Pole Positions</div>
+        <div class="header-tabelas m-3">Pole Positions <span id="toggle_poles"><i class="bi bi-plus-circle"></i></span></div>
 
-        <div class="d-flex">
+        <div class="d-flex" id="div_poles">
             <div>
                <h1>Pilotos</h1>
                <table class="m-5">
@@ -187,9 +187,9 @@ color: #fff;
 
         <hr class="separador">
 
-        <div class="header-tabelas m-3">Podios</div>
+        <div class="header-tabelas m-3">Podios <span id="toggle_podios"><i class="bi bi-plus-circle"></i></span></div>
 
-        <div class="d-flex">
+        <div class="d-flex d-none" id="div_podios">
             <div>
                 <h1>Pilotos</h1>
                 <table class="m-5">
@@ -252,9 +252,9 @@ color: #fff;
 
         <hr class="separador">
 
-        <div class="header-tabelas m-3">Abandonos</div>
+        <div class="header-tabelas m-3">Abandonos <span id="toggle_abandonos"><i class="bi bi-plus-circle"></i></span></div>
 
-        <div class="d-flex">
+        <div class="d-flex d-none" id="div_abandonos">
             <div>
                 <h1>Pilotos</h1>
                 <table class="m-5">
@@ -317,9 +317,9 @@ color: #fff;
 
         <hr class="separador">
 
-        <div class="header-tabelas m-3">Chegadas TOP 10</div>
+        <div class="header-tabelas m-3">Chegadas TOP 10 <span id="toggle_chegadastop10"><i class="bi bi-plus-circle"></i></span></div>
 
-        <div class="d-flex">
+        <div class="d-flex d-none" id="div_chegadastop10">
             <div>
                 <h1>Pilotos</h1>
                 <table class="m-5">
@@ -382,9 +382,9 @@ color: #fff;
 
         <hr class="separador">
 
-        <div class="header-tabelas m-3">Títulos</div>
+        <div class="header-tabelas m-3">Títulos <span id="toggle_titulos"><i class="bi bi-plus-circle"></i></span></div>
 
-        <div class="d-flex">
+        <div class="d-flex" id="div_titulos">
            
             <div>
                 <h1>Pilotos</h1>
@@ -448,16 +448,16 @@ color: #fff;
         @php 
             $temporadas = Temporada::where('user_id', Auth::user()->id)->get();
         @endphp
-        <div>
-            <select name="mudarTemporada" id="mudarTemporada">
-                <option value="" selected>Selecione uma Temporada</option>
-                @foreach($temporadas as $temporada)
-                    <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
-                @endforeach
-            </select>
-        </div>
 
-        <h1 id="tituloClassificacao">Classificação Geral</h1>
+    <h1 id="tituloClassificacao">Classificação Geral</h1>
+    <div class="">
+        <select name="mudarTemporada" id="mudarTemporada" class="form-select mt-3" style="width: 30%; margin:0 auto;">
+            <option value="" selected>Selecione uma Temporada</option>
+            @foreach($temporadas as $temporada)
+                <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
+            @endforeach
+        </select>
+    </div>
     
     <div class="d-flex">
         <div class="montaTabelaPilotos">
@@ -673,11 +673,35 @@ color: #fff;
             });
 
         });
-   });
 
-   
-3
-$(document).ready( function () {
-    //$('#tabelaClassificacaoPilotos').DataTable();
-} );
+        $('#toggle_vitorias').click(function (e) { 
+            e.preventDefault();
+            $('#div_vitorias').toggleClass('d-none');
+        });
+
+        $('#toggle_poles').click(function (e) { 
+            e.preventDefault();
+            $('#div_poles').toggleClass('d-none');
+        });
+
+        $('#toggle_podios').click(function (e) { 
+            e.preventDefault();
+            $('#div_podios').toggleClass('d-none');
+        });
+
+        $('#toggle_abandonos').click(function (e) { 
+            e.preventDefault();
+            $('#div_abandonos').toggleClass('d-none');
+        });
+
+        $('#toggle_chegadastop10').click(function (e) { 
+            e.preventDefault();
+            $('#div_chegadastop10').toggleClass('d-none');
+        });
+
+        $('#toggle_titulos').click(function (e) { 
+            e.preventDefault();
+            $('#div_titulos').toggleClass('d-none');
+        });
+   });
 </script>
