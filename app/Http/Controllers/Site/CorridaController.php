@@ -123,16 +123,21 @@ class CorridaController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request)
     {   
-        $resultados = Resultado::where('user_id', Auth::user()->id)->where('corrida_id', $id)->get();
+        
+        $resultados = Resultado::where('user_id', Auth::user()->id)->where('corrida_id', $request->corrida_id)->get();
 
-        foreach($resultados as $resultado){
-            $resultado->delete();
+        if(count($resultados) > 0){
+            foreach($resultados as $resultado){
+                $resultado->delete();
+            }
         }
 
-        $corrida = Corrida::where('id', $id)->where('user_id', Auth::user()->id)->first();
+        $corrida = Corrida::where('id', $request->corrida_id)->where('user_id', Auth::user()->id)->first();
         $corrida->delete();
-        return redirect()->back();
+
+        return redirect()->back()->with('status', 'O GP de '.$corrida->pista->nome.' foi excluído com sucesso');
+        // return redirect()->route('pilotos.index')->with('status', 'O piloto '.$piloto->nomeCompleto().' foi excluído com sucesso');
     }
 }

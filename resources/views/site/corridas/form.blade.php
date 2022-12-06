@@ -41,15 +41,20 @@
                 @endforeach
             </select>
         </div> --}}
-        <label for="pista_id">Pista</label>
-        <select name="pista_id" id="pista_id" class="form-control">
-            @foreach($model as $pista)
-                <option value="{{$pista->id}}">{{$pista->nome}}</option>
-            @endforeach
-        </select>
-
-        <label for="ordem">Ordem</label>
+        <div class="mb-3">
+            <label for="pista_id">Pista</label>
+            <select name="pista_id" id="pista_id" class="form-control">
+                @foreach($model as $pista)
+                    <option value="{{$pista->id}}">{{$pista->nome}}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="ordem">Ordem</label>
         <input type="number" class="pista_ordem" name="ordem" id="ordem" style="width:30px; height:30px;">
+        </div>
+
+        
 
 
 

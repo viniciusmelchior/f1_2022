@@ -113,7 +113,8 @@ route::post('/corridas/store', [CorridaController::class, 'store'])->name('corri
 route::get('/corridas/index/{id}', [CorridaController::class, 'index'])->name('corridas.index')->middleware('auth');
 route::get('/corridas/edit/{id}', [CorridaController::class, 'edit'])->name('corridas.edit')->middleware('auth');
 route::put('/corridas/update/{id}', [CorridaController::class, 'update'])->name('corridas.update')->middleware('auth');
-route::get('/corridas/delete/{id}', [CorridaController::class, 'destroy'])->name('corridas.delete')->middleware('auth');
+// route::get('/corridas/delete/{id}', [CorridaController::class, 'destroy'])->name('corridas.delete')->middleware('auth');
+route::get('/corridas/delete/', [CorridaController::class, 'destroy'])->name('corridas.delete')->middleware('auth');
 
 route::get('/corridas/adicionar/{id}', [CorridaController::class, 'adicionar'])->name('corridas.adicionar')->middleware('auth');
 route::post('/corridas/alterar/{id}', [CorridaController::class, 'alterar'])->name('corridas.alterar')->middleware('auth');
@@ -126,6 +127,7 @@ route::get('/resultados/show/{id}', [ResultadoController::class, 'show'])->name(
 
 /**Requisições Ajax */
 route::post('/ajax/classificacaoGeralPorTemporada', [AjaxController::class, 'classificacaoPorTemporada'])->name('ajax.classificacaoGeralPorTemporada')->middleware('auth');
+route::get('/estudos', [AjaxController::class, 'estudos'])->name('estudos')->middleware('auth');
 
 /**Rotas Excel */
 Route::get('pilotos/export/{id}', [PilotoController::class, 'export'])->name('pilotos.export');
