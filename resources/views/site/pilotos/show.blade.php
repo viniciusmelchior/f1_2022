@@ -226,7 +226,7 @@
                             <td> {{$resultado->corrida->temporada->ano->ano}} </td>
                             <td>{{$resultado->corrida->pista->nome}} @if($resultado->corrida->flg_sprint == 'S') - Sprint @endif</td>
                             <td>{{$resultado->largada}}</td>
-                            <td>{{$resultado->chegada}} <?= $resultado->flg_abandono ? ' - Abandonou' : '' ?></td>
+                            <td>{{$resultado->chegada}} <?= $resultado->flg_abandono == 'S' ? ' - Abandonou' : '' ?></td>
                             <td>{{$resultado->largada-$resultado->chegada}}</td>
                         @endif
                     </tr>
