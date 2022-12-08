@@ -209,6 +209,22 @@
             $resultados = Resultado::where('user_id', Auth::user()->id)->get();
         @endphp
 
+        <section class="resultados-por-corrida">
+            <h1>Histórico de Equipes</h1>
+            <table class="mt-5 mb-5 tabela-resultados">
+                <tr>
+                    <th>Temporada</th>
+                    <th>Equipe</th>
+                </tr>
+                @foreach($equipes as $equipe)
+                    <tr>
+                        <td>{{$equipe->ano->ano}}</td>
+                        <td>{{$equipe->equipe->nome}}</td>
+                    </tr>
+                @endforeach
+            </table>
+        </section>
+
         {{--Tabela de Largada e chegada--}}
         <section class="resultados-por-corrida">
             <h1>Resultados por Corrida</h1>

@@ -207,9 +207,13 @@ class PilotoController extends Controller
                                 ->whereIn('volta_rapida', $ids)
                                 ->get();
     
-        $totVoltasRapidas = count($resultado);           
+        $totVoltasRapidas = count($resultado);    
+        
+        //historico de equipes
+        $equipes = PilotoEquipe::where('user_id', Auth::user()->id)->where('piloto_id', $id)->get();
+        //dd($equipes);
        
-        return view('site.pilotos.show', compact('modelPiloto','totTitulos','totAbandonos', 'totCorridas', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas'));
+        return view('site.pilotos.show', compact('modelPiloto','totTitulos','totAbandonos', 'totCorridas', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas', 'equipes'));
     }
 
     /**
