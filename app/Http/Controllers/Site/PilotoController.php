@@ -107,6 +107,8 @@ class PilotoController extends Controller
         $piorPosicaoChegada = 0;
         $totTitulos = 0;
         $totAbandonos = 0;
+        $gridMedio = 0;
+        $mediaChegada = 0;
         
         foreach($resultados as $resultado){
             if($resultado->pilotoEquipe->piloto->id == $id){
@@ -147,6 +149,19 @@ class PilotoController extends Controller
                     $totAbandonos++;
                 }
             }
+
+             //calculo da Média de Largada
+            if($resultado->pilotoEquipe->piloto->id == $id){
+                $gridMedio += $resultado->largada;
+                // $gridMedio = $gridMedio/$totCorridas;
+            }
+
+             //calculo da Média de Chegada
+            if($resultado->pilotoEquipe->piloto->id == $id){
+                $mediaChegada += $resultado->chegada;
+                // $mediaChegada = $mediaChegada/$totCorridas;
+            }
+        
 
             //calculo de melhor posição de largada
             if($resultado->pilotoEquipe->piloto->id == $id){
@@ -212,8 +227,12 @@ class PilotoController extends Controller
         //historico de equipes
         $equipes = PilotoEquipe::where('user_id', Auth::user()->id)->where('piloto_id', $id)->get();
         //dd($equipes);
+
+        //Calculo final da média de largada e chegada
+        $mediaChegada = round($mediaChegada/$totCorridas);
+        $gridMedio = round($gridMedio/$totCorridas);
        
-        return view('site.pilotos.show', compact('modelPiloto','totTitulos','totAbandonos', 'totCorridas', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas', 'equipes'));
+        return view('site.pilotos.show', compact('modelPiloto','totTitulos','totAbandonos', 'totCorridas', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas', 'equipes','mediaChegada','gridMedio'));
     }
 
     /**

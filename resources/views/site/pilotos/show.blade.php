@@ -202,6 +202,14 @@
                 <h4>Abandonos</h4>
                 <p>{{ $totAbandonos }}</p>
            </div>
+            <div class="other-stats">
+                <h4>Grid Médio</h4>
+                <p>{{$gridMedio}}</p>
+           </div>
+            <div class="other-stats">
+                <h4>Média Chegada</h4>
+                <p>{{$mediaChegada}}</p>
+           </div>
         </div>
     </div>
 
