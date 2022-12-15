@@ -270,7 +270,7 @@
                // piloto1_imagem.attr("src", `http://127.0.0.1:8000/images/${response.dadosPiloto1[0]['imagem']}`)
                // piloto2_imagem.attr("src", `http://127.0.0.1:8000/images/${response.dadosPiloto2[0]['imagem']}`)
                piloto1_imagem.attr("src", `https://f1.vitorvasconcellos.com.br/images/${response.dadosPiloto1[0]['imagem']}`)
-               piloto2_imagem.attr("src", `https://f1.vitorvasconcellos.com.br/${response.dadosPiloto2[0]['imagem']}`)
+               piloto2_imagem.attr("src", `https://f1.vitorvasconcellos.com.br/images/${response.dadosPiloto2[0]['imagem']}`)
 
                piloto1TotPontos.text(response.piloto1TotPontos)
                piloto2TotPontos.text(response.piloto2TotPontos)
