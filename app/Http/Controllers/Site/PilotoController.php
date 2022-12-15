@@ -10,8 +10,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Exports\PilotosExport;
 use App\Models\Site\Corrida;
+use App\Models\Site\Temporada;
 use App\Models\Site\PilotoEquipe;
 use App\Models\Site\Titulo;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
 class PilotoController extends Controller
@@ -285,6 +287,138 @@ class PilotoController extends Controller
         $piloto->update();
 
         return redirect()->route('pilotos.index')->with('status', 'O piloto '.$piloto->nomeCompleto().' foi editado');
+    }
+
+    public function comparativo(){
+
+        $temporadas = Temporada::where('user_id', Auth::user()->id)->get();
+        
+        $temporada_id = 1;
+        $usuario_id = 1;
+        $piloto1_id = 4; //verstappen
+        $piloto2_id = 23; //perez
+
+        //Variaveis com Resultados da Comparação
+        $piloto1TotVitorias = 0;
+        $piloto2TotVitorias = 0;
+        $piloto1TotPolePositions = 0;
+        $piloto2TotPolePositions = 0;
+        $piloto1Largada = 0;
+        $piloto2Largada = 0;
+        $piloto1Chegada = 0;
+        $piloto2Chegada = 0;
+        $piloto1TotPodios = 0;
+        $piloto2TotPodios = 0;
+        $piloto1TotAbandonos = 0;
+        $piloto2TotAbandonos = 0;
+        $piloto1TotPontos = 0;
+        $piloto2TotPontos = 0;
+        $piloto1TotVoltasRapidas = 0;
+        $piloto2TotVoltasRapidas = 0;
+        $piloto1MelhorChegada = 22;
+        $piloto2MelhorChegada = 22;
+        $piloto1PiorChegada = 0;
+        $piloto2PiorChegada = 0;
+
+        $piloto1MelhorLargada = 22;
+        $piloto2MelhorLargada = 22;
+        $piloto1PiorLargada = 0;
+        $piloto2PiorLargada = 0;
+
+        //temporariamente; Depois pegar só campos que interessam no dadospilotos e concatenar nomes
+        //$pilotos = Piloto::whereIn('id', [$piloto1_id, $piloto2_id])->get();
+
+        $dadosPiloto1 =  DB::select('select
+                                     * 
+                                    from resultados
+                                    join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
+                                    join equipes on equipes.id = piloto_equipes.equipe_id
+                                    join corridas on corridas.id = resultados.corrida_id
+                                    join pilotos on piloto_equipes.piloto_id = pilotos.id
+                                    join temporadas on temporadas.id = corridas.temporada_id
+                                    where temporadas.id = '.$temporada_id.'
+                                    and resultados.user_id = '.$usuario_id.'
+                                    and corridas.flg_sprint = "N"
+                                    and piloto_id = '.$piloto1_id.'');
+                                
+        $dadosPiloto2 =  DB::select('select 
+                                    *
+                                    from resultados
+                                    join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
+                                    join equipes on equipes.id = piloto_equipes.equipe_id
+                                    join corridas on corridas.id = resultados.corrida_id
+                                    join pilotos on piloto_equipes.piloto_id = pilotos.id
+                                    join temporadas on temporadas.id = corridas.temporada_id
+                                    where temporadas.id = '.$temporada_id.'
+                                    and resultados.user_id = '.$usuario_id.'
+                                    and corridas.flg_sprint = "N"
+                                    and piloto_id = '.$piloto2_id.'');
+        
+        //loop que faz os comparativos
+        foreach($dadosPiloto1 as $key1 => $piloto1){
+           if(isset($dadosPiloto2[$key1]) && $piloto1->corrida_id == $dadosPiloto2[$key1]->corrida_id){
+                $piloto1->largada < $dadosPiloto2[$key1]->largada ?  $piloto1Largada++ : $piloto2Largada++;
+                $piloto1->chegada < $dadosPiloto2[$key1]->chegada ?  $piloto1Chegada++ : $piloto2Chegada++;
+                $piloto1->chegada <= 3 ? $piloto1TotPodios++ : "";
+                $piloto1->flg_abandono == 'S' ? $piloto1TotAbandonos++ : '';
+                $piloto1->volta_rapida == $piloto1->pilotoEquipe_id ? $piloto1TotVoltasRapidas++ : '';
+                $piloto1->chegada == 1 ? $piloto1TotVitorias++ : "";
+                $piloto1->largada == 1 ? $piloto1TotPolePositions++ : "";
+                $piloto1->chegada < $piloto1MelhorChegada ? $piloto1MelhorChegada = $piloto1->chegada : "";
+                $piloto1->chegada > $piloto1PiorChegada ? $piloto1PiorChegada = $piloto1->chegada : "";
+                $piloto1->largada > $piloto1PiorLargada ? $piloto1PiorLargada = $piloto1->largada : "";
+                $piloto1->largada < $piloto1MelhorLargada ? $piloto1MelhorLargada = $piloto1->largada : "";
+           }   
+        }
+
+        //loop do segundo piloto para dados especificos dele. Os do primeiro piloto ja são tratados como os dados base do loop comparativo
+        foreach($dadosPiloto2 as $key1 => $piloto2){
+            if(isset($dadosPiloto1[$key1]) && $piloto2->corrida_id == $dadosPiloto1[$key1]->corrida_id){
+                $piloto2->chegada <= 3 ? $piloto2TotPodios++ : "";
+                $piloto2->flg_abandono == 'S' ? $piloto2TotAbandonos++ : '';
+                $piloto2->volta_rapida == $piloto2->pilotoEquipe_id ? $piloto2TotVoltasRapidas++ : '';
+                $piloto2->chegada == 1 ? $piloto2TotVitorias++ : "";
+                $piloto2->largada == 1 ? $piloto2TotPolePositions++ : "";
+                $piloto2->chegada < $piloto2MelhorChegada ? $piloto2MelhorChegada = $piloto2->chegada : "";
+                $piloto2->chegada > $piloto2PiorChegada ? $piloto2PiorChegada = $piloto2->chegada : "";
+                $piloto2->largada > $piloto2PiorLargada ? $piloto2PiorLargada = $piloto2->largada : "";
+                $piloto2->largada < $piloto2MelhorLargada ? $piloto2MelhorLargada = $piloto2->largada : "";
+            }
+        }
+
+        //calculo de pontuação é em outro loop pois utiliza dados da corrida sprint também
+        $piloto1TotPontos = DB::select('select
+                                        sum(pontuacao) as totPontos
+                                        from resultados
+                                        join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
+                                        join equipes on equipes.id = piloto_equipes.equipe_id
+                                        join corridas on corridas.id = resultados.corrida_id
+                                        join pilotos on piloto_equipes.piloto_id = pilotos.id
+                                        join temporadas on temporadas.id = corridas.temporada_id
+                                        where temporadas.id = '.$temporada_id.'
+                                        and resultados.user_id = '.$usuario_id.'
+                                        and piloto_id = '.$piloto1_id.'');
+
+        $piloto1TotPontos = $piloto1TotPontos[0]->totPontos;
+
+        $piloto2TotPontos = DB::select('select
+                                        sum(pontuacao) as totPontos
+                                        from resultados
+                                        join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
+                                        join equipes on equipes.id = piloto_equipes.equipe_id
+                                        join corridas on corridas.id = resultados.corrida_id
+                                        join pilotos on piloto_equipes.piloto_id = pilotos.id
+                                        join temporadas on temporadas.id = corridas.temporada_id
+                                        where temporadas.id = '.$temporada_id.'
+                                        and resultados.user_id = '.$usuario_id.'
+                                        and piloto_id = '.$piloto2_id.'');
+
+        $piloto2TotPontos = $piloto2TotPontos[0]->totPontos;
+
+        $modelPilotos = Piloto::where('user_id', Auth::user()->id)
+                                ->get();
+
+        return view('site.pilotos.comparativo', compact('piloto1Largada','piloto2Largada','piloto1Chegada','piloto2Chegada','dadosPiloto1', 'dadosPiloto2','piloto1TotPodios','piloto2TotPodios','piloto1TotAbandonos','piloto2TotAbandonos','piloto1TotPontos','piloto2TotPontos','piloto1TotVoltasRapidas','piloto2TotVoltasRapidas','piloto1TotVitorias','piloto2TotVitorias','piloto1TotPolePositions','piloto2TotPolePositions','piloto1MelhorChegada','piloto2MelhorChegada','piloto1PiorChegada','piloto2PiorChegada','piloto1MelhorLargada','piloto2MelhorLargada','piloto1PiorLargada','piloto2PiorLargada','modelPilotos','temporadas'));
     }
 
     /**

@@ -21,6 +21,7 @@
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
               <a class="dropdown-item" href="{{route('pilotos.index')}}">Visualizar</a>
               <a class="dropdown-item" href="{{route('pilotos.create')}}">Cadastrar</a>
+              <a class="dropdown-item" href="{{route('pilotos.comparativo')}}">Comparativos</a>
             </div>
           </div>
 

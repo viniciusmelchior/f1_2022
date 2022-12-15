@@ -62,6 +62,7 @@ route::post('/pilotos/store', [PilotoController::class, 'store'])->name('pilotos
 route::get('/pilotos/index', [PilotoController::class, 'index'])->name('pilotos.index')->middleware('auth');
 route::get('/pilotos/edit/{id}', [PilotoController::class, 'edit'])->name('pilotos.edit')->middleware('auth');
 route::get('/pilotos/show/{id}', [PilotoController::class, 'show'])->name('pilotos.show')->middleware('auth');
+route::get('/pilotos/comparativo', [PilotoController::class, 'comparativo'])->name('pilotos.comparativo')->middleware('auth');
 route::put('/pilotos/update/{id}', [PilotoController::class, 'update'])->name('pilotos.update')->middleware('auth');
 route::get('/pilotos/delete', [PilotoController::class, 'destroy'])->name('pilotos.delete')->middleware('auth');
 
@@ -127,6 +128,8 @@ route::get('/resultados/show/{id}', [ResultadoController::class, 'show'])->name(
 
 /**Requisições Ajax */
 route::post('/ajax/classificacaoGeralPorTemporada', [AjaxController::class, 'classificacaoPorTemporada'])->name('ajax.classificacaoGeralPorTemporada')->middleware('auth');
+
+route::post('/ajax/comparativos', [AjaxController::class, 'comparativos'])->name('ajax.comparativos')->middleware('auth');
 route::get('/estudos', [AjaxController::class, 'estudos'])->name('estudos')->middleware('auth');
 
 /**Rotas Excel */
