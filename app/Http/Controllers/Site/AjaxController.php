@@ -221,6 +221,22 @@ class AjaxController extends Controller
         ]);
     }
 
+    public function getPilotosPorTemporada(Request $request){
+
+        $temporada = Temporada::where('user_id', Auth::user()->id)->where('id', $request->temporada_id)->first();
+        $pilotoEquipes = PilotoEquipe::where('user_id', Auth::user()->id)->where('ano_id', $temporada->ano_id)->get();
+        $pilotos = [];
+
+        foreach($pilotoEquipes as $piloto){
+            array_push($pilotos, $piloto->piloto);
+        }
+
+        return response()->json([
+            'message' => 'Chegamos no getPilotosPorTemporada',
+            'pilotos' => $pilotos
+        ]);
+    }
+
     public function estudos(){
        /* $paises = Pais::where('user_id', Auth::user()->id)->get();
        foreach($paises as $pais){

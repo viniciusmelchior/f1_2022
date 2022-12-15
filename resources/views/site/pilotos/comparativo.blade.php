@@ -19,6 +19,8 @@
       margin-bottom: 10%;
       margin-top: 10%;
       display: none;
+      /* padding-left: 50px;
+      padding-right: 50px; */
    }
 
    .tabela_comparativos tbody tr{
@@ -49,14 +51,34 @@
       height: 256px;
    }
 
+   #tabela-pilotos {
+     /* height: 110px;
+     overflow: auto; */
+   }
+
+   #form {
+      /* height: 100vh;
+      overflow: auto; */
+   }
+
 </style>
 
 @section('section')
 <div class="d-flex container">
+   {{--escolha da temporada--}}
    <div id="form" style="width: 40%;">
       <div>
          <form method="POST" action="" class="mt-3 mb-3" id="form-comparativos" {{-- style="background-color: blue;" --}}>
-            <table class="table text-center" style="width: 80%;">
+            <div class="mb-3">
+               <select name="temporada_id" id="temporada_id" class="form-control">
+                        <option value="">Selecionar Temporada</option>
+                   @foreach($temporadas as $temporada)
+                       <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
+                   @endforeach
+               </select>
+           </div>
+
+            <table class="table text-center" style="width: 80%;" id="tabela-pilotos">
             <thead>
                <tr>
                    <th>#</th>
@@ -64,33 +86,14 @@
                    <th>Ações</th>
                </tr>
             </thead>
-               <tbody>
-                  @foreach($modelPilotos as $key => $piloto)
+               <tbody id="tabela-pilotos-tbody">
                   <tr>
-                     <td>{{$key + 1}}</td>
-                     <td>{{$piloto->nomeCompleto()}}</td>
-                     <td>
-                        <input 
-                        type="checkbox" 
-                        class="piloto_id single-checkbox" 
-                        name="piloto_id[]" id="piloto_id" 
-                        style="width:30px; height:30px;" 
-                        value="<?= $piloto->id ?>"
-                        >
+                     <td colspan="3">
+                       Selecione uma Temporada
                      </td>
                   </tr>
-                  @endforeach
                </tbody>
          </table>
-         <div class="mb-3">
-            <label for="temporada_id" class="form-label">Temporada</label>
-            <select name="temporada_id" id="temporada_id" class="form-control">
-                @foreach($temporadas as $temporada)
-                    <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
-                @endforeach
-                     <option value="">Todas</option>
-            </select>
-        </div>
          <button type="submit" class="btn btn-primary">Comparar</button>
          <a href="" class="btn btn-secondary ml-3">Voltar</a>
          </form>
@@ -184,14 +187,17 @@
 </div>
    <script>
       urlcomparativos = "<?=route('ajax.comparativos')?>"
-
-      var limit = 2;
-      $('input[type=checkbox]').on('change', function (e) {
-         if ($('input[type=checkbox]:checked').length > limit) {
-            $(this).prop('checked', false);
-            alert("Escolher apenas 2 pilotos");
-         }
-      });
+      urlPilotosPorTemporada = "<?=route('ajax.getPilotosPorTemporada')?>"
+      
+   //   $(document).ready(function () {
+   //    var limit = 2;
+   //    $('input[type=checkbox]').on('change', function (e) {
+   //       if ($('input[type=checkbox]:checked').length > limit) {
+   //          $(this).prop('checked', false);
+   //          alert("Escolher apenas 2 pilotos");
+   //       }
+   //    });
+   //   });
 
       $('#form-comparativos').submit(function (e) { 
          e.preventDefault();
@@ -267,10 +273,10 @@
                piloto1_desc.text(`${response.dadosPiloto1[0]['nome']} ${response.dadosPiloto1[0]['sobrenome']}`)
                piloto2_desc.text(`${response.dadosPiloto2[0]['nome']} ${response.dadosPiloto2[0]['sobrenome']}`)
                
-               // piloto1_imagem.attr("src", `http://127.0.0.1:8000/images/${response.dadosPiloto1[0]['imagem']}`)
-               // piloto2_imagem.attr("src", `http://127.0.0.1:8000/images/${response.dadosPiloto2[0]['imagem']}`)
-               piloto1_imagem.attr("src", `https://f1.vitorvasconcellos.com.br/images/${response.dadosPiloto1[0]['imagem']}`)
-               piloto2_imagem.attr("src", `https://f1.vitorvasconcellos.com.br/images/${response.dadosPiloto2[0]['imagem']}`)
+               piloto1_imagem.attr("src", `http://127.0.0.1:8000/images/${response.dadosPiloto1[0]['imagem']}`)
+               piloto2_imagem.attr("src", `http://127.0.0.1:8000/images/${response.dadosPiloto2[0]['imagem']}`)
+               // piloto1_imagem.attr("src", `https://f1.vitorvasconcellos.com.br/images/${response.dadosPiloto1[0]['imagem']}`)
+               // piloto2_imagem.attr("src", `https://f1.vitorvasconcellos.com.br/images/${response.dadosPiloto2[0]['imagem']}`)
 
                piloto1TotPontos.text(response.piloto1TotPontos)
                piloto2TotPontos.text(response.piloto2TotPontos)
@@ -307,6 +313,59 @@
 
                piloto1PiorLargada.text(response.piloto1PiorLargada);
                piloto2PiorLargada.text(response.piloto2PiorLargada);
+            }
+         });
+      });
+
+      /*Listando pilotos por temporada*/
+
+      $('#temporada_id').change(function (e) { 
+         e.preventDefault();
+         
+         //limpa a tabela
+         tabela_pilotos = $('#tabela-pilotos');
+         // tabela_pilotos.html('');
+         temporada_id = $('#temporada_id').val();
+         tbody = $('#tabela-pilotos-tbody');
+
+         if(temporada_id == ""){
+            tbody.html('<tr><td colspan="3">Selecione uma Temporada</td></tr>')
+         }
+
+         $.ajaxSetup({
+            headers: {
+               'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+         });
+
+         $.ajax({
+            type: "POST",
+            url: urlPilotosPorTemporada,
+            data: {
+               temporada_id:temporada_id
+            },
+            contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+            success: function (response) {
+               if(response.pilotos.length > 0){
+                        contPilotos = 1;
+                        tbody.html('');
+                        response.pilotos.map(function(response){ 
+                        tbody.append("<tr><td>"+contPilotos+"</td><td>"+response.nome+" "+response.sobrenome+"</td><td><input type='checkbox' class='piloto_id single-checkbox' name='piloto_id[]' id='piloto_id' style='width:30px; height:30px;' value='"+response.id+"'></td></tr>");
+                        contPilotos++
+                        })
+                    } else {
+                       /*  tabelaClassificacaoPilotos.append('<tr><th>Posição</th><th>Piloto</th><th>Pontos</th></tr>')
+                        tabelaClassificacaoPilotos.append("<tr><td colspan='3'>Sem Dados Cadastrados</td></tr>"); */
+                    }  
+            
+            /*função que limita a escolha de checkbox*/
+            var limit = 2;
+            $('input[type=checkbox]').on('change', function (e) {
+               if ($('input[type=checkbox]:checked').length > limit) {
+                  $(this).prop('checked', false);
+                  alert("Escolher apenas 2 pilotos");
+               }
+            }); 
             }
          });
       });

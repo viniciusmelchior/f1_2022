@@ -130,6 +130,7 @@ route::get('/resultados/show/{id}', [ResultadoController::class, 'show'])->name(
 route::post('/ajax/classificacaoGeralPorTemporada', [AjaxController::class, 'classificacaoPorTemporada'])->name('ajax.classificacaoGeralPorTemporada')->middleware('auth');
 
 route::post('/ajax/comparativos', [AjaxController::class, 'comparativos'])->name('ajax.comparativos')->middleware('auth');
+route::post('/ajax/getPilotosPorTemporada', [AjaxController::class, 'getPilotosPorTemporada'])->name('ajax.getPilotosPorTemporada')->middleware('auth');
 route::get('/estudos', [AjaxController::class, 'estudos'])->name('estudos')->middleware('auth');
 
 /**Rotas Excel */
