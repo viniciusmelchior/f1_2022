@@ -159,7 +159,7 @@ class AjaxController extends Controller
 
          //loop que faz os comparativos
          foreach($dadosPiloto1 as $key1 => $piloto1){
-            if(isset($dadosPiloto2[$key1]) && $piloto1->corrida_id == $dadosPiloto2[$key1]->corrida_id){
+            // if(isset($dadosPiloto2[$key1]) && $piloto1->corrida_id == $dadosPiloto2[$key1]->corrida_id){
                  $piloto1->largada < $dadosPiloto2[$key1]->largada ?  $piloto1Largada++ : $piloto2Largada++;
                  $piloto1->chegada < $dadosPiloto2[$key1]->chegada ?  $piloto1Chegada++ : $piloto2Chegada++;
                  $piloto1->chegada <= 3 ? $piloto1TotPodios++ : "";
@@ -171,7 +171,7 @@ class AjaxController extends Controller
                  $piloto1->chegada > $piloto1PiorChegada ? $piloto1PiorChegada = $piloto1->chegada : "";
                  $piloto1->largada > $piloto1PiorLargada ? $piloto1PiorLargada = $piloto1->largada : "";
                  $piloto1->largada < $piloto1MelhorLargada ? $piloto1MelhorLargada = $piloto1->largada : "";
-            }   
+            // }   
          }
  
          //loop do segundo piloto para dados especificos dele. Os do primeiro piloto ja são tratados como os dados base do loop comparativo
