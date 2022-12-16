@@ -231,8 +231,10 @@ class PilotoController extends Controller
         //dd($equipes);
 
         //Calculo final da média de largada e chegada
-        $mediaChegada = round($mediaChegada/$totCorridas);
-        $gridMedio = round($gridMedio/$totCorridas);
+        if($totCorridas > 0){
+            $gridMedio = round($gridMedio/$totCorridas);
+            $mediaChegada = round($mediaChegada/$totCorridas);
+        }
        
         return view('site.pilotos.show', compact('modelPiloto','totTitulos','totAbandonos', 'totCorridas', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas', 'equipes','mediaChegada','gridMedio'));
     }
