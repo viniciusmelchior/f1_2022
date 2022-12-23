@@ -233,6 +233,17 @@
             </table>
         </section>
 
+        <hr>
+
+        <section class="" style="height: 400px;">
+            <h1 class="mb-3" style="text-transform:uppercase;">Histórico de Pontuação</h1>
+            <div style="width: 550px; height: 550px; margin: 0 auto;">
+                <canvas id="historicoPontuacao"></canvas>
+            </div>
+        </section>
+
+        <hr>
+
         {{--Tabela de Largada e chegada--}}
         <section class="resultados-por-corrida">
             <h1>Resultados por Corrida</h1>
@@ -300,7 +311,9 @@
     var labels= <?php echo json_encode($labels); ?>;
     var chegada = <?php echo json_encode($chegada); ?>;
     var largada = <?php echo json_encode($largada); ?>;
-    console.log(chegada);
+    
+    temporadasDisputadas = <?php echo json_encode($temporadasDisputadas); ?>;
+    pontuacaoPorTemporada = <?php echo json_encode($pontuacaoPorTemporada); ?>;
       
      const myChart = new Chart(ctx, {
       type: 'line',
@@ -348,6 +361,34 @@
           }
       }
   });
+
+  /*Gráfico de Histórico de Pontos dos pilotos*/
+    const historioPontuacao = document.getElementById('historicoPontuacao');
+
+    new Chart(historioPontuacao, {
+    type: 'bar',
+    data: {
+        labels: temporadasDisputadas,
+        datasets: [{
+        barThickness: 60,
+        label: 'Pontuação',
+        backgroundColor:
+        [
+            'rgba(194, 26, 26, 0.993)'
+        ],
+        data: pontuacaoPorTemporada,
+        borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+        y: {
+            beginAtZero: true,
+            min: 0,
+        }
+        }
+    }
+    });
 
   $('#show-other-stats').click(function (e) { 
     e.preventDefault();

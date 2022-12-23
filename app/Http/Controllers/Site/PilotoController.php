@@ -228,7 +228,27 @@ class PilotoController extends Controller
         
         //historico de equipes
         $equipes = PilotoEquipe::where('user_id', Auth::user()->id)->where('piloto_id', $id)->get();
-        //dd($equipes);
+        
+        //devolve os anos em que o piloto esteve inscrito para correr - Dinamicamente com base nos registros da tabela piloto_equipes
+        $temporadasDisputadas = [];
+        //calculo da pontuação por temporada disputada
+        $pontuacaoPorTemporada = [];
+        foreach($pilotoEquipe as $pilotoTemporada){
+            $retorno =  DB::select('select
+            sum(pontuacao) as totPontos
+            from resultados
+            join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
+            join equipes on equipes.id = piloto_equipes.equipe_id
+            join corridas on corridas.id = resultados.corrida_id
+            join pilotos on piloto_equipes.piloto_id = pilotos.id
+            join temporadas on temporadas.id = corridas.temporada_id
+            where temporadas.ano_id = '.$pilotoTemporada->ano_id.'
+            and resultados.user_id = '. Auth::user()->id.'
+            and piloto_id = '.$pilotoTemporada->piloto_id.'');
+           
+            array_push($pontuacaoPorTemporada, $retorno[0]->totPontos);
+            array_push($temporadasDisputadas, $pilotoTemporada->ano->ano);
+        }
 
         //Calculo final da média de largada e chegada
         if($totCorridas > 0){
@@ -236,7 +256,7 @@ class PilotoController extends Controller
             $mediaChegada = round($mediaChegada/$totCorridas);
         }
        
-        return view('site.pilotos.show', compact('modelPiloto','totTitulos','totAbandonos', 'totCorridas', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas', 'equipes','mediaChegada','gridMedio'));
+        return view('site.pilotos.show', compact('modelPiloto','totTitulos','totAbandonos', 'totCorridas', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas', 'equipes','mediaChegada','gridMedio','temporadasDisputadas','pontuacaoPorTemporada'));
     }
 
     /**
