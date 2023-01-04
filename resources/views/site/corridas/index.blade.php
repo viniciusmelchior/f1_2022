@@ -36,8 +36,7 @@
                         <td class="d-flex" style="justify-content: space-around;">
                             <a data-toggle="tooltip" data-placement="top" title="Visualizar resultados" href="{{route('resultados.show', [$corrida->id])}}"><i class="bi bi-eye-fill"></i></a>
                             <a data-toggle="tooltip" data-placement="top" title="Inserir Resultados" class="" href="{{route('resultados.edit', [$corrida->id])}}"><i class="bi bi-plus-circle-fill"></i></a>
-                            {{-- <a data-toggle="tooltip" data-placement="top" title="Deletar" class="deleteCorrida"><i class="bi bi-trash-fill"></i></a> --}}
-                            {{-- <a data-toggle="tooltip" data-placement="top" title="Deletar" class="" href="{{route('corridas.delete', [$corrida->id])}}"><i class="bi bi-trash-fill"></i></a> --}}
+                            <a data-toggle="tooltip" data-placement="top" title="Editar Corrida" class="" href="{{route('corridas.edit', [$corrida->temporada->id,$corrida->id])}}"><i class="bi bi-pencil-fill"></i></a>
                             <button type="button" class="deleteCorrida btn btn-link p-0" value="{{$corrida->id}}"><i class="bi bi-trash-fill"></i></button>
                         </td>
                     </tr>
@@ -49,6 +48,7 @@
         @endif
     </div>
     <a href="{{route('corridas.adicionar', [$temporada->id])}}" class="btn btn-primary">Adicionar Corridas</a>
+    <a href="{{route('temporadas.index')}}" class="btn btn-secondary ml-3">Voltar</a>
   </div>
 
  <!-- Modal exclsão de Corridas -->

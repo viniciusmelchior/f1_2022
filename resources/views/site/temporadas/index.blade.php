@@ -45,5 +45,6 @@
         @endif
     </div>
     <a href="{{route('temporadas.create')}}" class="btn btn-primary">Adicionar temporada</a>
+    <a href="{{route('dashboard')}}" class="btn btn-secondary ml-3">Voltar</a>
   </div>
 @endsection

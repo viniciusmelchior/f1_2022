@@ -118,7 +118,9 @@ route::put('/corridas/update/{id}', [CorridaController::class, 'update'])->name(
 route::get('/corridas/delete/', [CorridaController::class, 'destroy'])->name('corridas.delete')->middleware('auth');
 
 route::get('/corridas/adicionar/{id}', [CorridaController::class, 'adicionar'])->name('corridas.adicionar')->middleware('auth');
-route::post('/corridas/alterar/{id}', [CorridaController::class, 'alterar'])->name('corridas.alterar')->middleware('auth');
+route::get('/corridas/edit/{id}/{corrida}', [CorridaController::class, 'edit'])->name('corridas.edit')->middleware('auth');
+route::post('/corridas/store/{id}', [CorridaController::class, 'store'])->name('corridas.alterar')->middleware('auth');
+route::post('/corridas/update/{id}', [CorridaController::class, 'update'])->name('corridas.update')->middleware('auth');
 
 
 /**Corridas */

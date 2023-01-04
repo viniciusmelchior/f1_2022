@@ -25,15 +25,17 @@ class CorridaController extends Controller
     }
 
     public function adicionar($temporadaId){
-        //dd('adicionando corridas para temporada: '.$temporadaId);
+        
         $temporada = Temporada::where('user_id', Auth::user()->id)->where('id', $temporadaId)->first();
         $model = Pista::where('user_id', Auth::user()->id)->where('flg_ativo', 'S')->get();
         
         return view('site.corridas.form', compact('model', 'temporada'));
     }
 
-    public function alterar(Request $request, $temporadaId){
-        //dd($request->all());
+    /**
+     * função utilizada para criar as corridas
+     */
+    public function store(Request $request, $temporadaId){
 
         $corrida = new Corrida();
         $corrida->temporada_id = $request->temporada_id;
@@ -45,21 +47,7 @@ class CorridaController extends Controller
 
         $corrida->save();
 
-        /* foreach($request->input('pista_id') as $key => $pista){
-            $ordem = $request->input('ordem')[$key];
-            if($ordem != null){
-
-            $corrida = new Corrida();
-            $corrida->temporada_id = $request->temporada_id;
-            $corrida->pista_id = $pista;
-            $corrida->ordem = $ordem;
-            $corrida->user_id = Auth::user()->id;
-    
-            $corrida->save();
-            }
-        } */
-
-        return redirect()->back();
+        return redirect()->back()->with('status', 'GP '.$corrida->pista->nome.' criado com sucesso!');
     }
 
     /**
@@ -68,17 +56,6 @@ class CorridaController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
     {
         //
     }
@@ -100,9 +77,13 @@ class CorridaController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
-    {
-        //
+    public function edit($temporada_id, $corrida_id)
+    {   
+        $temporada = Temporada::where('user_id', Auth::user()->id)->where('id', $temporada_id)->first();
+        $model = Pista::where('user_id', Auth::user()->id)->where('flg_ativo', 'S')->get();
+        $modelCorrida = Corrida::where('id', $corrida_id)->first();
+        
+        return view('site.corridas.form', compact('model','modelCorrida', 'temporada'));
     }
 
     /**
@@ -113,8 +94,12 @@ class CorridaController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
-    {
-        //
+    {   
+        $corrida = Corrida::where('id', $request->corrida_id)->first();
+        $corrida->ordem = $request->ordem;
+        $corrida->update();
+
+        return redirect()->route('corridas.index',[$request->temporada_id])->with('status', 'O GP '.$corrida->pista->nome.' foi editado');
     }
 
     /**
@@ -138,6 +123,5 @@ class CorridaController extends Controller
         $corrida->delete();
 
         return redirect()->back()->with('status', 'O GP de '.$corrida->pista->nome.' foi excluído com sucesso');
-        // return redirect()->route('pilotos.index')->with('status', 'O piloto '.$piloto->nomeCompleto().' foi excluído com sucesso');
     }
 }
