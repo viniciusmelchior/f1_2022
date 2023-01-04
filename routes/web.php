@@ -112,7 +112,7 @@ route::get('/temporadas/delete/{id}', [TemporadaController::class, 'destroy'])->
 route::get('/corridas/create', [CorridaController::class, 'create'])->name('corridas.create')->middleware('auth');
 route::post('/corridas/store', [CorridaController::class, 'store'])->name('corridas.store')->middleware('auth');
 route::get('/corridas/index/{id}', [CorridaController::class, 'index'])->name('corridas.index')->middleware('auth');
-route::get('/corridas/edit/{id}', [CorridaController::class, 'edit'])->name('corridas.edit')->middleware('auth');
+// route::get('/corridas/edit/{id}', [CorridaController::class, 'edit'])->name('corridas.edit')->middleware('auth');
 route::put('/corridas/update/{id}', [CorridaController::class, 'update'])->name('corridas.update')->middleware('auth');
 // route::get('/corridas/delete/{id}', [CorridaController::class, 'destroy'])->name('corridas.delete')->middleware('auth');
 route::get('/corridas/delete/', [CorridaController::class, 'destroy'])->name('corridas.delete')->middleware('auth');
