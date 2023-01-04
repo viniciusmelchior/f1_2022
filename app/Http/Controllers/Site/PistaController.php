@@ -63,8 +63,8 @@ class PistaController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show($id)
-    {
-        //
+    {   
+        return view('site.pistas.show', compact('id'));
     }
 
     /**
