@@ -26,7 +26,7 @@ use Symfony\Component\HttpKernel\DataCollector\AjaxDataCollector;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
+//teste comentario
 Route::get('/', function () {
     return view('landingPage.index');
 })->name('landingPage');
