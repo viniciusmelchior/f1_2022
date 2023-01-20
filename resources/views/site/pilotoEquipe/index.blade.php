@@ -17,7 +17,7 @@
         </div>
     </div>
     
-    @if(count($pilotoEquipes) > 0)
+    @if(count($pilotoEquipes)> 0)
     <table class="table tabelaPaginada" id="pilotoEquipesTable">
         <thead>
             <tr>
