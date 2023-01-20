@@ -143,6 +143,37 @@ footer{
     transition: 0.4s;
  }
 
- /*Países*/
+ /*Estilo das tabelas que contam com paginação*/
+.tabelaPaginada{
+    max-width: 50%;
+    border-radius: 5px;
+    padding: 1rem;
+}
+
+.tabelaPaginada td,th{
+    text-align: center;
+}
+
+ /*Paginação Tabelas - mudança de páginas*/
+ #pagination{
+    display: flex;
+    width: 50%;
+    padding: .5rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    justify-content: center;
+    
+}
+
+.page-number{
+    background-color: rgb(5, 5, 5);
+    padding: .4rem;
+    width: 5%;
+    margin-right: .5rem;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+}
+
 
 
