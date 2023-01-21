@@ -8,6 +8,74 @@
 
 @extends('layouts.main')
 
+<style>
+    /*HOME*/
+.tabelaEstatisticas{
+    border: 1px solid black;
+    border-radius: 25px;
+}
+
+.tabelaResultadosCorridas{
+    border: 1px solid black;
+    border-radius:25px;
+}
+
+.tabelaEstatisticas th{
+    font-weight: bold;
+}
+
+.tabelaEstatisticas th, td{
+    /* border: 1px solid black; */
+    border-collapse: collapse;
+    margin: auto;
+    padding: 10px;
+    text-align: center!important;
+    width: 190px;
+}
+
+.tabelaResultadosCorridas th, td{
+    /* border: 1px solid black; */
+    border-collapse: collapse;
+    margin: auto;
+    padding: 10px;
+    text-align: center!important;
+    width: 190px;
+}
+
+.tabelaEstatisticas tr:nth-child(even){
+    background-color: #dce6eb;
+}
+
+.tabelaEstatisticas tr:hover:nth-child(1n + 2) {
+    background-color: #a0200f;
+    color: #fff;
+}
+
+.tabelaResultadosCorridas tbody tr:nth-child(odd) {
+  background-color: #dce6eb;
+}
+
+.tabelaResultadosCorridas tbody tr:hover {
+  background-color: #a0200f;
+  color: #fff;
+}
+
+.header-tabelas{
+    padding: 15px;
+    background-color: rgba(194, 26, 26, 0.993);
+    text-align: center;
+    font-size: 25px;
+    font-weight: bolder;
+    color: white;
+}
+
+.descricao-tabela{
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 2rem;
+}
+</style>
+
 @section('section')
     <div class="container">
         <div class="header-tabelas m-3">Vitórias <span id="toggle_vitorias"><i class="bi bi-plus-circle"></i></span></div>
