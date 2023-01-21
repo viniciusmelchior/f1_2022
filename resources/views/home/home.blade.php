@@ -8,58 +8,13 @@
 
 @extends('layouts.main')
 
-<style>
-
-h1{
-text-align: center;
-}
-
-table, th, td {
-border: 1px solid black;
-}
-
-table {
-border-collapse: collapse;
-margin: auto;
-}
-
-th, td{
-padding: 10px;
-text-align: center!important;
-width: 190px;
-}
-
-th{
-font-weight: bold;
-}
-
-tr:nth-child(even) {
-background-color: #dce6eb;
-}
-
-tr:hover:nth-child(1n + 2) {
-background-color: #a0200f;
-color: #fff;
-}
-
-.header-tabelas{
-    padding: 15px;
-    background-color: rgba(194, 26, 26, 0.993);
-    text-align: center;
-    font-size: 25px;
-    font-weight: bolder;
-    color: white;
-}
-
-</style>
-
 @section('section')
     <div class="container">
         <div class="header-tabelas m-3">Vitórias <span id="toggle_vitorias"><i class="bi bi-plus-circle"></i></span></div>
         <div class="d-flex" id="div_vitorias">
             <div>
-               <h1>Pilotos</h1>
-               <table class="m-5">
+               <h1 class="descricao-tabela">Pilotos</h1>
+               <table class="m-5 tabelaEstatisticas">
                     <tr>
                         <th>#</th>
                         <th>Piloto</th>
@@ -88,8 +43,8 @@ color: #fff;
             </div>
 
             <div>
-                <h1>Equipes</h1>
-                <table class="m-5">
+                <h1 class="descricao-tabela">Equipes</h1>
+                <table class="m-5 tabelaEstatisticas">
                      <tr>
                          <th>#</th>
                          <th>Equipe</th>
@@ -124,8 +79,8 @@ color: #fff;
 
         <div class="d-flex" id="div_poles">
             <div>
-               <h1>Pilotos</h1>
-               <table class="m-5">
+               <h1 class="descricao-tabela">Pilotos</h1>
+               <table class="m-5 tabelaEstatisticas">
                     <tr>
                         <th>#</th>
                         <th>Piloto</th>
@@ -154,8 +109,8 @@ color: #fff;
             </div>
 
             <div>
-                <h1>Equipes</h1>
-                <table class="m-5">
+                <h1 class="descricao-tabela">Equipes</h1>
+                <table class="m-5 tabelaEstatisticas">
                      <tr>
                          <th>#</th>
                          <th>Piloto</th>
@@ -190,8 +145,8 @@ color: #fff;
 
         <div class="d-flex d-none" id="div_podios">
             <div>
-                <h1>Pilotos</h1>
-                <table class="m-5">
+                <h1 class="descricao-tabela">Pilotos</h1>
+                <table class="m-5 tabelaEstatisticas">
                     <tr>
                         <th>#</th>
                         <th>Equipe</th>
@@ -219,8 +174,8 @@ color: #fff;
                 </table>
             </div>
             <div>
-                <h1>Equipes</h1>
-                <table class="m-5">
+                <h1 class="descricao-tabela">Equipes</h1>
+                <table class="m-5 tabelaEstatisticas">
                     <tr>
                         <th>#</th>
                         <th>Equipe</th>
@@ -255,8 +210,8 @@ color: #fff;
 
         <div class="d-flex d-none" id="div_abandonos">
             <div>
-                <h1>Pilotos</h1>
-                <table class="m-5">
+                <h1 class="descricao-tabela">Pilotos</h1>
+                <table class="m-5 tabelaEstatisticas">
                     <tr>
                         <th>#</th>
                         <th>Equipe</th>
@@ -284,8 +239,8 @@ color: #fff;
                 </table>
             </div>
             <div>
-                <h1>Equipes</h1>
-                <table class="m-5">
+                <h1 class="descricao-tabela">Equipes</h1>
+                <table class="m-5 tabelaEstatisticas">
                     <tr>
                         <th>#</th>
                         <th>Equipe</th>
@@ -320,8 +275,8 @@ color: #fff;
 
         <div class="d-flex d-none" id="div_chegadastop10">
             <div>
-                <h1>Pilotos</h1>
-                <table class="m-5">
+                <h1 class="descricao-tabela">Pilotos</h1>
+                <table class="m-5 tabelaEstatisticas">
                     <tr>
                         <th>#</th>
                         <th>Equipe</th>
@@ -349,8 +304,8 @@ color: #fff;
                 </table>
             </div>
             <div>
-                <h1>Equipes</h1>
-                <table class="m-5">
+                <h1 class="descricao-tabela">Equipes</h1>
+                <table class="m-5 tabelaEstatisticas">
                     <tr>
                         <th>#</th>
                         <th>Equipe</th>
@@ -386,8 +341,8 @@ color: #fff;
         <div class="d-flex" id="div_titulos">
            
             <div>
-                <h1>Pilotos</h1>
-                <table class="m-5">
+                <h1 class="descricao-tabela">Pilotos</h1>
+                <table class="m-5 tabelaEstatisticas">
                      <tr>
                          <th>#</th>
                          <th>Equipe</th>
@@ -413,8 +368,8 @@ color: #fff;
                 </table>
             </div> 
             <div>
-                <h1>Equipes</h1>
-                <table class="m-5">
+                <h1 class="descricao-tabela">Equipes</h1>
+                <table class="m-5 tabelaEstatisticas">
                      <tr>
                          <th>#</th>
                          <th>Piloto</th>
@@ -448,7 +403,7 @@ color: #fff;
             $temporadas = Temporada::where('user_id', Auth::user()->id)->get();
         @endphp
 
-    <h1 id="tituloClassificacao">Classificação Geral</h1>
+    <h1 id="tituloClassificacao" class="descricao-tabela">Classificação Geral</h1>
     <div class="">
         <select name="mudarTemporada" id="mudarTemporada" class="form-select mt-3" style="width: 30%; margin:0 auto;">
             <option value="" selected>Selecione uma Temporada</option>
@@ -460,7 +415,7 @@ color: #fff;
     
     <div class="d-flex">
         <div class="montaTabelaPilotos">
-            <table class="m-5" id="tabelaClassificacaoPilotos">
+            <table class="m-5 tabelaEstatisticas" id="tabelaClassificacaoPilotos">
                 <tr>
                     <th>Posição</th>
                     <th>Piloto</th>
@@ -473,7 +428,7 @@ color: #fff;
         </div>
        
         <div class="montaTabelaEquipes">
-            <table class="m-5" id="tabelaClassificacaoEquipes">
+            <table class="m-5 tabelaEstatisticas" id="tabelaClassificacaoEquipes">
                 <tr>
                     <th>Posição</th>
                     <th>Equipe</th>
@@ -500,10 +455,10 @@ color: #fff;
 
     <hr>
 
-    <h1 id="">Resultados</h1>
+    <h1 id="" class="descricao-tabela">Resultados</h1>
     <div class="montaTabelaEquipes">
         {{-- <table class="mb-5 mt-5" id="tabelaClassificacaoEquipes"> --}}
-        <table class="mt-5" id="tabelaResultadoCorridas">
+        <table class="mt-5 tabelaResultadosCorridas" id="tabelaResultadoCorridas">
             <thead>
                 <tr>
                     <th style="width: 5%;">#</th>
