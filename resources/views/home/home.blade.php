@@ -33,7 +33,6 @@ th{
 font-weight: bold;
 }
 
-
 tr:nth-child(even) {
 background-color: #dce6eb;
 }
@@ -489,27 +488,35 @@ color: #fff;
 
     {{--resultados--}}
     @php 
-        //dados das corridas
-    $resultadoCorridas = Corrida::where('user_id', Auth::user()->id)->orderBy('temporada_id')->orderBy('ordem')->get();
-    //$corrida = $resultadoCorridas->first();
-    //dd($corrida->condicao->descricao);
+    //dados das corridas
+    //$resultadoCorridas = Corrida::where('user_id', Auth::user()->id)->orderBy('temporada_id','DESC')->orderBy('ordem','DESC')->get();
+    $resultadoCorridas = Corrida::whereHas('resultado', function($query){
+       $query->where('user_id', Auth::user()->id)->orderBy('temporada_id','DESC')->orderBy('ordem','DESC');
+    })->get();
+
+    $resultadoCorridas = $resultadoCorridas->sortByDesc('ordem');
+    $resultadoCorridas = $resultadoCorridas->sortByDesc('temporada_id');
     @endphp
 
     <hr>
 
     <h1 id="">Resultados</h1>
     <div class="montaTabelaEquipes">
-        <table class="mb-5 mt-5" id="tabelaClassificacaoEquipes">
-            <tr>
-                <th style="width: 5%;">#</th>
-                <th style="width: 5%;">Temporada</th>
-                <th style="width: 15%;">Pista</th>
-                <th>Pole Position</th>
-                <th>Primeiro</th>
-                <th>Segundo</th>
-                <th>Terceiro</th>
-                <th>Volta Mais Rápida</th>
-            </tr>
+        {{-- <table class="mb-5 mt-5" id="tabelaClassificacaoEquipes"> --}}
+        <table class="mt-5" id="tabelaResultadoCorridas">
+            <thead>
+                <tr>
+                    <th style="width: 5%;">#</th>
+                    <th style="width: 5%;">Temporada</th>
+                    <th style="width: 15%;">Pista</th>
+                    <th>Pole Position</th>
+                    <th>Primeiro</th>
+                    <th>Segundo</th>
+                    <th>Terceiro</th>
+                    <th>Volta Mais Rápida</th>
+                </tr>
+            </thead>
+            <tbody>
             @foreach($resultadoCorridas as $key => $resultadoCorrida)
             @php 
 
@@ -590,11 +597,14 @@ color: #fff;
                     -
                     @endif --}}
                 </tr>
-            @endforeach
+                @endforeach
+            </tbody>
         </table>
     </div>
 
-
+    <div class="full-table-pagination-wrapper">
+        <div id="pagination"></div>
+    </div>
 
         
     </div>
@@ -703,5 +713,53 @@ color: #fff;
             e.preventDefault();
             $('#div_titulos').toggleClass('d-none');
         });
-   });
+   
+
+   var table = document.getElementById("tabelaResultadoCorridas");
+//    var rows = table.children[0].children;
+   var rows = table.tBodies[0].rows;
+//    console.log(rows)
+    var rowsPerPage = 10;
+    var currentPage = 0;
+    var pages = Math.ceil(rows.length / rowsPerPage);
+    var pagination = document.getElementById("pagination");
+    
+    
+    for (var i = 0; i < pages; i++) {
+    var page = Array.prototype.slice.call(rows, i * rowsPerPage, (i + 1) * rowsPerPage);
+    page.forEach(function(row) {
+        row.style.display = "none";
+    });
+    }
+
+    showPage();
+    
+    function showPage() {
+    for (var i = 0; i < pages; i++) {
+    var page = Array.prototype.slice.call(rows, i * rowsPerPage, (i + 1) * rowsPerPage);
+        if (i === currentPage) {
+        page.forEach(function(row) {
+            row.style.display = "table-row";
+        });
+        } else {
+        page.forEach(function(row) {
+            row.style.display = "none";
+        });
+        }
+    }
+    }
+    showPage();
+
+    for (var i = 0; i < pages; i++) {
+        var pageNumber = document.createElement("button");
+        pageNumber.innerHTML = i + 1;
+        pageNumber.classList.add("page-number");
+        pageNumber.addEventListener("click", function() {
+            currentPage = parseInt(this.innerHTML) - 1;
+            showPage();
+        });
+        pagination.appendChild(pageNumber);
+}
+
+});
 </script>

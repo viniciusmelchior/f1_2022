@@ -29,4 +29,8 @@ class Piloto extends Model
         return $this->hasMany(PilotoEquipe::class);
     }
 
+    public function equipeAtual(){
+        return 'Williams';
+    }
+
 }

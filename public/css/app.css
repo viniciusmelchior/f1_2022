@@ -157,12 +157,18 @@ footer{
  /*Paginação Tabelas - mudança de páginas*/
  #pagination{
     display: flex;
-    width: 50%;
+    width: 100%;
     padding: .5rem;
     margin-top: 1rem;
     margin-bottom: 1rem;
     justify-content: center;
-    
+}
+
+.left-table-pagination-wrapper #pagination{
+    width: 50%;
+}
+.full-table-pagination-wrapper #pagination{
+    width: 100%;
 }
 
 .page-number{

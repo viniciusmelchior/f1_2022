@@ -42,7 +42,7 @@ var table = document.getElementById("pilotoEquipesTable");
         pagination.appendChild(pageNumber);
 }
 
-    /**Caixa de Busca */
+    /**Caixa de Busca*/
 
     let caixaBusca = document.getElementById('caixaBusca');
     let tabelaPilotos = document.getElementById('pilotoEquipesTable');

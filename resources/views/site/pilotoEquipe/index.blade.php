@@ -48,7 +48,9 @@
     @else
         <p>Nenhum dado cadastrado</p>
     @endif
-    <div id="pagination"></div>
+    <div class="left-table-pagination-wrapper">
+        <div id="pagination"></div>
+    </div>
     <a href="{{route('pilotoEquipe.create')}}" class="btn btn-primary">Adicionar</a>
     <a href="{{route('dashboard')}}" class="btn btn-secondary ml-3">Voltar</a>
   </div>

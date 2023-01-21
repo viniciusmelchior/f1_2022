@@ -28,4 +28,8 @@ class Corrida extends Model
     public function condicao(){
         return $this->belongsTo(CondicaoClimatica::class);
     }
+    
+    public function resultado(){
+        return $this->hasOne(Resultado::class);
+    }
 }
