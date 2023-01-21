@@ -74,6 +74,7 @@ use App\Models\Site\PilotoEquipe;
                 <th style="width: 5%;">#</th>
                 <th style="width: 5%;">Temporada</th>
                 <th style="width: 15%;">Pista</th>
+                <th style="width: 1%;">IA</th>
                 <th>Pole Position</th>
                 <th>Primeiro</th>
                 <th>Segundo</th>
@@ -109,7 +110,10 @@ use App\Models\Site\PilotoEquipe;
                         @if($resultadoCorrida->qtd_safety_car > 0)
                             <i class="bi bi-car-front-fill mt-3"></i>
                         @endif
-                        </td>
+                    </td>
+                    <td>
+                        {{$resultadoCorrida->dificuldade_ia}}
+                    </td>
                     <td>
                         @if(isset($polePosition))
                         <span style="color:{{$polePosition->pilotoEquipe->equipe->des_cor}};">
