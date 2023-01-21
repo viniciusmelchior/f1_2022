@@ -214,7 +214,7 @@
     </div>
 
         @php 
-            $resultados = Resultado::where('user_id', Auth::user()->id)->get();
+            $resultados = Resultado::where('user_id', Auth::user()->id)->orderBy('id', 'DESC')->get();
         @endphp
 
         <section class="resultados-por-corrida">
