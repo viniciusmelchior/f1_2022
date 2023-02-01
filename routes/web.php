@@ -9,6 +9,7 @@ use App\Http\Controllers\Site\PilotoEquipeController;
 use App\Http\Controllers\Site\CondicaoClimaticaController;
 use App\Http\Controllers\Site\CorridaController;
 use App\Http\Controllers\Site\AnoController;
+use App\Http\Controllers\Site\HomeController;
 use App\Http\Controllers\Site\ResultadoController;
 use App\Http\Controllers\Site\TemporadaController;
 use App\Http\Controllers\Site\PDFController;
@@ -35,9 +36,11 @@ Route::get('/dashboard', function () {
     return view('site.dashboard.index');
 })->name('dashboard')->middleware('auth');
 
-Route::get('/home', function () {
-    return view('home.home');
-})->middleware('auth')->name('home');
+// Route::get('/home', function () {
+//     return view('home.home');
+// })->middleware('auth')->name('home');
+
+Route::get('/home', [HomeController::class, 'index'])->name('home');
 
 /**Rotas de Login e Logout */
 Route::get('/register', [UserController::class, 'create'])->name('user.register');
@@ -135,6 +138,9 @@ route::post('/ajax/classificacaoGeralPorTemporada', [AjaxController::class, 'cla
 route::post('/ajax/comparativos', [AjaxController::class, 'comparativos'])->name('ajax.comparativos')->middleware('auth');
 route::post('/ajax/getPilotosPorTemporada', [AjaxController::class, 'getPilotosPorTemporada'])->name('ajax.getPilotosPorTemporada')->middleware('auth');
 route::get('/estudos', [AjaxController::class, 'estudos'])->name('estudos')->middleware('auth');
+
+/**Montagem das tabelas de vitorias por pilotos e equipes (dinamicamente via ajax) */
+route::post('/ajax/ajaxGetVitoriasPilotoPorTemporada', [HomeController::class, 'ajaxGetVitoriasPilotoPorTemporada'])->name('ajax.ajaxGetVitoriasPilotoPorTemporada')->middleware('auth');
 
 /**Rotas Excel */
 Route::get('pilotos/export/{id}', [PilotoController::class, 'export'])->name('pilotos.export');
