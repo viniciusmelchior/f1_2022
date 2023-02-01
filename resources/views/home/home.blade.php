@@ -60,6 +60,11 @@
   color: #fff;
 }
 
+.current-page{
+    background: #fff;
+    color: black;
+}
+
 .header-tabelas{
     padding: 15px;
     background-color: rgba(194, 26, 26, 0.993);
@@ -517,6 +522,9 @@
        $query->where('user_id', Auth::user()->id)->orderBy('temporada_id','DESC')->orderBy('ordem','DESC');
     })->get();
 
+    // dd($resultadoCorridas);
+
+    $resultadoCorridas = $resultadoCorridas->where('flg_sprint', "<>", 'S');
     $resultadoCorridas = $resultadoCorridas->sortByDesc('ordem');
     $resultadoCorridas = $resultadoCorridas->sortByDesc('temporada_id');
     @endphp
@@ -524,6 +532,9 @@
     <hr>
 
     <h1 id="" class="descricao-tabela">Resultados</h1>
+   {{--  <div>
+        <input type="checkbox" id="hideRows"> Esconder Corridas Sprint
+    </div> --}}
     <div class="montaTabelaEquipes">
         {{-- <table class="mb-5 mt-5" id="tabelaClassificacaoEquipes"> --}}
         <table class="mt-5 tabelaResultadosCorridas" id="tabelaResultadoCorridas">
@@ -626,7 +637,7 @@
     </div>
 
     <div class="full-table-pagination-wrapper">
-        <div id="pagination"></div>
+        <div id="pagination" class="pagination"></div>
     </div>
 
         
@@ -737,11 +748,10 @@
             $('#div_titulos').toggleClass('d-none');
         });
    
+    // Paginação da tabela
 
    var table = document.getElementById("tabelaResultadoCorridas");
-//    var rows = table.children[0].children;
    var rows = table.tBodies[0].rows;
-//    console.log(rows)
     var rowsPerPage = 10;
     var currentPage = 0;
     var pages = Math.ceil(rows.length / rowsPerPage);
@@ -749,27 +759,27 @@
     
     
     for (var i = 0; i < pages; i++) {
-    var page = Array.prototype.slice.call(rows, i * rowsPerPage, (i + 1) * rowsPerPage);
-    page.forEach(function(row) {
-        row.style.display = "none";
-    });
+        var page = Array.prototype.slice.call(rows, i * rowsPerPage, (i + 1) * rowsPerPage);
+        page.forEach(function(row) {
+            row.style.display = "none";
+        });
     }
 
     showPage();
     
     function showPage() {
-    for (var i = 0; i < pages; i++) {
-    var page = Array.prototype.slice.call(rows, i * rowsPerPage, (i + 1) * rowsPerPage);
-        if (i === currentPage) {
-        page.forEach(function(row) {
-            row.style.display = "table-row";
-        });
-        } else {
-        page.forEach(function(row) {
-            row.style.display = "none";
-        });
+        for (var i = 0; i < pages; i++) {
+        var page = Array.prototype.slice.call(rows, i * rowsPerPage, (i + 1) * rowsPerPage);
+            if (i === currentPage) {
+                page.forEach(function(row) {
+                    row.style.display = "table-row";
+                });
+            } else {
+                page.forEach(function(row) {
+                    row.style.display = "none";
+                });
+            }
         }
-    }
     }
     showPage();
 
@@ -783,6 +793,12 @@
         });
         pagination.appendChild(pageNumber);
 }
+
+/* $(document).ready(function() {
+  $("#hideRows").click(function() {
+    $("#tabelaResultadoCorridas tr td:contains('Sprint')").parent().toggle();
+  });
+}); */
 
 });
 </script>
