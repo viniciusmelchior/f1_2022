@@ -86,7 +86,15 @@
         <div class="header-tabelas m-3">Vitórias <span id="toggle_vitorias"><i class="bi bi-plus-circle"></i></span></div>
         <div class="d-flex" id="div_vitorias">
             <div>
-               <h1 class="descricao-tabela">Pilotos</h1>
+                <div class="">
+                    <h1 class="descricao-tabela">Pilotos</h1>
+                    <select name="vitoriasPilotosPorTemporada" id="vitoriasPilotosPorTemporada" class="form-select mt-3" style="width: 50%; margin:0 auto;">
+                        <option value="" selected>Selecione uma Temporada</option>
+                        @foreach($temporadas as $temporada)
+                            <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
+                        @endforeach
+                    </select>
+                </div>
                <table class="m-5 tabelaEstatisticas">
                     <tr>
                         <th>#</th>
@@ -94,7 +102,7 @@
                         <th>Vitórias</th>
                     </tr>
                     @php 
-                        $vitoriasPiloto = Resultado::where('user_id', Auth::user()->id)->where('chegada', 1)->get();
+                       /*  $vitoriasPiloto = Resultado::where('user_id', Auth::user()->id)->where('chegada', 1)->get();
                         $vencedores = [];
                         foreach($vitoriasPiloto as $item){
                             if($item->corrida->flg_sprint == 'N'){
@@ -103,7 +111,7 @@
                         }
 
                         $totPorPiloto = array_count_values($vencedores);
-                        arsort($totPorPiloto);
+                        arsort($totPorPiloto); */
                     @endphp
                     @foreach($totPorPiloto as $key => $value)
                         <tr>
@@ -472,9 +480,9 @@
 
 
         <hr class="separador">
-        @php 
+       {{--  @php 
             $temporadas = Temporada::where('user_id', Auth::user()->id)->get();
-        @endphp
+        @endphp --}}
 
     <h1 id="tituloClassificacao" class="descricao-tabela">Classificação Geral</h1>
     <div class="">
@@ -648,6 +656,7 @@
 
 <script>
     urlclassificacaoGeralPorTemporada = "<?=route('ajax.classificacaoGeralPorTemporada')?>"
+    ajaxGetVitoriasPilotoPorTemporada = "<?=route('ajax.ajaxGetVitoriasPilotoPorTemporada')?>"
 </script>
 
 <script>
@@ -655,7 +664,6 @@
 
         $("#mudarTemporada").change(function (e) { 
         e.preventDefault();
-        //console.log($("#mudarTemporada").val());
 
         temporada_id = $("#mudarTemporada").val();
         tabelaClassificacaoPilotos = $('#tabelaClassificacaoPilotos');
@@ -799,6 +807,31 @@
     $("#tabelaResultadoCorridas tr td:contains('Sprint')").parent().toggle();
   });
 }); */
+
+/*montagem da tabela de vitórias dos pilotos por temporada*/
+$('#vitoriasPilotosPorTemporada').change(function (e) { 
+    e.preventDefault();
+    vitoriasPilotosTemporadaId = $('#vitoriasPilotosPorTemporada').val();
+    
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+
+    $.ajax({
+        type: "POST",
+        url: ajaxGetVitoriasPilotoPorTemporada,
+        data: {vitoriasPilotosTemporadaId: vitoriasPilotosTemporadaId},
+        contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+        success: function (response) {
+            console.log(response.totPorPiloto);
+        },
+        error:function(){
+            alert(error)
+        }
+    });
+});
 
 });
 </script>
