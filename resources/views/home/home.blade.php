@@ -89,13 +89,13 @@
                 <div class="">
                     <h1 class="descricao-tabela">Pilotos</h1>
                     <select name="vitoriasPilotosPorTemporada" id="vitoriasPilotosPorTemporada" class="form-select mt-3" style="width: 50%; margin:0 auto;">
-                        <option value="" selected>Selecione uma Temporada</option>
+                        <option value="" selected id="selectTemporadaVitoriasPiloto">Selecione uma Temporada</option>
                         @foreach($temporadas as $temporada)
                             <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
                         @endforeach
                     </select>
                 </div>
-               <table class="m-5 tabelaEstatisticas">
+               <table class="m-5 tabelaEstatisticas" id="tabelaVitoriasPilotos">
                     <tr>
                         <th>#</th>
                         <th>Piloto</th>
@@ -811,8 +811,18 @@
 /*montagem da tabela de vitórias dos pilotos por temporada*/
 $('#vitoriasPilotosPorTemporada').change(function (e) { 
     e.preventDefault();
+
     vitoriasPilotosTemporadaId = $('#vitoriasPilotosPorTemporada').val();
-    
+    tabelaVitoriasPilotos = $('#tabelaVitoriasPilotos');
+    tabelaVitoriasPilotos.html('');
+    tabelaVitoriasPilotos.append('<tr><th>#</th><th>Piloto</th><th>Vitórias</th></tr>')
+
+    selectTemporadaVitoriasPiloto = $('#selectTemporadaVitoriasPiloto').text('Selecione uma Temporada');
+
+    if(vitoriasPilotosTemporadaId != ''){
+        selectTemporadaVitoriasPiloto = $('#selectTemporadaVitoriasPiloto').text('Geral');
+    }
+
     $.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -825,7 +835,10 @@ $('#vitoriasPilotosPorTemporada').change(function (e) {
         data: {vitoriasPilotosTemporadaId: vitoriasPilotosTemporadaId},
         contentType: "application/x-www-form-urlencoded;charset=UTF-8",
         success: function (response) {
-            console.log(response.totPorPiloto);
+            for (const key in response.totPorPiloto) {
+                // console.log(`${key}: ${response.totPorPiloto[key]}`);
+                tabelaVitoriasPilotos.append("<tr><td>#</td><td>"+key+"</td><td>"+response.totPorPiloto[key]+"</td></tr>");
+            }
         },
         error:function(){
             alert(error)

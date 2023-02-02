@@ -35,12 +35,20 @@ class HomeController extends Controller
     public function ajaxGetVitoriasPilotoPorTemporada(Request $request){
 
         $temporada_id = $request->post('vitoriasPilotosTemporadaId');
+        $operadorConsulta = '=';
+        $condicao = $temporada_id;
+        
+        if($temporada_id == null){
+            $operadorConsulta = '>';
+            $condicao = 0; 
+        }
 
+        //Consulta Dinâmica utiliza os operadores e condicoes dependendo do fato de ter ou nao temporada
         $vitoriasPiloto = Resultado::where('resultados.user_id', Auth::user()->id)->where('chegada', 1)
-                                    ->join('corridas', function($join) use ($temporada_id){
-                                        $join->on('corridas.id', '=', 'resultados.corrida_id')
-                                            ->where('corridas.temporada_id', $temporada_id);
-                                    })->get();
+        ->join('corridas', function($join) use ($temporada_id, $operadorConsulta, $condicao){
+            $join->on('corridas.id', '=', 'resultados.corrida_id')
+                ->where('corridas.temporada_id',$operadorConsulta,$condicao);
+        })->get();
 
         $vencedores = [];
         foreach($vitoriasPiloto as $item){
@@ -51,8 +59,6 @@ class HomeController extends Controller
 
         $totPorPiloto = array_count_values($vencedores);
         arsort($totPorPiloto);
-
-        //dd($totPorPiloto);
 
         return response()->json([
             'message' => 'ajaxGetVitoriasPilotoPorTemporada',
