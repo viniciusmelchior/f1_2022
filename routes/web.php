@@ -40,7 +40,7 @@ Route::get('/dashboard', function () {
 //     return view('home.home');
 // })->middleware('auth')->name('home');
 
-Route::get('/home', [HomeController::class, 'index'])->name('home');
+Route::get('/home', [HomeController::class, 'index'])->name('home')->middleware('auth');
 
 /**Rotas de Login e Logout */
 Route::get('/register', [UserController::class, 'create'])->name('user.register');
