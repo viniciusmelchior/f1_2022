@@ -112,8 +112,9 @@
 
                         $totPorPiloto = array_count_values($vencedores);
                         arsort($totPorPiloto); */
+                        //dd($totPorPiloto);
                     @endphp
-                    @foreach($totPorPiloto as $key => $value)
+                    @foreach($totVitoriasPorPiloto as $key => $value)
                         <tr>
                             <td>#</td>
                             <td>{{$key}}</td>
@@ -125,25 +126,31 @@
 
             <div>
                 <h1 class="descricao-tabela">Equipes</h1>
-                <table class="m-5 tabelaEstatisticas">
+                <select name="vitoriasEquipesPorTemporada" id="vitoriasEquipesPorTemporada" class="form-select mt-3" style="width: 50%; margin:0 auto;">
+                    <option value="" selected id="selectTemporadaVitoriasEquipes">Selecione uma Temporada</option>
+                    @foreach($temporadas as $temporada)
+                        <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
+                    @endforeach
+                </select>
+                <table class="m-5 tabelaEstatisticas" id="tabelaVitoriasEquipes">
                      <tr>
                          <th>#</th>
                          <th>Equipe</th>
                          <th>Vitórias</th>
                      </tr>
                      @php
-                        $vitoriaEquipes = Resultado::where('user_id', Auth::user()->id)->where('chegada', 1)->get();
-                        $vencedores = [];
-                        foreach($vitoriaEquipes as $item){
-                            if($item->corrida->flg_sprint == 'N'){
-                                array_push($vencedores, $item->pilotoEquipe->equipe->nome);
-                            }
-                        }
+                        // $vitoriaEquipes = Resultado::where('user_id', Auth::user()->id)->where('chegada', 1)->get();
+                        // $vencedores = [];
+                        // foreach($vitoriaEquipes as $item){
+                        //     if($item->corrida->flg_sprint == 'N'){
+                        //         array_push($vencedores, $item->pilotoEquipe->equipe->nome);
+                        //     }
+                        // }
 
-                        $totPorEquipe = array_count_values($vencedores);
-                        arsort($totPorEquipe);
+                        // $totPorEquipe = array_count_values($vencedores);
+                        // arsort($totPorEquipe);
                     @endphp
-                     @foreach($totPorEquipe as $key => $value)
+                     @foreach($totVitoriasPorEquipe as $key => $value)
                         <tr>
                             <td>#</td>
                             <td>{{$key}}</td>
@@ -657,6 +664,7 @@
 <script>
     urlclassificacaoGeralPorTemporada = "<?=route('ajax.classificacaoGeralPorTemporada')?>"
     ajaxGetVitoriasPilotoPorTemporada = "<?=route('ajax.ajaxGetVitoriasPilotoPorTemporada')?>"
+    ajaxGetVitoriasEquipesPorTemporada = "<?=route('ajax.ajaxGetVitoriasEquipesPorTemporada')?>"
 </script>
 
 <script>
@@ -846,5 +854,44 @@ $('#vitoriasPilotosPorTemporada').change(function (e) {
     });
 });
 
+/*montagem da tabela de vitórias dos pilotos por temporada*/
+$('#vitoriasEquipesPorTemporada').change(function (e) { 
+    e.preventDefault();
+
+    vitoriasEquipesTemporadaId = $('#vitoriasEquipesPorTemporada').val();
+    tabelaVitoriasEquipes = $('#tabelaVitoriasEquipes');
+    tabelaVitoriasEquipes.html('');
+    tabelaVitoriasEquipes.append('<tr><th>#</th><th>Equipe</th><th>Vitórias</th></tr>')
+
+    selectTemporadaVitoriasEquipes = $('#selectTemporadaVitoriasEquipes').text('Selecione uma Temporada');
+
+    if(vitoriasEquipesTemporadaId != ''){
+        selectTemporadaVitoriasEquipes = $('#selectTemporadaVitoriasEquipes').text('Geral');
+    }
+
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+
+    $.ajax({
+        type: "POST",
+        url: ajaxGetVitoriasEquipesPorTemporada,
+        data: {vitoriasEquipesTemporadaId: vitoriasEquipesTemporadaId},
+        contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+        success: function (response) {
+            for (const key in response.totVitoriasPorEquipe) {
+                // console.log(`${key}: ${response.totPorPiloto[key]}`);
+                tabelaVitoriasEquipes.append("<tr><td>#</td><td>"+key+"</td><td>"+response.totVitoriasPorEquipe[key]+"</td></tr>");
+            }
+        },
+        error:function(){
+            alert(error)
+        }
+    });
+});
+
+//final do arquivo javascript
 });
 </script>
