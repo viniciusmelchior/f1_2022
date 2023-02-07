@@ -142,6 +142,8 @@ route::get('/estudos', [AjaxController::class, 'estudos'])->name('estudos')->mid
 /**Montagem das tabelas de vitorias por pilotos e equipes (dinamicamente via ajax) */
 route::post('/ajax/ajaxGetVitoriasPilotoPorTemporada', [HomeController::class, 'ajaxGetVitoriasPilotoPorTemporada'])->name('ajax.ajaxGetVitoriasPilotoPorTemporada')->middleware('auth');
 
+route::post('/ajax/ajaxGetVitoriasEquipePorTemporada', [HomeController::class, 'ajaxGetVitoriasEquipesPorTemporada'])->name('ajax.ajaxGetVitoriasEquipesPorTemporada')->middleware('auth');
+
 /**Rotas Excel */
 Route::get('pilotos/export/{id}', [PilotoController::class, 'export'])->name('pilotos.export');
 
