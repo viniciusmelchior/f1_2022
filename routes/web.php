@@ -144,6 +144,8 @@ route::post('/ajax/ajaxGetVitoriasPilotoPorTemporada', [HomeController::class, '
 
 route::post('/ajax/ajaxGetVitoriasEquipePorTemporada', [HomeController::class, 'ajaxGetVitoriasEquipesPorTemporada'])->name('ajax.ajaxGetVitoriasEquipesPorTemporada')->middleware('auth');
 
+route::post('/ajax/ajaxGetPolesPilotosPorTemporada', [HomeController::class, 'ajaxGetPolesPilotosPorTemporada'])->name('ajax.ajaxGetPolesPilotosPorTemporada')->middleware('auth');
+
 /**Rotas Excel */
 Route::get('pilotos/export/{id}', [PilotoController::class, 'export'])->name('pilotos.export');
 

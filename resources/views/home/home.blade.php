@@ -168,25 +168,32 @@
         <div class="d-flex" id="div_poles">
             <div>
                <h1 class="descricao-tabela">Pilotos</h1>
-               <table class="m-5 tabelaEstatisticas">
+
+               <select name="PolesPilotosPorTemporada" id="PolesPilotosPorTemporada" class="form-select mt-3" style="width: 50%; margin:0 auto;">
+                    <option value="" selected id="selectTemporadaPolesPilotos">Selecione uma Temporada</option>
+                @foreach($temporadas as $temporada)
+                    <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
+                @endforeach
+             </select>
+               <table class="m-5 tabelaEstatisticas" id="tabelaPolesPilotos">
                     <tr>
                         <th>#</th>
                         <th>Piloto</th>
                         <th>Poles</th>
                     </tr>
                     @php 
-                        $polePilotos = Resultado::where('user_id', Auth::user()->id)->where('largada', 1)->get();
-                        $poles = [];
-                        foreach($polePilotos as $item){
-                            if($item->corrida->flg_sprint == 'N'){
-                                array_push($poles, $item->pilotoEquipe->piloto->nomeCompleto());
-                            }
-                        }
+                        // $polePilotos = Resultado::where('user_id', Auth::user()->id)->where('largada', 1)->get();
+                        // $poles = [];
+                        // foreach($polePilotos as $item){
+                        //     if($item->corrida->flg_sprint == 'N'){
+                        //         array_push($poles, $item->pilotoEquipe->piloto->nomeCompleto());
+                        //     }
+                        // }
 
-                        $totPorPiloto = array_count_values($poles);
-                        arsort($totPorPiloto);
+                        // $totPorPiloto = array_count_values($poles);
+                        // arsort($totPorPiloto);
                     @endphp
-                    @foreach($totPorPiloto as $key => $value)
+                    @foreach($totPolesPorPiloto as $key => $value)
                         <tr>
                             <td>#</td>
                             <td>{{$key}}</td>
@@ -665,6 +672,7 @@
     urlclassificacaoGeralPorTemporada = "<?=route('ajax.classificacaoGeralPorTemporada')?>"
     ajaxGetVitoriasPilotoPorTemporada = "<?=route('ajax.ajaxGetVitoriasPilotoPorTemporada')?>"
     ajaxGetVitoriasEquipesPorTemporada = "<?=route('ajax.ajaxGetVitoriasEquipesPorTemporada')?>"
+    ajaxGetPolesPilotosPorTemporada = "<?=route('ajax.ajaxGetPolesPilotosPorTemporada')?>"
 </script>
 
 <script>
@@ -884,6 +892,45 @@ $('#vitoriasEquipesPorTemporada').change(function (e) {
             for (const key in response.totVitoriasPorEquipe) {
                 // console.log(`${key}: ${response.totPorPiloto[key]}`);
                 tabelaVitoriasEquipes.append("<tr><td>#</td><td>"+key+"</td><td>"+response.totVitoriasPorEquipe[key]+"</td></tr>");
+            }
+        },
+        error:function(){
+            alert(error)
+        }
+    });
+});
+
+//montagem da tabela de pole position dos pilotos por temporada
+$('#PolesPilotosPorTemporada').change(function (e) { 
+    e.preventDefault();
+
+    polesPilotosTemporadaId = $('#PolesPilotosPorTemporada').val();
+    console.log(polesPilotosTemporadaId)
+    tabelaPolesPilotos = $('#tabelaPolesPilotos');
+    tabelaPolesPilotos.html('');
+    tabelaPolesPilotos.append('<tr><th>#</th><th>Piloto</th><th>Poles</th></tr>')
+
+    selectTemporadaPolesPiloto = $('#selectTemporadaPolesPilotos').text('Selecione uma Temporada');
+
+    if(polesPilotosTemporadaId != ''){
+        selectTemporadaPolesPiloto = $('#selectTemporadaPolesPilotos').text('Geral');
+    }
+
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+
+    $.ajax({
+        type: "POST",
+        url: ajaxGetPolesPilotosPorTemporada,
+        data: {polesPilotosTemporadaId: polesPilotosTemporadaId},
+        contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+        success: function (response) {
+            for (const key in response.totPolesPorPiloto) {
+                // console.log(`${key}: ${response.totPorPiloto[key]}`);
+                tabelaPolesPilotos.append("<tr><td>#</td><td>"+key+"</td><td>"+response.totPolesPorPiloto[key]+"</td></tr>");
             }
         },
         error:function(){

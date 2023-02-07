@@ -43,7 +43,19 @@ class HomeController extends Controller
         $totVitoriasPorEquipe = array_count_values($vencedores);
         arsort($totVitoriasPorEquipe);
 
-        return view('home.home', compact('totVitoriasPorPiloto','totVitoriasPorEquipe', 'temporadas'));
+        /**Pole Position dos Pilotos */
+        $polePilotos = Resultado::where('user_id', Auth::user()->id)->where('largada', 1)->get();
+                        $poles = [];
+                        foreach($polePilotos as $item){
+                            if($item->corrida->flg_sprint == 'N'){
+                                array_push($poles, $item->pilotoEquipe->piloto->nomeCompleto());
+                            }
+                        }
+
+                        $totPolesPorPiloto = array_count_values($poles);
+                        arsort($totPolesPorPiloto);
+
+        return view('home.home', compact('totVitoriasPorPiloto','totVitoriasPorEquipe','totPolesPorPiloto', 'temporadas'));
     }
 
     public function ajaxGetVitoriasPilotoPorTemporada(Request $request){
@@ -112,5 +124,38 @@ class HomeController extends Controller
              'totVitoriasPorEquipe' => $totVitoriasPorEquipe
          ]);
 
+    }
+
+    public function ajaxGetPolesPilotosPorTemporada(Request $request){
+        $temporada_id = $request->post('polesPilotosTemporadaId');
+        $operadorConsulta = '=';
+        $condicao = $temporada_id;
+        
+        if($temporada_id == null){
+            $operadorConsulta = '>';
+            $condicao = 0; 
+        }
+
+         //Consulta Dinâmica utiliza os operadores e condicoes dependendo do fato de ter ou nao temporada
+         $polesPiloto = Resultado::where('resultados.user_id', Auth::user()->id)->where('largada', 1)
+         ->join('corridas', function($join) use ($temporada_id, $operadorConsulta, $condicao){
+             $join->on('corridas.id', '=', 'resultados.corrida_id')
+                 ->where('corridas.temporada_id',$operadorConsulta,$condicao);
+         })->get();
+ 
+         $polePositions = [];
+         foreach($polesPiloto as $item){
+             if($item->corrida->flg_sprint == 'N'){
+                 array_push($polePositions, $item->pilotoEquipe->piloto->nomeCompleto());
+             }
+         }
+ 
+         $totPolesPorPiloto = array_count_values($polePositions);
+         arsort($totPolesPorPiloto);
+ 
+         return response()->json([
+             'message' => 'ajaxGetPolesPilotoPorTemporada',
+             'totPolesPorPiloto' => $totPolesPorPiloto
+         ]);
     }
 }
