@@ -12,6 +12,7 @@ use App\Models\Site\Resultado;
 use App\Models\Site\Titulo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class EquipeController extends Controller
 {
@@ -195,8 +196,32 @@ class EquipeController extends Controller
 
         $totVoltasRapidas = count($resultado); 
 
+         //devolve os anos em que o piloto esteve inscrito para correr - Dinamicamente com base nos registros da tabela piloto_equipes
+         $temporadasDisputadas = [];
+         //calculo da pontuação por temporada disputada
+         $pontuacaoPorTemporada = [];
+
+        //temporadas em que a equipes está inscrita 
+        $temporadasEquipe = PilotoEquipe::where('equipe_id', $id)->groupBy('ano_id')->get();
         
-        return view('site.equipes.show', compact('modelEquipe','totTitulos', 'totCorridas','totTitulosPilotos', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas'));
+        foreach($temporadasEquipe as $equipeTemporada){
+            $retorno =  DB::select('select
+            sum(pontuacao) as totPontos, temporadas.ano_id
+            from resultados
+            join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
+            join equipes on equipes.id = piloto_equipes.equipe_id
+            join corridas on corridas.id = resultados.corrida_id
+            join pilotos on piloto_equipes.piloto_id = pilotos.id
+            join temporadas on temporadas.id = corridas.temporada_id
+            where temporadas.ano_id = '.$equipeTemporada->ano_id.'
+            and resultados.user_id = '. Auth::user()->id.'
+            and equipe_id = '.$equipeTemporada->equipe_id.'');
+        
+            array_push($pontuacaoPorTemporada, $retorno[0]->totPontos);
+            array_push($temporadasDisputadas, $equipeTemporada->ano->ano);
+        }
+
+        return view('site.equipes.show', compact('modelEquipe','totTitulos', 'totCorridas','totTitulosPilotos', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas','temporadasDisputadas','pontuacaoPorTemporada'));
     }
 
     /**

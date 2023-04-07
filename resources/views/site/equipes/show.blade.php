@@ -124,6 +124,13 @@
             </tr>
         </table>
 
+        <section class="" style="height: 400px;">
+            <h1 class="mb-3" style="text-transform:uppercase;">Histórico de Pontuação</h1>
+            <div style="width: 550px; height: 550px; margin: 0 auto;">
+                <canvas id="historicoPontuacao"></canvas>
+            </div>
+        </section>
+
         {{--Graficos Final--}}
         <div class="mb-5">
             <div class="d-flex" style="justify-content: space-around;">
@@ -137,5 +144,38 @@
             </div>
         </div>
    </div>
+
+<script>
+    temporadasDisputadas = <?php echo json_encode($temporadasDisputadas); ?>;
+    pontuacaoPorTemporada = <?php echo json_encode($pontuacaoPorTemporada); ?>;
+
+    /*Gráfico de Histórico de Pontos dos pilotos*/
+    const historioPontuacao = document.getElementById('historicoPontuacao');
+
+    new Chart(historioPontuacao, {
+    type: 'bar',
+    data: {
+        labels: temporadasDisputadas,
+        datasets: [{
+        barThickness: 60,
+        label: 'Pontuação',
+        backgroundColor:
+        [
+            'rgba(194, 26, 26, 0.993)'
+        ],
+        data: pontuacaoPorTemporada,
+        borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+        y: {
+            beginAtZero: true,
+            min: 0,
+        }
+        }
+    }
+    });
+</script>
 @endsection
 
