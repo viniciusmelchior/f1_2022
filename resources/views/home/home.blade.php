@@ -493,10 +493,55 @@
 
 
 
-        <hr class="separador">
-       {{--  @php 
-            $temporadas = Temporada::where('user_id', Auth::user()->id)->get();
-        @endphp --}}
+    <hr class="separador">
+    {{--  @php 
+        $temporadas = Temporada::where('user_id', Auth::user()->id)->get();
+    @endphp --}}
+    
+    <div class="header-tabelas m-3">Classificaçao Histórica <span id="toggle_classificacao_historica"><i class="bi bi-plus-circle"></i></span></div>
+    
+    <div class="d-flex d-none" id="div_classificacao_historica">
+        <div class="d-flex">
+            <div class="montaTabelaPilotos">
+                <table class="m-5 tabelaEstatisticas" id="">
+                    <tr>
+                        <th>Posição</th>
+                        <th>Piloto</th>
+                        <th>Pontos</th>
+                    </tr>
+                    <tr>
+                        @foreach( $resultadosPilotosGeral as $key => $piloto )
+                        <tr>
+                            <td>{{$key+1}}</td>
+                            <td>{{$piloto->nome}}</td>
+                            <td>{{$piloto->total}}</td>
+                        </tr>
+                        @endforeach
+                    </tr>
+                </table>
+            </div>
+        
+            <div class="montaTabelaEquipes">
+                <table class="m-5 tabelaEstatisticas" id="">
+                    <tr>
+                        <th>Posição</th>
+                        <th>Equipe</th>
+                        <th>Pontos</th>
+                    </tr>
+                    @foreach( $resultadosEquipesGeral as $key => $equipe ) 
+                        <tr>
+                            <td>{{$key+1}}</td>
+                            <td>{{$equipe->nome}}</td>
+                            <td>{{$equipe->total}}</td>
+                        </tr>
+                    @endforeach
+                </table>
+            </div>
+        </div> 
+    </div>                             
+
+
+    <hr class="separador">
 
     <h1 id="tituloClassificacao" class="descricao-tabela">Classificação Geral</h1>
     <div class="">
@@ -770,6 +815,11 @@
         $('#toggle_titulos').click(function (e) { 
             e.preventDefault();
             $('#div_titulos').toggleClass('d-none');
+        });
+
+        $('#toggle_classificacao_historica').click(function (e) { 
+            e.preventDefault();
+            $('#div_classificacao_historica').toggleClass('d-none');
         });
    
     // Paginação da tabela

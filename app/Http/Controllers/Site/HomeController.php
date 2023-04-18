@@ -7,6 +7,7 @@ use App\Models\Site\Resultado;
 use App\Models\Site\Temporada;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
@@ -55,7 +56,32 @@ class HomeController extends Controller
                         $totPolesPorPiloto = array_count_values($poles);
                         arsort($totPolesPorPiloto);
 
-        return view('home.home', compact('totVitoriasPorPiloto','totVitoriasPorEquipe','totPolesPorPiloto', 'temporadas'));
+        /**Retorna dados para montar a classificação geral histórica de pilotos e equipes */
+
+        $usuario = Auth::user()->id; 
+
+        $resultadosPilotosGeral = DB::select('select piloto_id, concat(pilotos.nome, " ", pilotos.sobrenome) as nome, equipes.nome as equipe, sum(pontuacao) as total from resultados
+                                            join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
+                                            join pilotos on pilotos.id = piloto_equipes.piloto_id
+                                            join equipes on equipes.id = piloto_equipes.equipe_id
+                                            join corridas on corridas.id = resultados.corrida_id
+                                            join temporadas on temporadas.id = corridas.temporada_id
+                                            where temporadas.id > 0
+                                            and resultados.user_id = '.$usuario.'
+                                            group by piloto_equipes.piloto_id
+                                            order by total desc');
+            
+        $resultadosEquipesGeral = DB::select('select equipe_id, equipes.nome as nome, sum(pontuacao) as total from resultados
+                            join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
+                            join equipes on equipes.id = piloto_equipes.equipe_id
+                            join corridas on corridas.id = resultados.corrida_id
+                            join temporadas on temporadas.id = corridas.temporada_id
+                            where temporadas.id > 0
+                            and resultados.user_id = '.$usuario.'
+                            group by piloto_equipes.equipe_id
+                            order by total desc');
+
+        return view('home.home', compact('totVitoriasPorPiloto','totVitoriasPorEquipe','totPolesPorPiloto', 'temporadas','resultadosPilotosGeral','resultadosEquipesGeral'));
     }
 
     public function ajaxGetVitoriasPilotoPorTemporada(Request $request){
