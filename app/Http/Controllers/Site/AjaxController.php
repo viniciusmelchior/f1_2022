@@ -18,7 +18,7 @@ class AjaxController extends Controller
         $usuario = Auth::user()->id; 
         $temporada = Temporada::where('user_id', Auth::user()->id)->where('id', $request->temporada_id)->first();
 
-        $resultadosPilotos = DB::select('select piloto_id, concat(pilotos.nome, " ", pilotos.sobrenome) as nome, equipes.nome as equipe, sum(pontuacao) as total from resultados
+        $resultadosPilotos = DB::select('select piloto_id, concat(pilotos.nome, " ", pilotos.sobrenome) as nome, equipes.nome as equipe, equipes.imagem, sum(pontuacao) as total from resultados
                                             join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
                                             join pilotos on pilotos.id = piloto_equipes.piloto_id
                                             join equipes on equipes.id = piloto_equipes.equipe_id
@@ -46,6 +46,10 @@ class AjaxController extends Controller
             'resultadosPilotos' => $resultadosPilotos,
             'resultadosEquipes' => $resultadosEquipes,
         ]);
+    }
+
+    public function classificacaoHistorica(){
+        
     }
 
     /**
@@ -273,7 +277,7 @@ class AjaxController extends Controller
                             ->where('pilotos.id','=', 4);
                     })->get();
 
-        dd($dados->get(), $dados2);
+        // dd($dados->get(), $dados2);
 
        return view('estudos', compact('pilotoEquipe', 'paises'));
     }

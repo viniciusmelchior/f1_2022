@@ -13,7 +13,7 @@ class Equipe extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['nome', 'pais_id', 'user_id', 'flg_ativo', 'des_cor'];
+    protected $fillable = ['nome', 'pais_id', 'user_id', 'flg_ativo', 'des_cor','imagem'];
 
     /**relacionamentos */
     public function pais(){

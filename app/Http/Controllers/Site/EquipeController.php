@@ -46,7 +46,7 @@ class EquipeController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {
+    {   
         $equipe = new Equipe();
         $equipe->nome = $request->nome;
         $equipe->des_cor = $request->des_cor;
@@ -57,6 +57,15 @@ class EquipeController extends Controller
         } else {
             $equipe->flg_ativo = 'N';
         }
+
+        if($request->imagem == ''){
+            $newImageName = '';
+        } else {
+           $newImageName = time().'-'.$request->nome.'.'.$request->imagem->extension();
+           $request->imagem->move(public_path('images'), $newImageName);
+        }
+
+        $equipe->imagem = $newImageName;
 
         $equipe->save();
 
@@ -255,6 +264,20 @@ class EquipeController extends Controller
             $equipe->flg_ativo = $request->flg_ativo;
         } else {
             $equipe->flg_ativo = 'N';
+        }
+
+        //se tiver foto criar span no form pra nao precisar alterar,  caso queira, apagar a antiga e colocar outra
+        if($request->imagem == ''){
+            $newImageName = '';
+        } else {
+            if(file_exists(public_path('images/'.$equipe->imagem))){
+                if($equipe->imagem != null){
+                    unlink(public_path('images/'.$equipe->imagem));
+                }
+            }
+           $newImageName = time().'-'.$request->nome.'.'.$request->imagem->extension();
+           $request->imagem->move(public_path('images'), $newImageName);
+           $equipe->imagem = $newImageName;
         }
 
         $equipe->update();

@@ -558,11 +558,12 @@
             <table class="m-5 tabelaEstatisticas" id="tabelaClassificacaoPilotos">
                 <tr>
                     <th>Posição</th>
+                    <th>Equipe</th>
                     <th>Piloto</th>
                     <th>Pontos</th>
                 </tr>
                 <tr>
-                    <td colspan="3">Selecione uma Temporada</td>
+                    <td colspan="4">Selecione uma Temporada</td>
                 </tr>
             </table>
         </div>
@@ -734,8 +735,8 @@
             tituloClassificacao = $('#tituloClassificacao').text('Classificação Geral');
             tabelaClassificacaoPilotos.html('')
             tabelaClassificacaoEquipes.html('')
-            tabelaClassificacaoPilotos.append('<tr><th>Posição</th><th>Piloto</th><th>Pontos</th></tr>')
-            tabelaClassificacaoPilotos.append("<tr><td colspan='3'>Selecione uma Temporada</td></tr>");
+            tabelaClassificacaoPilotos.append('<tr><th>Posição</th><th>Piloto</th>><th>Equipe</th><th>Pontos</th></tr>')
+            tabelaClassificacaoPilotos.append("<tr><td colspan='4'>Selecione uma Temporada</td></tr>");
             tabelaClassificacaoEquipes.append('<tr><th>Posição</th><th>Piloto</th><th>Pontos</th></tr>')
             tabelaClassificacaoEquipes.append("<tr><td colspan='3'>Selecione uma Temporada</td></tr>");
         }
@@ -757,11 +758,14 @@
                     tabelaClassificacaoEquipes.html('')
                     if(response.resultadosPilotos.length > 0){
                         contPilotos = 1;
-                        tabelaClassificacaoPilotos.append('<tr><th>Posição</th><th>Piloto</th><th>Pontos</th></tr>')
+                        tabelaClassificacaoPilotos.append('<tr><th style="width:5%;">Posição</th><th style="width:5%;">Equipe</th>><th <th style="width:25%;">Piloto</th><th <th style="width:15%;">Pontos</th></tr>')
                         response.resultadosPilotos.map(function(response){ 
-                        tabelaClassificacaoPilotos.append("<tr class='remover'><td>"+contPilotos+"</td><td>"+response.nome+"</td><td>"+response.total+"</td></tr>");
+                            var assetPath = "{{ asset('images/') }}" + "/"+response.imagem;
+                            tabelaClassificacaoPilotos.append("<tr class='remover'><td>" + contPilotos + "</td><td><img src='" + assetPath + "' style='width:25px; height:25px;'></td><td>" + response.nome + "</td><td>" + response.total + "</td></tr>");
+
                         contPilotos++
                         })
+                       
                     } else {
                         tabelaClassificacaoPilotos.append('<tr><th>Posição</th><th>Piloto</th><th>Pontos</th></tr>')
                         tabelaClassificacaoPilotos.append("<tr><td colspan='3'>Sem Dados Cadastrados</td></tr>");
