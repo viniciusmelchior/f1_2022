@@ -23,10 +23,11 @@
     }
 
     #driver-details{
-        background-color: #73b2959c;
+        /* background-color: #73b2959c; */
         width: 35%;
         padding: 2%;
         display: flex;
+        border: 1px solid white;
     }
 
     #driver-details h4{
@@ -55,7 +56,7 @@
     }
 
     #driver-stats{
-        background-color: #ebc83aaf;
+        /* background-color: #ebc83aaf; */
         width: 65%;
         padding: 2%;
         display: grid;
@@ -63,6 +64,7 @@
         grid-template-rows: repeat(2, 1fr);
         grid-column-gap: 0px;
         grid-row-gap: 0px;
+        /* text-align: center; */
     }
 
     #driver-stats div{
@@ -98,6 +100,15 @@
         text-transform: uppercase;
     }
 
+    .tabela-historico-equipes {
+        border-collapse: collapse;
+        width: 30%;
+    }
+
+    .tabela-historico-equipes td, th {
+        text-align: center;
+    }
+
     .tabela-resultados {
         border-collapse: collapse;
         width: 60%;
@@ -121,7 +132,7 @@
    <div class="container">
 
     <div id="driver-container">
-        <div id="driver-details">
+        <div id="driver-details" class="bg-dark text-light">
             <div>
                 <div>
                     <div>
@@ -145,7 +156,7 @@
                         <p>{{ $totCorridas }}</p>
                     </div>
                     <div>
-                        <button id="show-other-stats" class="btn btn-primary">Exibir Mais Estatisticas</button>
+                        <button id="show-other-stats" class="btn btn-light text-dark">Exibir Mais Estatisticas</button>
                     </div>
                 </div>
             </div>
@@ -153,7 +164,7 @@
                 <img src="{{asset('images/'.$modelPiloto->imagem)}}" alt="">
             </div>
         </div>
-        <div id="driver-stats">
+        <div id="driver-stats" class="bg-dark text-light">
            <div>
                 <h4>Campeonato de Pilotos</h4>
                 <p>{{ $totTitulos }}</p>
@@ -214,12 +225,12 @@
     </div>
 
         @php 
-            $resultados = Resultado::where('user_id', Auth::user()->id)->orderBy('id', 'DESC')->get();
+            
         @endphp
 
         <section class="resultados-por-corrida">
             <h1>Histórico de Equipes</h1>
-            <table class="mt-5 mb-5 tabela-resultados">
+            <table class="mt-5 mb-5 tabela-historico-equipes">
                 <tr>
                     <th>Temporada</th>
                     <th>Equipe</th>
@@ -227,7 +238,10 @@
                 @foreach($equipes as $equipe)
                     <tr>
                         <td>{{$equipe->ano->ano}}</td>
-                        <td>{{$equipe->equipe->nome}}</td>
+                        <td style="vertical-align: middle;">
+                            <img src="{{asset('images/'.$equipe->equipe->imagem)}}" style="width:25px; height:25px;">
+                            <span style="display: inline-block; vertical-align: middle;">{{$equipe->equipe->nome}}</span>
+                        </td>
                     </tr>
                 @endforeach
             </table>
@@ -255,7 +269,7 @@
                     <th>Chegada</th>
                     <th>Variação</th>
                 </tr>
-                @foreach($resultados as $resultado)
+                @foreach($resultadosPorCorrida as $resultado)
                     <tr @if($resultado->corrida->flg_sprint == 'S') style="font-style:italic; color:red;" @endif>
                         @if($resultado->pilotoEquipe->piloto->id == $modelPiloto->id)
                             <td> {{$resultado->corrida->temporada->ano->ano}} </td>
@@ -267,11 +281,14 @@
                     </tr>
                 @endforeach
             </table>
+            <div class="d-flex justify-content-center">
+                {{ $resultadosPorCorrida->links() }}
+            </div>
         </section>
        
-        <div>
+        {{-- <div>
             <canvas id="myChart"></canvas>
-        </div>
+        </div> --}}
 
         <div class="mb-5">
             <div class="d-flex" style="justify-content: space-around;">
@@ -289,80 +306,16 @@
 
     $chegada = [];
     $labels = [];
-    foreach($resultados as $resultado){
-        if($resultado->pilotoEquipe->piloto->id == $modelPiloto->id && $resultado->corrida->flg_sprint == 'N'){
-            array_push($chegada, $resultado->chegada);
-            array_push($labels, $resultado->corrida->pista->nome);
-        }
-    }
-
-    $largada = [];
-    foreach($resultados as $resultado){
-        if($resultado->pilotoEquipe->piloto->id == $modelPiloto->id && $resultado->corrida->flg_sprint == 'N'){
-            array_push($largada, $resultado->largada);
-        }
-    }
 
    @endphp
    
    <script>
     const ctx = document.getElementById('myChart');
 
-    var labels= <?php echo json_encode($labels); ?>;
-    var chegada = <?php echo json_encode($chegada); ?>;
-    var largada = <?php echo json_encode($largada); ?>;
-    
     temporadasDisputadas = <?php echo json_encode($temporadasDisputadas); ?>;
     pontuacaoPorTemporada = <?php echo json_encode($pontuacaoPorTemporada); ?>;
       
-     const myChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-          labels: labels,
-          datasets: [{
-              label: 'Chegada',
-              data: chegada,
-              backgroundColor: [
-                  'blue'
-              ],
-              borderColor: [
-                  'blue'
-              ],
-            borderWidth: 2,
-            fill: false,
-            tension: 0.1
-          },
-        {
-            label: 'Largada',
-              data: largada,
-              backgroundColor: [
-                  'red'
-              ],
-              borderColor: [
-                  'red'
-              ],
-            borderWidth: 2,
-            fill: false,
-            tension: 0.1 
-        }]
-      },
-      options: {
-        responsive: true,
-          scales: {
-              y: {
-                beginAtZero: true,
-                reverse: true,
-                min: 0,
-                max: 23,
-                ticks: {
-                    stepSize:1
-                }
-              }
-          }
-      }
-  });
-
-  /*Gráfico de Histórico de Pontos dos pilotos*/
+    /*Gráfico de Histórico de Pontos dos pilotos*/
     const historioPontuacao = document.getElementById('historicoPontuacao');
 
     new Chart(historioPontuacao, {

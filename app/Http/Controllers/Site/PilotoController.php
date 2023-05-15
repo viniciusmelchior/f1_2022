@@ -96,7 +96,7 @@ class PilotoController extends Controller
         $resultados = Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
                                     ->where('resultados.user_id', Auth::user()->id)
                                     ->where('corridas.flg_sprint', 'N')
-                                    ->get(); 
+                                    ->get();
 
         $totCorridas = 0;
         $totVitorias = 0;
@@ -255,8 +255,15 @@ class PilotoController extends Controller
             $gridMedio = round($gridMedio/$totCorridas);
             $mediaChegada = round($mediaChegada/$totCorridas);
         }
+
+        // $resultadosPorCorrida = Resultado::where('user_id', Auth::user()->id)->orderBy('id', 'DESC')->get();
+        $resultadosPorCorrida = Resultado::join('piloto_equipes', 'resultados.pilotoEquipe_id', '=', 'piloto_equipes.id')
+                                ->where('resultados.user_id', Auth::user()->id)
+                                ->where('piloto_equipes.piloto_id', $modelPiloto->id)
+                                ->orderBy('resultados.id', 'DESC')
+                                ->paginate(10);
        
-        return view('site.pilotos.show', compact('modelPiloto','totTitulos','totAbandonos', 'totCorridas', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas', 'equipes','mediaChegada','gridMedio','temporadasDisputadas','pontuacaoPorTemporada'));
+        return view('site.pilotos.show', compact('modelPiloto','totTitulos','totAbandonos', 'totCorridas', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas', 'equipes','mediaChegada','gridMedio','temporadasDisputadas','pontuacaoPorTemporada','resultadosPorCorrida'));
     }
 
     /**
