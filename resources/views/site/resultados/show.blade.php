@@ -149,11 +149,17 @@
                         @foreach($model as $key => $item)
                             <tr <?= $item->flg_abandono == 'S' ? "class='trAbandono'" : "" ?>>
                                 <td><?= $item->flg_abandono == 'S' ? "DNF" : $item->chegada ?></td>
-                                <td>{{$item->pilotoEquipe->piloto->nome}} <span class="driver-surname">{{$item->pilotoEquipe->piloto->sobrenome}}</span></td>
-                                {{-- <td>{{$item->pilotoEquipe->equipe->nome}}</td> --}}
-                                <td><img src="{{asset('images/'.$item->pilotoEquipe->equipe->imagem)}}" style="width:25px; height: 25px;"> <span class="text-upper team-name">
-                                    {{$item->pilotoEquipe->equipe->nome}}</td>
-                                </span>
+                                <td>
+                                    <img src="{{asset('images/'.$item->pilotoEquipe->piloto->pais->imagem)}}" alt="" style="width:35px; height: 25px;">
+                                    <span style="display: inline-block; vertical-align: middle;">{{$item->pilotoEquipe->piloto->nome}}</span>
+                                    <span class="driver-surname" style="display: inline-block; vertical-align: middle;">{{$item->pilotoEquipe->piloto->sobrenome}}</span>
+                                </td>
+                                <td style="vertical-align: middle;">
+                                    <img src="{{asset('images/'.$item->pilotoEquipe->equipe->imagem)}}" style="width:25px; height: 25px;">
+                                    <span class="text-upper team-name" style="display: inline-block; vertical-align: middle;">
+                                    {{$item->pilotoEquipe->equipe->nome}}
+                                    </span>
+                                </td>
                                 <td>{{$item->largada}}</td>
                                 <td>+{{$item->pontuacao}}</td>
                             </tr>

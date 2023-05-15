@@ -42,6 +42,16 @@ class PaisesController extends Controller
         $pais = new Pais();
         $pais->des_nome = $request->des_nome;
         $pais->user_id = Auth::user()->id;
+
+        if($request->imagem == ''){
+            $newImageName = '';
+        } else {
+           $newImageName = time().'-'.$request->nome.'.'.$request->imagem->extension();
+           $request->imagem->move(public_path('images'), $newImageName);
+        }
+
+        $pais->imagem = $newImageName;
+
         $pais->save();
 
         return redirect()->back();
@@ -80,6 +90,21 @@ class PaisesController extends Controller
     {
         $pais = Pais::where('id', $id)->where('user_id', Auth::user()->id)->first();
         $pais->des_nome = $request->des_nome;
+
+        //se tiver foto criar span no form pra nao precisar alterar,  caso queira, apagar a antiga e colocar outra
+        if($request->imagem == ''){
+            $newImageName = '';
+        } else {
+            if(file_exists(public_path('images/'.$pais->imagem))){
+                if($pais->imagem != null){
+                    unlink(public_path('images/'.$pais->imagem));
+                }
+            }
+           $newImageName = time().'-'.$request->nome.'.'.$request->imagem->extension();
+           $request->imagem->move(public_path('images'), $newImageName);
+           $pais->imagem = $newImageName;
+        }
+
         $pais->update();
 
         return redirect()->route('paises.index');

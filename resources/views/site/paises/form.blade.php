@@ -11,12 +11,21 @@
 
 @section('section')
    <div class="container">
-    <form method="POST" action="{{ $route }}" class="col-md-6 mt-3 mb-3">
+    <form method="POST" action="{{ $route }}" class="col-md-6 mt-3 mb-3" enctype="multipart/form-data">
         {{ $method }}
         @csrf
         <div class="mb-3">
             <label for="des_nome" class="form-label">Nome</label>
             <input type="text" class="form-control" id="des_nome" name="des_nome" value="@if(isset($model)) {{$model->des_nome}}  @endif">
+        </div>
+        <div class="mb-3">
+            <label for="imagem" class="form-label">Bandeira</label>
+            <input type="file" class="form-control" id="imagem" name="imagem">
+            @if(isset($model))
+                @if($model->imagem != '')
+                    <span style="color:red;">País ja tem uma bandeira registrada</span>
+                @endif
+            @endif
         </div>
         <button type="submit" class="btn btn-primary">Salvar</button>
         <a href="{{route('paises.index')}}" class="btn btn-secondary ml-3">Voltar</a>
