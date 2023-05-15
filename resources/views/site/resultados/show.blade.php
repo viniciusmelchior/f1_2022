@@ -98,7 +98,7 @@
 
 @section('section')
 <div class="container mt-3 mb-3">
-    <div class="bg-dark rounded p-2" style="height:610px;">
+    <div class="bg-dark rounded p-2" style="height:650px;">
         <div class="container">
             <div class="row align-items-start">
               <div class="col-md-3">
@@ -112,19 +112,20 @@
                         <div class="info-winner-team-logo">
                             <img src="{{asset('images/'.$vencedor->pilotoEquipe->equipe->imagem)}}">
                         </div>
-                        {{-- <div class="d-flex">
-                           <p><span class="first-position">1</span><span class="st-position">st</span></p>
-                        </div> --}}
                     </div>
                     <div class="mt-3 p-2 ia-difficulty">
                         <p>Dificuldade IA:  <span>{{$corrida->dificuldade_ia}}</span></p>
                      </div>
                     <div>
-                        <div class="mb-3 p-2 safety-car-qtd">
+                        <div class="mb p-2 safety-car-qtd">
                             <p>Quantidade de Safety Car:  <span>{{$corrida->qtd_safety_car}}</span></p>
                         </div>
                     </div>
-                    {{-- {{ $model->links('pagination::bootstrap-5') }} --}}
+                    <div>
+                        <div class="p-2 safety-car-qtd">
+                            <p>Clima: <i class="{{$corrida->condicao->des_icone}}"></i></p>
+                        </div>
+                    </div>
                     <div class="d-flex justify-content-center">
                         {{ $model->links() }}
                     </div>
@@ -132,11 +133,8 @@
               </div>
               <div class="col-md-9 bg-dark text-light">
                 <div class="race-title">
-                    <h2>{{$corrida->pista->nome}} Grand Prix {{$corrida->temporada->ano->ano}} <span> - Classificação Final</span></h2>
+                    <h2>{{$corrida->pista->nome}} {{$descEvento}} {{$corrida->temporada->ano->ano}} <span> - Classificação Final</span></h2>
                 </div>
-               {{--  <div>
-                    <h2>Classificação Final</h2>
-                </div> --}}
                 <table class="table text-light table-container">
                     <thead>
                         <tr>
@@ -144,15 +142,12 @@
                             <th class="text-start text-upper">Piloto</th>
                             <th class="text-start text-upper">Equipe</th>
                             <th class="text-start text-upper">Largada</th>
-                            {{-- <th>Chegada</th> --}}
                             <th class="text-start text-upper">Pontos</th>
                         </tr>
                     </thead>
                     <tbody class="text-left">
                         @foreach($model as $key => $item)
                             <tr <?= $item->flg_abandono == 'S' ? "class='trAbandono'" : "" ?>>
-                                {{-- <td>{{$key+1}}</td> --}}
-                                {{-- <td>{{$item->chegada}}</td> --}}
                                 <td><?= $item->flg_abandono == 'S' ? "DNF" : $item->chegada ?></td>
                                 <td>{{$item->pilotoEquipe->piloto->nome}} <span class="driver-surname">{{$item->pilotoEquipe->piloto->sobrenome}}</span></td>
                                 {{-- <td>{{$item->pilotoEquipe->equipe->nome}}</td> --}}
@@ -160,10 +155,20 @@
                                     {{$item->pilotoEquipe->equipe->nome}}</td>
                                 </span>
                                 <td>{{$item->largada}}</td>
-                               {{--  <td>{{$item->chegada}}</td> --}}
                                 <td>+{{$item->pontuacao}}</td>
                             </tr>
                         @endforeach
+                        @if($corrida->flg_sprint == 'N')
+                            <tr>
+                                <td colspan="5">
+                                    <span style="color:rgb(107, 34, 175); font-weight:bold; margin-right:1rem;">Volta Mais rápida</span>
+                                     <span>{{$voltaRapida->piloto->nome}}</span>
+                                     <span style="text-transform: uppercase; font-weight:bold;margin-right:1rem">{{$voltaRapida->piloto->sobrenome}}</span>
+                                     <span style="margin-right: 1rem;">{{$voltaRapida->equipe->nome}}</span>
+                                     <span>(+1 ponto)</span>
+                                    </td>
+                            </tr>
+                        @endif
                     </tbody>
                 </table>
               </div>

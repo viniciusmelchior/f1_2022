@@ -54,12 +54,19 @@ class ResultadoController extends Controller
     public function show($id)
     {
         $corrida = Corrida::where('id', $id)->first();
+        $voltaRapida = PilotoEquipe::find($corrida->volta_rapida);
+        $descEvento = 'Grand Prix';
+        if($corrida->flg_sprint == 'S'){
+            $descEvento = 'Sprint';
+        }
         $condicoesClimaticas = CondicaoClimatica::where('user_id', Auth::user()->id)->get();
         $model = Resultado::where('user_id', Auth::user()->id)->where('corrida_id', $corrida->id)->orderBy('chegada')->paginate(11);
         $vencedor = Resultado::where('user_id', Auth::user()->id)->where('corrida_id', $corrida->id)->where('chegada', 1)->orderBy('chegada')->first();
-        // dd($model);
+        if(count($model) == 0){
+            return redirect()->back()->with('error', 'Não existem resultados cadastrados para o evento selecionado');
+        }
 
-        return view('site.resultados.show', compact('corrida', 'model', 'condicoesClimaticas','vencedor'));
+        return view('site.resultados.show', compact('corrida', 'model', 'condicoesClimaticas','vencedor','descEvento','voltaRapida'));
     }
 
     /**
