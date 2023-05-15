@@ -1,58 +1,181 @@
 @extends('layouts.main')
 
 <style>
-    .TrvoltaRapida{
-        color: purple
+    .info-winner{
+        /* background-color: red; */
+        padding: 0.8rem;
+        line-height: 10px;
+        justify-content: space-between;
     }
 
-    .trAbandono{
-        color: red;
-        font-style: italic;
+    .info-winner{
+        color: #fff;
+        align-items: center;
     }
+
+    .info-winner-name{
+       font-size: 16px;
+    }
+
+    .info-winner-surname{
+        text-transform: uppercase;
+        font-size: 26px;
+    }
+
+    .info-winner-team-logo img{
+        width: 45px;
+        height: 45px;
+    }
+
+    .first-position{
+        text-transform: uppercase;
+        font-size: 36px;
+        text-align: center;
+        
+    }
+
+    .st-position{
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .ia-difficulty{
+        /* background-color: green; */
+        padding: 0.8rem;
+        line-height: 16px;
+        text-transform: uppercase;
+        color: #fff;
+        font-size: 14px;
+        margin-left: 8px;
+    }
+
+    .ia-difficulty span{
+        font-weight: bolder;
+        color: #fff;
+    }
+
+    .safety-car-qtd{
+        /* background-color: blue; */
+        padding: 0.8rem;
+        line-height: 16px;
+        text-transform: uppercase;
+        color: #fff;
+        font-size: 14px;
+        margin-left: 8px;
+    }
+
+    .safety-car-qtd span{
+        font-weight: bolder;
+        color: #fff;
+    }
+
+    /* formatacao da tabela  */
+    .table-container {
+        max-height: 600px;
+        overflow-y: scroll;
+    }
+
+    .race-title{
+        text-transform: uppercase;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+
+    .driver-surname{
+        text-transform: uppercase;
+        font-weight: bolder;
+    }
+
+    .text-upper{
+        text-transform: uppercase;
+    }
+
+    .team-name{
+        color: rgb(212, 212, 212);
+    }
+
 </style>
 
 @section('section')
-    <div class="container mt-3 mb-3">
-        <div>
-            <h2>GP de {{$corrida->pista->nome}} - {{$corrida->temporada->ano->ano}}</h2>
-        </div>
-        <div class="mb-3">
-           Dificuldade IA:  {{$corrida->dificuldade_ia}}
-        </div>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Piloto</th>
-                    <th>Equipe</th>
-                    <th>Largada</th>
-                    <th>Chegada</th>
-                    <th>Pontos</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($model as $key => $item)
-                    <tr <?= $item->flg_abandono == 'S' ? "class='trAbandono'" : "" ?>>
-                        <td>{{$key+1}}</td>
-                        <td>{{$item->pilotoEquipe->piloto->nome}} {{$item->pilotoEquipe->piloto->sobrenome}}</td>
-                        <td>{{$item->pilotoEquipe->equipe->nome}}</td>
-                        <td>{{$item->largada}}</td>
-                        <td>{{$item->chegada}}</td>
-                        <td>{{$item->pontuacao}}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-        <div class="mb-3">
-            Quantidade de Safety Car:  {{$corrida->qtd_safety_car}}
-        </div>
-        <div class="mb-3">
-            <label for="observacoes" class="form-label">Observações</label>
-            <textarea class="form-control" name="observacoes" id="observacoes" rows="5">
-                @if($corrida->observacoes)
-                    {{$corrida->observacoes}}
-                @endif
-            </textarea>
-        </div>
+<div class="container mt-3 mb-3">
+    <div class="bg-dark rounded p-2" style="height:610px;">
+        <div class="container">
+            <div class="row align-items-start">
+              <div class="col-md-3">
+                <div class="card bg-dark border-white">
+                    <img src="{{asset('images/'.$vencedor->pilotoEquipe->piloto->imagem)}}" alt="" srcset="">
+                    <div class="info-winner mt-2 d-flex">
+                        <div>
+                            <p class="info-winner-name">{{ $vencedor->pilotoEquipe->piloto->nome }}</p>
+                            <span class="info-winner-surname">{{ $vencedor->pilotoEquipe->piloto->sobrenome }}</span>
+                        </div>
+                        <div class="info-winner-team-logo">
+                            <img src="{{asset('images/'.$vencedor->pilotoEquipe->equipe->imagem)}}">
+                        </div>
+                        {{-- <div class="d-flex">
+                           <p><span class="first-position">1</span><span class="st-position">st</span></p>
+                        </div> --}}
+                    </div>
+                    <div class="mt-3 p-2 ia-difficulty">
+                        <p>Dificuldade IA:  <span>{{$corrida->dificuldade_ia}}</span></p>
+                     </div>
+                    <div>
+                        <div class="mb-3 p-2 safety-car-qtd">
+                            <p>Quantidade de Safety Car:  <span>{{$corrida->qtd_safety_car}}</span></p>
+                        </div>
+                    </div>
+                    {{-- {{ $model->links('pagination::bootstrap-5') }} --}}
+                    <div class="d-flex justify-content-center">
+                        {{ $model->links() }}
+                    </div>
+                </div>
+              </div>
+              <div class="col-md-9 bg-dark text-light">
+                <div class="race-title">
+                    <h2>{{$corrida->pista->nome}} Grand Prix {{$corrida->temporada->ano->ano}} <span> - Classificação Final</span></h2>
+                </div>
+               {{--  <div>
+                    <h2>Classificação Final</h2>
+                </div> --}}
+                <table class="table text-light table-container">
+                    <thead>
+                        <tr>
+                            <th class="text-start text-upper">#</th>
+                            <th class="text-start text-upper">Piloto</th>
+                            <th class="text-start text-upper">Equipe</th>
+                            <th class="text-start text-upper">Largada</th>
+                            {{-- <th>Chegada</th> --}}
+                            <th class="text-start text-upper">Pontos</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-left">
+                        @foreach($model as $key => $item)
+                            <tr <?= $item->flg_abandono == 'S' ? "class='trAbandono'" : "" ?>>
+                                {{-- <td>{{$key+1}}</td> --}}
+                                {{-- <td>{{$item->chegada}}</td> --}}
+                                <td><?= $item->flg_abandono == 'S' ? "DNF" : $item->chegada ?></td>
+                                <td>{{$item->pilotoEquipe->piloto->nome}} <span class="driver-surname">{{$item->pilotoEquipe->piloto->sobrenome}}</span></td>
+                                {{-- <td>{{$item->pilotoEquipe->equipe->nome}}</td> --}}
+                                <td><img src="{{asset('images/'.$item->pilotoEquipe->equipe->imagem)}}" style="width:25px; height: 25px;"> <span class="text-upper team-name">
+                                    {{$item->pilotoEquipe->equipe->nome}}</td>
+                                </span>
+                                <td>{{$item->largada}}</td>
+                               {{--  <td>{{$item->chegada}}</td> --}}
+                                <td>+{{$item->pontuacao}}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
     </div>
+    <div class="mb-3 mt-2">
+        <textarea readonly class="form-control bg-dark text-light text-left" name="observacoes" id="observacoes" rows="5">
+            @if($corrida->observacoes)
+                {{$corrida->observacoes}}
+            @endif
+        </textarea>
+    </div>
+</div>
 @endsection

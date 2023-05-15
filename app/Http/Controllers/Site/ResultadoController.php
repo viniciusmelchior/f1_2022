@@ -55,10 +55,11 @@ class ResultadoController extends Controller
     {
         $corrida = Corrida::where('id', $id)->first();
         $condicoesClimaticas = CondicaoClimatica::where('user_id', Auth::user()->id)->get();
-        $model = Resultado::where('user_id', Auth::user()->id)->where('corrida_id', $corrida->id)->orderBy('chegada')->get();
-        //dd($model);
+        $model = Resultado::where('user_id', Auth::user()->id)->where('corrida_id', $corrida->id)->orderBy('chegada')->paginate(11);
+        $vencedor = Resultado::where('user_id', Auth::user()->id)->where('corrida_id', $corrida->id)->where('chegada', 1)->orderBy('chegada')->first();
+        // dd($model);
 
-        return view('site.resultados.show', compact('corrida', 'model', 'condicoesClimaticas'));
+        return view('site.resultados.show', compact('corrida', 'model', 'condicoesClimaticas','vencedor'));
     }
 
     /**
