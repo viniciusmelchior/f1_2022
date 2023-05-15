@@ -188,5 +188,6 @@
             @endif
         </textarea>
     </div>
+    <a href="{{route('temporadas.index')}}" class="btn btn-dark ml-3">Voltar</a>
 </div>
 @endsection
