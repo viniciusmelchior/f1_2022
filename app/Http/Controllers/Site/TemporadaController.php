@@ -105,7 +105,7 @@ class TemporadaController extends Controller
     } 
 
     public function montaClassificacao($usuario, $temporada){
-                $resultadosPilotos = DB::select('select piloto_id,piloto_equipes.id as pilotoEquipe_id, concat(pilotos.nome, " ", pilotos.sobrenome) as nome, equipes.nome as equipe, sum(pontuacao) as total from resultados
+                $resultadosPilotos = DB::select('select piloto_id,piloto_equipes.id as pilotoEquipe_id, pilotos.nome, pilotos.sobrenome ,equipes.nome as equipe, equipes.imagem, sum(pontuacao) as total from resultados
                 join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
                 join pilotos on pilotos.id = piloto_equipes.piloto_id
                 join equipes on equipes.id = piloto_equipes.equipe_id
@@ -116,7 +116,7 @@ class TemporadaController extends Controller
                 group by piloto_equipes.piloto_id
                 order by total desc');
 
-                $resultadosEquipes = DB::select('select equipe_id, equipes.nome as nome, sum(pontuacao) as total from resultados
+                $resultadosEquipes = DB::select('select equipe_id, equipes.nome as nome, equipes.imagem, sum(pontuacao) as total from resultados
                 join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
                 join equipes on equipes.id = piloto_equipes.equipe_id
                 join corridas on corridas.id = resultados.corrida_id
@@ -134,7 +134,7 @@ class TemporadaController extends Controller
                 ];
     }
     public function montaClassificacaoClassica($usuario, $temporada){
-                $resultadosPilotosClassico = DB::select('select piloto_id,piloto_equipes.id as pilotoEquipe_id, concat(pilotos.nome, " ", pilotos.sobrenome) as nome, equipes.nome as equipe, sum(pontuacao_classica) as total from resultados
+                $resultadosPilotosClassico = DB::select('select piloto_id,piloto_equipes.id as pilotoEquipe_id,pilotos.nome,pilotos.sobrenome,equipes.imagem, equipes.nome as equipe, sum(pontuacao_classica) as total from resultados
                 join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
                 join pilotos on pilotos.id = piloto_equipes.piloto_id
                 join equipes on equipes.id = piloto_equipes.equipe_id
@@ -145,7 +145,7 @@ class TemporadaController extends Controller
                 group by piloto_equipes.piloto_id
                 order by total desc');
 
-                $resultadosEquipesClassico = DB::select('select equipe_id, equipes.nome as nome, sum(pontuacao_classica) as total from resultados
+                $resultadosEquipesClassico = DB::select('select equipe_id, equipes.imagem, equipes.nome as nome, sum(pontuacao_classica) as total from resultados
                 join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
                 join equipes on equipes.id = piloto_equipes.equipe_id
                 join corridas on corridas.id = resultados.corrida_id
@@ -162,7 +162,7 @@ class TemporadaController extends Controller
     }
 
     public function montaClassificacaoInvertida($usuario, $temporada){
-                $resultadosPilotosInvertida = DB::select('select piloto_id,piloto_equipes.id as pilotoEquipe_id, concat(pilotos.nome, " ", pilotos.sobrenome) as nome, equipes.nome as equipe, sum(pontuacao_invertida) as total from resultados
+                $resultadosPilotosInvertida = DB::select('select piloto_id,piloto_equipes.id as pilotoEquipe_id, pilotos.nome, pilotos.sobrenome,equipes.imagem, equipes.nome as equipe, sum(pontuacao_invertida) as total from resultados
                 join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
                 join pilotos on pilotos.id = piloto_equipes.piloto_id
                 join equipes on equipes.id = piloto_equipes.equipe_id
@@ -173,7 +173,7 @@ class TemporadaController extends Controller
                 group by piloto_equipes.piloto_id
                 order by total desc');
 
-                $resultadosEquipesInvertida = DB::select('select equipe_id, equipes.nome as nome, sum(pontuacao_invertida) as total from resultados
+                $resultadosEquipesInvertida = DB::select('select equipe_id, equipes.nome as nome, equipes.imagem, sum(pontuacao_invertida) as total from resultados
                 join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
                 join equipes on equipes.id = piloto_equipes.equipe_id
                 join corridas on corridas.id = resultados.corrida_id
@@ -190,7 +190,7 @@ class TemporadaController extends Controller
     }
 
     public function montaClassificacaoAlternativa($usuario, $temporada){
-                $resultadosPilotosAlternativa = DB::select('select piloto_id,piloto_equipes.id as pilotoEquipe_id, concat(pilotos.nome, " ", pilotos.sobrenome) as nome, equipes.nome as equipe, sum(pontuacao_personalizada) as total from resultados
+                $resultadosPilotosAlternativa = DB::select('select piloto_id,piloto_equipes.id as pilotoEquipe_id, pilotos.nome, pilotos.sobrenome, equipes.imagem, equipes.nome as equipe, sum(pontuacao_personalizada) as total from resultados
                 join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
                 join pilotos on pilotos.id = piloto_equipes.piloto_id
                 join equipes on equipes.id = piloto_equipes.equipe_id
@@ -201,7 +201,7 @@ class TemporadaController extends Controller
                 group by piloto_equipes.piloto_id
                 order by total desc');
 
-                $resultadosEquipesAlternativa = DB::select('select equipe_id, equipes.nome as nome, sum(pontuacao_personalizada) as total from resultados
+                $resultadosEquipesAlternativa = DB::select('select equipe_id,equipes.imagem, equipes.nome as nome, sum(pontuacao_personalizada) as total from resultados
                 join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
                 join equipes on equipes.id = piloto_equipes.equipe_id
                 join corridas on corridas.id = resultados.corrida_id

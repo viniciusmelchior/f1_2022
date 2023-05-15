@@ -3,41 +3,52 @@
 @section('section')
 
 <style>
-    table, th, td {
+   /*  table, th, td {
         border: 1px solid black;
-    }
+    } */
 
-    table {
+    /* table {
         border-collapse: collapse;
         margin: auto;
-    }
+    } */
 
-    th, td{
+   /*  th, td{
         padding: 6px;
         text-align: center!important;
         width: 190px;
-    }
+    } */
 
-    th{
+   /*  th{
         font-weight: bold;
-    }
+    } */
 
-    tr:nth-child(even) {
+    /* tr:nth-child(even) {
         background-color: #dce6eb;
-    }
+    } */
 
-    tr:hover:nth-child(1n + 2) {
+    /* tr:hover:nth-child(1n + 2) {
         background-color: #a0200f;
         color: #fff;
-    }
+    } */
 
     .header-tabelas{
-        padding: 15px;
-        background-color: rgba(194, 26, 26, 0.993);
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+        /* background-color: rgba(194, 26, 26, 0.993); */
         text-align: center;
         font-size: 25px;
         font-weight: bolder;
-        color: white;
+        margin-bottom: 1rem;
+        /* color: white; */
+    }
+
+    .text-upper{
+        text-transform: uppercase;
+    }
+
+    .driver-surname{
+        text-transform: uppercase;
+        font-weight: bolder;
     }
 
 </style>
@@ -51,26 +62,34 @@
             <li class="breadcrumb-item active" aria-current="page">Classificação Geral - {{$temporada->ano->ano}}</li>
         </ol>
     </nav>
+
     <div class="container">
-        {{-- <h1 id="tituloClassificacao">Classificação Geral - {{$temporada->ano->ano}}</h1> --}}
-        <div class="header-tabelas m-3">Pontuação Normal</div>
-        <div class="d-flex">
+        <div class="header-tabelas bg-dark text-light">Pontuação Normal</div>
+        <div class="d-flex bg-dark text-light p-3" style="justify-content: space-around;">
             <div class="montaTabelaPilotos">
-                <table class="m-5" id="tabelaClassificacaoPilotos" style="">
-                    <tr>
-                        <th style="width:5%">Posição</th>
-                        <th>Piloto</th>
-                        <th style="width:5%">Pontos</th>
-                        <th style="width:5%">Diferença</th>
-                    </tr>
+                <table class="table text-light" id="tabelaClassificacaoPilotos">
+                    <thead>
+                        <tr>
+                            <th class="text-upper">#</th>
+                            <th class="text-upper">Piloto</th>
+                            <th class="text-upper">Pontos</th>
+                            <th class="text-upper">Diferença</th>
+                        </tr>
+                    </thead>
                     @if(count($resultadosPilotos) > 0)
                         @foreach($resultadosPilotos as $key => $piloto) 
+                        <tbody>
                             <tr>
-                                <td style="width:5%">{{$key+1}}</td>
-                                <td>{{$piloto->nome}}</td>
-                                <td class="pontosPiloto" style="width:5%">{{$piloto->total}}</td>
-                                <td class="diferencaPontosPiloto" style="width:5%"></td>
+                                <td style="">{{$key+1}}</td>
+                                <td style="vertical-align: middle;">
+                                    <img src="{{asset('images/'.$piloto->imagem)}}" alt="" style="width: 25px; height:25px;">
+                                    <span style="display: inline-block; vertical-align: middle;">{{$piloto->nome}}</span>
+                                    <span class="driver-surname" style="display: inline-block; vertical-align: middle;">{{$piloto->sobrenome}}</span>
+                                </td>
+                                <td class="pontosPiloto" style="">{{$piloto->total}}</td>
+                                <td class="diferencaPontosPiloto" style=""></td>
                             </tr>
+                        </tbody> 
                         @endforeach
                     @else 
                         <tr>
@@ -81,21 +100,28 @@
             </div>
            
             <div class="montaTabelaEquipes">
-                <table class="m-5" id="tabelaClassificacaoEquipes" style="">
-                    <tr>
-                        <th style="width:5%">Posição</th>
-                        <th>Equipe</th>
-                        <th style="width:5%">Pontos</th>
-                        <th style="width:5%">Diferença</th>
-                    </tr>
+                <table class="table text-light" id="tabelaClassificacaoEquipes" style="">
+                    <thead>
+                        <tr>
+                            <th class="text-upper">#</th>
+                            <th class="text-upper">Equipe</th>
+                            <th class="text-upper">Pontos</th>
+                            <th class="text-upper">Diferença</th>
+                        </tr>
+                    </thead>
                     @if(count($resultadosEquipes) > 0)
                         @foreach($resultadosEquipes as $key => $equipe) 
-                            <tr>
-                                <td style="width:5%">{{$key+1}}</td>
-                                <td>{{$equipe->nome}}</td>
-                                <td class="pontosEquipe" style="width:5%">{{$equipe->total}}</td>
-                                <td class="diferencaPontosEquipe" style="width:5%"></td>
-                            </tr>
+                            <tbody>
+                                <tr>
+                                    <td style="">{{$key+1}}</td>
+                                    <td style="vertical-align: middle;">
+                                        <img src="{{asset('images/'.$equipe->imagem)}}" alt="" style="width: 25px; height:25px;">
+                                        <span style="display: inline-block; vertical-align: middle;">{{$equipe->nome}}</span>
+                                    </td>
+                                    <td class="pontosEquipe" style="">{{$equipe->total}}</td>
+                                    <td class="diferencaPontosEquipe"></td>
+                                </tr>
+                            </tbody> 
                         @endforeach
                     @else 
                         <tr>
@@ -106,24 +132,30 @@
             </div>
         </div>
         <hr>
-        <div class="header-tabelas m-3">Pontuação Clássica</div>
-        <div class="d-flex">
+        <div class="header-tabelas bg-dark text-light">Pontuação Clássica</div>
+        <div class="d-flex bg-dark text-light p-3" style="justify-content: space-around;">
             <div class="montaTabelaPilotos">
-                <table class="m-5" id="tabelaClassificacaoPilotos" style="">
-                    <tr>
-                        <th style="width:5%">Posição</th>
-                        <th>Piloto</th>
-                        <th style="width:5%">Pontos</th>
-                       {{--  <th style="width:5%">Diferença</th> --}}
-                    </tr>
+                <table class="table text-light" id="tabelaClassificacaoPilotos">
+                    <thead>
+                        <tr>
+                            <th class=" text-upper">#</th>
+                            <th class="text-upper">Piloto</th>
+                            <th class="text-upper">Pontos</th>
+                        </tr>
+                    </thead>
                     @if(count($resultadosPilotosClassico) > 0)
                         @foreach($resultadosPilotosClassico as $key => $piloto) 
+                        <tbody>
                             <tr>
-                                <td style="width:5%">{{$key+1}}</td>
-                                <td>{{$piloto->nome}}</td>
-                                <td class="" style="width:5%">{{$piloto->total}}</td>
-                               {{--  <td class="" style="width:5%"></td> --}}
+                                <td style="">{{$key+1}}</td>
+                                <td style="vertical-align: middle;">
+                                    <img src="{{asset('images/'.$piloto->imagem)}}" alt="" style="width: 25px; height:25px;">
+                                    <span style="display: inline-block; vertical-align: middle;">{{$piloto->nome}}</span>
+                                    <span class="driver-surname" style="display: inline-block; vertical-align: middle;">{{$piloto->sobrenome}}</span>
+                                </td>
+                                <td>{{$piloto->total}}</td>
                             </tr>
+                        </tbody> 
                         @endforeach
                     @else 
                         <tr>
@@ -134,21 +166,26 @@
             </div>
            
             <div class="montaTabelaEquipes">
-                <table class="m-5" id="tabelaClassificacaoEquipes" style="">
-                    <tr>
-                        <th style="width:5%">Posição</th>
-                        <th>Equipe</th>
-                        <th style="width:5%">Pontos</th>
-                       {{--  <th style="width:5%">Diferença</th> --}}
-                    </tr>
+                <table class="table text-light" id="tabelaClassificacaoEquipes" style="">
+                    <thead>
+                        <tr>
+                            <th class="text-upper">#</th>
+                            <th class="text-upper">Equipe</th>
+                            <th class="text-upper">Pontos</th>
+                        </tr>
+                    </thead>
                     @if(count($resultadosEquipesClassico) > 0)
                         @foreach($resultadosEquipesClassico as $key => $equipe) 
-                            <tr>
-                                <td style="width:5%">{{$key+1}}</td>
-                                <td>{{$equipe->nome}}</td>
-                                <td class="" style="width:5%">{{$equipe->total}}</td>
-                             {{--    <td class="" style="width:5%"></td> --}}
-                            </tr>
+                            <tbody>
+                                <tr>
+                                    <td style="">{{$key+1}}</td>
+                                    <td style="vertical-align: middle;">
+                                        <img src="{{asset('images/'.$equipe->imagem)}}" alt="" style="width: 25px; height:25px;">
+                                        <span style="display: inline-block; vertical-align: middle;">{{$equipe->nome}}</span>
+                                    </td>
+                                    <td>{{$equipe->total}}</td>
+                                </tr>
+                            </tbody> 
                         @endforeach
                     @else 
                         <tr>
@@ -159,24 +196,30 @@
             </div>
         </div>
         <hr>
-        <div class="header-tabelas m-3">Pontuação Invertida</div>
-        <div class="d-flex">
+        <div class="header-tabelas bg-dark text-light">Pontuação Invertida</div>
+        <div class="d-flex bg-dark text-light p-3" style="justify-content: space-around;">
             <div class="montaTabelaPilotos">
-                <table class="m-5" id="tabelaClassificacaoPilotos" style="">
-                    <tr>
-                        <th style="width:5%">Posição</th>
-                        <th>Piloto</th>
-                        <th style="width:5%">Pontos</th>
-                       {{--  <th style="width:5%">Diferença</th> --}}
-                    </tr>
+                <table class="table text-light" id="tabelaClassificacaoPilotos">
+                    <thead>
+                        <tr>
+                            <th class=" text-upper">#</th>
+                            <th class="text-upper">Piloto</th>
+                            <th class="text-upper">Pontos</th>
+                        </tr>
+                    </thead>
                     @if(count($resultadosPilotosInvertida) > 0)
                         @foreach($resultadosPilotosInvertida as $key => $piloto) 
+                        <tbody>
                             <tr>
-                                <td style="width:5%">{{$key+1}}</td>
-                                <td>{{$piloto->nome}}</td>
-                                <td class="" style="width:5%">{{$piloto->total}}</td>
-                               {{--  <td class="" style="width:5%"></td> --}}
+                                <td style="">{{$key+1}}</td>
+                                <td style="vertical-align: middle;">
+                                    <img src="{{asset('images/'.$piloto->imagem)}}" alt="" style="width: 25px; height:25px;">
+                                    <span style="display: inline-block; vertical-align: middle;">{{$piloto->nome}}</span>
+                                    <span class="driver-surname" style="display: inline-block; vertical-align: middle;">{{$piloto->sobrenome}}</span>
+                                </td>
+                                <td>{{$piloto->total}}</td>
                             </tr>
+                        </tbody> 
                         @endforeach
                     @else 
                         <tr>
@@ -187,21 +230,26 @@
             </div>
            
             <div class="montaTabelaEquipes">
-                <table class="m-5" id="tabelaClassificacaoEquipes" style="">
-                    <tr>
-                        <th style="width:5%">Posição</th>
-                        <th>Equipe</th>
-                        <th style="width:5%">Pontos</th>
-                       {{--  <th style="width:5%">Diferença</th> --}}
-                    </tr>
+                <table class="table text-light" id="tabelaClassificacaoEquipes" style="">
+                    <thead>
+                        <tr>
+                            <th class="text-upper">#</th>
+                            <th class="text-upper">Equipe</th>
+                            <th class="text-upper">Pontos</th>
+                        </tr>
+                    </thead>
                     @if(count($resultadosEquipesInvertida) > 0)
                         @foreach($resultadosEquipesInvertida as $key => $equipe) 
-                            <tr>
-                                <td style="width:5%">{{$key+1}}</td>
-                                <td>{{$equipe->nome}}</td>
-                                <td class="" style="width:5%">{{$equipe->total}}</td>
-                             {{--    <td class="" style="width:5%"></td> --}}
-                            </tr>
+                            <tbody>
+                                <tr>
+                                    <td style="">{{$key+1}}</td>
+                                    <td style="vertical-align: middle;">
+                                        <img src="{{asset('images/'.$equipe->imagem)}}" alt="" style="width: 25px; height:25px;">
+                                        <span style="display: inline-block; vertical-align: middle;">{{$equipe->nome}}</span>
+                                    </td>
+                                    <td>{{$equipe->total}}</td>
+                                </tr>
+                            </tbody> 
                         @endforeach
                     @else 
                         <tr>
@@ -212,24 +260,30 @@
             </div>
         </div>
         <hr>
-        <div class="header-tabelas m-3">Pontuação Alternativa</div>
-        <div class="d-flex">
+        <div class="header-tabelas bg-dark text-light">Pontuação Alternativa</div>
+        <div class="d-flex bg-dark text-light p-3" style="justify-content: space-around;">
             <div class="montaTabelaPilotos">
-                <table class="m-5" id="tabelaClassificacaoPilotos" style="">
-                    <tr>
-                        <th style="width:5%">Posição</th>
-                        <th>Piloto</th>
-                        <th style="width:5%">Pontos</th>
-                       {{--  <th style="width:5%">Diferença</th> --}}
-                    </tr>
+                <table class="table text-light" id="tabelaClassificacaoPilotos">
+                    <thead>
+                        <tr>
+                            <th class=" text-upper">#</th>
+                            <th class="text-upper">Piloto</th>
+                            <th class="text-upper">Pontos</th>
+                        </tr>
+                    </thead>
                     @if(count($resultadosPilotosAlternativa) > 0)
                         @foreach($resultadosPilotosAlternativa as $key => $piloto) 
+                        <tbody>
                             <tr>
-                                <td style="width:5%">{{$key+1}}</td>
-                                <td>{{$piloto->nome}}</td>
-                                <td class="" style="width:5%">{{$piloto->total}}</td>
-                               {{--  <td class="" style="width:5%"></td> --}}
+                                <td style="">{{$key+1}}</td>
+                                <td style="vertical-align: middle;">
+                                    <img src="{{asset('images/'.$piloto->imagem)}}" alt="" style="width: 25px; height:25px;">
+                                    <span style="display: inline-block; vertical-align: middle;">{{$piloto->nome}}</span>
+                                    <span class="driver-surname" style="display: inline-block; vertical-align: middle;">{{$piloto->sobrenome}}</span>
+                                </td>
+                                <td>{{$piloto->total}}</td>
                             </tr>
+                        </tbody> 
                         @endforeach
                     @else 
                         <tr>
@@ -240,21 +294,26 @@
             </div>
            
             <div class="montaTabelaEquipes">
-                <table class="m-5" id="tabelaClassificacaoEquipes" style="">
-                    <tr>
-                        <th style="width:5%">Posição</th>
-                        <th>Equipe</th>
-                        <th style="width:5%">Pontos</th>
-                       {{--  <th style="width:5%">Diferença</th> --}}
-                    </tr>
+                <table class="table text-light" id="tabelaClassificacaoEquipes" style="">
+                    <thead>
+                        <tr>
+                            <th class="text-upper">#</th>
+                            <th class="text-upper">Equipe</th>
+                            <th class="text-upper">Pontos</th>
+                        </tr>
+                    </thead>
                     @if(count($resultadosEquipesAlternativa) > 0)
                         @foreach($resultadosEquipesAlternativa as $key => $equipe) 
-                            <tr>
-                                <td style="width:5%">{{$key+1}}</td>
-                                <td>{{$equipe->nome}}</td>
-                                <td class="" style="width:5%">{{$equipe->total}}</td>
-                             {{--    <td class="" style="width:5%"></td> --}}
-                            </tr>
+                            <tbody>
+                                <tr>
+                                    <td style="">{{$key+1}}</td>
+                                    <td style="vertical-align: middle;">
+                                        <img src="{{asset('images/'.$equipe->imagem)}}" alt="" style="width: 25px; height:25px;">
+                                        <span style="display: inline-block; vertical-align: middle;">{{$equipe->nome}}</span>
+                                    </td>
+                                    <td>{{$equipe->total}}</td>
+                                </tr>
+                            </tbody> 
                         @endforeach
                     @else 
                         <tr>
@@ -265,7 +324,7 @@
             </div>
         </div>
     </div>
-    <a href="{{route('temporadas.index')}}" class="btn btn-primary">Voltar</a>
+    <a href="{{route('temporadas.index')}}" class="btn btn-primary mt-3 bg-dark">Voltar</a>
   </div>
 @endsection
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer">
