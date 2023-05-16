@@ -173,73 +173,6 @@
     
 </style>
    <div class="container">
-        {{-- <table class="mt-5 mb-5">
-            <tr>
-                <th colspan="2">{{$modelEquipe->nome}}</th>
-            </tr>
-            <tr>
-                <td>Total De Largadas</td>
-                <td>{{$totCorridas}}</td>
-            </tr>
-            <tr>
-                <td>Vitórias</td>
-                <td>{{$totVitorias}}</td>
-            </tr>
-            <tr>
-                <td>Titulos de Construtores</td>
-                <td>{{$totTitulos}}</td>
-            </tr>
-            <tr>
-                <td>Titulos de Pilotos</td>
-                <td>{{$totTitulosPilotos}}</td>
-            </tr>
-            <tr>
-                <td>Pole Positions</td>
-                <td>{{$totPoles}}</td>
-            </tr>
-            <tr>
-                <td>Pódios</td>
-                <td>{{$totPodios}}</td>
-            </tr>
-            <tr>
-                <td>Total de Pontos</td>
-                <td>{{$totPontos}}</td>
-            </tr>
-            <tr>
-                <td>Chegadas no Top 10</td>
-                <td>{{$totTopTen}}</td>
-            </tr>
-            <tr>
-                <td>Melhor Largada</td>
-                <td>{{$melhorPosicaoLargada}}</td>
-            </tr>
-            <tr>
-                <td>Pior Largada</td>
-                <td>{{$piorPosicaoLargada}}</td>
-            </tr>
-            <tr>
-                <td>Melhor Chegada</td>
-                <td>{{$melhorPosicaoChegada}}</td>
-            </tr>
-            <tr>
-                <td>Pior Chegada</td>
-                <td>{{$piorPosicaoChegada}}</td>
-            </tr>
-            <tr>
-                <td>Voltas Mais Rápidas</td>
-                <td>{{$totVoltasRapidas}}</td>
-            </tr>
-            <tr>
-                <td>Status</td>
-                <td>
-                    @if($modelEquipe->flg_ativo == 'S')
-                        Em Atividade
-                    @else 
-                        Aposentado
-                    @endif
-                </td>
-            </tr>
-        </table> --}}
         <select name="ajaxGetStatsEquipePorTemporada" id="ajaxGetStatsEquipePorTemporada" class="form-select mt-3" style="width: 20%; margin:0 auto;">
             <option value="" selected id="selectGetStatsEquipePorTemporada">Selecione uma Temporada</option>
             @foreach($temporadas as $temporada)
@@ -267,7 +200,7 @@
                             @endif
                         </div>
                         <div>
-                            <h4>Corridas Disputadas</h4>
+                            <h4>Largadas</h4>
                             <p id="tot-corridas">{{ $totCorridas }}</p>
                         </div>
                         <div>
@@ -324,18 +257,18 @@
                     <h4>pior Chegada</h4>
                     <p id="equipe-pior-chegada">{{ $piorPosicaoChegada }}º</p>
                </div>
-                {{-- <div class="other-stats">
+                <div class="other-stats">
                     <h4>Abandonos</h4>
-                    <p>{{ $totAbandonos }}</p>
-               </div> --}}
-                {{-- <div class="other-stats">
+                    <p id="equipe-totAbandonos">{{ $totAbandonos }}</p>
+               </div>
+                <div class="other-stats">
                     <h4>Grid Médio</h4>
-                    <p>{{$gridMedio}}</p>
-               </div> --}}
-                {{-- <div class="other-stats">
+                    <p id="equipe-gridMedio">{{$gridMedio}}</p>
+               </div>
+                <div class="other-stats">
                     <h4>Média Chegada</h4>
-                    <p>{{$mediaChegada}}</p>
-               </div> --}}
+                    <p id="equipe-mediaChegada">{{$mediaChegada}}</p>
+               </div>
             </div>
         </div>
 
@@ -433,7 +366,7 @@
         success: function (response) {
            $('#equipe-tot-vitorias').text(response.totVitorias)
            $('#equipe-tot-poles').text(response.totPoles)
-           $('#equipe-tot-podios').text(response.totPoles)
+           $('#equipe-tot-podios').text(response.totPodios)
            $('#equipe-tot-pontos').text(response.totPontos)
            $('#equipe-tot-voltas-rapidas').text(response.totVoltasRapidas)
            $('#equipe-tot-top-ten').text(response.totTopTen)
@@ -442,6 +375,9 @@
            $('#equipe-melhor-chegada').text(response.melhorPosicaoChegada)
            $('#equipe-pior-chegada').text(response.piorPosicaoChegada)
            $('#tot-corridas').text(response.totCorridas)
+           $('#equipe-totAbandonos').text(response.totAbandonos)
+           $('#equipe-gridMedio').text(response.gridMedio)
+           $('#equipe-mediaChegada').text(response.mediaChegada)
         },
         error:function(){
             alert(error)

@@ -318,6 +318,9 @@ class AjaxController extends Controller
         $melhorPosicaoChegada = 22;
         $piorPosicaoChegada = 0;
         $totTitulos = 0;
+        $totAbandonos = 0;
+        $gridMedio = 0;
+        $mediaChegada = 0;
 
         $totVoltasRapidas = 0;
 
@@ -355,6 +358,25 @@ class AjaxController extends Controller
                 if($resultado->pilotoEquipe->equipe->id == $id){
                     $totTopTen++;
                 }
+            }
+
+             //calculo de total de abandonos
+             if($resultado->flg_abandono == 'S'){
+                if($resultado->pilotoEquipe->equipe->id == $id){
+                    $totAbandonos++;
+                }
+            }
+
+             //calculo da Média de Largada
+            if($resultado->pilotoEquipe->equipe->id == $id){
+                $gridMedio += $resultado->largada;
+                // $gridMedio = $gridMedio/$totCorridas;
+            }
+
+             //calculo da Média de Chegada
+            if($resultado->pilotoEquipe->equipe->id == $id){
+                $mediaChegada += $resultado->chegada;
+                // $mediaChegada = $mediaChegada/$totCorridas;
             }
 
             //calculo de melhor posição de largada
@@ -451,6 +473,11 @@ class AjaxController extends Controller
             array_push($temporadasDisputadas, $equipeTemporada->ano->ano);
         }
 
+        if($totCorridas > 0){
+            $gridMedio = round($gridMedio/$totCorridas);
+            $mediaChegada = round($mediaChegada/$totCorridas);
+        }
+
         // return view('site.equipes.show', compact('modelEquipe','totTitulos', 'totCorridas','totTitulosPilotos', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas','temporadasDisputadas','pontuacaoPorTemporada','temporadas'));
 
         return response()->json([
@@ -466,6 +493,9 @@ class AjaxController extends Controller
             'melhorPosicaoChegada' => $melhorPosicaoChegada,
             'piorPosicaoChegada' => $piorPosicaoChegada,
             'totVoltasRapidas' => $totVoltasRapidas,
+            'totAbandonos' => $totAbandonos,
+            'gridMedio' => $gridMedio,
+            'mediaChegada' => $mediaChegada
         ]);
 
     }

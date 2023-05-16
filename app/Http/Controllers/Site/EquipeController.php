@@ -105,6 +105,9 @@ class EquipeController extends Controller
         $melhorPosicaoChegada = 22;
         $piorPosicaoChegada = 0;
         $totTitulos = 0;
+        $totAbandonos = 0;
+        $gridMedio = 0;
+        $mediaChegada = 0;
 
         $totVoltasRapidas = 0;
 
@@ -142,6 +145,25 @@ class EquipeController extends Controller
                 if($resultado->pilotoEquipe->equipe->id == $id){
                     $totTopTen++;
                 }
+            }
+
+            //calculo de total de abandonos
+            if($resultado->flg_abandono == 'S'){
+                if($resultado->pilotoEquipe->equipe->id == $id){
+                    $totAbandonos++;
+                }
+            }
+
+             //calculo da Média de Largada
+            if($resultado->pilotoEquipe->equipe->id == $id){
+                $gridMedio += $resultado->largada;
+                // $gridMedio = $gridMedio/$totCorridas;
+            }
+
+             //calculo da Média de Chegada
+            if($resultado->pilotoEquipe->equipe->id == $id){
+                $mediaChegada += $resultado->chegada;
+                // $mediaChegada = $mediaChegada/$totCorridas;
             }
 
             //calculo de melhor posição de largada
@@ -234,7 +256,12 @@ class EquipeController extends Controller
             array_push($temporadasDisputadas, $equipeTemporada->ano->ano);
         }
 
-        return view('site.equipes.show', compact('modelEquipe','totTitulos', 'totCorridas','totTitulosPilotos', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas','temporadasDisputadas','pontuacaoPorTemporada','temporadas'));
+        if($totCorridas > 0){
+            $gridMedio = round($gridMedio/$totCorridas);
+            $mediaChegada = round($mediaChegada/$totCorridas);
+        }
+
+        return view('site.equipes.show', compact('modelEquipe','totTitulos', 'totCorridas','totTitulosPilotos', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas','temporadasDisputadas','pontuacaoPorTemporada','temporadas','totAbandonos','gridMedio','mediaChegada'));
     }
 
     /**
