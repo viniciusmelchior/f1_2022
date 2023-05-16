@@ -3,9 +3,13 @@
 namespace App\Http\Controllers\Site;
 
 use App\Http\Controllers\Controller;
+use App\Models\Site\Corrida;
+use App\Models\Site\Equipe;
 use App\Models\Site\Pais;
 use App\Models\Site\PilotoEquipe;
+use App\Models\Site\Resultado;
 use App\Models\Site\Temporada;
+use App\Models\Site\Titulo;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -248,37 +252,221 @@ class AjaxController extends Controller
         echo('<h3>'.$pais->des_nome.'</h3>'.' =>'. count($pais->pistas). '<br>');
         echo('------------------------------------------------------------');
        } */
-       $pilotoEquipe = PilotoEquipe::where('user_id', Auth::user()->id)->get();
+    //    $pilotoEquipe = PilotoEquipe::where('user_id', Auth::user()->id)->get();
 
-       $paises = Pais::where('user_id', Auth::user()->id)
-                    // ->whereIn('id', [7,15,17,18,6,19,10])
-                    ->orderBy('des_nome')
-                    ->get();
+    //    $paises = Pais::where('user_id', Auth::user()->id)
+    //                 // ->whereIn('id', [7,15,17,18,6,19,10])
+    //                 ->orderBy('des_nome')
+    //                 ->get();
 
-        //possível fazer assim, acrescentando o join após a consulta inicial e dando get na hora de puxar os dados
-        $dados = DB::table('titulos')
-                    ->select('*')
-                    ->join('piloto_equipes', function($join){
-                        $join->on('piloto_equipes.id', '=', 'titulos.pilotoEquipe_id');
-                    });
+    //     //possível fazer assim, acrescentando o join após a consulta inicial e dando get na hora de puxar os dados
+    //     $dados = DB::table('titulos')
+    //                 ->select('*')
+    //                 ->join('piloto_equipes', function($join){
+    //                     $join->on('piloto_equipes.id', '=', 'titulos.pilotoEquipe_id');
+    //                 });
                    
-        $dados->join('pilotos', function($join){
-            $join->on('pilotos.id', '=', 'piloto_equipes.piloto_id');
-        });
+    //     $dados->join('pilotos', function($join){
+    //         $join->on('pilotos.id', '=', 'piloto_equipes.piloto_id');
+    //     });
 
-        //ou encadeando e dando get no final . 
-        $dados2 = DB::table('titulos')
-                    ->select('*')
-                    ->join('piloto_equipes', function($join){
-                        $join->on('piloto_equipes.id', '=', 'titulos.pilotoEquipe_id');
-                    })
-                    ->join('pilotos', function($join){
-                        $join->on('pilotos.id', '=', 'piloto_equipes.piloto_id')
-                            ->where('pilotos.id','=', 4);
-                    })->get();
+    //     //ou encadeando e dando get no final . 
+    //     $dados2 = DB::table('titulos')
+    //                 ->select('*')
+    //                 ->join('piloto_equipes', function($join){
+    //                     $join->on('piloto_equipes.id', '=', 'titulos.pilotoEquipe_id');
+    //                 })
+    //                 ->join('pilotos', function($join){
+    //                     $join->on('pilotos.id', '=', 'piloto_equipes.piloto_id')
+    //                         ->where('pilotos.id','=', 4);
+    //                 })->get();
 
-        // dd($dados->get(), $dados2);
+    //     // dd($dados->get(), $dados2);
 
-       return view('estudos', compact('pilotoEquipe', 'paises'));
+    //    return view('estudos', compact('pilotoEquipe', 'paises'));
+    }
+
+    public function ajaxGetStatsEquipePorTemporada(Request $request){
+       
+        $temporada_id = $request->temporada_id;
+        $id = $request->equipe_id;
+
+        $operadorConsulta = '=';
+        $condicao = $temporada_id;
+        
+        if($temporada_id == null){
+            $operadorConsulta = '>';
+            $condicao = 0; 
+        }
+        $modelEquipe = Equipe::where('id', $id)
+                                ->where('user_id', Auth::user()->id)
+                                ->first();
+
+        $resultados = Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                            ->where('resultados.user_id', Auth::user()->id)
+                            ->where('corridas.flg_sprint', 'N')
+                            ->where('corridas.temporada_id', $operadorConsulta, $condicao)
+                            ->get();
+                     
+        $totCorridas = 0;
+        $totVitorias = 0;
+        $totPoles = 0;
+        $totPodios = 0;
+        $totTopTen = 0;
+        $melhorPosicaoLargada = 22;
+        $piorPosicaoLargada = 0;
+        $melhorPosicaoChegada = 22;
+        $piorPosicaoChegada = 0;
+        $totTitulos = 0;
+
+        $totVoltasRapidas = 0;
+
+        //Consideramos apenas o id da equipe pois levamos em consideração a junção do resultado da dupla de pilotos
+        foreach($resultados as $resultado){
+
+            //total de largadas
+            if($resultado->pilotoEquipe->equipe->id == $id){
+                $totCorridas++;
+            }
+
+            //calculo do total de vitórias
+            if($resultado->chegada == 1){
+                if($resultado->pilotoEquipe->equipe->id == $id){
+                    $totVitorias++;
+                }
+            }
+
+             //calculo do total de pole positions
+             if($resultado->largada == 1){
+                if($resultado->pilotoEquipe->equipe->id == $id){
+                    $totPoles++;
+                }
+            }
+
+             //calculo de podios
+             if($resultado->chegada <= 3){
+                if($resultado->pilotoEquipe->equipe->id == $id){
+                    $totPodios++;
+                }
+            }
+
+             //calculo de chegadas no top 10
+             if($resultado->chegada <= 10){
+                if($resultado->pilotoEquipe->equipe->id == $id){
+                    $totTopTen++;
+                }
+            }
+
+            //calculo de melhor posição de largada
+            if($resultado->pilotoEquipe->equipe->id == $id){
+                if($resultado->largada <= $melhorPosicaoLargada){
+                    $melhorPosicaoLargada = $resultado->largada;
+                }    
+            }
+
+            //calculo pior posição de largada
+            if($resultado->pilotoEquipe->equipe->id == $id){
+                if($resultado->largada > $piorPosicaoLargada){
+                    $piorPosicaoLargada = $resultado->largada;
+                }    
+            }
+
+            //calculo melhor posição de chegada
+            if($resultado->pilotoEquipe->equipe->id == $id){
+                if($resultado->chegada <= $melhorPosicaoChegada){
+                    $melhorPosicaoChegada = $resultado->chegada;
+                }    
+            }
+
+            //calculo pior posição de chegada 
+            if($resultado->pilotoEquipe->equipe->id == $id){
+                if($resultado->chegada > $piorPosicaoChegada){
+                    $piorPosicaoChegada = $resultado->chegada;
+                }    
+            }
+        }
+
+        //calculo de titulo de construtores
+        $totTitulos = count(Titulo::where('equipe_id', $id)->where('user_id', Auth::user()->id)->get());
+
+        //calculo do titulo de pilotos
+        $totTitulosPilotos = count(Titulo::join('piloto_equipes', 'piloto_equipes.id', '=', 'titulos.pilotoEquipe_id')
+                                            ->where('titulos.user_id', Auth::user()->id)
+                                            ->where('piloto_equipes.equipe_id', $id)
+                                            ->get());
+
+        //Total de Pontos tem cálculo diferente pois envolve sprints   
+        $resultados = Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                ->where('resultados.user_id', Auth::user()->id)
+                                ->where('corridas.temporada_id', $operadorConsulta, $condicao)
+                                ->get();                  
+        $totPontos = 0;
+        foreach($resultados as $resultado){
+        if($resultado->pilotoEquipe->equipe->id == $id){
+                $totPontos += $resultado->pontuacao;
+            }
+        }
+
+        $pilotoEquipe = PilotoEquipe::where('equipe_id', $id)
+                                    ->where('user_id', Auth::user()->id)
+                                    ->get();
+
+        $ids = [];
+        foreach($pilotoEquipe as $equipeId){
+            array_push($ids, $equipeId->id);
+        }
+
+        $resultado = Corrida::where('user_id', Auth::user()->id)
+                            ->where('flg_sprint', 'N')
+                            ->where('volta_rapida', '!=', null)
+                            ->whereIn('volta_rapida', $ids)
+                            ->where('temporada_id', $operadorConsulta, $condicao)
+                            ->get();
+
+        $totVoltasRapidas = count($resultado); 
+
+         //devolve os anos em que o piloto esteve inscrito para correr - Dinamicamente com base nos registros da tabela piloto_equipes
+         $temporadasDisputadas = [];
+         //calculo da pontuação por temporada disputada
+         $pontuacaoPorTemporada = [];
+
+        //temporadas em que a equipes está inscrita 
+        $temporadasEquipe = PilotoEquipe::where('equipe_id', $id)->groupBy('ano_id')->get();
+        $temporadas = Temporada::where('user_id', Auth::user()->id)->get();
+        
+        foreach($temporadasEquipe as $equipeTemporada){
+            $retorno =  DB::select('select
+            sum(pontuacao) as totPontos, temporadas.ano_id
+            from resultados
+            join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
+            join equipes on equipes.id = piloto_equipes.equipe_id
+            join corridas on corridas.id = resultados.corrida_id
+            join pilotos on piloto_equipes.piloto_id = pilotos.id
+            join temporadas on temporadas.id = corridas.temporada_id
+            where temporadas.ano_id = '.$equipeTemporada->ano_id.'
+            and resultados.user_id = '. Auth::user()->id.'
+            and equipe_id = '.$equipeTemporada->equipe_id.'');
+        
+            array_push($pontuacaoPorTemporada, $retorno[0]->totPontos);
+            array_push($temporadasDisputadas, $equipeTemporada->ano->ano);
+        }
+
+        // return view('site.equipes.show', compact('modelEquipe','totTitulos', 'totCorridas','totTitulosPilotos', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas','temporadasDisputadas','pontuacaoPorTemporada','temporadas'));
+
+        return response()->json([
+            'message' => 'OK',
+            'totVitorias' => $totVitorias,
+            'totCorridas' => $totCorridas,
+            'totPontos' => $totPontos,
+            'totPodios' => $totPodios,
+            'totTopTen' => $totTopTen,
+            'piorPosicaoLargada' => $piorPosicaoLargada,
+            'totPoles' => $totPoles,
+            'melhorPosicaoLargada' => $melhorPosicaoLargada,
+            'melhorPosicaoChegada' => $melhorPosicaoChegada,
+            'piorPosicaoChegada' => $piorPosicaoChegada,
+            'totVoltasRapidas' => $totVoltasRapidas,
+        ]);
+
     }
 }

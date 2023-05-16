@@ -9,6 +9,7 @@ use App\Models\Site\Pais;
 use App\Models\Site\Piloto;
 use App\Models\Site\PilotoEquipe;
 use App\Models\Site\Resultado;
+use App\Models\Site\Temporada;
 use App\Models\Site\Titulo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -79,7 +80,7 @@ class EquipeController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show($id)
-    {
+    {   
          //Dados do Piloto 
          $modelEquipe = Equipe::where('id', $id)
                                 ->where('user_id', Auth::user()->id)
@@ -89,7 +90,9 @@ class EquipeController extends Controller
         $resultados = Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
                                 ->where('resultados.user_id', Auth::user()->id)
                                 ->where('corridas.flg_sprint', 'N')
-                                ->get(); 
+                                // ->where('corridas.temporada_id', 1)
+                                ->get();
+                                // dd($resultados[0]); 
                                
 
         $totCorridas = 0;
@@ -212,6 +215,7 @@ class EquipeController extends Controller
 
         //temporadas em que a equipes está inscrita 
         $temporadasEquipe = PilotoEquipe::where('equipe_id', $id)->groupBy('ano_id')->get();
+        $temporadas = Temporada::where('user_id', Auth::user()->id)->get();
         
         foreach($temporadasEquipe as $equipeTemporada){
             $retorno =  DB::select('select
@@ -230,7 +234,7 @@ class EquipeController extends Controller
             array_push($temporadasDisputadas, $equipeTemporada->ano->ano);
         }
 
-        return view('site.equipes.show', compact('modelEquipe','totTitulos', 'totCorridas','totTitulosPilotos', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas','temporadasDisputadas','pontuacaoPorTemporada'));
+        return view('site.equipes.show', compact('modelEquipe','totTitulos', 'totCorridas','totTitulosPilotos', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas','temporadasDisputadas','pontuacaoPorTemporada','temporadas'));
     }
 
     /**
