@@ -94,9 +94,13 @@ class PilotoController extends Controller
         
         //total de corridas
         $resultados = Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                    ->join('piloto_equipes', 'piloto_equipes.id', '=', 'resultados.pilotoEquipe_id')
                                     ->where('resultados.user_id', Auth::user()->id)
                                     ->where('corridas.flg_sprint', 'N')
+                                    ->where('piloto_equipes.piloto_id', $modelPiloto->id)
                                     ->get();
+    
+     //estudar otimização da consulta. Adicionar mais filtros e desafogar o foreach
 
         $totCorridas = 0;
         $totVitorias = 0;
@@ -262,7 +266,10 @@ class PilotoController extends Controller
                                 ->where('piloto_equipes.piloto_id', $modelPiloto->id)
                                 ->orderBy('resultados.id', 'DESC')
                                 ->paginate(10);
-       
+    // sleep(1);
+    // $time = microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"];
+    // $tempoExecucao =  "Tempo de execução: ".$time;
+    // dd($tempoExecucao);
         return view('site.pilotos.show', compact('modelPiloto','totTitulos','totAbandonos', 'totCorridas', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas', 'equipes','mediaChegada','gridMedio','temporadasDisputadas','pontuacaoPorTemporada','resultadosPorCorrida'));
     }
 
@@ -446,6 +453,7 @@ class PilotoController extends Controller
 
         $modelPilotos = Piloto::where('user_id', Auth::user()->id)
                                 ->get();
+
 
         return view('site.pilotos.comparativo', compact('piloto1Largada','piloto2Largada','piloto1Chegada','piloto2Chegada','dadosPiloto1', 'dadosPiloto2','piloto1TotPodios','piloto2TotPodios','piloto1TotAbandonos','piloto2TotAbandonos','piloto1TotPontos','piloto2TotPontos','piloto1TotVoltasRapidas','piloto2TotVoltasRapidas','piloto1TotVitorias','piloto2TotVitorias','piloto1TotPolePositions','piloto2TotPolePositions','piloto1MelhorChegada','piloto2MelhorChegada','piloto1PiorChegada','piloto2PiorChegada','piloto1MelhorLargada','piloto2MelhorLargada','piloto1PiorLargada','piloto2PiorLargada','modelPilotos','temporadas'));
     }
