@@ -621,11 +621,19 @@
             <tbody>
             @foreach($resultadoCorridas as $key => $resultadoCorrida)
             @php 
+            // dd($resultadoCorridas);
+            $resultado = Resultado::where('user_id', Auth::user()->id)->where('corrida_id', $resultadoCorrida->id)->get();
+            // $primeiro = Resultado::where('user_id', Auth::user()->id)->where('corrida_id', $resultadoCorrida->id)->where('chegada', 1)->first();
+            // $polePosition = Resultado::where('user_id', Auth::user()->id)->where('corrida_id', $resultadoCorrida->id)->where('largada', 1)->first();
+            // $segundo = Resultado::where('user_id', Auth::user()->id)->where('corrida_id', $resultadoCorrida->id)->where('chegada', 2)->first();
+            // $terceiro = Resultado::where('user_id', Auth::user()->id)->where('corrida_id', $resultadoCorrida->id)->where('chegada', 3)->first();
+            // $voltaRapida = PilotoEquipe::where('user_id', Auth::user()->id)->where('id', $resultadoCorrida->volta_rapida)->first();
 
-            $primeiro = Resultado::where('user_id', Auth::user()->id)->where('corrida_id', $resultadoCorrida->id)->where('chegada', 1)->first();
-            $polePosition = Resultado::where('user_id', Auth::user()->id)->where('corrida_id', $resultadoCorrida->id)->where('largada', 1)->first();
-            $segundo = Resultado::where('user_id', Auth::user()->id)->where('corrida_id', $resultadoCorrida->id)->where('chegada', 2)->first();
-            $terceiro = Resultado::where('user_id', Auth::user()->id)->where('corrida_id', $resultadoCorrida->id)->where('chegada', 3)->first();
+            $primeiro = $resultado->where('chegada', 1)->first();
+            // dd($primeiro);
+            $polePosition = $resultado->where('largada', 1)->first();
+            $segundo = $resultado->where('chegada', 2)->first();
+            $terceiro = $resultado->where('chegada', 3)->first();
             $voltaRapida = PilotoEquipe::where('user_id', Auth::user()->id)->where('id', $resultadoCorrida->volta_rapida)->first();
             
             @endphp
@@ -707,8 +715,12 @@
     <div class="full-table-pagination-wrapper">
         <div id="pagination" class="pagination"></div>
     </div>
-
-        
+    @php 
+        // sleep(1);
+        // $time = microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"];
+        // $tempoExecucao =  "Tempo de execução: ".$time;
+        // dd($tempoExecucao);
+    @endphp
     </div>
 @endsection
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer">
