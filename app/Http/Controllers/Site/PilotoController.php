@@ -205,7 +205,12 @@ class PilotoController extends Controller
                                 ->get());
     
         //Total de Pontos tem cálculo diferente pois envolve sprints
-        $resultados =  Resultado::where('user_id', Auth::user()->id)->get();                     
+        $resultados = Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                    ->join('piloto_equipes', 'piloto_equipes.id', '=', 'resultados.pilotoEquipe_id')
+                                    ->where('resultados.user_id', Auth::user()->id)
+                                    ->where('piloto_equipes.piloto_id', $modelPiloto->id)
+                                    ->get();
+                                //  dd($resultados);                
         $totPontos = 0;
         foreach($resultados as $resultado){
         if($resultado->pilotoEquipe->piloto->id == $id){
