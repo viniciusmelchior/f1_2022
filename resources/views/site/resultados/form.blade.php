@@ -23,7 +23,7 @@
         <div>
             <h2>GP de {{$corrida->pista->nome}} - {{$corrida->temporada->ano->ano}}</h2>
         </div>
-    <form method="POST" action="{{ $route }}" class="col-md-8 mt-3 mb-3">
+    <form method="POST" action="{{ $route }}" class="col-md-9 mt-3 mb-3">
         {{ $method }}
         @csrf
         <div class="mb-3">
