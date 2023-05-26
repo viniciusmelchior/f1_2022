@@ -10,9 +10,9 @@
         </ol>
     </nav>
 
-    <div class="left_table">
+    <div class="table-responsive">
         @if(count($temporadas) > 0)
-        <table class="table table-sm" id="tabelaTemporadas">
+        <table class="table" id="tabelaTemporadas">
             <thead>
                 <tr>
                     <th>#</th>
@@ -44,7 +44,7 @@
             <p>Nenhuma temporada cadastrada</p>
         @endif
     </div>
-    <a href="{{route('temporadas.create')}}" class="btn btn-primary">Adicionar temporada</a>
-    <a href="{{route('dashboard')}}" class="btn btn-secondary ml-3">Voltar</a>
+    <a href="{{route('temporadas.create')}}" class="btn btn-dark">Adicionar temporada</a>
+    <a href="{{route('dashboard')}}" class="btn btn-danger ml-3">Voltar</a>
   </div>
 @endsection
