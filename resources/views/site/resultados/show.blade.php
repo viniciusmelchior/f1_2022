@@ -71,7 +71,7 @@
 
     /* formatacao da tabela  */
     .table-container {
-        max-height: 600px;
+        max-height: 700px;
         overflow-y: scroll;
     }
 
@@ -98,7 +98,7 @@
 
 @section('section')
 <div class="container mt-3 mb-3">
-    <div class="bg-dark rounded p-2" style="height:650px;">
+    <div class="bg-dark rounded p-2" style="height:660px;">
         <div class="container">
             <div class="row align-items-start">
               <div class="col-md-3">
