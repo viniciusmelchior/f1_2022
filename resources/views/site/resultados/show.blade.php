@@ -94,15 +94,46 @@
         color: rgb(212, 212, 212);
     }
 
+    @media (max-width: 769px){
+        .race-title{
+            display: none;
+        }
+
+        .race-title-mobile{
+            display: block;
+        }
+
+        .card-vencedor{
+            margin-bottom: 60px;
+        }
+
+        .ocultar-mobile{
+            display: none;
+        }
+    }
+
+    @media (min-width: 769px){
+        
+        .race-title-mobile{
+            display: none;
+        }
+
+    }
+
 </style>
 
 @section('section')
 <div class="container mt-3 mb-3">
-    <div class="bg-dark rounded p-2" style="height:660px;">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="bg-dark rounded p-2" style="height:auto;">
         <div class="container">
             <div class="row align-items-start">
               <div class="col-md-3">
-                <div class="card bg-dark border-white">
+                  <div class="race-title-mobile text-light p-3">
+                      <h2>{{$corrida->pista->nome}} {{$descEvento}} {{$corrida->temporada->ano->ano}} <span> - Classificação Final</span></h2>
+                  </div>
+                <div class="card bg-dark border-white card-vencedor">
                     <img src="{{asset('images/'.$vencedor->pilotoEquipe->piloto->imagem)}}" alt="" srcset="">
                     <div class="info-winner mt-2 d-flex">
                         <div>
@@ -135,59 +166,67 @@
                 <div class="race-title">
                     <h2>{{$corrida->pista->nome}} {{$descEvento}} {{$corrida->temporada->ano->ano}} <span> - Classificação Final</span></h2>
                 </div>
-                <table class="table text-light table-container">
-                    <thead>
-                        <tr>
-                            <th class="text-start text-upper">#</th>
-                            <th class="text-start text-upper">Piloto</th>
-                            <th class="text-start text-upper">Equipe</th>
-                            <th class="text-start text-upper">Largada</th>
-                            <th class="text-start text-upper">Pontos</th>
-                        </tr>
-                    </thead>
-                    <tbody class="text-left">
-                        @foreach($model as $key => $item)
-                            <tr <?= $item->flg_abandono == 'S' ? "class='trAbandono'" : "" ?>>
-                                <td><?= $item->flg_abandono == 'S' ? "DNF" : $item->chegada ?></td>
-                                <td>
-                                    <img src="{{asset('images/'.$item->pilotoEquipe->piloto->pais->imagem)}}" alt="" style="width:35px; height: 25px;">
-                                    <span style="display: inline-block; vertical-align: middle;">{{$item->pilotoEquipe->piloto->nome}}</span>
-                                    <span class="driver-surname" style="display: inline-block; vertical-align: middle;">{{$item->pilotoEquipe->piloto->sobrenome}}</span>
-                                </td>
-                                <td style="vertical-align: middle;">
-                                    <img src="{{asset('images/'.$item->pilotoEquipe->equipe->imagem)}}" style="width:25px; height: 25px;">
-                                    <span class="text-upper team-name" style="display: inline-block; vertical-align: middle;">
-                                    {{$item->pilotoEquipe->equipe->nome}}
-                                    </span>
-                                </td>
-                                <td>{{$item->largada}}</td>
-                                <td>+{{$item->pontuacao}}</td>
-                            </tr>
-                        @endforeach
-                        @if($corrida->flg_sprint == 'N')
+                <div class="table-responsive">
+                    <table class="table text-light table-container">
+                        <thead>
                             <tr>
-                                <td colspan="5">
-                                    <span style="color:rgb(107, 34, 175); font-weight:bold; margin-right:1rem;">Volta Mais rápida</span>
-                                     <span>{{$voltaRapida->piloto->nome}}</span>
-                                     <span style="text-transform: uppercase; font-weight:bold;margin-right:1rem">{{$voltaRapida->piloto->sobrenome}}</span>
-                                     <span style="margin-right: 1rem;">{{$voltaRapida->equipe->nome}}</span>
-                                     <span>(+1 ponto)</span>
-                                    </td>
+                                <th class="text-start text-upper">#</th>
+                                <th class="text-start text-upper">Piloto</th>
+                                <th class="text-start text-upper">Equipe</th>
+                                <th class="text-start text-upper">Largada</th>
+                                <th class="text-start text-upper">Pontos</th>
                             </tr>
-                        @endif
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody class="text-left">
+                            @foreach($model as $key => $item)
+                                <tr <?= $item->flg_abandono == 'S' ? "class='trAbandono'" : "" ?>>
+                                    <td><?= $item->flg_abandono == 'S' ? "DNF" : $item->chegada ?></td>
+                                    <td>
+                                        <img src="{{asset('images/'.$item->pilotoEquipe->piloto->pais->imagem)}}" alt="" style="width:35px; height: 25px;" class="ocultar-mobile">
+                                        <span style="display: inline-block; vertical-align: middle;">{{$item->pilotoEquipe->piloto->nome}}</span>
+                                        <span class="driver-surname" style="display: inline-block; vertical-align: middle;">{{$item->pilotoEquipe->piloto->sobrenome}}</span>
+                                    </td>
+                                    <td style="vertical-align: middle;">
+                                        <img src="{{asset('images/'.$item->pilotoEquipe->equipe->imagem)}}" style="width:25px; height: 25px;" class="ocultar-mobile">
+                                        <span class="text-upper team-name" style="display: inline-block; vertical-align: middle;">
+                                        {{$item->pilotoEquipe->equipe->nome}}
+                                        </span>
+                                    </td>
+                                    <td>{{$item->largada}}</td>
+                                    <td>+{{$item->pontuacao}}</td>
+                                </tr>
+                            @endforeach
+                            @if($corrida->flg_sprint == 'N')
+                                <tr>
+                                    <td colspan="5">
+                                        <span style="color:rgb(107, 34, 175); font-weight:bold; margin-right:1rem;">Volta Mais rápida</span>
+                                        <span>{{$voltaRapida->piloto->nome}}</span>
+                                        <span style="text-transform: uppercase; font-weight:bold;margin-right:1rem">{{$voltaRapida->piloto->sobrenome}}</span>
+                                        <span style="margin-right: 1rem;">{{$voltaRapida->equipe->nome}}</span>
+                                        <span>(+1 ponto)</span>
+                                        </td>
+                                </tr>
+                            @endif
+                        </tbody>
+                    </table>
+                </div>
               </div>
             </div>
           </div>
+         </div>
+        </div>
     </div>
-    <div class="mb-3 mt-2">
-        <textarea readonly class="form-control bg-dark text-light text-left" name="observacoes" id="observacoes" rows="5">
-            @if($corrida->observacoes)
-                {{$corrida->observacoes}}
-            @endif
-        </textarea>
+    <div class="row">
+       <div class="col-md-12">
+        <div class="mb-3 mt-2">
+            <textarea readonly class="form-control bg-dark text-light text-left" name="observacoes" id="observacoes" rows="5">
+                @if($corrida->observacoes)
+                    {{$corrida->observacoes}}
+                @endif
+            </textarea>
+        </div>
+        <a href="{{route('temporadas.index')}}" class="btn btn-dark ml-3">Voltar</a>
+       </div>
     </div>
-    <a href="{{route('temporadas.index')}}" class="btn btn-dark ml-3">Voltar</a>
 </div>
 @endsection
