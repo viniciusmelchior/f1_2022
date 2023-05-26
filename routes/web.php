@@ -30,7 +30,7 @@ use Symfony\Component\HttpKernel\DataCollector\AjaxDataCollector;
 //teste comentario
 Route::get('/', function () {
     return view('landingPage.index');
-})->name('landingPage');
+})->name('landingPage')->middleware('auth');
 
 Route::get('/dashboard', function () {
     return view('site.dashboard.index');

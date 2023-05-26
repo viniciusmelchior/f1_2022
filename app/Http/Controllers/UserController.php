@@ -119,7 +119,8 @@ class UserController extends Controller
             return Redirect::back()->withErrors($errors);
         }
 
-        return redirect()->route('home');
+        // return redirect()->route('home');
+        return redirect()->route('landingPage');
     }
 
     public function logout(Request $request)
