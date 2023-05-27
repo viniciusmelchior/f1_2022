@@ -3,34 +3,6 @@
 @section('section')
 
 <style>
-   /*  table, th, td {
-        border: 1px solid black;
-    } */
-
-    /* table {
-        border-collapse: collapse;
-        margin: auto;
-    } */
-
-   /*  th, td{
-        padding: 6px;
-        text-align: center!important;
-        width: 190px;
-    } */
-
-   /*  th{
-        font-weight: bold;
-    } */
-
-    /* tr:nth-child(even) {
-        background-color: #dce6eb;
-    } */
-
-    /* tr:hover:nth-child(1n + 2) {
-        background-color: #a0200f;
-        color: #fff;
-    } */
-
     .header-tabelas{
         padding-top: 1rem;
         padding-bottom: 1rem;
@@ -51,21 +23,52 @@
         font-weight: bolder;
     }
 
+    .breadcrumb-item {
+        display: flex;
+        align-items: center;
+    }
+
+    .breadcrumb-item .breadcrumb-icon {
+        margin-right: 5px;
+    }
+
+    @media (max-width: 769px){
+        .ocultar-mobile{
+            display: none;
+        }
+
+        .montaTabelaPilotos{
+            margin-bottom: 50px;
+        }
+    }
+
+    @media (min-width: 769px){
+        
+    }
+
+
+
 </style>
 
   <div class="container mt-3 mb-3">
 
     <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{route('home')}}">Home</a></li>
+            <li class="breadcrumb-item">
+                <a href="{{route('home')}}">
+                    <span class="breadcrumb-icon"><i class="fas fa-home"></i></span> Home
+                </a>
+            </li>
             <li class="breadcrumb-item active">Temporadas</li>
-            <li class="breadcrumb-item active" aria-current="page">Classificação Geral - {{$temporada->ano->ano}}</li>
+            <li class="breadcrumb-item active" aria-current="page">
+                <span class="breadcrumb-icon"><i class="fas fa-calendar"></i></span> Classificação Geral - {{$temporada->ano->ano}}
+            </li>
         </ol>
     </nav>
 
     <div class="container">
         <div class="header-tabelas bg-dark text-light">Pontuação Normal</div>
-        <div class="d-flex bg-dark text-light p-3" style="justify-content: space-around;">
+        <div class="d-flex bg-dark text-light p-3" style="justify-content: space-around; flex-wrap: wrap;">
             <div class="montaTabelaPilotos">
                 <table class="table text-light" id="tabelaClassificacaoPilotos">
                     <thead>
@@ -73,7 +76,7 @@
                             <th class="text-upper">#</th>
                             <th class="text-upper">Piloto</th>
                             <th class="text-upper">Pontos</th>
-                            <th class="text-upper">Diferença</th>
+                            <th class="text-upper ocultar-mobile">Diferença</th>
                         </tr>
                     </thead>
                     @if(count($resultadosPilotos) > 0)
@@ -87,7 +90,7 @@
                                     <span class="driver-surname" style="display: inline-block; vertical-align: middle;">{{$piloto->sobrenome}}</span>
                                 </td>
                                 <td class="pontosPiloto" style="">{{$piloto->total}}</td>
-                                <td class="diferencaPontosPiloto" style=""></td>
+                                <td class="diferencaPontosPiloto ocultar-mobile" style=""></td>
                             </tr>
                         </tbody> 
                         @endforeach
@@ -98,7 +101,7 @@
                     @endif
                 </table>
             </div>
-           
+        
             <div class="montaTabelaEquipes">
                 <table class="table text-light" id="tabelaClassificacaoEquipes" style="">
                     <thead>
@@ -106,7 +109,7 @@
                             <th class="text-upper">#</th>
                             <th class="text-upper">Equipe</th>
                             <th class="text-upper">Pontos</th>
-                            <th class="text-upper">Diferença</th>
+                            <th class="text-upper ocultar-mobile">Diferença</th>
                         </tr>
                     </thead>
                     @if(count($resultadosEquipes) > 0)
@@ -119,7 +122,7 @@
                                         <span style="display: inline-block; vertical-align: middle;">{{$equipe->nome}}</span>
                                     </td>
                                     <td class="pontosEquipe" style="">{{$equipe->total}}</td>
-                                    <td class="diferencaPontosEquipe"></td>
+                                    <td class="diferencaPontosEquipe ocultar-mobile"></td>
                                 </tr>
                             </tbody> 
                         @endforeach
@@ -133,7 +136,7 @@
         </div>
         <hr>
         <div class="header-tabelas bg-dark text-light">Pontuação Clássica</div>
-        <div class="d-flex bg-dark text-light p-3" style="justify-content: space-around;">
+        <div class="d-flex bg-dark text-light p-3" style="justify-content: space-around; flex-wrap: wrap;">
             <div class="montaTabelaPilotos">
                 <table class="table text-light" id="tabelaClassificacaoPilotos">
                     <thead>
@@ -197,7 +200,7 @@
         </div>
         <hr>
         <div class="header-tabelas bg-dark text-light">Pontuação Invertida</div>
-        <div class="d-flex bg-dark text-light p-3" style="justify-content: space-around;">
+        <div class="d-flex bg-dark text-light p-3" style="justify-content: space-around; flex-wrap: wrap;">
             <div class="montaTabelaPilotos">
                 <table class="table text-light" id="tabelaClassificacaoPilotos">
                     <thead>
@@ -261,7 +264,7 @@
         </div>
         <hr>
         <div class="header-tabelas bg-dark text-light">Pontuação Alternativa</div>
-        <div class="d-flex bg-dark text-light p-3" style="justify-content: space-around;">
+        <div class="d-flex bg-dark text-light p-3" style="justify-content: space-around; flex-wrap: wrap;">
             <div class="montaTabelaPilotos">
                 <table class="table text-light" id="tabelaClassificacaoPilotos">
                     <thead>
