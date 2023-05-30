@@ -173,7 +173,7 @@
     
 </style>
    <div class="container">
-        <select name="ajaxGetStatsEquipePorTemporada" id="ajaxGetStatsEquipePorTemporada" class="form-select mt-3" style="width: 20%; margin:0 auto;">
+        <select name="ajaxGetStatsEquipePorTemporada" id="ajaxGetStatsEquipePorTemporada" class="form-select mt-3" style="width: 25%; margin:0 auto;">
             <option value="" selected id="selectGetStatsEquipePorTemporada">Selecione uma Temporada</option>
             @foreach($temporadas as $temporada)
                 <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
@@ -342,7 +342,7 @@
     $('.other-stats').toggle();
   });
 
-  $('#ajaxGetStatsEquipePorTemporada').change(function (e) { 
+$('#ajaxGetStatsEquipePorTemporada').change(function (e) { 
     e.preventDefault();
 
     temporada_id = $('#ajaxGetStatsEquipePorTemporada').val();

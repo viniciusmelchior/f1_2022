@@ -88,13 +88,12 @@ class EquipeController extends Controller
 
         //total de corridas
         $resultados = Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                ->join('piloto_equipes', 'piloto_equipes.id', '=', 'resultados.pilotoEquipe_id')
                                 ->where('resultados.user_id', Auth::user()->id)
                                 ->where('corridas.flg_sprint', 'N')
-                                // ->where('corridas.temporada_id', 1)
+                                ->where('piloto_equipes.equipe_id', $modelEquipe->id)
                                 ->get();
-                                // dd($resultados[0]); 
                                
-
         $totCorridas = 0;
         $totVitorias = 0;
         $totPoles = 0;

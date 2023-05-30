@@ -80,6 +80,8 @@ route::get('/equipes/delete/{id}', [EquipeController::class, 'destroy'])->name('
 
 route::post('/ajax/ajaxGetStatsEquipePorTemporada', [AjaxController::class, 'ajaxGetStatsEquipePorTemporada'])->name('ajax.ajaxGetStatsEquipePorTemporada')->middleware('auth');
 
+route::post('/ajax/ajaxGetStatsPilotoPorTemporada', [AjaxController::class, 'ajaxGetStatsPilotoPorTemporada'])->name('ajax.ajaxGetStatsPilotoPorTemporada')->middleware('auth');
+
 /**Pistas */
 route::get('/pistas/create', [PistaController::class, 'create'])->name('pistas.create')->middleware('auth');
 route::post('/pistas/store', [PistaController::class, 'store'])->name('pistas.store')->middleware('auth');

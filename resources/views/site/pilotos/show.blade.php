@@ -130,7 +130,12 @@
     
 </style>
    <div class="container">
-
+    <select name="ajaxGetStatsPilotoPorTemporada" id="ajaxGetStatsPilotoPorTemporada" class="form-select mt-3" style="width: 25%; margin:0 auto;">
+        <option value="" selected id="selectGetStatsPilotoPorTemporada">Selecione uma Temporada</option>
+        @foreach($temporadas as $temporada)
+            <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
+        @endforeach
+    </select>
     <div id="driver-container">
         <div id="driver-details" class="bg-dark text-light">
             <div>
@@ -153,7 +158,7 @@
                     </div>
                     <div>
                         <h4>Corridas Disputadas</h4>
-                        <p>{{ $totCorridas }}</p>
+                        <p id="tot-corridas">{{ $totCorridas }}</p>
                     </div>
                     <div>
                         <button id="show-other-stats" class="btn btn-light text-dark">Exibir Mais Estatisticas</button>
@@ -171,58 +176,59 @@
            </div>
             <div>
                 <h4>Vitórias</h4>
-                <p>{{ $totVitorias }}</p>
+                <p id="piloto-tot-vitorias">{{ $totVitorias }}</p>
            </div>
             <div>
                 <h4>Pole Positions</h4>
-                <p>{{ $totPoles }}</p>
+                <p id="piloto-tot-poles">{{ $totPoles }}</p>
            </div>
             <div>
                 <h4>Subidas ao Pódio</h4>
-                <p>{{ $totPodios }}</p>
+                <p id="piloto-tot-podios">{{ $totPodios }}</p>
            </div>
             <div>
                 <h4>Total de Pontos</h4>
-                <p>{{ $totPontos }}</p>
+                <p id="piloto-tot-pontos">{{ $totPontos }}</p>
            </div>
             <div>
                 <h4>Voltas mais rapidas</h4>
-                <p>{{ $totVoltasRapidas }}</p>
+                <p id="piloto-tot-voltas-rapidas">{{ $totVoltasRapidas }}</p>
            </div>
             <div class="other-stats">
                 <h4>Chegadas no top 10</h4>
-                <p>{{ $totTopTen }}</p>
+                <p id="piloto-tot-top-ten">{{ $totTopTen }}</p>
            </div>
             <div class="other-stats">
                 <h4>Melhor largada</h4>
-                <p>{{ $melhorPosicaoLargada }}º</p>
+                <p id="piloto-melhor-largada">{{ $melhorPosicaoLargada }}º</p>
            </div>
             <div class="other-stats">
                 <h4>Pior Largada</h4>
-                <p>{{ $piorPosicaoLargada }}º</p>
+                <p id="piloto-pior-largada">{{ $piorPosicaoLargada }}º</p>
            </div>
             <div class="other-stats">
                 <h4>Melhor Chegada</h4>
-                <p>{{ $melhorPosicaoChegada }}º</p>
+                <p id="piloto-melhor-chegada">{{ $melhorPosicaoChegada }}º</p>
            </div>
             <div class="other-stats">
                 <h4>pior Chegada</h4>
-                <p>{{ $piorPosicaoChegada }}º</p>
+                <p id="piloto-pior-chegada">{{ $piorPosicaoChegada }}º</p>
            </div>
             <div class="other-stats">
                 <h4>Abandonos</h4>
-                <p>{{ $totAbandonos }}</p>
+                <p id="piloto-totAbandonos">{{ $totAbandonos }}</p>
            </div>
             <div class="other-stats">
                 <h4>Grid Médio</h4>
-                <p>{{$gridMedio}}</p>
+                <p id="piloto-gridMedio">{{$gridMedio}}</p>
            </div>
             <div class="other-stats">
                 <h4>Média Chegada</h4>
-                <p>{{$mediaChegada}}</p>
+                <p id="piloto-mediaChegada">{{$mediaChegada}}</p>
            </div>
         </div>
     </div>
+    <input type="hidden" id="piloto_id" name="piloto_id" value="{{$modelPiloto->id}}">
 
         @php 
             
@@ -302,6 +308,10 @@
         </div>   
    </div>
 
+   <script>
+    ajaxGetStatsPilotoPorTemporada = "<?=route('ajax.ajaxGetStatsPilotoPorTemporada')?>"
+   </script>
+
    @php 
 
     $chegada = [];
@@ -353,6 +363,50 @@
 
     $('.other-stats').toggle();
   });
+
+  $('#ajaxGetStatsPilotoPorTemporada').change(function (e) { 
+    e.preventDefault();
+
+    temporada_id = $('#ajaxGetStatsPilotoPorTemporada').val();
+    piloto_id = $('#piloto_id').val();
+    
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+
+    if(temporada_id != ''){
+        selectTemporadaPolesPiloto = $('#selectGetStatsPilotoPorTemporada').text('Geral');
+    }
+
+    $.ajax({
+        type: "POST",
+        url: ajaxGetStatsPilotoPorTemporada,
+        data: {temporada_id: temporada_id, piloto_id: piloto_id},
+        contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+        success: function (response) {
+           $('#piloto-tot-vitorias').text(response.totVitorias)
+           $('#piloto-tot-poles').text(response.totPoles)
+           $('#piloto-tot-podios').text(response.totPodios)
+           $('#piloto-tot-pontos').text(response.totPontos)
+           $('#piloto-tot-voltas-rapidas').text(response.totVoltasRapidas)
+           $('#piloto-tot-top-ten').text(response.totTopTen)
+           $('#piloto-melhor-largada').text(response.melhorPosicaoLargada)
+           $('#piloto-pior-largada').text(response.piorPosicaoLargada)
+           $('#piloto-melhor-chegada').text(response.melhorPosicaoChegada)
+           $('#piloto-pior-chegada').text(response.piorPosicaoChegada)
+           $('#tot-corridas').text(response.totCorridas)
+           $('#piloto-totAbandonos').text(response.totAbandonos)
+           $('#piloto-gridMedio').text(response.gridMedio)
+           $('#piloto-mediaChegada').text(response.mediaChegada)
+        },
+        error:function(){
+            alert("Piloto não participou da temporada selecionada")
+        }
+    });
+      
+});
 
   </script>
 @endsection
