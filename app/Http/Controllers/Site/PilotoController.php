@@ -86,7 +86,6 @@ class PilotoController extends Controller
      */
     public function show($id)
     {   
-
         //Dados do Piloto 
         $modelPiloto = Piloto::where('id', $id)
                         ->where('user_id', Auth::user()->id)
@@ -100,8 +99,6 @@ class PilotoController extends Controller
                                     ->where('piloto_equipes.piloto_id', $modelPiloto->id)
                                     ->get();
     
-     //estudar otimização da consulta. Adicionar mais filtros e desafogar o foreach
-
         $totCorridas = 0;
         $totVitorias = 0;
         $totPoles = 0;
@@ -159,13 +156,11 @@ class PilotoController extends Controller
              //calculo da Média de Largada
             if($resultado->pilotoEquipe->piloto->id == $id){
                 $gridMedio += $resultado->largada;
-                // $gridMedio = $gridMedio/$totCorridas;
             }
 
              //calculo da Média de Chegada
             if($resultado->pilotoEquipe->piloto->id == $id){
                 $mediaChegada += $resultado->chegada;
-                // $mediaChegada = $mediaChegada/$totCorridas;
             }
         
 
@@ -210,7 +205,7 @@ class PilotoController extends Controller
                                     ->where('resultados.user_id', Auth::user()->id)
                                     ->where('piloto_equipes.piloto_id', $modelPiloto->id)
                                     ->get();
-                                //  dd($resultados);                
+                              
         $totPontos = 0;
         foreach($resultados as $resultado){
         if($resultado->pilotoEquipe->piloto->id == $id){
@@ -271,11 +266,14 @@ class PilotoController extends Controller
                                 ->where('piloto_equipes.piloto_id', $modelPiloto->id)
                                 ->orderBy('resultados.id', 'DESC')
                                 ->paginate(10);
-    // sleep(1);
-    // $time = microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"];
-    // $tempoExecucao =  "Tempo de execução: ".$time;
-    // dd($tempoExecucao);
-        return view('site.pilotos.show', compact('modelPiloto','totTitulos','totAbandonos', 'totCorridas', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas', 'equipes','mediaChegada','gridMedio','temporadasDisputadas','pontuacaoPorTemporada','resultadosPorCorrida'));
+        // sleep(1);
+        // $time = microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"];
+        // $tempoExecucao =  "Tempo de execução: ".$time;
+        // dd($tempoExecucao);
+
+        $temporadas = Temporada::where('user_id', Auth::user()->id)->get();
+
+        return view('site.pilotos.show', compact('modelPiloto','totTitulos','totAbandonos', 'totCorridas', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas', 'equipes','mediaChegada','gridMedio','temporadasDisputadas','pontuacaoPorTemporada','resultadosPorCorrida','temporadas'));
     }
 
     /**
