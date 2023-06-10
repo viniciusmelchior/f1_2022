@@ -31,6 +31,10 @@
             <label for="qtd_carros" class="form-label">Quantidade de Carros</label>
             <input type="text" class="form-control" id="qtd_carros" name="qtd_carros" value="@if(isset($model)) {{$model->qtd_carros}}  @endif">
         </div>
+        <div class="mb-3">
+            <label for="tamanho_km" class="form-label">Tamanho da pista (KM)</label>
+            <input type="text" class="form-control" id="tamanho_km" name="tamanho_km" value="@if(isset($model)) {{$model->tamanho_km}}  @endif">
+        </div>
 
         @if(Route::currentRouteName() != 'pistas.create')
             <div class="form-group form-check mb-3">

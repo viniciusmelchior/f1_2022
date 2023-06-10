@@ -25,6 +25,8 @@
                     <th>Nome</th>
                     <th>País</th>
                     <th>Qtd Carros</th>
+                    <th>Tamanho</th>
+                    <th>Qtd Voltas</th>
                     <th>Status</th>
                     <th>Ações</th>
                 </tr>
@@ -36,6 +38,8 @@
                         <td>{{$pista->nome}}</td>
                         <td>{{$pista->pais->des_nome}}</td>
                         <td>{{$pista->qtd_carros != null ? $pista->qtd_carros : '-'}}</td>
+                        <td>{{$pista->tamanho_km != null ? $pista->tamanho_km : '-'}}</td>
+                        <td>{{$pista->qtd_voltas != null ? $pista->qtd_voltas : '-'}}</td>
                         <td>{{$pista->flg_ativo}}</td>
                         <td class="d-flex" style="justify-content: space-between;">
                             <a data-toggle="tooltip" data-placement="top" title="Visualizar" class="" href="{{route('pistas.show', [$pista->id])}}"><i class="bi bi-eye-fill"></i></a>

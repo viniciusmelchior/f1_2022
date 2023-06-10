@@ -13,7 +13,7 @@ class Pista extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['nome', 'pais_id', 'user_id', 'flg_ativo','qtd_carros'];
+    protected $fillable = ['nome', 'pais_id', 'user_id', 'flg_ativo','qtd_carros','tamanho_km','qtd_voltas'];
 
     /**relacionamentos */
 

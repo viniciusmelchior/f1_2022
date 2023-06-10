@@ -53,6 +53,11 @@ class PistaController extends Controller
         //     $pista->flg_ativo = 'N';
         // }
 
+        $pista->tamanho_km = $request->tamanho_km; 
+        //calculo de voltas. Distância 50% em corridas da Indy e F1 (outras categorias, desconsiderar)
+        $distanciaOficial = 300;
+        $pista->qtd_voltas = round((($distanciaOficial/$pista->tamanho_km)*1000)/2)+1;
+
         $pista->save();
 
         return redirect()->back();
@@ -101,6 +106,12 @@ class PistaController extends Controller
         } else {
             $pista->flg_ativo = 'N';
         }
+
+        $pista->tamanho_km = $request->tamanho_km; 
+        //calculo de voltas. Distância 50% em corridas da Indy e F1 (outras categorias, desconsiderar)
+        $distanciaOficial = 300;
+        $pista->qtd_voltas = round((($distanciaOficial/$pista->tamanho_km)*1000)/2)+1;
+        //dd($pista->qtd_voltas, $distanciaOficial, $pista->tamanho_km);
 
         $pista->update();
 
