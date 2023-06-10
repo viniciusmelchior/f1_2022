@@ -42,11 +42,13 @@ class AnoController extends Controller
         $ano = new Ano();
         $ano->user_id = Auth::user()->id;
         $ano->ano = $request->ano;
-        if ($request->has('flg_ativo')) {
+       /*  if ($request->has('flg_ativo')) {
             $ano->flg_ativo = $request->flg_ativo;
         } else {
             $ano->flg_ativo = 'N';
-        }
+        } */
+
+        $ano->flg_ativo = 'S';
 
         $ano->save();
 
