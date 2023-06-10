@@ -58,11 +58,12 @@ class PilotoController extends Controller
         $piloto->sobrenome = $request->sobrenome;
         $piloto->user_id = Auth::user()->id;
         $piloto->pais_id = $request->pais_id;
-        if ($request->has('flg_ativo')) {
+        /* if ($request->has('flg_ativo')) {
             $piloto->flg_ativo = $request->flg_ativo;
         } else {
             $piloto->flg_ativo = 'N';
-        }
+        } */
+        $piloto->flg_ativo = 'S';
 
         if($request->imagem == ''){
             $newImageName = '';
