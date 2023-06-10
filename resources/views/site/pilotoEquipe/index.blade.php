@@ -25,6 +25,7 @@
                 <th>Ano</th>
                 <th>Piloto</th>
                 <th>Equipe</th>
+                <th>SC</th>
                 <th>Status</th>
                 <th>ações</th>
             </tr>
@@ -36,6 +37,7 @@
                     <td>{{$pilotoEquipe->ano->ano}}</td>
                     <td>{{$pilotoEquipe->piloto->nome}} {{$pilotoEquipe->piloto->sobrenome}}</td>
                     <td>{{$pilotoEquipe->equipe->nome}}</td>
+                    <td>{{$pilotoEquipe->flg_super_corrida == 'S' ? 'SIM': '-'}}</td>
                     <td>{{$pilotoEquipe->flg_ativo}}</td>
                     <td>
                         <a href="{{route('pilotoEquipe.edit', [$pilotoEquipe->id])}}"><i class="bi bi-pencil-fill"></i></a>

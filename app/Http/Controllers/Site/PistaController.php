@@ -45,11 +45,13 @@ class PistaController extends Controller
         $pista->nome = $request->nome;
         $pista->user_id = Auth::user()->id;
         $pista->pais_id = $request->pais_id;
-        if ($request->has('flg_ativo')) {
-            $pista->flg_ativo = $request->flg_ativo;
-        } else {
-            $pista->flg_ativo = 'N';
-        }
+        $pista->qtd_carros = $request->qtd_carros;
+        $pista->flg_ativo = 'S';
+        // if ($request->has('flg_ativo')) {
+        //     $pista->flg_ativo = $request->flg_ativo;
+        // } else {
+        //     $pista->flg_ativo = 'N';
+        // }
 
         $pista->save();
 
@@ -93,6 +95,7 @@ class PistaController extends Controller
         $pista->nome = $request->nome;
         $pista->user_id = Auth::user()->id;
         $pista->pais_id = $request->pais_id;
+        $pista->qtd_carros = $request->qtd_carros;
         if ($request->has('flg_ativo')) {
             $pista->flg_ativo = $request->flg_ativo;
         } else {

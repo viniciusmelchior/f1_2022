@@ -20,7 +20,7 @@ class PilotoEquipeController extends Controller
      */
     public function index()
     {
-        $pilotoEquipes = PilotoEquipe::where('user_id', Auth::user()->id)->get();
+        $pilotoEquipes = PilotoEquipe::where('user_id', Auth::user()->id)->orderBy('ano_id', 'DESC')->orderBy('equipe_id')->get();
 
         return view('site.pilotoEquipe.index', compact('pilotoEquipes'));
     }
@@ -35,7 +35,7 @@ class PilotoEquipeController extends Controller
         $paises = Pais::where('user_id', Auth::user()->id)->get();
         $pilotos = Piloto::where('user_id', Auth::user()->id)->where('flg_ativo', 'S')->get();
         $equipes = Equipe::where('user_id', Auth::user()->id)->where('flg_ativo', 'S')->get();
-        $anos = Ano::where('user_id', Auth::user()->id)->get();
+        $anos = Ano::where('user_id', Auth::user()->id)->orderBy('ano', 'DESC')->get();
         return view('site.pilotoEquipe.form', compact('paises', 'pilotos', 'equipes', 'anos'));
     }
 
@@ -52,10 +52,12 @@ class PilotoEquipeController extends Controller
         $pilotoEquipe->equipe_id = $request->equipe_id;
         $pilotoEquipe->user_id = Auth::user()->id;
         $pilotoEquipe->ano_id = $request->ano_id;
-        if ($request->has('flg_ativo')) {
-            $pilotoEquipe->flg_ativo = $request->flg_ativo;
+        $pilotoEquipe->flg_ativo = 'S';
+
+        if ($request->has('flg_super_corrida')) {
+            $pilotoEquipe->flg_super_corrida = $request->flg_super_corrida;
         } else {
-            $pilotoEquipe->flg_ativo = 'N';
+            $pilotoEquipe->flg_super_corrida = 'N';
         }
 
         $pilotoEquipe->save();
@@ -85,7 +87,7 @@ class PilotoEquipeController extends Controller
         $model = PilotoEquipe::where('id', $id)->where('user_id', Auth::user()->id)->first();
         $pilotos = Piloto::where('user_id', Auth::user()->id)->where('flg_ativo', 'S')->get();
         $equipes = Equipe::where('user_id', Auth::user()->id)->where('flg_ativo', 'S')->get();
-        $anos = Ano::where('user_id', Auth::user()->id)->get();
+        $anos = Ano::where('user_id', Auth::user()->id)->orderBy('ano', 'DESC')->get();
         return view('site.pilotoEquipe.form', compact('model', 'pilotos', 'equipes', 'anos'));
     }
 
@@ -107,6 +109,12 @@ class PilotoEquipeController extends Controller
             $pilotoEquipe->flg_ativo = $request->flg_ativo;
         } else {
             $pilotoEquipe->flg_ativo = 'N';
+        }
+
+        if ($request->has('flg_super_corrida')) {
+            $pilotoEquipe->flg_super_corrida = $request->flg_super_corrida;
+        } else {
+            $pilotoEquipe->flg_super_corrida = 'N';
         }
 
         $pilotoEquipe->update();

@@ -13,7 +13,7 @@ class PilotoEquipe extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['piloto_id', 'equipe_id', 'user_id', 'ano_id', 'flg_ativo'];
+    protected $fillable = ['piloto_id', 'equipe_id', 'user_id', 'ano_id', 'flg_ativo','flg_super_corrida'];
 
     /**relacionamentos */
 

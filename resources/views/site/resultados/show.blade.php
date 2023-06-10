@@ -216,6 +216,7 @@
          </div>
         </div>
     </div>
+
     <div class="row">
        <div class="col-md-12">
         <div class="mb-3 mt-2">
@@ -225,6 +226,13 @@
                 @endif
             </textarea>
         </div>
+
+        @if(isset($corrida->updated_at))
+            <div class="mb-3 mt-3 fst-italic">
+                <span>Atualizado em {{date('d/m/Y', strtotime($corrida->updated_at))}} às {{date('H:i:s', strtotime($corrida->updated_at))}}</span>
+            </div>
+        @endif
+        
         <a href="{{route('temporadas.index')}}" class="btn btn-dark ml-3">Voltar</a>
        </div>
     </div>

@@ -22,7 +22,7 @@
         </ol>
     </nav>
     
-    <div class="left_table">
+    <div class="table">
         @if(count($corridas) > 0)
         <table class="table" id="tabelaCorridas">
             <thead>
@@ -30,6 +30,7 @@
                     <th>#</th>
                     <th>Pista</th>
                     <th>Dificuldade IA</th>
+                    <th>Atualizado Em</th>
                     <th>Ações</th>
                 </tr>
             </thead>
@@ -37,8 +38,21 @@
                 @foreach ($corridas as $key => $corrida)
                     <tr @if($corrida->flg_sprint == 'S') style="color:red;" @endif>
                         <td>@if($corrida->flg_sprint != 'S') {{$corrida->ordem}} @endif</td>
-                        <td>{{$corrida->pista->nome}} @if($corrida->flg_sprint == 'S') - Sprint @endif</td>
+                        <td>{{$corrida->pista->nome}}
+                            @if($corrida->flg_sprint == 'S')
+                              - Sprint
+                            @elseif($corrida->flg_super_corrida == 'S')
+                                - Super Corrida
+                            @endif</td>
                         <td>{{$corrida->dificuldade_ia}}</td>
+                        <td>
+                            @if (isset($corrida->updated_at))
+                                {{-- {{date('d/m/Y', strtotime($corrida->updated_at))}} às {{date('H:m:s', strtotime($corrida->updated_at))}} --}}
+                                {{date('d/m/Y', strtotime($corrida->updated_at))}} às {{date('H:i:s', strtotime($corrida->updated_at))}}
+                            @else
+                                -
+                            @endif
+                        </td>
                         <td class="d-flex" style="justify-content: space-around;">
                             <a data-toggle="tooltip" data-placement="top" title="Visualizar resultados" href="{{route('resultados.show', [$corrida->id])}}"><i class="bi bi-eye-fill"></i></a>
                             <a data-toggle="tooltip" data-placement="top" title="Inserir Resultados" class="" href="{{route('resultados.edit', [$corrida->id])}}"><i class="bi bi-plus-circle-fill"></i></a>

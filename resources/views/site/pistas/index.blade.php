@@ -17,13 +17,14 @@
     </div>
 
     @if(count($pistas) > 0)
-    <div class="left_table">
+    <div class="table">
         <table class="table" id="tabelaPilotos">
             <thead>
                 <tr>
                     <th>#</th>
                     <th>Nome</th>
                     <th>País</th>
+                    <th>Qtd Carros</th>
                     <th>Status</th>
                     <th>Ações</th>
                 </tr>
@@ -34,6 +35,7 @@
                         <td>{{$key+1}}</td>
                         <td>{{$pista->nome}}</td>
                         <td>{{$pista->pais->des_nome}}</td>
+                        <td>{{$pista->qtd_carros != null ? $pista->qtd_carros : '-'}}</td>
                         <td>{{$pista->flg_ativo}}</td>
                         <td class="d-flex" style="justify-content: space-between;">
                             <a data-toggle="tooltip" data-placement="top" title="Visualizar" class="" href="{{route('pistas.show', [$pista->id])}}"><i class="bi bi-eye-fill"></i></a>
