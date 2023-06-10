@@ -53,11 +53,13 @@ class EquipeController extends Controller
         $equipe->des_cor = $request->des_cor;
         $equipe->user_id = Auth::user()->id;
         $equipe->pais_id = $request->pais_id;
-        if ($request->has('flg_ativo')) {
-            $equipe->flg_ativo = $request->flg_ativo;
-        } else {
-            $equipe->flg_ativo = 'N';
-        }
+        // if ($request->has('flg_ativo')) {
+        //     $equipe->flg_ativo = $request->flg_ativo;
+        // } else {
+        //     $equipe->flg_ativo = 'N';
+        // }
+
+        $equipe->flg_ativo = 'S';
 
         if($request->imagem == ''){
             $newImageName = '';
