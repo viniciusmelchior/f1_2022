@@ -80,7 +80,7 @@
                 id="flg_super_corrida"
                 name="flg_super_corrida"
                 value="S"
-                @if(isset($corrida) && $corrida->flg_super_corrida == 'S') checked @endif
+                {{-- @if(isset($corrida) && $corrida->flg_super_corrida == 'S') checked @endif --}}
                 >
                 <label class="form-check-label" for="flg_ativo">Super Corrida</label>
             </div>
@@ -106,7 +106,8 @@
                 @php 
                     $infoPiloto =  Resultado::where('user_id', Auth::user()->id)->where('pilotoEquipe_id', $pilotoEquipe->id)->where('corrida_id', $corrida->id)->first();
                 @endphp
-                    <tr style="color:{{$pilotoEquipe->equipe->des_cor}};" class="linha_resultados {{$pilotoEquipe->flg_super_corrida == 'S' ? 'd-none': ''}}">
+                    <tr style="color:{{$pilotoEquipe->equipe->des_cor}};" class="linha_resultados">
+                    {{-- <tr style="color:{{$pilotoEquipe->equipe->des_cor}};" class="linha_resultados {{$pilotoEquipe->flg_super_corrida == 'S' ? 'd-none': ''}}"> --}}
                         <td>
                             {{$pilotoEquipe->piloto->nome}} {{$pilotoEquipe->piloto->sobrenome}}
                             <input type="hidden" name="pilotoEquipe_id[]" value="{{$pilotoEquipe->id}}">
