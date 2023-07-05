@@ -86,7 +86,7 @@
                 >
                 <label class="form-check-label" for="flg_ativo">Super Corrida</label>
             </div>
-        </div>
+        
 
         <hr>
 
@@ -233,6 +233,8 @@
                 @endif
             </textarea>
         </div>
+
+    </div>
 
         @if(isset($corrida->updated_at))
             <div class="mb-3 fst-italic">
