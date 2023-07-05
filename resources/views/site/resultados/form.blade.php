@@ -2,7 +2,7 @@
 
 @php 
     use App\Models\Site\Resultado;
-    use Illuminate\Support\Facedes\Artisan;
+    use Illuminate\Support\Facades\Artisan;
     $route = route('resultados.update', [$corrida->id]);
     $method = method_field('POST');
     if(isset($model)){
