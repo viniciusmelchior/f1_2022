@@ -2,12 +2,14 @@
 
 @php 
     use App\Models\Site\Resultado;
+    use Illuminate\Support\Facedes\Artisan;
     $route = route('resultados.update', [$corrida->id]);
     $method = method_field('POST');
     if(isset($model)){
         $route = route('resultados.update', [$corrida->id]);
         $method = method_field('POST');
     }
+    Artisan::call('view:clear');
 @endphp
 
 <style>
@@ -27,7 +29,7 @@
         {{ $method }}
         @csrf
 
-        <div class="card mb-3 mt-3 p-3 bg-danger text-white">
+        <div class="card mb-3 mt-3 p-3 bg-dark text-white">
             <div class="mb-3">
                 <label for="condicao_id" class="form-label">Condição Climática</label>
                 <select name="condicao_id" id="condicao_id" class="form-control">
