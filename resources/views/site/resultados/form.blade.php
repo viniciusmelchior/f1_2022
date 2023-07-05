@@ -27,7 +27,7 @@
         {{ $method }}
         @csrf
 
-        <div class="card mb-3 mt-3 p-3">
+        <div class="card mb-3 mt-3 p-3 bg-dark text-white">
             <div class="mb-3">
                 <label for="condicao_id" class="form-label">Condição Climática</label>
                 <select name="condicao_id" id="condicao_id" class="form-control">
@@ -88,7 +88,7 @@
 
         <hr>
 
-        <table class="table">
+        <table class="table text-white">
             <thead>
                 <tr>
                     <th>Piloto</th>
@@ -106,11 +106,13 @@
                 @php 
                     $infoPiloto =  Resultado::where('user_id', Auth::user()->id)->where('pilotoEquipe_id', $pilotoEquipe->id)->where('corrida_id', $corrida->id)->first();
                 @endphp
-                    <tr style="color:{{$pilotoEquipe->equipe->des_cor}};" class="linha_resultados">
+                    <tr class="linha_resultados">
+                    {{-- <tr style="color:{{$pilotoEquipe->equipe->des_cor}};" class="linha_resultados"> --}}
                     {{-- <tr style="color:{{$pilotoEquipe->equipe->des_cor}};" class="linha_resultados {{$pilotoEquipe->flg_super_corrida == 'S' ? 'd-none': ''}}"> --}}
-                        <td>
-                            {{$pilotoEquipe->piloto->nome}} {{$pilotoEquipe->piloto->sobrenome}}
-                            <input type="hidden" name="pilotoEquipe_id[]" value="{{$pilotoEquipe->id}}">
+                        <td style="vertical-align: middle;">
+                            <img src="{{asset('images/'.$pilotoEquipe->equipe->imagem)}}" alt="" style="width: 25px; height:25px;">
+                            {{$pilotoEquipe->piloto->nome}} {{$pilotoEquipe->piloto->sobrenome}} 
+                            <span> <input type="hidden" name="pilotoEquipe_id[]" value="{{$pilotoEquipe->id}}"></span>
                         </td>
                         <td>
                             <input
