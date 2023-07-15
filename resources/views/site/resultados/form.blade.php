@@ -39,6 +39,18 @@
                 </select>
             </div>
             <div class="mb-3">
+                <label for="categoria" class="form-label">Categoria</label>
+                <select name="categoria" id="categoria" class="form-control">
+                    <option value="F1">Formula 1</option>
+                    <option value="F1Sprint">Formula 1 (Sprint)</option>
+                    <option value="SC">Super Corrida</option>
+                    <option value="Indy">Indy</option>
+                    <option value="FormulaE">Formula E</option>
+                    <option value="Stock1">Stock Car (Corrida 1)</option>
+                    <option value="Stock2">Stock Car (Corrida 2)</option>
+                </select>
+            </div>
+            <div class="mb-3">
                 <label for="qtd_safety_car" class="form-label">Quantidade Safety Car</label>
                 <input
                     type="number"
@@ -64,30 +76,93 @@
                         value="">
                     @endif 
             </div>
-            <div class="form-group form-check mt-3 mb-3">
-                <input
-                type="checkbox"
-                class="form-check-input"
-                id="flg_sprint"
-                name="flg_sprint"
-                value="S"
-                @if(isset($corrida) && $corrida->flg_sprint == 'S') checked @endif
-                >
-                <label class="form-check-label" for="flg_ativo">Corrida Sprint</label>
-            </div>
-            <div class="form-group form-check mt-3 mb-3">
-                <input
-                type="checkbox"
-                class="form-check-input"
-                id="flg_super_corrida"
-                name="flg_super_corrida"
-                value="S"
-                {{-- @if(isset($corrida) && $corrida->flg_super_corrida == 'S') checked @endif --}}
-                >
-                <label class="form-check-label" for="flg_ativo">Super Corrida</label>
-            </div>
-        
 
+            {{-- <div class="d-flex" style="justify-content: space-between;">
+                <div class="form-group form-check mt-3 mb-3">
+                    <input
+                    type="checkbox"
+                    class="form-check-input"
+                    id="flg_sprint"
+                    name="flg_sprint"
+                    value="S"
+                    @if(isset($corrida) && $corrida->flg_sprint == 'S') checked @endif
+                    >
+                    <label class="form-check-label" for="flg_sprint">Corrida Sprint F1</label>
+                </div>
+                <div class="form-group form-check mt-3 mb-3">
+                    <input
+                    type="checkbox"
+                    class="form-check-input"
+                    id="flg_super_corrida"
+                    name="flg_super_corrida"
+                    value="S"
+                    >
+                    <label class="form-check-label" for="flg_super_corrida">Super Corrida F1</label>
+                </div>
+                <div class="form-group form-check mt-3 mb-3">
+                    <input
+                    type="checkbox"
+                    class="form-check-input"
+                    id="flg_formula_e"
+                    name="flg_formula_e"
+                    value="S"
+                    >
+                    <label class="form-check-label" for="flg_formula_e">Formula E</label>
+                </div>
+                <div class="form-group form-check mt-3 mb-3">
+                    <input
+                    type="checkbox"
+                    class="form-check-input"
+                    id="flg_indy"
+                    name="flg_indy"
+                    value="S"
+                    >
+                    <label class="form-check-label" for="flg_indy">Formula Indy</label>
+                </div>
+            </div>
+            <div class="d-flex" style="justify-content: space-between;">
+                <div class="form-group form-check mt-3 mb-3">
+                    <input
+                    type="checkbox"
+                    class="form-check-input"
+                    id="flg_stock_car_1"
+                    name="flg_stock_car_1"
+                    value="S"
+                    >
+                    <label class="form-check-label" for="flg_stock_car_1">Stock Car - Corrida 1</label>
+                </div>
+                <div class="form-group form-check mt-3 mb-3">
+                    <input
+                    type="checkbox"
+                    class="form-check-input"
+                    id="flg_stock_car_2"
+                    name="flg_stock_car_2"
+                    value="S"
+                    
+                    >
+                    <label class="form-check-label" for="flg_stock_car_2">Stock Car - Corrida 2</label>
+                </div>
+                <div class="form-group form-check mt-3 mb-3">
+                    <input
+                    type="checkbox"
+                    class="form-check-input"
+                    id="flg_formula_2_principal"
+                    name="flg_formula_2_principal"
+                    value="S"
+                    >
+                    <label class="form-check-label" for="flg_formula_2_principal">F2 - Principal</label>
+                </div>
+                <div class="form-group form-check mt-3 mb-3">
+                    <input
+                    type="checkbox"
+                    class="form-check-input"
+                    id="flg_formula_2_sprint"
+                    name="flg_formula_2_sprint"
+                    value="S"
+                    >
+                    <label class="form-check-label" for="flg_formula_2_sprint">F2 - Sprint</label>
+                </div>
+            </div> --}}
         <hr>
 
         <table class="table text-white">
@@ -110,7 +185,7 @@
                 @endphp
                     <tr class="linha_resultados">
                     {{-- <tr style="color:{{$pilotoEquipe->equipe->des_cor}};" class="linha_resultados"> --}}
-                    {{-- <tr style="color:{{$pilotoEquipe->equipe->des_cor}};" class="linha_resultados {{$pilotoEquipe->flg_super_corrida == 'S' ? 'd-none': ''}}"> --}}
+                    {{-- <tr class="linha_resultados {{$pilotoEquipe->flg_super_corrida == 'S' ? 'd-none': ''}}"> --}}
                         <td style="vertical-align: middle;">
                             <img src="{{asset('images/'.$pilotoEquipe->equipe->imagem)}}" alt="" style="width: 25px; height:25px;">
                             {{$pilotoEquipe->piloto->nome}} {{$pilotoEquipe->piloto->sobrenome}} 
@@ -266,7 +341,7 @@
             $(".linha_resultados").removeClass("d-none");
         } else {
             // Exibe todas as linhas quando o checkbox está desmarcado
-            // $(".linha_resultados").removeClass("d-none");
+            // $(".linha_resultados").addClass("d-none");
             location.reload()
         }
     });

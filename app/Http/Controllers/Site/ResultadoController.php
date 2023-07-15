@@ -106,14 +106,14 @@ class ResultadoController extends Controller
         $corrida->observacoes = $request->observacoes;
         $corrida->updated_at = date('Y-m-d H:i:s');
 
-        if ($request->has('flg_sprint')) {
-            $corrida->flg_sprint = $request->flg_sprint;
+        if ($request->categoria == 'F1Sprint') {
+            $corrida->flg_sprint = 'S';
         } else {
             $corrida->flg_sprint = 'N';
         }
 
-        if ($request->has('flg_super_corrida')) {
-            $corrida->flg_super_corrida = $request->flg_super_corrida;
+        if ($request->categoria == 'SC') {
+            $corrida->flg_super_corrida = 'S';
         } else {
             $corrida->flg_super_corrida = 'N';
         }
@@ -135,22 +135,80 @@ class ResultadoController extends Controller
                             }
                         }
                     }
-                   
-                    if($corrida->flg_spring == 'S'){
-                        $model->pontuacao = $this->calcularPontuacaoSprint($model, $chegada);
-                    }elseif($corrida->flg_super_corrida == 'S'){
-                        $model->pontuacao = $this->calcularPontuacaoSuperCorrida($model, $chegada);
-                        $model->pontuacao_classica = $this->calcularPontuacaoClassica($model, $chegada);
-                        $model->pontuacao_personalizada = $this->calcularPontuacaoPersonalizada($model, $chegada);
-                        $model->pontuacao_invertida = $this->calcularPontuacaoInvertida($model, $chegada);
-                    }else{
+
+                    if($request->categoria == 'FormulaE'){
+                         //Regra de 3 pontos para o pole position
+                        if($model->largada == 1){
+                            $model->pontuacao = $this->calcularPontuacaoFormulaE($model, $chegada)+3;
+                            $model->pontuacao_personalizada = $this->calcularPontuacaoPersonalizada($model, $chegada);
+                            $model->pontuacao_classica = $this->calcularPontuacaoClassica($model, $chegada);
+                            $model->pontuacao_invertida = $this->calcularPontuacaoInvertida($model, $chegada);
+                        }else{
+                            $model->pontuacao = $this->calcularPontuacaoFormulaE($model, $chegada);
+                            $model->pontuacao_personalizada = $this->calcularPontuacaoPersonalizada($model, $chegada);
+                            $model->pontuacao_classica = $this->calcularPontuacaoClassica($model, $chegada);
+                            $model->pontuacao_invertida = $this->calcularPontuacaoInvertida($model, $chegada);
+                        }
+                    }
+
+                    if($request->categoria == 'F1'){
                         $model->pontuacao = $this->calcularPontuacao($model, $chegada);
-                        $model->pontuacao_classica = $this->calcularPontuacaoClassica($model, $chegada);
                         $model->pontuacao_personalizada = $this->calcularPontuacaoPersonalizada($model, $chegada);
+                        $model->pontuacao_classica = $this->calcularPontuacaoClassica($model, $chegada);
+                        $model->pontuacao_invertida = $this->calcularPontuacaoInvertida($model, $chegada);
+                    }
+
+                    if($request->categoria == 'F1Sprint'){
+                        $model->pontuacao = $this->calcularPontuacaoSprint($model, $chegada);
+                        $model->pontuacao_personalizada = $this->calcularPontuacaoPersonalizada($model, $chegada);
+                        $model->pontuacao_classica = $this->calcularPontuacaoClassica($model, $chegada);
+                        $model->pontuacao_invertida = $this->calcularPontuacaoInvertida($model, $chegada);  
+                    }
+
+                    if($request->categoria == 'SC'){
+                        $model->pontuacao = $this->calcularPontuacaoSuperCorrida($model, $chegada);
+                        $model->pontuacao_personalizada = $this->calcularPontuacaoPersonalizada($model, $chegada);
+                        $model->pontuacao_classica = $this->calcularPontuacaoClassica($model, $chegada);
+                        $model->pontuacao_invertida = $this->calcularPontuacaoInvertida($model, $chegada);  
+                    }
+
+                    if($request->categoria == 'Indy'){
+                        if($model->largada == 1){
+                            $model->pontuacao = $this->calcularPontuacaoIndy($model, $chegada)+1;
+                            $model->pontuacao_personalizada = $this->calcularPontuacaoPersonalizada($model, $chegada);
+                            $model->pontuacao_classica = $this->calcularPontuacaoClassica($model, $chegada);
+                            $model->pontuacao_invertida = $this->calcularPontuacaoInvertida($model, $chegada);
+                        }else{
+                            $model->pontuacao = $this->calcularPontuacaoIndy($model, $chegada);
+                            $model->pontuacao_personalizada = $this->calcularPontuacaoPersonalizada($model, $chegada);
+                            $model->pontuacao_classica = $this->calcularPontuacaoClassica($model, $chegada);
+                            $model->pontuacao_invertida = $this->calcularPontuacaoInvertida($model, $chegada);
+                        }
+                    }
+
+                    if($request->categoria == 'Stock1'){
+                        //Regra de 2 pontos para o pole position da Corrida 1
+                        if($model->largada == 1){
+                            $model->pontuacao = $this->calcularPontuacaoStockCar1($model, $chegada)+2;
+                            $model->pontuacao_personalizada = $this->calcularPontuacaoPersonalizada($model, $chegada);
+                            $model->pontuacao_classica = $this->calcularPontuacaoClassica($model, $chegada);
+                            $model->pontuacao_invertida = $this->calcularPontuacaoInvertida($model, $chegada);
+                        }else{
+                            $model->pontuacao = $this->calcularPontuacaoStockCar1($model, $chegada);
+                            $model->pontuacao_personalizada = $this->calcularPontuacaoPersonalizada($model, $chegada);
+                            $model->pontuacao_classica = $this->calcularPontuacaoClassica($model, $chegada);
+                            $model->pontuacao_invertida = $this->calcularPontuacaoInvertida($model, $chegada);
+                        }
+                    }
+                    
+                    if($request->categoria == 'Stock2'){
+                        $model->pontuacao = $this->calcularPontuacaoStockCar2($model, $chegada);
+                        $model->pontuacao_personalizada = $this->calcularPontuacaoPersonalizada($model, $chegada);
+                        $model->pontuacao_classica = $this->calcularPontuacaoClassica($model, $chegada);
                         $model->pontuacao_invertida = $this->calcularPontuacaoInvertida($model, $chegada);
                     }
                     
-                   $model->update();
+                    $model->update();
 
                 }else{
                     $model = new Resultado();
@@ -166,29 +224,79 @@ class ResultadoController extends Controller
                             }
                         }
                     }
-                    // if($corrida->flg_sprint == 'N'){
-                    //     $model->pontuacao = $this->calcularPontuacao($model, $chegada);
-                    //     $model->pontuacao_classica = $this->calcularPontuacaoClassica($model, $chegada);
-                    //     $model->pontuacao_personalizada = $this->calcularPontuacaoPersonalizada($model, $chegada);
-                    //     $model->pontuacao_invertida = $this->calcularPontuacaoInvertida($model, $chegada);
-                    // }else{
-                    //     $model->pontuacao = $this->calcularPontuacaoSprint($model, $chegada);
-                    // }
 
-                    if($corrida->flg_spring == 'S'){
-                        $model->pontuacao = $this->calcularPontuacaoSprint($model, $chegada);
-                    }elseif($corrida->flg_super_corrida == 'S'){
-                        $model->pontuacao = $this->calcularPontuacaoSuperCorrida($model, $chegada);
-                        $model->pontuacao_classica = $this->calcularPontuacaoClassica($model, $chegada);
-                        $model->pontuacao_personalizada = $this->calcularPontuacaoPersonalizada($model, $chegada);
-                        $model->pontuacao_invertida = $this->calcularPontuacaoInvertida($model, $chegada);
-                    }else{
+                    if($request->categoria == 'FormulaE'){
+                        if($model->largada == 1){
+                            $model->pontuacao = $this->calcularPontuacaoFormulaE($model, $chegada)+3;
+                            $model->pontuacao_personalizada = $this->calcularPontuacaoPersonalizada($model, $chegada);
+                            $model->pontuacao_classica = $this->calcularPontuacaoClassica($model, $chegada);
+                            $model->pontuacao = $this->calcularPontuacaoInvertida($model, $chegada);
+                        }else{
+                            $model->pontuacao = $this->calcularPontuacaoFormulaE($model, $chegada);
+                            $model->pontuacao_personalizada = $this->calcularPontuacaoPersonalizada($model, $chegada);
+                            $model->pontuacao_classica = $this->calcularPontuacaoClassica($model, $chegada);
+                            $model->pontuacao_invertida = $this->calcularPontuacaoInvertida($model, $chegada);
+                        }
+                    }
+
+                    if($request->categoria == 'F1'){
                         $model->pontuacao = $this->calcularPontuacao($model, $chegada);
-                        $model->pontuacao_classica = $this->calcularPontuacaoClassica($model, $chegada);
                         $model->pontuacao_personalizada = $this->calcularPontuacaoPersonalizada($model, $chegada);
+                        $model->pontuacao_classica = $this->calcularPontuacaoClassica($model, $chegada);
                         $model->pontuacao_invertida = $this->calcularPontuacaoInvertida($model, $chegada);
                     }
 
+                    if($request->categoria == 'F1Sprint'){
+                        $model->pontuacao = $this->calcularPontuacaoSprint($model, $chegada);
+                        $model->pontuacao_personalizada = $this->calcularPontuacaoPersonalizada($model, $chegada);
+                        $model->pontuacao_classica = $this->calcularPontuacaoClassica($model, $chegada);
+                        $model->pontuacao_invertida = $this->calcularPontuacaoInvertida($model, $chegada);  
+                    }
+
+                    if($request->categoria == 'SC'){
+                        $model->pontuacao = $this->calcularPontuacaoSuperCorrida($model, $chegada);
+                        $model->pontuacao_personalizada = $this->calcularPontuacaoPersonalizada($model, $chegada);
+                        $model->pontuacao_classica = $this->calcularPontuacaoClassica($model, $chegada);
+                        $model->pontuacao_invertida = $this->calcularPontuacaoInvertida($model, $chegada);  
+                    }
+
+                    if($request->categoria == 'Indy'){
+                        if($model->largada == 1){
+                            $model->pontuacao = $this->calcularPontuacaoIndy($model, $chegada)+1;
+                            $model->pontuacao_personalizada = $this->calcularPontuacaoPersonalizada($model, $chegada);
+                            $model->pontuacao_classica = $this->calcularPontuacaoClassica($model, $chegada);
+                            $model->pontuacao_invertida = $this->calcularPontuacaoInvertida($model, $chegada);
+                        }else{
+                            $model->pontuacao = $this->calcularPontuacaoIndy($model, $chegada);
+                            $model->pontuacao_personalizada = $this->calcularPontuacaoPersonalizada($model, $chegada);
+                            $model->pontuacao_classica = $this->calcularPontuacaoClassica($model, $chegada);
+                            $model->pontuacao_invertida = $this->calcularPontuacaoInvertida($model, $chegada);
+                        }
+                    }
+
+                    if($request->categoria == 'Stock1'){
+                        //Regra de 3 pontos para o pole position da Corrida 1
+                        if($model->largada == 1){
+                            $model->pontuacao = $this->calcularPontuacaoStockCar1($model, $chegada)+2;
+                            $model->pontuacao_personalizada = $this->calcularPontuacaoPersonalizada($model, $chegada);
+                            $model->pontuacao_classica = $this->calcularPontuacaoClassica($model, $chegada);
+                            $model->pontuacao_invertida = $this->calcularPontuacaoInvertida($model, $chegada);
+                        }else{
+                            $model->pontuacao = $this->calcularPontuacaoStockCar1($model, $chegada);
+                            $model->pontuacao_personalizada = $this->calcularPontuacaoPersonalizada($model, $chegada);
+                            $model->pontuacao_classica = $this->calcularPontuacaoClassica($model, $chegada);
+                            $model->pontuacao_invertida = $this->calcularPontuacaoInvertida($model, $chegada);
+                        }
+                    }
+                    
+                    if($request->categoria == 'Stock2'){
+                        $model->pontuacao = $this->calcularPontuacaoStockCar2($model, $chegada);
+                        $model->pontuacao_personalizada = $this->calcularPontuacaoPersonalizada($model, $chegada);
+                        $model->pontuacao_classica = $this->calcularPontuacaoClassica($model, $chegada);
+                        $model->pontuacao_invertida = $this->calcularPontuacaoInvertida($model, $chegada);
+                    }
+
+                    //salva as alterações 
                     if(($model->largada != null) || $model->chegada != null){
                         $model->save();
                     }
@@ -196,7 +304,8 @@ class ResultadoController extends Controller
                 }
 
         }
-         /**Cáculo da volta mais rapida */
+
+        /**Cáculo da volta mais rapida Formula 1 */
         if($corrida->volta_rapida != null){
             $resultadoVoltaRapida = Resultado::where('pilotoEquipe_id', $corrida->volta_rapida)
                                                 ->where('user_id', Auth::user()->id)
@@ -207,21 +316,9 @@ class ResultadoController extends Controller
                 $resultadoVoltaRapida->pontuacao = $resultadoVoltaRapida->pontuacao+1;
                 $resultadoVoltaRapida->update();
             }
+
         }
-
-        //Enviar Email Avisando que o resultado foi inserido
-        // $data["email"] = "vmelchior.93@gmail.com";
-        // $data["title"] = "Teste Email";
-        // $data["body"] = "Corpo do Email Teste";
-        
-        // $pdf = PDF::loadView('emails.teste', $data);
-  
-        // Mail::send('emails.teste', $data, function($message)use($data, $pdf) {
-        //     $message->to($data["email"], $data["email"])
-        //             ->subject($data["title"])
-        //             ->attachData($pdf->output(), "text.pdf");
-        // });              
-
+ 
         return redirect()->back();
     }
 
@@ -237,6 +334,55 @@ class ResultadoController extends Controller
     }
 
     public function calcularPontuacao($model, $chegada){
+        $primeiro = 25;
+        $segundo = 18;
+        $terceiro = 15;
+        $quarto = 12;
+        $quinto = 10;
+        $sexto = 8;
+        $setimo = 6;
+        $oitavo = 4;
+        $nono = 2;
+        $decimo = 1; 
+
+        switch ($chegada) {
+            case 1:
+                $model->pontuacao = $primeiro;
+                break;
+            case 2:
+                $model->pontuacao = $segundo;
+                break;
+            case 3:
+                $model->pontuacao = $terceiro;
+                break;
+            case 4:
+                $model->pontuacao = $quarto;
+                break;
+            case 5:
+                $model->pontuacao = $quinto;
+                break;
+            case 6:
+                $model->pontuacao = $sexto;
+                break;
+            case 7:
+                $model->pontuacao = $setimo;
+                break;
+            case 8:
+                $model->pontuacao = $oitavo;
+                break;
+            case 9:
+                $model->pontuacao = $nono;
+                break;
+            case 10:
+                $model->pontuacao = $decimo;
+                break;
+            default:
+            $model->pontuacao = 0;
+        }
+
+        return $model->pontuacao;
+    }
+    public function calcularPontuacaoFormulaE($model, $chegada){
         $primeiro = 25;
         $segundo = 18;
         $terceiro = 15;
@@ -425,6 +571,289 @@ class ResultadoController extends Controller
 
         return $model->pontuacao;
     }
+    public function calcularPontuacaoIndy($model, $chegada){
+        $primeiro = 50;
+        $segundo = 40;
+        $terceiro = 35;
+        $quarto = 32;
+        $quinto = 30;
+        $sexto = 28;
+        $setimo = 26;
+        $oitavo = 24;
+        $nono = 22;
+        $decimo = 20; 
+        $decimoPrimeiro = 19; 
+        $decimoSegundo = 18; 
+        $decimoTerceiro = 17; 
+        $decimoQuarto = 16; 
+        $decimoQuinto = 15; 
+        $decimoSexto = 14; 
+        $decimoSetimo = 13; 
+        $decimoOitavo = 12; 
+        $decimoNono = 11; 
+        $vigesimo = 10;
+        $vigesimoPrimeiro = 9;
+        $vigesimoSegundo = 8;
+        $vigesimoTerceiro = 7;
+        $vigesimoQuarto = 6;
+
+        switch ($chegada) {
+            case 1:
+                $model->pontuacao = $primeiro;
+                break;
+            case 2:
+                $model->pontuacao = $segundo;
+                break;
+            case 3:
+                $model->pontuacao = $terceiro;
+                break;
+            case 4:
+                $model->pontuacao = $quarto;
+                break;
+            case 5:
+                $model->pontuacao = $quinto;
+                break;
+            case 6:
+                $model->pontuacao = $sexto;
+                break;
+            case 7:
+                $model->pontuacao = $setimo;
+                break;
+            case 8:
+                $model->pontuacao = $oitavo;
+                break;
+            case 9:
+                $model->pontuacao = $nono;
+                break;
+            case 10:
+                $model->pontuacao = $decimo;
+                break;
+            case 11:
+                $model->pontuacao = $decimoPrimeiro;
+                break;
+            case 12:
+                $model->pontuacao = $decimoSegundo;
+                break;
+            case 13:
+                $model->pontuacao = $decimoTerceiro;
+                break;
+            case 14:
+                $model->pontuacao = $decimoQuarto;
+                break;
+            case 15:
+                $model->pontuacao = $decimoQuinto;
+                break;
+            case 16:
+                $model->pontuacao = $decimoSexto;
+                break;
+            case 17:
+                $model->pontuacao = $decimoSetimo;
+                break;
+            case 18:
+                $model->pontuacao = $decimoOitavo;
+                break;
+            case 19:
+                $model->pontuacao = $decimoNono;
+                break;
+            case 20:
+                $model->pontuacao = $vigesimo;
+                break;
+            case 21:
+                $model->pontuacao = $vigesimoPrimeiro;
+                break;
+            case 22:
+                $model->pontuacao = $vigesimoSegundo;
+                break;
+            case 23:
+                $model->pontuacao = $vigesimoTerceiro;
+                break;
+            case 24:
+                $model->pontuacao = $vigesimoQuarto;
+                break;
+            default:
+            $model->pontuacao = 5;
+        }
+
+        return $model->pontuacao;
+    }
+    public function calcularPontuacaoStockCar1($model, $chegada){
+        $primeiro = 30;
+        $segundo = 26;
+        $terceiro = 22;
+        $quarto = 19;
+        $quinto = 17;
+        $sexto = 15;
+        $setimo = 14;
+        $oitavo = 13;
+        $nono = 12;
+        $decimo = 11; 
+        $decimoPrimeiro = 10; 
+        $decimoSegundo = 9; 
+        $decimoTerceiro = 8; 
+        $decimoQuarto = 7; 
+        $decimoQuinto = 6; 
+        $decimoSexto = 5; 
+        $decimoSetimo = 4; 
+        $decimoOitavo = 3; 
+        $decimoNono = 2; 
+        $vigesimo = 1;
+
+        switch ($chegada) {
+            case 1:
+                $model->pontuacao = $primeiro;
+                break;
+            case 2:
+                $model->pontuacao = $segundo;
+                break;
+            case 3:
+                $model->pontuacao = $terceiro;
+                break;
+            case 4:
+                $model->pontuacao = $quarto;
+                break;
+            case 5:
+                $model->pontuacao = $quinto;
+                break;
+            case 6:
+                $model->pontuacao = $sexto;
+                break;
+            case 7:
+                $model->pontuacao = $setimo;
+                break;
+            case 8:
+                $model->pontuacao = $oitavo;
+                break;
+            case 9:
+                $model->pontuacao = $nono;
+                break;
+            case 10:
+                $model->pontuacao = $decimo;
+                break;
+            case 11:
+                $model->pontuacao = $decimoPrimeiro;
+                break;
+            case 12:
+                $model->pontuacao = $decimoSegundo;
+                break;
+            case 13:
+                $model->pontuacao = $decimoTerceiro;
+                break;
+            case 14:
+                $model->pontuacao = $decimoQuarto;
+                break;
+            case 15:
+                $model->pontuacao = $decimoQuinto;
+                break;
+            case 16:
+                $model->pontuacao = $decimoSexto;
+                break;
+            case 17:
+                $model->pontuacao = $decimoSetimo;
+                break;
+            case 18:
+                $model->pontuacao = $decimoOitavo;
+                break;
+            case 19:
+                $model->pontuacao = $decimoNono;
+                break;
+            case 20:
+                $model->pontuacao = $vigesimo;
+                break;
+            default:
+            $model->pontuacao = 0;
+        }
+
+        return $model->pontuacao;
+    }
+    public function calcularPontuacaoStockCar2($model, $chegada){
+        $primeiro = 24;
+        $segundo = 20;
+        $terceiro = 18;
+        $quarto = 17;
+        $quinto = 16;
+        $sexto = 15;
+        $setimo = 14;
+        $oitavo = 13;
+        $nono = 12;
+        $decimo = 11; 
+        $decimoPrimeiro = 10; 
+        $decimoSegundo = 9; 
+        $decimoTerceiro = 8; 
+        $decimoQuarto = 7; 
+        $decimoQuinto = 6; 
+        $decimoSexto = 5; 
+        $decimoSetimo = 4; 
+        $decimoOitavo = 3; 
+        $decimoNono = 2; 
+        $vigesimo = 1;
+
+        switch ($chegada) {
+            case 1:
+                $model->pontuacao = $primeiro;
+                break;
+            case 2:
+                $model->pontuacao = $segundo;
+                break;
+            case 3:
+                $model->pontuacao = $terceiro;
+                break;
+            case 4:
+                $model->pontuacao = $quarto;
+                break;
+            case 5:
+                $model->pontuacao = $quinto;
+                break;
+            case 6:
+                $model->pontuacao = $sexto;
+                break;
+            case 7:
+                $model->pontuacao = $setimo;
+                break;
+            case 8:
+                $model->pontuacao = $oitavo;
+                break;
+            case 9:
+                $model->pontuacao = $nono;
+                break;
+            case 10:
+                $model->pontuacao = $decimo;
+                break;
+            case 11:
+                $model->pontuacao = $decimoPrimeiro;
+                break;
+            case 12:
+                $model->pontuacao = $decimoSegundo;
+                break;
+            case 13:
+                $model->pontuacao = $decimoTerceiro;
+                break;
+            case 14:
+                $model->pontuacao = $decimoQuarto;
+                break;
+            case 15:
+                $model->pontuacao = $decimoQuinto;
+                break;
+            case 16:
+                $model->pontuacao = $decimoSexto;
+                break;
+            case 17:
+                $model->pontuacao = $decimoSetimo;
+                break;
+            case 18:
+                $model->pontuacao = $decimoOitavo;
+                break;
+            case 19:
+                $model->pontuacao = $decimoNono;
+                break;
+            case 20:
+                $model->pontuacao = $vigesimo;
+                break;
+            default:
+            $model->pontuacao = 0;
+        }
+
+        return $model->pontuacao;
+    }
 
     public function calcularPontuacaoPersonalizada($model, $chegada){
         $primeiro = 50;
@@ -519,7 +948,7 @@ class ResultadoController extends Controller
                 $model->pontuacao_personalizada = $vigesimoSegundo;
                 break;
             default:
-            $model->pontuacao_personalizada = 0;
+            $model->pontuacao_personalizada = 1;
         }
 
         return $model->pontuacao_personalizada;
@@ -618,7 +1047,7 @@ class ResultadoController extends Controller
                 $model->pontuacao_invertida = $vigesimoSegundo;
                 break;
             default:
-            $model->pontuacao_invertida = 0;
+            $model->pontuacao_invertida = 70;
         }
 
         return $model->pontuacao_invertida;
