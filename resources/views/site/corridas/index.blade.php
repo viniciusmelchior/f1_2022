@@ -29,6 +29,7 @@
                 <tr>
                     <th>#</th>
                     <th>Pista</th>
+                    <th>Qtd Voltas</th>
                     <th>Dificuldade IA</th>
                     <th>Atualizado Em</th>
                     <th>Ações</th>
@@ -44,6 +45,9 @@
                             @elseif($corrida->flg_super_corrida == 'S')
                                 - Super Corrida
                             @endif</td>
+                            <td>
+                                {{$corrida->pista->qtd_voltas != null ? $corrida->pista->qtd_voltas : '-'}}
+                            </td>
                         <td>{{$corrida->dificuldade_ia}}</td>
                         <td>
                             @if (isset($corrida->updated_at))
