@@ -77,98 +77,38 @@
                     @endif 
             </div>
 
-            {{-- <div class="d-flex" style="justify-content: space-between;">
-                <div class="form-group form-check mt-3 mb-3">
-                    <input
-                    type="checkbox"
-                    class="form-check-input"
-                    id="flg_sprint"
-                    name="flg_sprint"
-                    value="S"
-                    @if(isset($corrida) && $corrida->flg_sprint == 'S') checked @endif
-                    >
-                    <label class="form-check-label" for="flg_sprint">Corrida Sprint F1</label>
-                </div>
-                <div class="form-group form-check mt-3 mb-3">
-                    <input
-                    type="checkbox"
-                    class="form-check-input"
-                    id="flg_super_corrida"
-                    name="flg_super_corrida"
-                    value="S"
-                    >
-                    <label class="form-check-label" for="flg_super_corrida">Super Corrida F1</label>
-                </div>
-                <div class="form-group form-check mt-3 mb-3">
-                    <input
-                    type="checkbox"
-                    class="form-check-input"
-                    id="flg_formula_e"
-                    name="flg_formula_e"
-                    value="S"
-                    >
-                    <label class="form-check-label" for="flg_formula_e">Formula E</label>
-                </div>
-                <div class="form-group form-check mt-3 mb-3">
-                    <input
-                    type="checkbox"
-                    class="form-check-input"
-                    id="flg_indy"
-                    name="flg_indy"
-                    value="S"
-                    >
-                    <label class="form-check-label" for="flg_indy">Formula Indy</label>
-                </div>
+            <div class="form-group form-check mt-3 mb-3">
+                <input
+                type="checkbox"
+                class="form-check-input"
+                id="flg_super_corrida"
+                name="flg_super_corrida"
+                value="S"
+                >
+                <label class="form-check-label" for="flg_super_corrida">Super Corrida F1</label>
             </div>
-            <div class="d-flex" style="justify-content: space-between;">
-                <div class="form-group form-check mt-3 mb-3">
-                    <input
-                    type="checkbox"
-                    class="form-check-input"
-                    id="flg_stock_car_1"
-                    name="flg_stock_car_1"
-                    value="S"
-                    >
-                    <label class="form-check-label" for="flg_stock_car_1">Stock Car - Corrida 1</label>
+
+            <hr>
+
+            <div class="">
+                <div style="margin-bottom: 25px;">
+                    <label for="inputFileLargada">Upload JSON Largada</label>
+                    <br>
+                    <input type="file" id="inputFileLargada">
                 </div>
-                <div class="form-group form-check mt-3 mb-3">
-                    <input
-                    type="checkbox"
-                    class="form-check-input"
-                    id="flg_stock_car_2"
-                    name="flg_stock_car_2"
-                    value="S"
-                    
-                    >
-                    <label class="form-check-label" for="flg_stock_car_2">Stock Car - Corrida 2</label>
-                </div>
-                <div class="form-group form-check mt-3 mb-3">
-                    <input
-                    type="checkbox"
-                    class="form-check-input"
-                    id="flg_formula_2_principal"
-                    name="flg_formula_2_principal"
-                    value="S"
-                    >
-                    <label class="form-check-label" for="flg_formula_2_principal">F2 - Principal</label>
-                </div>
-                <div class="form-group form-check mt-3 mb-3">
-                    <input
-                    type="checkbox"
-                    class="form-check-input"
-                    id="flg_formula_2_sprint"
-                    name="flg_formula_2_sprint"
-                    value="S"
-                    >
-                    <label class="form-check-label" for="flg_formula_2_sprint">F2 - Sprint</label>
-                </div>
-            </div> --}}
+                  <div style="argin-bottom: 25px; ">
+                      <label for="inputFileChegada">Upload JSON Chegada</label>
+                      <br>
+                      <input type="file" id="inputFileChegada">
+                  </div>
+            </div>
+
         <hr>
 
         <table class="table text-white">
             <thead>
                 <tr>
-                    <th>Piloto</th>
+                    <th colspan="2">Piloto</th>
                     <th>Largada</th>
                     <th>Chegada</th>
                     <th>Abandono</th>
@@ -178,18 +118,19 @@
                     <th>Invertida</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="tabela">
                 @foreach($model as $pilotoEquipe)
                 @php 
                     $infoPiloto =  Resultado::where('user_id', Auth::user()->id)->where('pilotoEquipe_id', $pilotoEquipe->id)->where('corrida_id', $corrida->id)->first();
                 @endphp
-                    <tr class="linha_resultados">
+                    {{-- <tr class="linha_resultados"> --}}
                     {{-- <tr style="color:{{$pilotoEquipe->equipe->des_cor}};" class="linha_resultados"> --}}
-                    {{-- <tr class="linha_resultados {{$pilotoEquipe->flg_super_corrida == 'S' ? 'd-none': ''}}"> --}}
+                    <tr class="linha_resultados {{$pilotoEquipe->flg_super_corrida == 'S' ? 'd-none': ''}}">
+                        <td> <img src="{{asset('images/'.$pilotoEquipe->equipe->imagem)}}" alt="" style="width: 25px; height:25px;"></td>
                         <td style="vertical-align: middle;">
-                            <img src="{{asset('images/'.$pilotoEquipe->equipe->imagem)}}" alt="" style="width: 25px; height:25px;">
+                            {{-- <img src="{{asset('images/'.$pilotoEquipe->equipe->imagem)}}" alt="" style="width: 25px; height:25px;"> --}}
                             {{$pilotoEquipe->piloto->nome}} {{$pilotoEquipe->piloto->sobrenome}} 
-                            <span> <input type="hidden" name="pilotoEquipe_id[]" value="{{$pilotoEquipe->id}}"></span>
+                            {{-- <span> <input type="hidden" name="pilotoEquipe_id[]" value="{{$pilotoEquipe->id}}"></span> --}}
                         </td>
                         <td>
                             <input
@@ -321,15 +262,102 @@
         <a href="{{route('temporadas.index')}}" class="btn btn-secondary ml-3">Voltar</a>
       </form>
    </div>
+@endsection
+<script type="module">
+document.getElementById('inputFileLargada').addEventListener('change', function(event) {
+        // console.log('funcionou largada')
+        const arquivo = event.target.files[0];
+        const leitor = new FileReader();
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script>
-       /*  $('.flg_abandono').click(function (e) { 
-            e.preventDefault();
-            //alert(this.value);
-            this.value = 'S';
-           // alert(this.value)
-        }); */
+        leitor.onload = function(e) {
+            const conteudo = e.target.result;
+            let objetoJSON = JSON.parse(conteudo);
+            gerarResultadoLargada(objetoJSON)
+        };
+
+        leitor.readAsText(arquivo);
+    });
+
+    document.getElementById('inputFileChegada').addEventListener('change', function(event) {
+        // console.log('funcionou chegada')
+        const arquivo = event.target.files[0];
+        const leitor = new FileReader();
+
+        leitor.onload = function(e) {
+            const conteudo = e.target.result;
+            let objetoJSON = JSON.parse(conteudo);
+            gerarResultadoChegada(objetoJSON)
+        };
+
+        leitor.readAsText(arquivo);
+    });
+
+    function gerarResultadoChegada(resultados) {
+       
+        var resultados = resultados
+        // console.log(resultados)
+        var pilotos = resultados['players'];
+        var resultadoFinal = resultados['sessions'][0]['raceResult'];
+
+        let ordemChegada = [];
+
+        for (let index = 0; index < resultadoFinal.length; index++) {
+            ordemChegada.push(pilotos[resultadoFinal[index]]['name']);
+        }
+
+        const tabela = document.getElementById('tabela');
+
+        // Obtendo todas as linhas da tabela
+        const linhas = tabela.rows;
+        
+        //deixar o código dinâmico
+        const arrayDeLinhas = Array.from(linhas);
+
+        //transformar o array em UPPERCASE
+        ordemChegada = ordemChegada.map(item => item.toUpperCase())
+
+        arrayDeLinhas.forEach((linha, indice) => {
+            let nomePiloto = linha.cells[1].innerHTML.toUpperCase().trim() //limpa os espaços do inicio e fim da string
+            nomePiloto = nomePiloto.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); //retira os ascentos
+            const valorChegada = parseInt(ordemChegada.indexOf(nomePiloto))+1
+            if(valorChegada > 0){
+                linha.cells[3].querySelector('input[type="number"]').value = valorChegada
+            }
+        });
+    }
+
+    function gerarResultadoLargada(resultados){
+        var resultados = resultados;
+        var pilotos = resultados['players'];
+        var resultadoFinal = resultados['sessions'][1]['bestLaps'].sort((a, b) => a.time - b.time);
+
+        let ordemLargada = [];
+
+        for (let index = 0; index < resultadoFinal.length; index++) {
+            ordemLargada.push(pilotos[resultadoFinal[index]['car']]['name']);
+        }
+
+        const tabela = document.getElementById('tabela');
+
+        // Obtendo todas as linhas da tabela
+        const linhas = tabela.rows;
+        
+        //deixar o código dinâmico
+        const arrayDeLinhas = Array.from(linhas);
+
+        //transformar o array em UPPERCASE
+        ordemLargada = ordemLargada.map(item => item.toUpperCase())
+
+        arrayDeLinhas.forEach((linha, indice) => {
+            let nomePiloto = linha.cells[1].innerHTML.toUpperCase().trim() //limpa os espaços do inicio e fim da string
+            nomePiloto = nomePiloto.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); ///retira os ascentos
+            const valorLargada = parseInt(ordemLargada.indexOf(nomePiloto))+1
+
+            if(valorLargada > 0){
+                linha.cells[2].querySelector('input[type="number"]').value = valorLargada
+            }
+        });
+    }
 
     var checkbox = $("#flg_super_corrida");
 
@@ -345,5 +373,4 @@
             location.reload()
         }
     });
-    </script>
-@endsection
+</script>
