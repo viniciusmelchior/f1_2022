@@ -133,6 +133,7 @@
                             {{-- <span> <input type="hidden" name="pilotoEquipe_id[]" value="{{$pilotoEquipe->id}}"></span> --}}
                         </td>
                         <td>
+                            <span> <input type="hidden" name="pilotoEquipe_id[]" value="{{$pilotoEquipe->id}}"></span>
                             <input
                             type="number"
                             class="largada" 
