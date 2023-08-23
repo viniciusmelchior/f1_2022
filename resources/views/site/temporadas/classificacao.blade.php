@@ -52,6 +52,9 @@
 
   <div class="container mt-3 mb-3">
 
+    <input type="hidden" id="temporada_id" name="temporada_id" value="{{$temporada->id}}">
+    <input type="hidden" id="total_corridas" name="total_corridas" value="{{$totalCorridas}}">
+
     <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
@@ -68,6 +71,12 @@
 
     <div class="container">
         <div class="header-tabelas bg-dark text-light">Pontuação Normal</div>
+        <div>Anterior
+            <i class="bi bi-arrow-left-square" id="corrida_anterior" data-id="{{$corridaAtual->ordem}}" onclick="corridaAnterior(this)"></i>
+            <i class="bi bi-arrow-right-square" id="proxima_corrida" data-id="{{$corridaAtual->ordem}}" onclick="proximaCorrida(this)"></i>
+            Próxima
+        </div>
+        <div class="py-3">Após GP <span id="nome_corrida">{{$corridaAtual->pista->nome}}</span><span> (Etapa <span id="ordem_corrida">{{$corridaAtual->ordem}}</span> de {{$totalCorridas}})</span></div>
         <div class="d-flex bg-dark text-light p-3" style="justify-content: space-around; flex-wrap: wrap;">
             <div class="montaTabelaPilotos">
                 <table class="table text-light" id="tabelaClassificacaoPilotos">
@@ -80,8 +89,8 @@
                         </tr>
                     </thead>
                     @if(count($resultadosPilotos) > 0)
+                    <tbody id="TbodytabelaClassificacaoPilotos">
                         @foreach($resultadosPilotos as $key => $piloto) 
-                        <tbody>
                             <tr>
                                 <td style="">{{$key+1}}</td>
                                 <td style="vertical-align: middle;">
@@ -92,8 +101,8 @@
                                 <td class="pontosPiloto" style="">{{$piloto->total}}</td>
                                 <td class="diferencaPontosPiloto ocultar-mobile" style=""></td>
                             </tr>
-                        </tbody> 
                         @endforeach
+                    </tbody> 
                     @else 
                         <tr>
                             <td colspan="3">Sem dados registrados</td>
@@ -334,7 +343,15 @@
 </script>
 
 <script>
+    urlgetClassificacaoAposCorrida = "<?=route('fetch.getClassificacaoAposCorrida')?>"
+</script>
+
+<script>
     $(document).ready(function () {
+        calculaDiferencasPontuacao()
+    });
+
+    function calculaDiferencasPontuacao(){
         tdPontuacaoPilotos = document.querySelectorAll('.pontosPiloto');
         tdDiferencaPilotos = document.querySelectorAll('.diferencaPontosPiloto')
         tdPontuacaoEquipes = document.querySelectorAll('.pontosEquipe');
@@ -356,5 +373,150 @@
                 tdDiferencaEquipes[j+1].innerText = ` - ${diferencaEquipes}`;
             }
         }
-    });
+    }
+
+    function corridaAnterior(elemento){
+        botaoVoltarCorrida = document.getElementById("corrida_anterior");
+        botaoAvancarCorrida = document.getElementById("proxima_corrida");
+        temporada_id = document.getElementById("temporada_id").value;
+        nome_corrida = document.getElementById("nome_corrida");
+        ordemCorrida = document.getElementById("ordem_corrida");
+        tabelaClassificacaoPilotos = document.getElementById("TbodytabelaClassificacaoPilotos");
+
+        var corrida_id = elemento.getAttribute("data-id");
+        corrida_id--;
+
+        if(corrida_id < 1){
+            alert("primeira corrida ja está selecionada")
+            return
+        }
+
+        //montagem da tabela
+        tabelaClassificacaoPilotos.innerHTML = "";
+
+         // como queremos saber o resultado da corrida anterior, diminuimos um numero
+        console.log(corrida_id)
+
+        //atualizar o data id
+        botaoVoltarCorrida.setAttribute("data-id", corrida_id);
+        botaoAvancarCorrida.setAttribute("data-id", corrida_id);
+
+        var dados = {
+            corrida_id: corrida_id,
+            temporada_id: temporada_id
+        };
+
+        // Configurações da requisição
+        var url = urlgetClassificacaoAposCorrida; // Substitua pela URL da sua API
+        var opcoes = {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            body: JSON.stringify(dados)
+        };
+
+        // Realiza a requisição usando fetch
+        fetch(url, opcoes)
+            .then(response => response.json())
+            .then(data => {
+                
+                data.resultadosPilotos.forEach((element, index) => {
+                    var assetPath = "{{ asset('images/') }}" + "/"+element.imagem;
+
+                    tabelaClassificacaoPilotos.innerHTML += `<tr>
+                    <td>${index+1}</td>
+                    <td style="vertical-align: middle;">
+                        <img src="${assetPath}" style="width: 25px; height:25px;">
+                        <span style="display: inline-block; vertical-align: middle;">${element.nome}</span>
+                        <span class="driver-surname" style="display: inline-block; vertical-align: middle;">${element.sobrenome}</span>
+                    </td>
+                    <td class="pontosPiloto">${element.total}</td>
+                    <td class="diferencaPontosPiloto ocultar-mobile">0</td>
+                    </tr>`
+                });
+                nome_corrida.innerText =  data.corridaAtual
+                ordemCorrida.innerText = data.ordemCorrida
+                console.log(data.resultadosPilotos, data.corridaAtual) 
+                calculaDiferencasPontuacao()
+            })
+            .catch(error => {
+                console.error("Ocorreu um erro:", error);
+            });
+        }
+
+    //inicio função pontuação proxima corrida
+    function proximaCorrida(elemento){
+        botaoVoltarCorrida = document.getElementById("corrida_anterior");
+        botaoAvancarCorrida = document.getElementById("proxima_corrida");
+        temporada_id = document.getElementById("temporada_id").value;
+        total_corridas = document.getElementById("total_corridas").value;
+        nome_corrida = document.getElementById("nome_corrida");
+        ordemCorrida = document.getElementById("ordem_corrida");
+        tabelaClassificacaoPilotos = document.getElementById("TbodytabelaClassificacaoPilotos");
+
+        var corrida_id = elemento.getAttribute("data-id");
+        corrida_id++; // como queremos saber o resultado da proxima corrida, aumentamos um numero
+
+        if(corrida_id > total_corridas){
+            alert("última corrida ja está selecionada")
+            return
+        }
+
+        //montagem da tabela
+        tabelaClassificacaoPilotos.innerHTML = "";
+
+        console.log(corrida_id)
+
+        //atualizar o data id
+        botaoVoltarCorrida.setAttribute("data-id", corrida_id);
+        botaoAvancarCorrida.setAttribute("data-id", corrida_id);
+
+        var dados = {
+            corrida_id: corrida_id,
+            temporada_id: temporada_id
+        };
+
+        // Configurações da requisição
+        var url = urlgetClassificacaoAposCorrida; // Substitua pela URL da sua API
+        var opcoes = {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            body: JSON.stringify(dados)
+        };
+
+        // Realiza a requisição usando fetch
+        fetch(url, opcoes)
+            .then(response => response.json())
+            .then(data => {
+                
+                data.resultadosPilotos.forEach((element, index) => {
+                    var assetPath = "{{ asset('images/') }}" + "/"+element.imagem;
+
+                    tabelaClassificacaoPilotos.innerHTML += `<tr>
+                    <td>${index+1}</td>
+                    <td style="vertical-align: middle;">
+                        <img src="${assetPath}" style="width: 25px; height:25px;">
+                        <span style="display: inline-block; vertical-align: middle;">${element.nome}</span>
+                        <span class="driver-surname" style="display: inline-block; vertical-align: middle;">${element.sobrenome}</span>
+                    </td>
+                    <td class="pontosPiloto">${element.total}</td>
+                    <td class="diferencaPontosPiloto ocultar-mobile">0</td>
+                    </tr>`
+                });
+                nome_corrida.innerText =  data.corridaAtual
+                ordemCorrida.innerText = data.ordemCorrida
+                console.log(data.resultadosPilotos, data.corridaAtual) 
+                calculaDiferencasPontuacao()
+            })
+            .catch(error => {
+                console.error("Ocorreu um erro:", error);
+            });
+    }
+    
+
 </script>

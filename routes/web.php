@@ -164,5 +164,8 @@ route::get('/anos/edit/{id}', [AnoController::class, 'edit'])->name('anos.edit')
 route::put('/anos/update/{id}', [AnoController::class, 'update'])->name('anos.update')->middleware('auth');
 route::get('/anos/delete/{id}', [AnoController::class, 'destroy'])->name('anos.delete')->middleware('auth');
 
+/**Classificação após corrida */
+route::post('/fetch/getClassificacaoAposCorrida', [TemporadaController::class, 'getClassificacaoAposCorrida'])->name('fetch.getClassificacaoAposCorrida')->middleware('auth');
+
 
 

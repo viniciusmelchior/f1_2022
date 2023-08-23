@@ -30,7 +30,7 @@
                     <th>#</th>
                     <th>Pista</th>
                     <th>Qtd Voltas</th>
-                    <th>Dificuldade IA</th>
+                    {{-- <th>Dificuldade IA</th> --}}
                     <th>Atualizado Em</th>
                     <th>Ações</th>
                 </tr>
@@ -48,7 +48,7 @@
                             <td>
                                 {{$corrida->pista->qtd_voltas != null ? $corrida->pista->qtd_voltas : '-'}}
                             </td>
-                        <td>{{$corrida->dificuldade_ia}}</td>
+                        {{-- <td>{{$corrida->dificuldade_ia}}</td> --}}
                         <td>
                             @if (isset($corrida->updated_at))
                                 {{-- {{date('d/m/Y', strtotime($corrida->updated_at))}} às {{date('H:m:s', strtotime($corrida->updated_at))}} --}}

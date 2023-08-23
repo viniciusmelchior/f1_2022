@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Site;
 
 use App\Http\Controllers\Controller;
 use App\Models\Site\Ano;
+use App\Models\Site\Corrida;
+use App\Models\Site\Resultado;
 use App\Models\Site\Temporada;
 use App\Models\Site\Titulo;
 use Illuminate\Http\Request;
@@ -85,6 +87,17 @@ class TemporadaController extends Controller
         $usuario = Auth::user()->id; 
         $temporada = Temporada::where('user_id', Auth::user()->id)->where('id', $id)->first();
 
+        $corridaAtual = Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                    ->where('resultados.user_id', Auth::user()->id)
+                                    ->where('corridas.temporada_id', $id)
+                                    ->where('resultados.chegada', '<>', null)
+                                    ->orderBy('corrida_id', 'desc')
+                                    ->first();
+
+        $totalCorridas = Corrida::where('user_id', Auth::user()->id)->where('temporada_id', $temporada->id)->where('flg_sprint', 'N')->count();
+
+        $corridaAtual = Corrida::find($corridaAtual->corrida_id);
+
         $retorno = $this->montaClassificacao($usuario, $temporada);
         $resultadosPilotos = $retorno['resultadoPilotos'];
         $resultadosEquipes = $retorno['resultadoEquipes'];
@@ -101,7 +114,7 @@ class TemporadaController extends Controller
         $resultadosPilotosAlternativa = $retornoAlternativa['resultadoPilotosAlternativa'];
         $resultadosEquipesAlternativa = $retornoAlternativa['resultadoEquipesAlternativa'];
 
-        return view('site.temporadas.classificacao', compact('temporada', 'resultadosPilotos','resultadosEquipes','resultadosPilotosClassico','resultadosEquipesClassico','resultadosPilotosInvertida','resultadosEquipesInvertida','resultadosPilotosAlternativa','resultadosEquipesAlternativa'));
+        return view('site.temporadas.classificacao', compact('corridaAtual','totalCorridas','temporada', 'resultadosPilotos','resultadosEquipes','resultadosPilotosClassico','resultadosEquipesClassico','resultadosPilotosInvertida','resultadosEquipesInvertida','resultadosPilotosAlternativa','resultadosEquipesAlternativa'));
     } 
 
     public function montaClassificacao($usuario, $temporada){
@@ -272,4 +285,72 @@ class TemporadaController extends Controller
         $temporada->delete();
         return redirect()->back();
     }
+
+    /**
+     * rotas para montar classificação de acordo com a corrida
+     */
+
+     public function getClassificacaoAposCorrida(Request $request){
+
+        $usuario = Auth::user()->id; 
+        $temporada = Temporada::where('user_id', Auth::user()->id)->where('id', $request->temporada_id)->first();
+        $ordem = $request->corrida_id;
+
+        $retorno = $this->montaClassificacaoAposCorrida($usuario, $ordem, $temporada);
+        $resultadosPilotos = $retorno['resultadoPilotos'];
+
+        $corrida = Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                    ->where('resultados.user_id', Auth::user()->id)
+                                    ->where('corridas.temporada_id', $temporada->id)
+                                    ->where('resultados.chegada', '<>', null)
+                                    ->where('corridas.ordem', $ordem)
+                                    ->orderBy('corrida_id', 'desc')
+                                    ->first();
+
+        $corrida = Corrida::find($corrida->corrida_id);
+        $ordemCorrida = $corrida->ordem;
+        $corridaAtual = $corrida->pista->nome;
+
+        // dd($resultadosPilotos);
+
+        return response()->json([
+            'message' => 'OK',
+            'ordemCorrida' => $ordemCorrida,
+            'corridaAtual' => $corridaAtual,
+            'resultadosPilotos' => $resultadosPilotos
+        ]);  
+
+     }
+
+    public function montaClassificacaoAposCorrida($usuario, $ordem, $temporada){
+                                        $resultadosPilotos = DB::select('select piloto_id,piloto_equipes.id as pilotoEquipe_id, pilotos.nome, pilotos.sobrenome ,equipes.nome as equipe, equipes.imagem, sum(pontuacao) as total from resultados
+                                        join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
+                                        join pilotos on pilotos.id = piloto_equipes.piloto_id
+                                        join equipes on equipes.id = piloto_equipes.equipe_id
+                                        join corridas on corridas.id = resultados.corrida_id
+                                        join temporadas on temporadas.id = corridas.temporada_id
+                                        where temporadas.id = '.$temporada->id.'
+                                        and corridas.ordem <= '.$ordem.'
+                                        and resultados.user_id = '.$usuario.'
+                                        group by piloto_equipes.piloto_id
+                                        order by total desc');
+
+                                        $resultadosEquipes = DB::select('select equipe_id, equipes.nome as nome, equipes.imagem, sum(pontuacao) as total from resultados
+                                        join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
+                                        join equipes on equipes.id = piloto_equipes.equipe_id
+                                        join corridas on corridas.id = resultados.corrida_id
+                                        join temporadas on temporadas.id = corridas.temporada_id
+                                        where temporadas.id = '.$temporada->id.'
+                                        and resultados.user_id = '.$usuario.'
+                                        group by piloto_equipes.equipe_id
+                                        order by total desc');
+
+        return [
+            'resultadoPilotos' => $resultadosPilotos,
+            'resultadoEquipes' => $resultadosEquipes,
+            'piloto_campeao' => $resultadosPilotos,
+            'equipe_campea' => $resultadosEquipes
+        ];
+    }
+
 }
