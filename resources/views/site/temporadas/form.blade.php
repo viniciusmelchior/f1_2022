@@ -29,7 +29,7 @@
         <div class="mb-3">
             <label for="observacoes" class="form-label">Observações</label>
             <textarea class="form-control" name="observacoes" id="observacoes" rows="10">
-                @if($model->observacoes)
+                @if(isset($model->observacoes))
                     {{$model->observacoes}}
                 @endif
             </textarea>
