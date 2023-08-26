@@ -70,6 +70,14 @@
         @else
             <p>Nenhuma corrida cadastrada</p>
         @endif
+        <div class="mb-3">
+            <label for="observacoes" class="form-label">Observações</label>
+            <textarea class="form-control" name="observacoes" id="observacoes" rows="10" readonly>
+                @if($temporada->observacoes)
+                    {{$temporada->observacoes}}
+                @endif
+            </textarea>
+        </div>
     </div>
     <a href="{{route('corridas.adicionar', [$temporada->id])}}" class="btn btn-primary">Adicionar Corridas</a>
     <a href="{{route('temporadas.index')}}" class="btn btn-secondary ml-3">Voltar</a>

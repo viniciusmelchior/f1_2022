@@ -209,7 +209,8 @@
                     </div>
                 </div>
                 <div class="image-wrapper mt-3">
-                    <img src="{{asset('images/'.$modelEquipe->imagem)}}" alt="">
+                    {{-- <img src="{{ $modelEquipe->imagem != '' ? asset('images/'.$modelEquipe->imagem) : asset('images/equipes_placeholder.png') }}" alt=""> --}}
+                    <img src="{{ $modelEquipe->imagem != '' ? asset('images/'.$modelEquipe->imagem) : 'https://www.adaptivewfs.com/wp-content/uploads/2020/07/logo-placeholder-image.png' }}" alt="">
                 </div>
             </div>
             <div id="driver-stats" class="bg-dark text-light">
@@ -268,6 +269,10 @@
                 <div class="other-stats">
                     <h4>Média Chegada</h4>
                     <p id="equipe-mediaChegada">{{$mediaChegada}}</p>
+               </div>
+                <div class="other-stats">
+                    <h4>Dobradinhas</h4>
+                    <p id="equipe-totDobradinhas">{{$totDobradinhas}}</p>
                </div>
             </div>
         </div>
@@ -378,6 +383,7 @@ $('#ajaxGetStatsEquipePorTemporada').change(function (e) {
            $('#equipe-totAbandonos').text(response.totAbandonos)
            $('#equipe-gridMedio').text(response.gridMedio)
            $('#equipe-mediaChegada').text(response.mediaChegada)
+           $('#equipe-totDobradinhas').text(response.totDobradinhas)
         },
         error:function(){
             alert(error)

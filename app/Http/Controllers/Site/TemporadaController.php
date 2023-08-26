@@ -49,6 +49,7 @@ class TemporadaController extends Controller
         $temporada->des_temporada = $request->des_temporada;
         $temporada->user_id = Auth::user()->id;
         $temporada->ano_id = $request->ano_id;
+        $temporada->observacoes = $request->observacoes;
         $temporada->flg_finalizada = 'N';
 
         $temporada->save();
@@ -244,6 +245,7 @@ class TemporadaController extends Controller
         $temporada->user_id = Auth::user()->id;
         $temporada->ano_id = $request->ano_id;
         $usuario = Auth::user()->id; 
+        $temporada->observacoes = $request->observacoes;
         //pesquisa pela classificação atualizada
         $retorno = $this->montaClassificacao($usuario, $temporada);
 

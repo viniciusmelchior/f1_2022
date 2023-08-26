@@ -109,11 +109,21 @@ class EquipeController extends Controller
         $totAbandonos = 0;
         $gridMedio = 0;
         $mediaChegada = 0;
+        $totDobradinhas = 0;
 
         $totVoltasRapidas = 0;
 
+        $possiveisDobradinhas = [];
+
         //Consideramos apenas o id da equipe pois levamos em consideração a junção do resultado da dupla de pilotos
+
         foreach($resultados as $resultado){
+
+            if($resultado->chegada == 2){
+                if($resultado->pilotoEquipe->equipe->id == $id){
+                    $possiveisDobradinhas[] = $resultado;
+                }
+            }
 
             //total de largadas
             if($resultado->pilotoEquipe->equipe->id == $id){
@@ -123,6 +133,7 @@ class EquipeController extends Controller
             //calculo do total de vitórias
             if($resultado->chegada == 1){
                 if($resultado->pilotoEquipe->equipe->id == $id){
+                    $possiveisDobradinhas[] = $resultado;
                     $totVitorias++;
                 }
             }
@@ -196,6 +207,37 @@ class EquipeController extends Controller
             }
         }
 
+        $idCorridasPossiveisDobradinhas = [];
+
+        foreach($possiveisDobradinhas as $possivelDobradinha){
+            if(!in_array($possivelDobradinha->corrida_id,$idCorridasPossiveisDobradinhas)){
+                $idCorridasPossiveisDobradinhas[] = $possivelDobradinha->corrida_id;
+            }
+        }
+
+    
+        foreach($idCorridasPossiveisDobradinhas as $item){
+            $newCorrida = Corrida::find($item);
+            // $resultado = Resultado::where('corrida_id', $newCorrida->id)->where('chegada', '<=', 2 )->get();
+
+            $primeiro = Resultado::where('corrida_id', $newCorrida->id)
+                                    ->where('chegada', 1 )
+                                    ->where('user_id', Auth::user()->id)
+                                    ->first();
+
+            $segundo = Resultado::where('corrida_id', $newCorrida->id)
+                                    ->where('chegada', 2)
+                                    ->where('user_id', Auth::user()->id)
+                                    ->first();
+
+            //compara os equipe id, se for igual soma
+            if($primeiro->pilotoEquipe->equipe->id == $segundo->pilotoEquipe->equipe->id){
+                if($primeiro->pilotoEquipe->equipe->id == $id){
+                    $totDobradinhas++;
+                }
+            }
+        }
+
         //calculo de titulo de construtores
         $totTitulos = count(Titulo::where('equipe_id', $id)->where('user_id', Auth::user()->id)->get());
 
@@ -262,7 +304,7 @@ class EquipeController extends Controller
             $mediaChegada = round($mediaChegada/$totCorridas);
         }
 
-        return view('site.equipes.show', compact('modelEquipe','totTitulos', 'totCorridas','totTitulosPilotos', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas','temporadasDisputadas','pontuacaoPorTemporada','temporadas','totAbandonos','gridMedio','mediaChegada'));
+        return view('site.equipes.show', compact('modelEquipe','totTitulos', 'totCorridas','totTitulosPilotos', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas','temporadasDisputadas','pontuacaoPorTemporada','temporadas','totAbandonos','gridMedio','mediaChegada','totDobradinhas'));
     }
 
     /**

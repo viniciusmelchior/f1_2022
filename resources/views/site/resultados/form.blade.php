@@ -296,66 +296,79 @@ document.getElementById('inputFileLargada').addEventListener('change', function(
     function gerarResultadoChegada(resultados) {
        
         var resultados = resultados
-        // console.log(resultados)
+        let sessoesDisponiveis = resultados['sessions'];
         var pilotos = resultados['players'];
-        var resultadoFinal = resultados['sessions'][0]['raceResult'];
 
-        let ordemChegada = [];
+        sessoesDisponiveis.forEach((sessao,key) => {
+            if(sessao['name'] == 'Quick Race'){
+                var resultadoFinal = resultados['sessions'][key]['raceResult']; //pega o resultado que está na posição em que a chave Quick Race foi encontrada
 
-        for (let index = 0; index < resultadoFinal.length; index++) {
-            ordemChegada.push(pilotos[resultadoFinal[index]]['name']);
-        }
+                let ordemChegada = [];
 
-        const tabela = document.getElementById('tabela');
+                for (let index = 0; index < resultadoFinal.length; index++) {
+                    ordemChegada.push(pilotos[resultadoFinal[index]]['name']);
+                }
 
-        // Obtendo todas as linhas da tabela
-        const linhas = tabela.rows;
-        
-        //deixar o código dinâmico
-        const arrayDeLinhas = Array.from(linhas);
+                const tabela = document.getElementById('tabela');
 
-        //transformar o array em UPPERCASE
-        ordemChegada = ordemChegada.map(item => item.toUpperCase())
+                // Obtendo todas as linhas da tabela
+                const linhas = tabela.rows;
 
-        arrayDeLinhas.forEach((linha, indice) => {
-            let nomePiloto = linha.cells[1].innerHTML.toUpperCase().trim() //limpa os espaços do inicio e fim da string
-            nomePiloto = nomePiloto.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); //retira os ascentos
-            const valorChegada = parseInt(ordemChegada.indexOf(nomePiloto))+1
-            if(valorChegada > 0){
-                linha.cells[3].querySelector('input[type="number"]').value = valorChegada
+                //deixar o código dinâmico
+                const arrayDeLinhas = Array.from(linhas);
+
+                //transformar o array em UPPERCASE
+                ordemChegada = ordemChegada.map(item => item.toUpperCase())
+
+                arrayDeLinhas.forEach((linha, indice) => {
+                    let nomePiloto = linha.cells[1].innerHTML.toUpperCase().trim() //limpa os espaços do inicio e fim da string
+                    nomePiloto = nomePiloto.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); //retira os ascentos
+                    const valorChegada = parseInt(ordemChegada.indexOf(nomePiloto))+1
+                    if(valorChegada > 0){
+                        linha.cells[3].querySelector('input[type="number"]').value = valorChegada
+                    }
+                });
             }
         });
     }
 
     function gerarResultadoLargada(resultados){
         var resultados = resultados;
+        let sessoesDisponiveis = resultados['sessions'];
         var pilotos = resultados['players'];
-        var resultadoFinal = resultados['sessions'][1]['bestLaps'].sort((a, b) => a.time - b.time);
 
-        let ordemLargada = [];
+        sessoesDisponiveis.forEach((sessao,key) => {
+            if(sessao['name'] == 'Qualifying'){
 
-        for (let index = 0; index < resultadoFinal.length; index++) {
-            ordemLargada.push(pilotos[resultadoFinal[index]['car']]['name']);
-        }
+                var resultadoFinal = resultados['sessions'][key]['bestLaps'].sort((a, b) => a.time - b.time); //pega o resultado que está na posição em que a chave Qualyfying foi encontrada
+                
+                let ordemLargada = [];
 
-        const tabela = document.getElementById('tabela');
+                for (let index = 0; index < resultadoFinal.length; index++) {
+                    ordemLargada.push(pilotos[resultadoFinal[index]['car']]['name']);
+                }
 
-        // Obtendo todas as linhas da tabela
-        const linhas = tabela.rows;
-        
-        //deixar o código dinâmico
-        const arrayDeLinhas = Array.from(linhas);
+                const tabela = document.getElementById('tabela');
 
-        //transformar o array em UPPERCASE
-        ordemLargada = ordemLargada.map(item => item.toUpperCase())
+                // Obtendo todas as linhas da tabela
+                const linhas = tabela.rows;
+                
+                //deixar o código dinâmico
+                const arrayDeLinhas = Array.from(linhas);
 
-        arrayDeLinhas.forEach((linha, indice) => {
-            let nomePiloto = linha.cells[1].innerHTML.toUpperCase().trim() //limpa os espaços do inicio e fim da string
-            nomePiloto = nomePiloto.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); ///retira os ascentos
-            const valorLargada = parseInt(ordemLargada.indexOf(nomePiloto))+1
+                //transformar o array em UPPERCASE
+                ordemLargada = ordemLargada.map(item => item.toUpperCase())
 
-            if(valorLargada > 0){
-                linha.cells[2].querySelector('input[type="number"]').value = valorLargada
+                arrayDeLinhas.forEach((linha, indice) => {
+                    let nomePiloto = linha.cells[1].innerHTML.toUpperCase().trim() //limpa os espaços do inicio e fim da string
+                    nomePiloto = nomePiloto.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); ///retira os ascentos
+                    const valorLargada = parseInt(ordemLargada.indexOf(nomePiloto))+1
+
+                    if(valorLargada > 0){
+                        linha.cells[2].querySelector('input[type="number"]').value = valorLargada
+                    }
+                });
+
             }
         });
     }

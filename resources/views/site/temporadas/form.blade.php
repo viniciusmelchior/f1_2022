@@ -26,6 +26,14 @@
                 @endforeach
             </select>
         </div>
+        <div class="mb-3">
+            <label for="observacoes" class="form-label">Observações</label>
+            <textarea class="form-control" name="observacoes" id="observacoes" rows="10">
+                @if($model->observacoes)
+                    {{$model->observacoes}}
+                @endif
+            </textarea>
+        </div>
 
         {{--Form aparece apenas rota de edit--}}
         @if(Route::currentRouteName() == 'temporadas.edit')

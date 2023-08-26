@@ -266,7 +266,7 @@ class PilotoController extends Controller
                                 ->where('resultados.user_id', Auth::user()->id)
                                 ->where('piloto_equipes.piloto_id', $modelPiloto->id)
                                 ->orderBy('resultados.id', 'DESC')
-                                ->paginate(10);
+                                ->paginate(30);
         // sleep(1);
         // $time = microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"];
         // $tempoExecucao =  "Tempo de execução: ".$time;
@@ -395,6 +395,8 @@ class PilotoController extends Controller
                                     and piloto_id = '.$piloto2_id.'');
         
         //loop que faz os comparativos
+        // dd($dadosPiloto1, $dadosPiloto2);
+
         foreach($dadosPiloto1 as $key1 => $piloto1){
            if(isset($dadosPiloto2[$key1]) && $piloto1->corrida_id == $dadosPiloto2[$key1]->corrida_id){
                 $piloto1->largada < $dadosPiloto2[$key1]->largada ?  $piloto1Largada++ : $piloto2Largada++;

@@ -63,6 +63,7 @@ class AjaxController extends Controller
     public function comparativos(Request $request){
 
         $request = $request->post();
+        // dd($request, Auth::user()->id);
 
         if($request['temporada_id'] == null){
            //$temporada_id = [1,2,3,4,5,6,7,8,9,10];
@@ -166,40 +167,99 @@ class AjaxController extends Controller
 
         $piloto2TotPontos = $piloto2TotPontos[0]->totPontos;
 
+        //Só contar nas corridas em que ambos correram
+        $corridasEmComum = [];
+
+        foreach($dadosPiloto1 as $dadoPiloto1){
+            $corridasEmComum[] = $dadoPiloto1->corrida_id;
+        }
+
+        foreach($dadosPiloto2 as $dadoPiloto2){
+            $corridasEmComum[] = $dadoPiloto2->corrida_id;
+        }
+
+        $countedValues = array_count_values($corridasEmComum);
+
+        // Filtra os valores que ocorrem mais de uma vez
+        $duplicatedValues = array_filter($countedValues, function ($count) {
+            return $count > 1;
+        });
+
+        $corridasEmComum = array_keys($duplicatedValues);
+
          //loop que faz os comparativos
-         foreach($dadosPiloto1 as $key1 => $piloto1){
-            // if(isset($dadosPiloto2[$key1]) && $piloto1->corrida_id == $dadosPiloto2[$key1]->corrida_id){
-                 $piloto1->largada < $dadosPiloto2[$key1]->largada ?  $piloto1Largada++ : $piloto2Largada++;
-                 $piloto1->chegada < $dadosPiloto2[$key1]->chegada ?  $piloto1Chegada++ : $piloto2Chegada++;
-                 $piloto1->chegada <= 3 ? $piloto1TotPodios++ : "";
-                 $piloto1->flg_abandono == 'S' ? $piloto1TotAbandonos++ : '';
-                 $piloto1->volta_rapida == $piloto1->pilotoEquipe_id ? $piloto1TotVoltasRapidas++ : '';
-                 $piloto1->chegada == 1 ? $piloto1TotVitorias++ : "";
-                 $piloto1->largada == 1 ? $piloto1TotPolePositions++ : "";
-                 $piloto1->chegada < $piloto1MelhorChegada ? $piloto1MelhorChegada = $piloto1->chegada : "";
-                 $piloto1->chegada > $piloto1PiorChegada ? $piloto1PiorChegada = $piloto1->chegada : "";
-                 $piloto1->largada > $piloto1PiorLargada ? $piloto1PiorLargada = $piloto1->largada : "";
-                 $piloto1->largada < $piloto1MelhorLargada ? $piloto1MelhorLargada = $piloto1->largada : "";
-            // }   
-         }
+        foreach($dadosPiloto1 as $key1 => $piloto1){
+
+                if(in_array($piloto1->corrida_id, $corridasEmComum)){
+                    $newResultado = Resultado::where('corrida_id', $piloto1->corrida_id)
+                                                ->join('piloto_equipes', 'pilotoEquipe_id', 'piloto_equipes.id')
+                                                ->whereIn('piloto_id', [$piloto1_id, $piloto2_id])
+                                                ->get();
+
+                    //comparação de resultados de largada
+                    if($newResultado[0]->largada < $newResultado[1]->largada){
+                        if($newResultado[0]->piloto_id == $piloto1_id){
+                            $piloto1Largada++;
+                        }else{
+                            $piloto2Largada++;
+                        }
+                    }
+
+                    if($newResultado[0]->largada > $newResultado[1]->largada){
+                        if($newResultado[1]->piloto_id == $piloto1_id){
+                            $piloto1Largada++;
+                        }else{
+                            $piloto2Largada++;
+                        }
+                    }
+
+                    //comparação dos resultados de chegada
+                    if($newResultado[0]->chegada < $newResultado[1]->chegada){
+                        if($newResultado[0]->piloto_id == $piloto1_id){
+                            $piloto1Chegada++;
+                        }else{
+                            $piloto2Chegada++;
+                        }
+                    }
+
+                    if($newResultado[0]->chegada > $newResultado[1]->chegada){
+                        if($newResultado[1]->piloto_id == $piloto1_id){
+                            $piloto1Chegada++;
+                        }else{
+                            $piloto2Chegada++;
+                        }
+                    }
+                    
+                }
+
+                $piloto1->chegada <= 3 ? $piloto1TotPodios++ : "";
+                $piloto1->flg_abandono == 'S' ? $piloto1TotAbandonos++ : '';
+                $piloto1->volta_rapida == $piloto1->pilotoEquipe_id ? $piloto1TotVoltasRapidas++ : '';
+                $piloto1->chegada == 1 ? $piloto1TotVitorias++ : "";
+                $piloto1->largada == 1 ? $piloto1TotPolePositions++ : "";
+                $piloto1->chegada < $piloto1MelhorChegada ? $piloto1MelhorChegada = $piloto1->chegada : "";
+                $piloto1->chegada > $piloto1PiorChegada ? $piloto1PiorChegada = $piloto1->chegada : "";
+                $piloto1->largada > $piloto1PiorLargada ? $piloto1PiorLargada = $piloto1->largada : "";
+                $piloto1->largada < $piloto1MelhorLargada ? $piloto1MelhorLargada = $piloto1->largada : "";
+
+        }
  
          //loop do segundo piloto para dados especificos dele. Os do primeiro piloto ja são tratados como os dados base do loop comparativo
          foreach($dadosPiloto2 as $key1 => $piloto2){
-            //  if(isset($dadosPiloto1[$key1]) && $piloto2->corrida_id == $dadosPiloto1[$key1]->corrida_id){
-                 $piloto2->chegada <= 3 ? $piloto2TotPodios++ : "";
-                 $piloto2->flg_abandono == 'S' ? $piloto2TotAbandonos++ : '';
-                 $piloto2->volta_rapida == $piloto2->pilotoEquipe_id ? $piloto2TotVoltasRapidas++ : '';
-                 $piloto2->chegada == 1 ? $piloto2TotVitorias++ : "";
-                 $piloto2->largada == 1 ? $piloto2TotPolePositions++ : "";
-                 $piloto2->chegada < $piloto2MelhorChegada ? $piloto2MelhorChegada = $piloto2->chegada : "";
-                 $piloto2->chegada > $piloto2PiorChegada ? $piloto2PiorChegada = $piloto2->chegada : "";
-                 $piloto2->largada > $piloto2PiorLargada ? $piloto2PiorLargada = $piloto2->largada : "";
-                 $piloto2->largada < $piloto2MelhorLargada ? $piloto2MelhorLargada = $piloto2->largada : "";
-            //  }
+            
+            $piloto2->chegada <= 3 ? $piloto2TotPodios++ : "";
+            $piloto2->flg_abandono == 'S' ? $piloto2TotAbandonos++ : '';
+            $piloto2->volta_rapida == $piloto2->pilotoEquipe_id ? $piloto2TotVoltasRapidas++ : '';
+            $piloto2->chegada == 1 ? $piloto2TotVitorias++ : "";
+            $piloto2->largada == 1 ? $piloto2TotPolePositions++ : "";
+            $piloto2->chegada < $piloto2MelhorChegada ? $piloto2MelhorChegada = $piloto2->chegada : "";
+            $piloto2->chegada > $piloto2PiorChegada ? $piloto2PiorChegada = $piloto2->chegada : "";
+            $piloto2->largada > $piloto2PiorLargada ? $piloto2PiorLargada = $piloto2->largada : "";
+            $piloto2->largada < $piloto2MelhorLargada ? $piloto2MelhorLargada = $piloto2->largada : "";
          }
         
         return response()->json([
-            'message' => 'Chegamos no Controller',
+            'message' => 'ok',
             'request' => $request,
             'dadosPiloto1' => $dadosPiloto1,
             'dadosPiloto2' => $dadosPiloto2,
@@ -326,6 +386,9 @@ class AjaxController extends Controller
         $mediaChegada = 0;
 
         $totVoltasRapidas = 0;
+        $totDobradinhas = 0;
+
+        $possiveisDobradinhas = [];
 
         //Consideramos apenas o id da equipe pois levamos em consideração a junção do resultado da dupla de pilotos
         foreach($resultados as $resultado){
@@ -338,7 +401,14 @@ class AjaxController extends Controller
             //calculo do total de vitórias
             if($resultado->chegada == 1){
                 if($resultado->pilotoEquipe->equipe->id == $id){
+                    $possiveisDobradinhas[] = $resultado;
                     $totVitorias++;
+                }
+            }
+
+            if($resultado->chegada == 2){
+                if($resultado->pilotoEquipe->equipe->id == $id){
+                    $possiveisDobradinhas[] = $resultado;
                 }
             }
 
@@ -408,6 +478,37 @@ class AjaxController extends Controller
                 if($resultado->chegada > $piorPosicaoChegada){
                     $piorPosicaoChegada = $resultado->chegada;
                 }    
+            }
+        }
+
+        $idCorridasPossiveisDobradinhas = [];
+
+        foreach($possiveisDobradinhas as $possivelDobradinha){
+            if(!in_array($possivelDobradinha->corrida_id,$idCorridasPossiveisDobradinhas)){
+                $idCorridasPossiveisDobradinhas[] = $possivelDobradinha->corrida_id;
+            }
+        }
+
+    
+        foreach($idCorridasPossiveisDobradinhas as $item){
+            $newCorrida = Corrida::find($item);
+            // $resultado = Resultado::where('corrida_id', $newCorrida->id)->where('chegada', '<=', 2 )->get();
+
+            $primeiro = Resultado::where('corrida_id', $newCorrida->id)
+                                    ->where('chegada', 1 )
+                                    ->where('user_id', Auth::user()->id)
+                                    ->first();
+
+            $segundo = Resultado::where('corrida_id', $newCorrida->id)
+                                    ->where('chegada', 2)
+                                    ->where('user_id', Auth::user()->id)
+                                    ->first();
+
+            //compara os equipe id, se for igual soma
+            if($primeiro->pilotoEquipe->equipe->id == $segundo->pilotoEquipe->equipe->id){
+                if($primeiro->pilotoEquipe->equipe->id == $id){
+                    $totDobradinhas++;
+                }
             }
         }
 
@@ -498,7 +599,8 @@ class AjaxController extends Controller
             'totVoltasRapidas' => $totVoltasRapidas,
             'totAbandonos' => $totAbandonos,
             'gridMedio' => $gridMedio,
-            'mediaChegada' => $mediaChegada
+            'mediaChegada' => $mediaChegada,
+            'totDobradinhas' => $totDobradinhas
         ]);
 
     }
