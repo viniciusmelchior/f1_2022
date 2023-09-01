@@ -106,7 +106,6 @@
                                 
                                 @foreach ($corridas as $corrida)
                                     @php 
-                                        // dd($corrida, $piloto);
                                         $posicao = PilotoEquipe::getResultadoPilotoEquipe($corrida->id, $piloto->pilotoEquipe_id);
                                     @endphp
                                     <td class="text-center">
