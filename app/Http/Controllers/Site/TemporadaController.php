@@ -355,4 +355,20 @@ class TemporadaController extends Controller
         ];
     }
 
+    public function resultados($id){
+
+        $usuario = Auth::user()->id; 
+        $temporada = Temporada::where('user_id', Auth::user()->id)->where('id', $id)->first();
+
+        $retorno = $this->montaClassificacao($usuario, $temporada);
+        $resultadosPilotos = $retorno['resultadoPilotos'];
+
+        $corridas = Corrida::where('temporada_id', $id)
+                            ->where('user_id', $usuario)
+                            ->where('flg_sprint', 'N')
+                            ->get();
+
+        return view('site.temporadas.resultados', compact('temporada', 'resultadosPilotos','corridas'));
+    }
+
 }

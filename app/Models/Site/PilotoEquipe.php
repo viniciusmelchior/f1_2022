@@ -32,4 +32,25 @@ class PilotoEquipe extends Model
     public function resultado(){
         return $this->hasMany(Resultado::class);
     }
+
+    /**Função que acha qual posição determinado piloto chegou em tal corrida */
+
+    /**recebe a corrida, temporada, piloto_equipe */
+    public static function getResultadoPilotoEquipe($corrida, $pilotoEquipe){
+        // dd($corrida, $pilotoEquipe);
+
+        $resultado = Resultado::select('chegada')
+                            ->where('corrida_id', $corrida)
+                            ->where('pilotoEquipe_id', $pilotoEquipe)
+                            ->first();
+
+        $chegada = '-';
+
+        if(isset($resultado)){
+            $chegada = $resultado['chegada'];
+        }
+
+        return $chegada;
+
+    }
 }
