@@ -90,7 +90,7 @@
                                 @foreach ($corridas as $corrida)
                                     <th class="">
                                         {{-- <span style="display: inline-block; vertical-align: middle; white-space: nowrap;">{{$corrida->pista->nome}}</span> --}}
-                                        <img src="{{asset('images/'.$corrida->pista->pais->imagem)}}" alt="" srcset="" style="width:35px; height: 25px;" data-toggle="tooltip" data-placement="top" title="{{$corrida->pista->nome}}">
+                                        <img src="{{asset('images/'.$corrida->pista->pais->imagem)}}" alt="" srcset="" style="width:35px; height: 25px;" data-toggle="tooltip" data-placement="top" title="{{$corrida->pista->nome}} @if($corrida->flg_sprint == 'S') (Sprint) @endif">
                                     </th>
                                 @endforeach
                             <th class="text-upper">Pontos</th>
@@ -112,7 +112,7 @@
                                     @php 
                                         $posicao = PilotoEquipe::getResultadoPilotoEquipe($corrida->id, $piloto->pilotoEquipe_id);
                                     @endphp
-                                    <td class="text-center">
+                                    <td class="text-center" @if($corrida->flg_sprint == 'S') style="color:yellow;" @endif>
                                        @if($posicao)
                                         <div @if($corrida->volta_rapida == $piloto->pilotoEquipe_id) style="widh:100%; height:100%; background-color: purple; padding:0" @endif>
                                             <span @if($corrida->volta_rapida == $piloto->piloto_id) style="font-weight: bolder;" @endif>
