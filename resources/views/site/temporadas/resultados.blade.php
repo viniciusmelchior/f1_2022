@@ -18,6 +18,10 @@
         /* color: white; */
     }
 
+    .hoverable:hover {
+        background-color: white;
+    }
+
     .text-upper{
         text-transform: uppercase;
     }
@@ -81,7 +85,7 @@
                 <table class="table table-dark table-hover">
                     <thead>
                         <tr>
-                            <th class="text-upper sticky-col">#</th>
+                            <th class="text-upper sticky-col hoverable">#</th>
                             <th class="text-upper w-100 sticky-col">Piloto</th>
                                 @foreach ($corridas as $corrida)
                                     <th class="">
@@ -110,7 +114,7 @@
                                     @endphp
                                     <td class="text-center">
                                        @if($posicao)
-                                        <div @if($corrida->volta_rapida == $piloto->piloto_id) style="widh:100%; height:100%; background-color: purple; padding:0" @endif>
+                                        <div @if($corrida->volta_rapida == $piloto->pilotoEquipe_id) style="widh:100%; height:100%; background-color: purple; padding:0" @endif>
                                             <span @if($corrida->volta_rapida == $piloto->piloto_id) style="font-weight: bolder;" @endif>
                                                 {{$posicao}}
                                             </span>

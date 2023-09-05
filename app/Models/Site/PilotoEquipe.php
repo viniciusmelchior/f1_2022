@@ -39,7 +39,7 @@ class PilotoEquipe extends Model
     public static function getResultadoPilotoEquipe($corrida, $pilotoEquipe){
         // dd($corrida, $pilotoEquipe);
 
-        $resultado = Resultado::select('chegada')
+        $resultado = Resultado::select('chegada','flg_abandono')
                             ->where('corrida_id', $corrida)
                             ->where('pilotoEquipe_id', $pilotoEquipe)
                             ->first();
@@ -48,6 +48,9 @@ class PilotoEquipe extends Model
 
         if(isset($resultado)){
             $chegada = $resultado['chegada'];
+            if($resultado->flg_abandono == 'S'){
+                $chegada = 'NC';
+            }
         }
 
         return $chegada;
