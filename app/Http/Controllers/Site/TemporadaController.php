@@ -155,8 +155,8 @@ class TemporadaController extends Controller
                             JOIN equipes ON equipes.id = piloto_equipes.equipe_id
                             JOIN corridas ON corridas.id = resultados.corrida_id
                             JOIN temporadas ON temporadas.id = corridas.temporada_id
-                            WHERE temporadas.id = 2
-                            AND resultados.user_id = 1
+                            WHERE temporadas.id =  '.$temporada->id.'
+                            AND resultados.user_id =  '.$usuario.'
                             GROUP BY piloto_equipes.piloto_id, piloto_equipes.id, pilotos.nome, pilotos.sobrenome, equipes.nome, equipes.imagem
                             ORDER BY total DESC '.$queryCountOrderByPilotos.';    
         ');
@@ -410,8 +410,8 @@ class TemporadaController extends Controller
                                                         JOIN equipes ON equipes.id = piloto_equipes.equipe_id
                                                         JOIN corridas ON corridas.id = resultados.corrida_id
                                                         JOIN temporadas ON temporadas.id = corridas.temporada_id
-                                                        WHERE temporadas.id = 2
-                                                        AND resultados.user_id = 1
+                                                        WHERE temporadas.id =  '.$temporada->id.'
+                                                        AND resultados.user_id =  '.$usuario.'
                                                         and corridas.ordem <= '.$ordem.'
                                                         GROUP BY piloto_equipes.piloto_id, piloto_equipes.id, pilotos.nome, pilotos.sobrenome, equipes.nome, equipes.imagem
                                                         ORDER BY total DESC '.$queryCountOrderBy.';    
