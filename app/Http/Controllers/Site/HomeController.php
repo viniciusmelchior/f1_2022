@@ -152,6 +152,40 @@ class HomeController extends Controller
 
     }
 
+    public function ajaxGetPolesEquipesPorTemporada(Request $request){
+        $temporada_id = $request->post('polesEquipesTemporadaId');
+        $operadorConsulta = '=';
+        $condicao = $temporada_id;
+        
+        if($temporada_id == null){
+            $operadorConsulta = '>';
+            $condicao = 0; 
+        }
+        
+         //Consulta Dinâmica utiliza os operadores e condicoes dependendo do fato de ter ou nao temporada
+         $polesEquipe = Resultado::where('resultados.user_id', Auth::user()->id)->where('largada', 1)
+         ->join('corridas', function($join) use ($temporada_id, $operadorConsulta, $condicao){
+             $join->on('corridas.id', '=', 'resultados.corrida_id')
+                 ->where('corridas.temporada_id',$operadorConsulta,$condicao);
+         })->get();
+ 
+         $poles = [];
+         foreach($polesEquipe as $item){
+             if($item->corrida->flg_sprint == 'N'){
+                 array_push($poles, $item->pilotoEquipe->equipe->nome);
+             }
+         }
+ 
+         $totPolesPorEquipe = array_count_values($poles);
+         arsort($totPolesPorEquipe);
+ 
+         return response()->json([
+             'message' => 'ajaxGetVitoriasEquipesPorTemporada',
+             'totPolesPorEquipe' => $totPolesPorEquipe
+         ]);
+
+    }
+
     public function ajaxGetPolesPilotosPorTemporada(Request $request){
         $temporada_id = $request->post('polesPilotosTemporadaId');
         $operadorConsulta = '=';

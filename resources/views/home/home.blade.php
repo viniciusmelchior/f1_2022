@@ -101,19 +101,6 @@
                         <th>Piloto</th>
                         <th>Vitórias</th>
                     </tr>
-                    @php 
-                       /*  $vitoriasPiloto = Resultado::where('user_id', Auth::user()->id)->where('chegada', 1)->get();
-                        $vencedores = [];
-                        foreach($vitoriasPiloto as $item){
-                            if($item->corrida->flg_sprint == 'N'){
-                                array_push($vencedores, $item->pilotoEquipe->piloto->nomeCompleto());
-                            }
-                        }
-
-                        $totPorPiloto = array_count_values($vencedores);
-                        arsort($totPorPiloto); */
-                        //dd($totPorPiloto);
-                    @endphp
                     @foreach($totVitoriasPorPiloto as $key => $value)
                         <tr>
                             <td>#</td>
@@ -138,18 +125,6 @@
                          <th>Equipe</th>
                          <th>Vitórias</th>
                      </tr>
-                     @php
-                        // $vitoriaEquipes = Resultado::where('user_id', Auth::user()->id)->where('chegada', 1)->get();
-                        // $vencedores = [];
-                        // foreach($vitoriaEquipes as $item){
-                        //     if($item->corrida->flg_sprint == 'N'){
-                        //         array_push($vencedores, $item->pilotoEquipe->equipe->nome);
-                        //     }
-                        // }
-
-                        // $totPorEquipe = array_count_values($vencedores);
-                        // arsort($totPorEquipe);
-                    @endphp
                      @foreach($totVitoriasPorEquipe as $key => $value)
                         <tr>
                             <td>#</td>
@@ -174,25 +149,13 @@
                 @foreach($temporadas as $temporada)
                     <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
                 @endforeach
-             </select>
+                </select>
                <table class="m-5 tabelaEstatisticas" id="tabelaPolesPilotos">
                     <tr>
                         <th>#</th>
                         <th>Piloto</th>
                         <th>Poles</th>
                     </tr>
-                    @php 
-                        // $polePilotos = Resultado::where('user_id', Auth::user()->id)->where('largada', 1)->get();
-                        // $poles = [];
-                        // foreach($polePilotos as $item){
-                        //     if($item->corrida->flg_sprint == 'N'){
-                        //         array_push($poles, $item->pilotoEquipe->piloto->nomeCompleto());
-                        //     }
-                        // }
-
-                        // $totPorPiloto = array_count_values($poles);
-                        // arsort($totPorPiloto);
-                    @endphp
                     @foreach($totPolesPorPiloto as $key => $value)
                         <tr>
                             <td>#</td>
@@ -205,7 +168,15 @@
 
             <div>
                 <h1 class="descricao-tabela">Equipes</h1>
-                <table class="m-5 tabelaEstatisticas">
+
+                <select name="PolesEquipesPorTemporada" id="PolesEquipesPorTemporada" class="form-select mt-3" style="width: 50%; margin:0 auto;">
+                    <option value="" selected id="selectTemporadaPolesEquipes">Selecione uma Temporada</option>
+                @foreach($temporadas as $temporada)
+                    <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
+                @endforeach
+                </select>
+
+                <table class="m-5 tabelaEstatisticas" id="tabelaPolesEquipes">
                      <tr>
                          <th>#</th>
                          <th>Piloto</th>
@@ -491,12 +462,7 @@
             </div>
         </div>
 
-
-
     <hr class="separador">
-    {{--  @php 
-        $temporadas = Temporada::where('user_id', Auth::user()->id)->get();
-    @endphp --}}
     
     <div class="header-tabelas m-3">Classificaçao Histórica <span id="toggle_classificacao_historica"><i class="bi bi-plus-circle"></i></span></div>
     
@@ -582,15 +548,11 @@
         </div>
     </div>
 
-    {{--resultados--}}
     @php 
-    //dados das corridas
-    //$resultadoCorridas = Corrida::where('user_id', Auth::user()->id)->orderBy('temporada_id','DESC')->orderBy('ordem','DESC')->get();
+
     $resultadoCorridas = Corrida::whereHas('resultado', function($query){
        $query->where('user_id', Auth::user()->id)->orderBy('temporada_id','DESC')->orderBy('ordem','DESC');
     })->get();
-
-    // dd($resultadoCorridas);
 
     $resultadoCorridas = $resultadoCorridas->where('flg_sprint', "<>", 'S');
     $resultadoCorridas = $resultadoCorridas->sortByDesc('ordem');
@@ -600,11 +562,8 @@
     <hr>
 
     <h1 id="" class="descricao-tabela">Resultados</h1>
-   {{--  <div>
-        <input type="checkbox" id="hideRows"> Esconder Corridas Sprint
-    </div> --}}
+   
     <div class="montaTabelaEquipes">
-        {{-- <table class="mb-5 mt-5" id="tabelaClassificacaoEquipes"> --}}
         <table class="mt-5 tabelaResultadosCorridas" id="tabelaResultadoCorridas">
             <thead>
                 <tr>
@@ -621,16 +580,10 @@
             <tbody>
             @foreach($resultadoCorridas as $key => $resultadoCorrida)
             @php 
-            // dd($resultadoCorridas);
+    
             $resultado = Resultado::where('user_id', Auth::user()->id)->where('corrida_id', $resultadoCorrida->id)->get();
-            // $primeiro = Resultado::where('user_id', Auth::user()->id)->where('corrida_id', $resultadoCorrida->id)->where('chegada', 1)->first();
-            // $polePosition = Resultado::where('user_id', Auth::user()->id)->where('corrida_id', $resultadoCorrida->id)->where('largada', 1)->first();
-            // $segundo = Resultado::where('user_id', Auth::user()->id)->where('corrida_id', $resultadoCorrida->id)->where('chegada', 2)->first();
-            // $terceiro = Resultado::where('user_id', Auth::user()->id)->where('corrida_id', $resultadoCorrida->id)->where('chegada', 3)->first();
-            // $voltaRapida = PilotoEquipe::where('user_id', Auth::user()->id)->where('id', $resultadoCorrida->volta_rapida)->first();
 
             $primeiro = $resultado->where('chegada', 1)->first();
-            // dd($primeiro);
             $polePosition = $resultado->where('largada', 1)->first();
             $segundo = $resultado->where('chegada', 2)->first();
             $terceiro = $resultado->where('chegada', 3)->first();
@@ -701,11 +654,6 @@
                         -
                         @endif 
                     </td>
-                    {{-- @if(isset($voltaRapida))
-                        <td></td>
-                    @else
-                    -
-                    @endif --}}
                 </tr>
                 @endforeach
             </tbody>
@@ -731,6 +679,7 @@
     ajaxGetVitoriasPilotoPorTemporada = "<?=route('ajax.ajaxGetVitoriasPilotoPorTemporada')?>"
     ajaxGetVitoriasEquipesPorTemporada = "<?=route('ajax.ajaxGetVitoriasEquipesPorTemporada')?>"
     ajaxGetPolesPilotosPorTemporada = "<?=route('ajax.ajaxGetPolesPilotosPorTemporada')?>"
+    ajaxGetPolesEquipesPorTemporada = "<?=route('ajax.ajaxGetPolesEquipesPorTemporada')?>"
 </script>
 
 <script>
@@ -884,12 +833,6 @@
         pagination.appendChild(pageNumber);
 }
 
-/* $(document).ready(function() {
-  $("#hideRows").click(function() {
-    $("#tabelaResultadoCorridas tr td:contains('Sprint')").parent().toggle();
-  });
-}); */
-
 /*montagem da tabela de vitórias dos pilotos por temporada*/
 $('#vitoriasPilotosPorTemporada').change(function (e) { 
     e.preventDefault();
@@ -1004,6 +947,46 @@ $('#PolesPilotosPorTemporada').change(function (e) {
         }
     });
 });
+
+//montagem da tabela de pole position das equipes por temporada
+$('#PolesEquipesPorTemporada').change(function (e) { 
+    e.preventDefault();
+
+    polesEquipesTemporadaId = $('#PolesEquipesPorTemporada').val();
+    console.log(polesEquipesTemporadaId)
+    tabelaPolesEquipes = $('#tabelaPolesEquipes');
+    tabelaPolesEquipes.html('');
+    tabelaPolesEquipes.append('<tr><th>#</th><th>Piloto</th><th>Poles</th></tr>')
+
+    selectTemporadaPolesEquipes = $('#selectTemporadaPolesEquipes').text('Selecione uma Temporada');
+
+    if(polesEquipesTemporadaId != ''){
+        selectTemporadaPolesEquipe = $('#selectTemporadaPolesEquipes').text('Geral');
+    }
+
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+
+    $.ajax({
+        type: "POST",
+        url: ajaxGetPolesEquipesPorTemporada,
+        data: {polesEquipesTemporadaId: polesEquipesTemporadaId},
+        contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+        success: function (response) {
+            for (const key in response.totPolesPorEquipe) {
+                // console.log(`${key}: ${response.totPorPiloto[key]}`);
+                tabelaPolesEquipes.append("<tr><td>#</td><td>"+key+"</td><td>"+response.totPolesPorEquipe[key]+"</td></tr>");
+            }
+        },
+        error:function(){
+            alert(error)
+        }
+    });
+});
+
 
 //final do arquivo javascript
 });
