@@ -39,15 +39,20 @@
                 @foreach ($corridas as $key => $corrida)
                     <tr @if($corrida->flg_sprint == 'S') style="color:red;" @endif>
                         <td>@if($corrida->flg_sprint != 'S') {{$corrida->ordem}} @endif</td>
-                        <td>{{$corrida->pista->nome}}
+                        <td>
+                            <span style="width: 35px; height:25px;">
+                                <img src="{{asset('images/'.$corrida->pista->pais->imagem)}}" alt="" srcset="" style="width: 35px; height:25px;">
+                            </span>
+                            {{$corrida->pista->nome}}
                             @if($corrida->flg_sprint == 'S')
                               - Sprint
                             @elseif($corrida->flg_super_corrida == 'S')
                                 - Super Corrida
-                            @endif</td>
-                            <td>
-                                {{$corrida->pista->qtd_voltas != null ? $corrida->pista->qtd_voltas : '-'}}
-                            </td>
+                            @endif
+                        </td>
+                        <td>
+                            {{$corrida->pista->qtd_voltas != null ? $corrida->pista->qtd_voltas : '-'}}
+                        </td>
                         {{-- <td>{{$corrida->dificuldade_ia}}</td> --}}
                         <td>
                             @if (isset($corrida->updated_at))
