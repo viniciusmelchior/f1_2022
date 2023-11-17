@@ -246,8 +246,9 @@ class TemporadaController extends Controller
                 ];
     }
 
+    /**Utilizada para o calculo de pontuação das corridas sprint */
     public function montaClassificacaoAlternativa($usuario, $temporada){
-                $resultadosPilotosAlternativa = DB::select('select piloto_id,piloto_equipes.id as pilotoEquipe_id, pilotos.nome, pilotos.sobrenome, equipes.imagem, equipes.nome as equipe, sum(pontuacao_personalizada) as total from resultados
+                $resultadosPilotosAlternativa = DB::select('select piloto_id,piloto_equipes.id as pilotoEquipe_id, pilotos.nome, pilotos.sobrenome, equipes.imagem, equipes.nome as equipe, sum(pontuacao) as total from resultados
                 join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
                 join pilotos on pilotos.id = piloto_equipes.piloto_id
                 join equipes on equipes.id = piloto_equipes.equipe_id
@@ -255,16 +256,18 @@ class TemporadaController extends Controller
                 join temporadas on temporadas.id = corridas.temporada_id
                 where temporadas.id = '.$temporada->id.'
                 and resultados.user_id = '.$usuario.'
+                and corridas.flg_sprint = "S"
                 group by piloto_equipes.piloto_id
                 order by total desc');
 
-                $resultadosEquipesAlternativa = DB::select('select equipe_id,equipes.imagem, equipes.nome as nome, sum(pontuacao_personalizada) as total from resultados
+                $resultadosEquipesAlternativa = DB::select('select equipe_id,equipes.imagem, equipes.nome as nome, sum(pontuacao) as total from resultados
                 join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
                 join equipes on equipes.id = piloto_equipes.equipe_id
                 join corridas on corridas.id = resultados.corrida_id
                 join temporadas on temporadas.id = corridas.temporada_id
                 where temporadas.id = '.$temporada->id.'
                 and resultados.user_id = '.$usuario.'
+                and corridas.flg_sprint = "S"
                 group by piloto_equipes.equipe_id
                 order by total desc');
 
