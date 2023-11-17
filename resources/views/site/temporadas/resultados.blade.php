@@ -88,10 +88,12 @@
                             <th class="text-upper sticky-col hoverable">#</th>
                             <th class="text-upper w-100 sticky-col">Piloto</th>
                                 @foreach ($corridas as $corrida)
-                                    <th class="">
-                                        {{-- <span style="display: inline-block; vertical-align: middle; white-space: nowrap;">{{$corrida->pista->nome}}</span> --}}
-                                        <img src="{{asset('images/'.$corrida->pista->pais->imagem)}}" alt="" srcset="" style="width:35px; height: 25px;" data-toggle="tooltip" data-placement="top" title="{{$corrida->pista->nome}} @if($corrida->flg_sprint == 'S') (Sprint) @endif">
-                                    </th>
+                                    @if(isset($corrida->resultado))
+                                        <th class="">
+                                            {{-- <span style="display: inline-block; vertical-align: middle; white-space: nowrap;">{{$corrida->pista->nome}}</span> --}}
+                                            <img src="{{asset('images/'.$corrida->pista->pais->imagem)}}" alt="" srcset="" style="width:35px; height: 25px;" data-toggle="tooltip" data-placement="top" title="{{$corrida->pista->nome}} @if($corrida->flg_sprint == 'S') (Sprint) @endif">
+                                        </th>
+                                    @endif
                                 @endforeach
                             <th class="text-upper">Pontos</th>
                         </tr>
@@ -109,20 +111,22 @@
                                 </td>
                                 
                                 @foreach ($corridas as $corrida)
-                                    @php 
-                                        $posicao = PilotoEquipe::getResultadoPilotoEquipe($corrida->id, $piloto->pilotoEquipe_id);
-                                    @endphp
-                                    <td class="text-center" @if($corrida->flg_sprint == 'S') style="color:yellow;" @endif>
-                                       @if($posicao)
-                                        <div @if($corrida->volta_rapida == $piloto->pilotoEquipe_id) style="widh:100%; height:100%; background-color: purple; padding:0" @endif>
-                                            <span @if($corrida->volta_rapida == $piloto->piloto_id) style="font-weight: bolder;" @endif>
-                                                {{$posicao}}
-                                            </span>
-                                        </div>
-                                       @else
-                                            -
-                                       @endif
-                                    </td>
+                                    @if(isset($corrida->resultado))
+                                        @php 
+                                            $posicao = PilotoEquipe::getResultadoPilotoEquipe($corrida->id, $piloto->pilotoEquipe_id);
+                                        @endphp
+                                        <td class="text-center" @if($corrida->flg_sprint == 'S') style="color:yellow;" @endif>
+                                        @if($posicao)
+                                            <div @if($corrida->volta_rapida == $piloto->pilotoEquipe_id) style="widh:100%; height:100%; background-color: purple; padding:0" @endif>
+                                                <span @if($corrida->volta_rapida == $piloto->piloto_id) style="font-weight: bolder;" @endif>
+                                                    {{$posicao}}
+                                                </span>
+                                            </div>
+                                        @else
+                                                -
+                                        @endif
+                                        </td>
+                                    @endif
                                 @endforeach
                                 <td class="pontosPiloto text-center" style="">{{$piloto->total}}</td>
                             </tr>
