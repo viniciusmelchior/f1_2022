@@ -94,7 +94,7 @@
                   </tr>
                </tbody>
          </table>
-         <button type="submit" class="btn btn-primary">Comparar</button>
+         <button type="submit" class="btn btn-primary" style="position: fixed; top:200px;left: 100px;">Comparar</button>
          <a href="" class="btn btn-secondary ml-3">Voltar</a>
          </form>
       </div>
