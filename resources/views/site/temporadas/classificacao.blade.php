@@ -155,6 +155,7 @@
                             <th class="text-upper">Pontos</th>
                         </tr>
                     </thead>
+                    
                     @if(count($resultadosPilotosAlternativa) > 0)
                         @foreach($resultadosPilotosAlternativa as $key => $piloto) 
                         <tbody>
