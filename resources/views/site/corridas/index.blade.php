@@ -40,8 +40,8 @@
                     <tr @if($corrida->flg_sprint == 'S') style="color:red;" @endif>
                         <td>@if($corrida->flg_sprint != 'S') {{$corrida->ordem}} @endif</td>
                         <td>
-                            <span style="width: 35px; height:25px;">
-                                <img src="{{asset('images/'.$corrida->pista->pais->imagem)}}" alt="" srcset="" style="width: 35px; height:25px;">
+                            <span style="width: 30px; height:20px;">
+                                <img src="{{asset('images/'.$corrida->pista->pais->imagem)}}" alt="" srcset="" style="width: 30px; height:20px;">
                             </span>
                             {{$corrida->pista->nome}}
                             @if($corrida->flg_sprint == 'S')
