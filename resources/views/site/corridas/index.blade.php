@@ -24,11 +24,11 @@
     
     <div class="table">
         @if(count($corridas) > 0)
-        <table class="table" id="tabelaCorridas">
+        <table class="table" id="tabelaCorridas" style="width:70%;">
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Pista</th>
+                    <th style="text-align: left;">Pista</th>
                     <th>Qtd Voltas</th>
                     {{-- <th>Dificuldade IA</th> --}}
                     <th>Atualizado Em</th>
@@ -37,16 +37,15 @@
             </thead>
             <tbody>
                 @foreach ($corridas as $key => $corrida)
-                    <tr @if($corrida->flg_sprint == 'S') style="color:red;" @endif>
-                        <td>@if($corrida->flg_sprint != 'S') {{$corrida->ordem}} @endif</td>
-                        <td>
+                    <tr @if($corrida->flg_sprint == 'S') style="color:red; font-style: italic;" @endif>
+                        {{-- <td>@if($corrida->flg_sprint != 'S') {{$corrida->ordem}} @endif</td> --}}
+                        <td>{{$corrida->flg_sprint != 'S' ? $corrida->ordem : 'Sprint' }}</td>
+                        <td style="text-align: left;">
                             <span style="width: 30px; height:20px;">
                                 <img src="{{asset('images/'.$corrida->pista->pais->imagem)}}" alt="" srcset="" style="width: 30px; height:20px;">
                             </span>
                             {{$corrida->pista->nome}}
-                            @if($corrida->flg_sprint == 'S')
-                              - Sprint
-                            @elseif($corrida->flg_super_corrida == 'S')
+                            @if($corrida->flg_super_corrida == 'S')
                                 - Super Corrida
                             @endif
                         </td>
