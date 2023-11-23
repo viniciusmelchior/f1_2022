@@ -159,7 +159,7 @@ use App\Models\Site\PilotoEquipe;
             @endforeach
         </table>
     </div>
-    <a href="{{route('pistas.index')}}" class="btn btn-secondary ml-3 mb-3">Voltar</a>
+    <a href="{{route('paises.index')}}" class="btn btn-secondary ml-3 mb-3">Voltar</a>
    </div>
 </div>
 @endsection
