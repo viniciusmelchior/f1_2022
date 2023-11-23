@@ -29,7 +29,7 @@
                 <tr>
                     <th>#</th>
                     <th style="text-align: left;">Pista</th>
-                    <th>Qtd Voltas</th>
+                    {{-- <th>Qtd Voltas</th> --}}
                     {{-- <th>Dificuldade IA</th> --}}
                     <th>Atualizado Em</th>
                     <th>Ações</th>
@@ -49,9 +49,9 @@
                                 - Super Corrida
                             @endif
                         </td>
-                        <td>
+                        {{-- <td>
                             {{$corrida->pista->qtd_voltas != null ? $corrida->pista->qtd_voltas : '-'}}
-                        </td>
+                        </td> --}}
                         {{-- <td>{{$corrida->dificuldade_ia}}</td> --}}
                         <td>
                             @if (isset($corrida->updated_at))
