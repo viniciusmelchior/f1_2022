@@ -50,7 +50,9 @@
                                 </span>
                                 {{$pais->des_nome}}
                             </td>
-                            <td> - </td>
+                            <td> 
+                                {{isset($pais->continente->nome) ? $pais->continente->nome : '-' }}
+                            </td>
                             <td class="coluna_acoes">
                                 <a href="{{route('paises.show', [$pais->id])}}"><i class="bi bi-eye-fill"></i></a>
                                 <a href="{{route('paises.edit', [$pais->id])}}"><i class="bi bi-pencil-fill"></i></a>

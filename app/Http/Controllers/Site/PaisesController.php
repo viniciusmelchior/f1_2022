@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Site;
 
 use App\Http\Controllers\Controller;
+use App\Models\Site\Continente;
 use App\Models\Site\Corrida;
 use App\Models\Site\Pais;
 use Illuminate\Http\Request;
@@ -28,8 +29,10 @@ class PaisesController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function create()
-    {
-        return view('site.paises.form');
+    {   
+        $continentes = Continente::all();
+
+        return view('site.paises.form', compact('continentes'));
     }
 
     /**
@@ -42,6 +45,7 @@ class PaisesController extends Controller
     {
         $pais = new Pais();
         $pais->des_nome = $request->des_nome;
+        $pais->continente_id = $request->continente_id;
         $pais->user_id = Auth::user()->id;
 
         if($request->imagem == ''){
@@ -91,7 +95,9 @@ class PaisesController extends Controller
     public function edit($id)
     {
         $model = Pais::where('id', $id)->where('user_id', Auth::user()->id)->first();
-        return view('site.paises.form', compact('model'));
+        $continentes = Continente::all();
+
+        return view('site.paises.form', compact('model','continentes'));
     }
 
     /**
@@ -117,6 +123,7 @@ class PaisesController extends Controller
             }
            $newImageName = time().'-'.$request->nome.'.'.$request->imagem->extension();
            $request->imagem->move(public_path('images'), $newImageName);
+           $pais->continente_id = $request->continente_id;
            $pais->imagem = $newImageName;
         }
 

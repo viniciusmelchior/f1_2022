@@ -13,7 +13,7 @@ class Pais extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['des_nome', 'user_id','imagem'];
+    protected $fillable = ['des_nome', 'user_id','imagem', 'continente_id'];
 
     /**relacionamentos */
 
@@ -27,5 +27,9 @@ class Pais extends Model
     
     public function pistas(){
         return $this->hasMany(Pista::class);
+    }
+
+    public function continente(){
+        return $this->belongsTo(Continente::class);
     }
 }

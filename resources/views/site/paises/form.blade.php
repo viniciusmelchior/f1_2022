@@ -19,6 +19,15 @@
             <input type="text" class="form-control" id="des_nome" name="des_nome" value="@if(isset($model)) {{$model->des_nome}}  @endif">
         </div>
         <div class="mb-3">
+            <label for="continente_id" class="form-label">Continente</label>
+            <select name="continente_id" id="continente_id" class="form-control">
+                @foreach($continentes as $continente)
+                    <option value="">Selecione</option>
+                    <option value="{{$continente->id}}" @if(isset($model) && isset($model->continente) && $model->continente->id == $continente->id) selected @endif>{{$continente->nome}}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="mb-3">
             <label for="imagem" class="form-label">Bandeira</label>
             <input type="file" class="form-control" id="imagem" name="imagem">
             @if(isset($model))
