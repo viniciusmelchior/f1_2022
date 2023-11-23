@@ -451,6 +451,7 @@ class TemporadaController extends Controller
                             ->where('user_id', $usuario)
                             // ->where('flg_sprint', 'N')
                             ->orderBy('ordem', 'ASC')
+                            ->orderBy('flg_sprint', 'DESC')
                             ->get();
 
         return view('site.temporadas.resultados', compact('temporada', 'resultadosPilotos','corridas'));
