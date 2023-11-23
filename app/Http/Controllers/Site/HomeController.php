@@ -14,25 +14,22 @@ class HomeController extends Controller
     public function index(){
 
         /**Vitoria dos Pilotos */
-        $vitoriasPiloto = Resultado::where('resultados.user_id', Auth::user()->id)->where('chegada', 1)
-                                    ->join('corridas', function($join){
-                                        $join->on('corridas.id', '=', 'resultados.corrida_id')
-                                            ->where('corridas.temporada_id', ">", 0);
-                                    })->get();
-
-        $vencedores = [];
-        foreach($vitoriasPiloto as $item){
-            if($item->corrida->flg_sprint == 'N'){
-                array_push($vencedores, $item->pilotoEquipe->piloto->nomeCompleto());
-            }
-        }
-
-        $totVitoriasPorPiloto = array_count_values($vencedores);
-        arsort($totVitoriasPorPiloto);
+        $totVitoriasPorPiloto = DB::select('select
+                                                pilotos.id, COUNT(*) as vitorias, concat(pilotos.nome," ",pilotos.sobrenome) as nome
+                                            from resultados
+                                            join corridas on (corridas.id = resultados.corrida_id)
+                                            join piloto_equipes on (resultados.pilotoEquipe_id = piloto_equipes.id)
+                                            join pilotos on (piloto_equipes.piloto_id = pilotos.id)
+                                            where corridas.temporada_id > 0
+                                            and resultados.chegada = 1
+                                            and corridas.flg_sprint = "N"
+                                            and corridas.user_id = '.Auth::user()->id.'
+                                            group by pilotos.id 
+                                            order by vitorias desc');
 
         $temporadas = Temporada::where('user_id', Auth::user()->id)->get();
 
-         /**Vitoria das Equipes */
+        /**Vitoria das Equipes */
         $vitoriaEquipes = Resultado::where('user_id', Auth::user()->id)->where('chegada', 1)->get();
         $vencedores = [];
         foreach($vitoriaEquipes as $item){
@@ -84,6 +81,10 @@ class HomeController extends Controller
         return view('home.home', compact('totVitoriasPorPiloto','totVitoriasPorEquipe','totPolesPorPiloto', 'temporadas','resultadosPilotosGeral','resultadosEquipesGeral'));
     }
 
+    // public function visualizarVitoriasPiloto(Request $request){
+    //     dd($request->query());
+    // }
+
     public function ajaxGetVitoriasPilotoPorTemporada(Request $request){
 
         $temporada_id = $request->post('vitoriasPilotosTemporadaId');
@@ -95,22 +96,18 @@ class HomeController extends Controller
             $condicao = 0; 
         }
 
-        //Consulta Dinâmica utiliza os operadores e condicoes dependendo do fato de ter ou nao temporada
-        $vitoriasPiloto = Resultado::where('resultados.user_id', Auth::user()->id)->where('chegada', 1)
-        ->join('corridas', function($join) use ($temporada_id, $operadorConsulta, $condicao){
-            $join->on('corridas.id', '=', 'resultados.corrida_id')
-                ->where('corridas.temporada_id',$operadorConsulta,$condicao);
-        })->get();
-
-        $vencedores = [];
-        foreach($vitoriasPiloto as $item){
-            if($item->corrida->flg_sprint == 'N'){
-                array_push($vencedores, $item->pilotoEquipe->piloto->nomeCompleto());
-            }
-        }
-
-        $totPorPiloto = array_count_values($vencedores);
-        arsort($totPorPiloto);
+        $totPorPiloto = DB::select('select
+                                        pilotos.id, COUNT(*) as vitorias, concat(pilotos.nome," ",pilotos.sobrenome) as nome
+                                    from resultados
+                                    join corridas on (corridas.id = resultados.corrida_id)
+                                    join piloto_equipes on (resultados.pilotoEquipe_id = piloto_equipes.id)
+                                    join pilotos on (piloto_equipes.piloto_id = pilotos.id)
+                                    where corridas.temporada_id '.$operadorConsulta.' '.$condicao.'
+                                    and resultados.chegada = 1
+                                    and corridas.flg_sprint = "N"
+                                    and corridas.user_id = '.Auth::user()->id.'
+                                    group by pilotos.id 
+                                    order by vitorias desc');
 
         return response()->json([
             'message' => 'ajaxGetVitoriasPilotoPorTemporada',
@@ -218,4 +215,35 @@ class HomeController extends Controller
              'totPolesPorPiloto' => $totPolesPorPiloto
          ]);
     }
+
+    public function ajaxGetPodiosPilotosPorTemporada(Request $request){
+        $temporada_id = $request->post('podiosPilotosTemporadaId');
+        $operadorConsulta = '=';
+        $condicao = $temporada_id;
+        
+        if($temporada_id == null){
+            $operadorConsulta = '>';
+            $condicao = 0; 
+        }
+
+        $totPorPiloto = DB::select('select
+                                        pilotos.id, COUNT(*) as podios, concat(pilotos.nome," ",pilotos.sobrenome) as nome
+                                    from resultados
+                                    join corridas on (corridas.id = resultados.corrida_id)
+                                    join piloto_equipes on (resultados.pilotoEquipe_id = piloto_equipes.id)
+                                    join pilotos on (piloto_equipes.piloto_id = pilotos.id)
+                                    where corridas.temporada_id '.$operadorConsulta.' '.$condicao.'
+                                    and resultados.chegada >= 1
+                                    and resultados.chegada <=3
+                                    and corridas.flg_sprint = "N"
+                                    and corridas.user_id = '.Auth::user()->id.'
+                                    group by pilotos.id 
+                                    order by podios desc');
+
+        return response()->json([
+            'message' => 'ajaxGetPodiosPilotoPorTemporada',
+            'totPorPiloto' => $totPorPiloto
+        ]);
+    }
+
 }

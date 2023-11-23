@@ -170,5 +170,11 @@ route::get('/anos/delete/{id}', [AnoController::class, 'destroy'])->name('anos.d
 /**Classificação após corrida */
 route::post('/fetch/getClassificacaoAposCorrida', [TemporadaController::class, 'getClassificacaoAposCorrida'])->name('fetch.getClassificacaoAposCorrida')->middleware('auth');
 
+/**
+ * Listagem de Vitorias por Piloto
+ */
+route::get('/visualizarVitoriasPiloto/{piloto_id}', [HomeController::class, 'visualizarVitoriasPiloto'])->name('visualizarVitoriasPiloto')->middleware('auth');
+
+route::post('/ajax/ajaxGetPodiosPilotoPorTemporada', [HomeController::class, 'ajaxGetPodiosPilotosPorTemporada'])->name('ajax.ajaxGetPodiosPilotoPorTemporada')->middleware('auth');
 
 

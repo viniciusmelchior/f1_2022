@@ -101,11 +101,12 @@
                         <th>Piloto</th>
                         <th>Vitórias</th>
                     </tr>
-                    @foreach($totVitoriasPorPiloto as $key => $value)
+                    @foreach($totVitoriasPorPiloto as $key => $piloto)
                         <tr>
+                            {{-- <td><a href=""><i class="bi bi-eye" style="color:black;"></i></a></td> --}}
                             <td>#</td>
-                            <td>{{$key}}</td>
-                            <td>{{$value}}</td>
+                            <td>{{$piloto->nome}}</td>
+                            <td>{{$piloto->vitorias}}</td>
                         </tr>
                     @endforeach
                </table>
@@ -212,10 +213,18 @@
         <div class="d-flex d-none" id="div_podios">
             <div>
                 <h1 class="descricao-tabela">Pilotos</h1>
-                <table class="m-5 tabelaEstatisticas">
+
+                <select name="podiosPilotosPorTemporada" id="podiosPilotosPorTemporada" class="form-select mt-3" style="width: 50%; margin:0 auto;">
+                    <option value="" selected id="selectTemporadaPodiosPilotos">Selecione uma Temporada</option>
+                @foreach($temporadas as $temporada)
+                    <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
+                @endforeach
+                </select>
+
+                <table class="m-5 tabelaEstatisticas" id="tabelaPodiosPilotos">
                     <tr>
                         <th>#</th>
-                        <th>Equipe</th>
+                        <th>Piloto</th>
                         <th>Podios</th>
                     </tr>
                     @php 
@@ -680,6 +689,7 @@
     ajaxGetVitoriasEquipesPorTemporada = "<?=route('ajax.ajaxGetVitoriasEquipesPorTemporada')?>"
     ajaxGetPolesPilotosPorTemporada = "<?=route('ajax.ajaxGetPolesPilotosPorTemporada')?>"
     ajaxGetPolesEquipesPorTemporada = "<?=route('ajax.ajaxGetPolesEquipesPorTemporada')?>"
+    ajaxGetPodiosPilotoPorTemporada = "<?=route('ajax.ajaxGetPodiosPilotoPorTemporada')?>"
 </script>
 
 <script>
@@ -860,10 +870,10 @@ $('#vitoriasPilotosPorTemporada').change(function (e) {
         data: {vitoriasPilotosTemporadaId: vitoriasPilotosTemporadaId},
         contentType: "application/x-www-form-urlencoded;charset=UTF-8",
         success: function (response) {
-            for (const key in response.totPorPiloto) {
-                // console.log(`${key}: ${response.totPorPiloto[key]}`);
-                tabelaVitoriasPilotos.append("<tr><td>#</td><td>"+key+"</td><td>"+response.totPorPiloto[key]+"</td></tr>");
-            }
+            response.totPorPiloto.forEach(function(piloto, index) {
+                // tabelaVitoriasPilotos.append("<tr><td><a href='visualizarVitoriasPiloto'><i class='bi bi-eye'></i></a></td><td>"+piloto.nome+"</td><td>"+piloto.vitorias+" id: "+piloto.id+"</td></tr>");
+                tabelaVitoriasPilotos.append("<tr><td>#</td><td>"+piloto.nome+"</td><td>"+piloto.vitorias);
+            }); 
         },
         error:function(){
             alert(error)
@@ -980,6 +990,43 @@ $('#PolesEquipesPorTemporada').change(function (e) {
                 // console.log(`${key}: ${response.totPorPiloto[key]}`);
                 tabelaPolesEquipes.append("<tr><td>#</td><td>"+key+"</td><td>"+response.totPolesPorEquipe[key]+"</td></tr>");
             }
+        },
+        error:function(){
+            alert(error)
+        }
+    });
+});
+
+/*podios por piloto a cada temporada*/
+$('#podiosPilotosPorTemporada').change(function (e) { 
+    e.preventDefault();
+
+    podiosPilotosTemporadaId = $('#podiosPilotosPorTemporada').val();
+    tabelaPodiosPilotos = $('#tabelaPodiosPilotos');
+    tabelaPodiosPilotos.html('');
+    tabelaPodiosPilotos.append('<tr><th>#</th><th>Piloto</th><th>Podios</th></tr>')
+
+    selectTemporadaPodiosPiloto = $('#selectTemporadaPodiosPilotos').text('Selecione uma Temporada');
+
+    if(podiosPilotosTemporadaId != ''){
+        selectTemporadaPodiosPiloto = $('#selectTemporadaPodiosPilotos').text('Geral');
+    }
+
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+
+    $.ajax({
+        type: "POST",
+        url: ajaxGetPodiosPilotoPorTemporada,
+        data: {podiosPilotosTemporadaId: podiosPilotosTemporadaId},
+        contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+        success: function (response) {
+           response.totPorPiloto.forEach(function(piloto, index) {
+                tabelaPodiosPilotos.append("<tr><td>#</td><td>"+piloto.nome+"</td><td>"+piloto.podios);
+            }); 
         },
         error:function(){
             alert(error)
