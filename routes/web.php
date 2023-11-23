@@ -57,7 +57,8 @@ route::post('/paises/store', [PaisesController::class, 'store'])->name('paises.s
 route::get('/paises/index', [PaisesController::class, 'index'])->name('paises.index')->middleware('auth');
 route::get('/paises/edit/{id}', [PaisesController::class, 'edit'])->name('paises.edit')->middleware('auth');
 route::put('/paises/update/{id}', [PaisesController::class, 'update'])->name('paises.update')->middleware('auth');
-route::get('/paises/delete/{id}', [PaisesController::class, 'destroy'])->name('paises.delete')->middleware('auth');
+route::get('/paises/show/{id}', [PaisesController::class, 'show'])->name('paises.show')->middleware('auth');
+route::get('/paises/delete', [PaisesController::class, 'destroy'])->name('paises.delete')->middleware('auth');
 
 /**Pilotos */
 route::get('/pilotos/create', [PilotoController::class, 'create'])->name('pilotos.create')->middleware('auth');

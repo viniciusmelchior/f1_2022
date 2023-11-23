@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Site;
 
 use App\Http\Controllers\Controller;
+use App\Models\Site\Corrida;
 use App\Models\Site\Pais;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -65,6 +66,20 @@ class PaisesController extends Controller
      */
     public function show($id)
     {
+
+        $resultadoCorridas = Corrida::where('user_id', Auth::user()->id)
+                                    ->whereHas('pista', function ($query) use ($id) {
+                                        $query->where('pais_id', $id);
+                                    })
+                                    ->orderBy('temporada_id', 'DESC')
+                                    ->orderBy('ordem', 'DESC')
+                                    ->get();
+
+        if(count($resultadoCorridas) > 0){
+            return view('site.paises.show', compact('resultadoCorridas'));
+        }else{
+            return redirect()->route('paises.index')->with('error', 'Não existem corridas disputadas no país selecionado');
+        }
     }
 
     /**
@@ -116,10 +131,25 @@ class PaisesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
-    {
-        $pais = Pais::where('id', $id)->where('user_id', Auth::user()->id)->first();
-        $pais->delete();
-        return redirect()->back();
+
+    public function destroy(Request $request)
+    {      
+        
+        try {
+            $id = $request->pais_id;
+            $pais = Pais::where('id', $id)->where('user_id', Auth::user()->id)->first();
+            $pais->delete();
+    
+            //apagando a foto do país
+            if($pais->imagem != null){
+                if(file_exists(public_path('images/'.$pais->imagem))){
+                    unlink(public_path('images/'.$pais->imagem));
+                }
+            }
+        
+            return redirect()->route('paises.index')->with('status', 'O pais '.$pais->des_nome.' foi excluído com sucesso');
+        } catch (\Throwable $th) {
+            return redirect()->route('paises.index')->with('error', 'Não foi possível excluir o país selecionado');
+        }
     }
 }
