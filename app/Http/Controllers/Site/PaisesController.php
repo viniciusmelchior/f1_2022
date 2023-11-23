@@ -111,6 +111,7 @@ class PaisesController extends Controller
     {
         $pais = Pais::where('id', $id)->where('user_id', Auth::user()->id)->first();
         $pais->des_nome = $request->des_nome;
+        $pais->continente_id = $request->continente_id;
 
         //se tiver foto criar span no form pra nao precisar alterar,  caso queira, apagar a antiga e colocar outra
         if($request->imagem == ''){
@@ -123,7 +124,6 @@ class PaisesController extends Controller
             }
            $newImageName = time().'-'.$request->nome.'.'.$request->imagem->extension();
            $request->imagem->move(public_path('images'), $newImageName);
-           $pais->continente_id = $request->continente_id;
            $pais->imagem = $newImageName;
         }
 

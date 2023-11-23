@@ -21,8 +21,8 @@
         <div class="mb-3">
             <label for="continente_id" class="form-label">Continente</label>
             <select name="continente_id" id="continente_id" class="form-control">
+                <option value="">Selecione</option>
                 @foreach($continentes as $continente)
-                    <option value="">Selecione</option>
                     <option value="{{$continente->id}}" @if(isset($model) && isset($model->continente) && $model->continente->id == $continente->id) selected @endif>{{$continente->nome}}</option>
                 @endforeach
             </select>

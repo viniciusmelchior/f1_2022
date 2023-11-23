@@ -50,7 +50,7 @@
                                 </span>
                                 {{$pais->des_nome}}
                             </td>
-                            <td> 
+                            <td style="text-align: center;"> 
                                 {{isset($pais->continente->nome) ? $pais->continente->nome : '-' }}
                             </td>
                             <td class="coluna_acoes">
