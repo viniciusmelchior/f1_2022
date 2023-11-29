@@ -178,4 +178,6 @@ route::get('/visualizarVitoriasPiloto/{piloto_id}', [HomeController::class, 'vis
 
 route::post('/ajax/ajaxGetPodiosPilotoPorTemporada', [HomeController::class, 'ajaxGetPodiosPilotosPorTemporada'])->name('ajax.ajaxGetPodiosPilotoPorTemporada')->middleware('auth');
 
+route::post('/ajax/ajaxGetPodiosEquipesPorTemporada', [HomeController::class, 'ajaxGetPodiosEquipesPorTemporada'])->name('ajax.ajaxGetPodiosEquipesPorTemporada')->middleware('auth');
+
 

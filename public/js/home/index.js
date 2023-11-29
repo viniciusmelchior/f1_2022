@@ -339,5 +339,42 @@ $(document).ready(function () {
             }
         });
     });
+
+     /* montagem da tabela de podios por equipes por temporada*/
+     $('#podiosEquipesPorTemporada').change(function (e) { 
+        e.preventDefault();
+
+        podiosEquipesTemporadaId = $('#podiosEquipesPorTemporada').val();
+        tabelaPodiosEquipes = $('#tabelaPodiosEquipes');
+        tabelaPodiosEquipes.html('');
+        tabelaPodiosEquipes.append('<tr><th>#</th><th>Piloto</th><th>Podios</th></tr>')
+
+        selectTemporadaPodiosEquipe = $('#selectTemporadaPodiosEquipes').text('Selecione uma Temporada');
+
+        if(podiosEquipesTemporadaId != ''){
+            selectTemporadaPodiosEquipe = $('#selectTemporadaPodiosEquipes').text('Geral');
+        }
+
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
+        $.ajax({
+            type: "POST",
+            url: ajaxGetPodiosEquipesPorTemporada,
+            data: {podiosEquipesTemporadaId: podiosEquipesTemporadaId},
+            contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+            success: function (response) {
+            response.totPorEquipe.forEach(function(equipe, index) {
+                    tabelaPodiosEquipes.append("<tr><td>#</td><td>"+equipe.nome+"</td><td>"+equipe.podios);
+                }); 
+            },
+            error:function(){
+                alert(error)
+            }
+        });
+    });
     
 });

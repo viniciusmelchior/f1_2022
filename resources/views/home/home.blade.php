@@ -250,7 +250,15 @@
             </div>
             <div>
                 <h1 class="descricao-tabela">Equipes</h1>
-                <table class="m-5 tabelaEstatisticas">
+
+                <select name="podiosEquipesPorTemporada" id="podiosEquipesPorTemporada" class="form-select mt-3" style="width: 50%; margin:0 auto;">
+                    <option value="" selected id="selectTemporadaPodiosEquipes">Selecione uma Temporada</option>
+                    @foreach($temporadas as $temporada)
+                        <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
+                    @endforeach
+                </select>
+
+                <table class="m-5 tabelaEstatisticas" id="tabelaPodiosEquipes">
                     <tr>
                         <th>#</th>
                         <th>Equipe</th>
@@ -696,4 +704,5 @@
     ajaxGetPolesPilotosPorTemporada = "<?=route('ajax.ajaxGetPolesPilotosPorTemporada')?>"
     ajaxGetPolesEquipesPorTemporada = "<?=route('ajax.ajaxGetPolesEquipesPorTemporada')?>"
     ajaxGetPodiosPilotoPorTemporada = "<?=route('ajax.ajaxGetPodiosPilotoPorTemporada')?>"
+    ajaxGetPodiosEquipesPorTemporada = "<?=route('ajax.ajaxGetPodiosEquipesPorTemporada')?>"
 </script>

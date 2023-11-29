@@ -246,4 +246,35 @@ class HomeController extends Controller
         ]);
     }
 
+    public function ajaxGetPodiosEquipesPorTemporada(Request $request){
+        
+        $temporada_id = $request->post('podiosEquipesTemporadaId');
+        $operadorConsulta = '=';
+        $condicao = $temporada_id;
+        
+        if($temporada_id == null){
+            $operadorConsulta = '>';
+            $condicao = 0; 
+        }
+
+        $totPorEquipe = DB::select('select
+                                        equipes.id, COUNT(*) as podios, equipes.nome as nome
+                                    from resultados
+                                    join corridas on (corridas.id = resultados.corrida_id)
+                                    join piloto_equipes on (resultados.pilotoEquipe_id = piloto_equipes.id)
+                                    join equipes on (piloto_equipes.equipe_id = equipes.id)
+                                    where corridas.temporada_id '.$operadorConsulta.' '.$condicao.'
+                                    and resultados.chegada > 0 
+                                    and resultados.chegada <= 3
+                                    and corridas.flg_sprint = "N"
+                                    and corridas.user_id = '.Auth::user()->id.'
+                                    group by equipe_id 
+                                    order by podios desc;');
+
+        return response()->json([
+            'message' => 'ajaxGetPodiosPilotoPorTemporada',
+            'totPorEquipe' => $totPorEquipe
+        ]);
+    }
+
 }
