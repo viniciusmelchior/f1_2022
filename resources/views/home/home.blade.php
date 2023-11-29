@@ -763,52 +763,6 @@
             });
 
         });
-        
-    // Paginação da tabela
-
-   var table = document.getElementById("tabelaResultadoCorridas");
-   var rows = table.tBodies[0].rows;
-    var rowsPerPage = 10;
-    var currentPage = 0;
-    var pages = Math.ceil(rows.length / rowsPerPage);
-    var pagination = document.getElementById("pagination");
-    
-    
-    for (var i = 0; i < pages; i++) {
-        var page = Array.prototype.slice.call(rows, i * rowsPerPage, (i + 1) * rowsPerPage);
-        page.forEach(function(row) {
-            row.style.display = "none";
-        });
-    }
-
-    showPage();
-    
-    function showPage() {
-        for (var i = 0; i < pages; i++) {
-        var page = Array.prototype.slice.call(rows, i * rowsPerPage, (i + 1) * rowsPerPage);
-            if (i === currentPage) {
-                page.forEach(function(row) {
-                    row.style.display = "table-row";
-                });
-            } else {
-                page.forEach(function(row) {
-                    row.style.display = "none";
-                });
-            }
-        }
-    }
-    showPage();
-
-    for (var i = 0; i < pages; i++) {
-        var pageNumber = document.createElement("button");
-        pageNumber.innerHTML = i + 1;
-        pageNumber.classList.add("page-number");
-        pageNumber.addEventListener("click", function() {
-            currentPage = parseInt(this.innerHTML) - 1;
-            showPage();
-        });
-        pagination.appendChild(pageNumber);
-}
 
 /*montagem da tabela de vitórias dos pilotos por temporada*/
 $('#vitoriasPilotosPorTemporada').change(function (e) { 
