@@ -340,7 +340,7 @@ $(document).ready(function () {
         });
     });
 
-     /* montagem da tabela de podios por equipes por temporada*/
+     //montagem da tabela de podios por equipes por temporada
      $('#podiosEquipesPorTemporada').change(function (e) { 
         e.preventDefault();
 
