@@ -37,7 +37,6 @@ $(document).ready(function () {
     });
 
     // Paginação da tabela dos resultados das corridas
-
     var table = document.getElementById("tabelaResultadoCorridas");
     var rows = table.tBodies[0].rows;
     var rowsPerPage = 10;
@@ -83,5 +82,70 @@ $(document).ready(function () {
         pagination.appendChild(pageNumber);
     }
 
-    
+    //mudar classificação dos pilotos e equipes por temporada 
+    $("#mudarTemporada").change(function (e) { 
+        e.preventDefault();
+
+        temporada_id = $("#mudarTemporada").val();
+        tabelaClassificacaoPilotos = $('#tabelaClassificacaoPilotos');
+        tabelaClassificacaoEquipes = $('#tabelaClassificacaoEquipes');
+
+        if(temporada_id == ""){
+            tituloClassificacao = $('#tituloClassificacao').text('Classificação Geral');
+            tabelaClassificacaoPilotos.html('')
+            tabelaClassificacaoEquipes.html('')
+            tabelaClassificacaoPilotos.append('<tr><th>Posição</th><th>Piloto</th>><th>Equipe</th><th>Pontos</th></tr>')
+            tabelaClassificacaoPilotos.append("<tr><td colspan='4'>Selecione uma Temporada</td></tr>");
+            tabelaClassificacaoEquipes.append('<tr><th>Posição</th><th>Piloto</th><th>Pontos</th></tr>')
+            tabelaClassificacaoEquipes.append("<tr><td colspan='3'>Selecione uma Temporada</td></tr>");
+        }
+            
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
+        $.ajax({
+            type: "POST",
+            url: urlclassificacaoGeralPorTemporada,
+            data: {temporada_id: temporada_id},
+            contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+            success: function (response) {
+                tituloClassificacao = $('#tituloClassificacao').text('Classificação Geral '+response.temporada.des_temporada);
+                tabelaClassificacaoPilotos.html('')
+                tabelaClassificacaoEquipes.html('')
+                if(response.resultadosPilotos.length > 0){
+                    contPilotos = 1;
+                    tabelaClassificacaoPilotos.append('<tr><th style="width:5%;">Posição</th><th style="width:5%;">Equipe</th>><th <th style="width:25%;">Piloto</th><th <th style="width:15%;">Pontos</th></tr>')
+                    response.resultadosPilotos.map(function(response){ 
+                        var assetPath = "{{ asset('images/') }}" + "/"+response.imagem;
+                        tabelaClassificacaoPilotos.append("<tr class='remover'><td>" + contPilotos + "</td><td><img src='" + assetPath + "' style='width:25px; height:25px;'></td><td>" + response.nome + "</td><td>" + response.total + "</td></tr>");
+
+                    contPilotos++
+                    })
+                    
+                } else {
+                    tabelaClassificacaoPilotos.append('<tr><th>Posição</th><th>Piloto</th><th>Pontos</th></tr>')
+                    tabelaClassificacaoPilotos.append("<tr><td colspan='3'>Sem Dados Cadastrados</td></tr>");
+                }
+
+                if(response.resultadosEquipes.length > 0){
+                    contEquipes = 1;
+                    tabelaClassificacaoEquipes.append('<tr><th>Posição</th><th>Piloto</th><th>Pontos</th></tr>')
+                    response.resultadosEquipes.map(function(response){ 
+                    tabelaClassificacaoEquipes.append("<tr><td>"+contEquipes+"</td><td>"+response.nome+"</td><td>"+response.total+"</td></tr>");
+                    contEquipes++
+                    })
+                }else{
+                    tabelaClassificacaoEquipes.append('<tr><th>Posição</th><th>Piloto</th><th>Pontos</th></tr>')
+                    tabelaClassificacaoEquipes.append("<tr><td colspan='3'>Sem Dados Cadastrados</td></tr>");
+                }
+            
+            },
+            error:function(){
+                alert(error)
+            }
+        });
+    });
 });
