@@ -344,8 +344,6 @@ $(document).ready(function () {
      $('#podiosEquipesPorTemporada').change(function (e) { 
         e.preventDefault();
 
-        alert("teste")
-
         podiosEquipesTemporadaId = $('#podiosEquipesPorTemporada').val();
         tabelaPodiosEquipes = $('#tabelaPodiosEquipes');
         tabelaPodiosEquipes.html('');
