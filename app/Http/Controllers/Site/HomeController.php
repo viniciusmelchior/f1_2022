@@ -277,4 +277,36 @@ class HomeController extends Controller
         ]);
     }
 
+    public function ajaxGetChegadasPilotosPorTemporada(Request $request){
+        // dd($request->all());
+
+        $temporada_id = $request->post('temporada');
+        $operadorConsulta = '=';
+        $condicao = $temporada_id;
+        
+        if($temporada_id == null){
+            $operadorConsulta = '>';
+            $condicao = 0; 
+        }
+
+        $totPorPiloto = DB::select('select
+                                        pilotos.id, COUNT(*) as chegadas, concat(pilotos.nome," ",pilotos.sobrenome) as nome
+                                    from resultados
+                                    join corridas on (corridas.id = resultados.corrida_id)
+                                    join piloto_equipes on (resultados.pilotoEquipe_id = piloto_equipes.id)
+                                    join pilotos on (piloto_equipes.piloto_id = pilotos.id)
+                                    where corridas.temporada_id '.$operadorConsulta.' '.$condicao.'
+                                    and resultados.chegada >= '.$request->inicio.'
+                                    and resultados.chegada <= '.$request->fim.'
+                                    and corridas.flg_sprint = "N"
+                                    and corridas.user_id = '.Auth::user()->id.'
+                                    group by pilotos.id 
+                                    order by chegadas desc');
+
+        return response()->json([
+            'message' => 'ajaxGetChegadasPilotosPorTemporada',
+            'totPorPiloto' => $totPorPiloto
+        ]);
+    }
+
 }

@@ -378,5 +378,90 @@ $(document).ready(function () {
             }
         });
     });
-    
+
+    //mudar select de temporada da tabela de chegadas dos pilotos 
+    $('#chegadasPilotosPorTemporada').change(function (e) { 
+        e.preventDefault();
+
+        temporadaId = $('#chegadasPilotosPorTemporada').val();
+        inicioPosicaoChegadasPilotos = $('#inicioPosicaoChegadasPilotos').val();
+        fimPosicaoChegadasPilotos = $('#fimPosicaoChegadasPilotos').val();
+
+        getChegadasPorPosicao(temporadaId, inicioPosicaoChegadasPilotos, fimPosicaoChegadasPilotos);
+    });
+
+    //mudar posição inicial da tabela de chegadas dos pilotos 
+    $('#inicioPosicaoChegadasPilotos').change(function (e) { 
+        e.preventDefault();
+        
+        temporadaId = $('#chegadasPilotosPorTemporada').val();
+        inicioPosicaoChegadasPilotos = $('#inicioPosicaoChegadasPilotos').val();
+        fimPosicaoChegadasPilotos = $('#fimPosicaoChegadasPilotos').val();
+
+        getChegadasPorPosicao(temporadaId, inicioPosicaoChegadasPilotos, fimPosicaoChegadasPilotos);
+    });
+
+    //mudar posição final da tabela de chegadas dos pilotos 
+    $('#fimPosicaoChegadasPilotos').change(function (e) { 
+        e.preventDefault();
+        
+        temporadaId = $('#chegadasPilotosPorTemporada').val();
+        inicioPosicaoChegadasPilotos = $('#inicioPosicaoChegadasPilotos').val();
+        fimPosicaoChegadasPilotos = $('#fimPosicaoChegadasPilotos').val();
+
+        getChegadasPorPosicao(temporadaId, inicioPosicaoChegadasPilotos, fimPosicaoChegadasPilotos);
+    });
+
+    function getChegadasPorPosicao(temporada, inicio, fim){
+
+        //tratamento para que o fim seja sempre maior que o inicio
+        // if(fim <= inicio){
+        //     alert('O número do campo fim deve ser maior que o do campo inicio')
+        //     // $('#inicioPosicaoChegadasPilotos').val(fim - 1);
+        //     return
+        // }
+
+        //tratamento para que os campos de inicio e fim sejam preenchidos
+        // if(inicio == '' || fim == ''){
+        //     alert("Os campos 'inicio' e 'fim' precisam ser preenchidos!");
+        //     // $('#inicioPosicaoChegadasPilotos').val(1);
+        //     // $('#fimPosicaoChegadasPilotos').val(10);
+        //     return
+        // }
+
+        console.log(temporada, inicio, fim)
+
+        tabelaChegadasPilotos = $('#tabelaChegadasPilotos');
+        tabelaChegadasPilotos.html('');
+        tabelaChegadasPilotos.append('<tr><th>#</th><th>Piloto</th><th>Chegadas</th></tr>')
+
+        selectTemporadaChegadasPilotos = $('#selectTemporadaChegadasPilotos').text('Selecione uma Temporada');
+
+        if(temporada != ''){
+            selectTemporadaChegadasPilotos = $('#selectTemporadaChegadasPilotos').text('Geral');
+        }
+
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
+        $.ajax({
+            type: "POST",
+            url: ajaxGetChegadasPilotosPorTemporada,
+            data: {temporada: temporada, inicio:inicio, fim:fim},
+            contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+            success: function (response) {
+                console.log('ok')
+                response.totPorPiloto.forEach(function(piloto, index) {
+                    tabelaChegadasPilotos.append("<tr><td>#</td><td>"+piloto.nome+"</td><td>"+piloto.chegadas);
+                }); 
+            },
+            error:function(){
+                alert(error)
+            }
+        });
+
+    }
 });

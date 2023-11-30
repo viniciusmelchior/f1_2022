@@ -9,6 +9,13 @@
 @extends('layouts.main')
 
 <style>
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+-webkit-appearance: none;
+margin: 0;
+}
+
     /*HOME*/
 .tabelaEstatisticas{
     border: 1px solid black;
@@ -354,12 +361,37 @@
 
         <hr class="separador">
 
-        <div class="header-tabelas m-3">Chegadas TOP 10 <span id="toggle_chegadastop10"><i class="bi bi-plus-circle"></i></span></div>
+        <div class="header-tabelas m-3">Chegadas <span id="toggle_chegadastop10"><i class="bi bi-plus-circle"></i></span></div>
 
         <div class="d-flex d-none" id="div_chegadastop10">
             <div>
                 <h1 class="descricao-tabela">Pilotos</h1>
-                <table class="m-5 tabelaEstatisticas">
+
+                <div>
+                    <div>
+                        <select name="chegadasPilotosPorTemporada" id="chegadasPilotosPorTemporada" class="form-select mt-3" style="width: 50%; margin:0 auto;">
+                            <option value="" selected id="selectTemporadaChegadasPilotos">Selecione uma Temporada</option>
+                        @foreach($temporadas as $temporada)
+                            <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
+                        @endforeach
+                        </select>
+                    </div>
+                
+                    <div class="mt-3">
+                        <div style="display: flex; justify-content: center; align-items: center;">
+                            <div>
+                                <label for="">Inicio</label>
+                                <input type="number" name="inicioPosicaoChegadasPilotos" id="inicioPosicaoChegadasPilotos" style="width:30px; height:30px; text-align: center;" value="1">
+                            </div>
+                            <div>
+                                <label for="" style="margin-left: 1rem;">Fim</label>
+                                <input type="number" name="fimPosicaoChegadasPilotos" id="fimPosicaoChegadasPilotos" style="width:30px; height:30px; text-align: center;" value="10">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <table class="m-5 tabelaEstatisticas" id="tabelaChegadasPilotos">
                     <tr>
                         <th>#</th>
                         <th>Equipe</th>
@@ -705,4 +737,5 @@
     ajaxGetPolesEquipesPorTemporada = "<?=route('ajax.ajaxGetPolesEquipesPorTemporada')?>"
     ajaxGetPodiosPilotoPorTemporada = "<?=route('ajax.ajaxGetPodiosPilotoPorTemporada')?>"
     ajaxGetPodiosEquipesPorTemporada = "<?=route('ajax.ajaxGetPodiosEquipesPorTemporada')?>"
+    ajaxGetChegadasPilotosPorTemporada = "<?=route('ajax.ajaxGetChegadasPilotosPorTemporada')?>"
 </script>
