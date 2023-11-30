@@ -387,7 +387,7 @@ $(document).ready(function () {
         inicioPosicaoChegadasPilotos = $('#inicioPosicaoChegadasPilotos').val();
         fimPosicaoChegadasPilotos = $('#fimPosicaoChegadasPilotos').val();
 
-        getChegadasPorPosicao(temporadaId, inicioPosicaoChegadasPilotos, fimPosicaoChegadasPilotos);
+        getChegadasPilotosPorPosicao(temporadaId, inicioPosicaoChegadasPilotos, fimPosicaoChegadasPilotos);
     });
 
     //mudar posição inicial da tabela de chegadas dos pilotos 
@@ -398,7 +398,7 @@ $(document).ready(function () {
         inicioPosicaoChegadasPilotos = $('#inicioPosicaoChegadasPilotos').val();
         fimPosicaoChegadasPilotos = $('#fimPosicaoChegadasPilotos').val();
 
-        getChegadasPorPosicao(temporadaId, inicioPosicaoChegadasPilotos, fimPosicaoChegadasPilotos);
+        getChegadasPilotosPorPosicao(temporadaId, inicioPosicaoChegadasPilotos, fimPosicaoChegadasPilotos);
     });
 
     //mudar posição final da tabela de chegadas dos pilotos 
@@ -409,25 +409,10 @@ $(document).ready(function () {
         inicioPosicaoChegadasPilotos = $('#inicioPosicaoChegadasPilotos').val();
         fimPosicaoChegadasPilotos = $('#fimPosicaoChegadasPilotos').val();
 
-        getChegadasPorPosicao(temporadaId, inicioPosicaoChegadasPilotos, fimPosicaoChegadasPilotos);
+        getChegadasPilotosPorPosicao(temporadaId, inicioPosicaoChegadasPilotos, fimPosicaoChegadasPilotos);
     });
 
-    function getChegadasPorPosicao(temporada, inicio, fim){
-
-        //tratamento para que o fim seja sempre maior que o inicio
-        // if(fim <= inicio){
-        //     alert('O número do campo fim deve ser maior que o do campo inicio')
-        //     // $('#inicioPosicaoChegadasPilotos').val(fim - 1);
-        //     return
-        // }
-
-        //tratamento para que os campos de inicio e fim sejam preenchidos
-        // if(inicio == '' || fim == ''){
-        //     alert("Os campos 'inicio' e 'fim' precisam ser preenchidos!");
-        //     // $('#inicioPosicaoChegadasPilotos').val(1);
-        //     // $('#fimPosicaoChegadasPilotos').val(10);
-        //     return
-        // }
+    function getChegadasPilotosPorPosicao(temporada, inicio, fim){
 
         console.log(temporada, inicio, fim)
 
@@ -462,6 +447,75 @@ $(document).ready(function () {
                 alert(error)
             }
         });
+    }
 
+    //mudar select de temporada da tabela de chegadas das equipes 
+    $('#chegadasEquipesPorTemporada').change(function (e) { 
+        e.preventDefault();
+
+        temporadaId = $('#chegadasEquipesPorTemporada').val();
+        inicioPosicaoChegadasEquipes = $('#inicioPosicaoChegadasEquipes').val();
+        fimPosicaoChegadasEquipes = $('#fimPosicaoChegadasEquipes').val();
+
+        getChegadasEquipesPorPosicao(temporadaId, inicioPosicaoChegadasEquipes, fimPosicaoChegadasEquipes);
+    });
+
+    //mudar posição inicial da tabela de chegadas das equipes
+    $('#inicioPosicaoChegadasEquipes').change(function (e) { 
+        e.preventDefault();
+        
+        temporadaId = $('#chegadasEquipesPorTemporada').val();
+        inicioPosicaoChegadasEquipes = $('#inicioPosicaoChegadasEquipes').val();
+        fimPosicaoChegadasEquipes = $('#fimPosicaoChegadasEquipes').val();
+
+        getChegadasEquipesPorPosicao(temporadaId, inicioPosicaoChegadasEquipes, fimPosicaoChegadasEquipes);
+    });
+
+    //mudar posição final da tabela de chegadas das equipes
+    $('#fimPosicaoChegadasEquipes').change(function (e) { 
+        e.preventDefault();
+        
+        temporadaId = $('#chegadasEquipesPorTemporada').val();
+        inicioPosicaoChegadasEquipes = $('#inicioPosicaoChegadasEquipes').val();
+        fimPosicaoChegadasEquipes = $('#fimPosicaoChegadasEquipes').val();
+
+        getChegadasEquipesPorPosicao(temporadaId, inicioPosicaoChegadasEquipes, fimPosicaoChegadasEquipes);
+    });
+
+    function getChegadasEquipesPorPosicao(temporada, inicio, fim){
+
+        console.log(temporada, inicio, fim)
+
+        tabelaChegadasEquipes = $('#tabelaChegadasEquipes');
+        tabelaChegadasEquipes.html('');
+        tabelaChegadasEquipes.append('<tr><th>#</th><th>Piloto</th><th>Chegadas</th></tr>')
+
+        selectTemporadaChegadasEquipes = $('#selectTemporadaChegadasEquipes').text('Selecione uma Temporada');
+
+        if(temporada != ''){
+            selectTemporadaChegadasEquipes = $('#selectTemporadaChegadasEquipes').text('Geral');
+        }
+
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
+        $.ajax({
+            type: "POST",
+            url: ajaxGetChegadasEquipesPorTemporada,
+            data: {temporada: temporada, inicio:inicio, fim:fim},
+            contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+            success: function (response) {
+                console.log('ok')
+                response.totPorEquipe.forEach(function(equipe, index) {
+                    tabelaChegadasEquipes.append("<tr><td>#</td><td>"+equipe.nome+"</td><td>"+equipe.chegadas);
+                }); 
+            },
+            error:function(){
+                alert(error)
+            }
+        });
     }
 });

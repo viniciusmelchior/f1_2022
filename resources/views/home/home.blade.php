@@ -420,7 +420,32 @@ margin: 0;
             </div>
             <div>
                 <h1 class="descricao-tabela">Equipes</h1>
-                <table class="m-5 tabelaEstatisticas">
+
+                <div>
+                    <div>
+                        <select name="chegadasEquipesPorTemporada" id="chegadasEquipesPorTemporada" class="form-select mt-3" style="width: 50%; margin:0 auto;">
+                            <option value="" selected id="selectTemporadaChegadasEquipes">Selecione uma Temporada</option>
+                        @foreach($temporadas as $temporada)
+                            <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
+                        @endforeach
+                        </select>
+                    </div>
+                
+                    <div class="mt-3">
+                        <div style="display: flex; justify-content: center; align-items: center;">
+                            <div>
+                                <label for="">Inicio</label>
+                                <input type="number" name="inicioPosicaoChegadasEquipes" id="inicioPosicaoChegadasEquipes" style="width:30px; height:30px; text-align: center;" value="1">
+                            </div>
+                            <div>
+                                <label for="" style="margin-left: 1rem;">Fim</label>
+                                <input type="number" name="fimPosicaoChegadasEquipes" id="fimPosicaoChegadasEquipes" style="width:30px; height:30px; text-align: center;" value="10">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <table class="m-5 tabelaEstatisticas" id="tabelaChegadasEquipes">
                     <tr>
                         <th>#</th>
                         <th>Equipe</th>
@@ -738,4 +763,5 @@ margin: 0;
     ajaxGetPodiosPilotoPorTemporada = "<?=route('ajax.ajaxGetPodiosPilotoPorTemporada')?>"
     ajaxGetPodiosEquipesPorTemporada = "<?=route('ajax.ajaxGetPodiosEquipesPorTemporada')?>"
     ajaxGetChegadasPilotosPorTemporada = "<?=route('ajax.ajaxGetChegadasPilotosPorTemporada')?>"
+    ajaxGetChegadasEquipesPorTemporada = "<?=route('ajax.ajaxGetChegadasEquipesPorTemporada')?>"
 </script>

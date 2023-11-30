@@ -181,5 +181,6 @@ route::post('/ajax/ajaxGetPodiosPilotoPorTemporada', [HomeController::class, 'aj
 route::post('/ajax/ajaxGetPodiosEquipesPorTemporada', [HomeController::class, 'ajaxGetPodiosEquipesPorTemporada'])->name('ajax.ajaxGetPodiosEquipesPorTemporada')->middleware('auth');
 
 route::post('/ajax/ajaxGetChegadasPilotosPorTemporada', [HomeController::class, 'ajaxGetChegadasPilotosPorTemporada'])->name('ajax.ajaxGetChegadasPilotosPorTemporada')->middleware('auth');
+route::post('/ajax/ajaxGetChegadasEquipesPorTemporada', [HomeController::class, 'ajaxGetChegadasEquipesPorTemporada'])->name('ajax.ajaxGetChegadasEquipesPorTemporada')->middleware('auth');
 
 
