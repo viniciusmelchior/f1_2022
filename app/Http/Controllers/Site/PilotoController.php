@@ -113,6 +113,7 @@ class PilotoController extends Controller
         $totAbandonos = 0;
         $gridMedio = 0;
         $mediaChegada = 0;
+        $listagemVitorias = [];
         
         foreach($resultados as $resultado){
             if($resultado->pilotoEquipe->piloto->id == $id){
@@ -123,6 +124,7 @@ class PilotoController extends Controller
             if($resultado->chegada == 1){
                 if($resultado->pilotoEquipe->piloto->id == $id){
                     $totVitorias++;
+                    $listagemVitorias[] = $resultado;
                 }
             }
 
@@ -274,7 +276,7 @@ class PilotoController extends Controller
 
         $temporadas = Temporada::where('user_id', Auth::user()->id)->get();
 
-        return view('site.pilotos.show', compact('modelPiloto','totTitulos','totAbandonos', 'totCorridas', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas', 'equipes','mediaChegada','gridMedio','temporadasDisputadas','pontuacaoPorTemporada','resultadosPorCorrida','temporadas'));
+        return view('site.pilotos.show', compact('modelPiloto','totTitulos','totAbandonos', 'totCorridas', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas', 'equipes','mediaChegada','gridMedio','temporadasDisputadas','pontuacaoPorTemporada','resultadosPorCorrida','temporadas','listagemVitorias'));
     }
 
     /**
