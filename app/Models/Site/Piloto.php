@@ -36,46 +36,20 @@ class Piloto extends Model
     }
 
     static function getInfoCampeonato($temporada_id, $piloto_id){
-        //devolve a temporada, posicao e qtd de pontos, usado para listar a temporada temporadas/classificacao/2
+        
         $usuario = Auth::user()->id;
 
-        $classificacao = DB::select('
-                                SELECT *
-                                FROM (
-                                    SELECT 
-                                        piloto_id,
-                                        pilotoEquipe_id,
-                                        nome,
-                                        sobrenome,
-                                        imagem,
-                                        equipe,
-                                        total,
-                                        ROW_NUMBER() OVER(ORDER BY total DESC) AS posicao
-                                    FROM (
-                                        SELECT 
-                                            piloto_id,
-                                            piloto_equipes.id AS pilotoEquipe_id,
-                                            pilotos.nome,
-                                            pilotos.sobrenome,
-                                            equipes.imagem,
-                                            equipes.nome AS equipe,
-                                            SUM(pontuacao) AS total
-                                        FROM resultados
-                                        JOIN piloto_equipes ON piloto_equipes.id = resultados.pilotoEquipe_id
-                                        JOIN pilotos ON pilotos.id = piloto_equipes.piloto_id
-                                        JOIN equipes ON equipes.id = piloto_equipes.equipe_id
-                                        JOIN corridas ON corridas.id = resultados.corrida_id
-                                        JOIN temporadas ON temporadas.id = corridas.temporada_id
-                                        WHERE temporadas.id = '.$temporada_id.'
-                                            AND resultados.user_id = '.$usuario.'
-                                        GROUP BY piloto_equipes.piloto_id
-                                    ) AS subquery
-                                ) AS ranked_results
-                                WHERE piloto_id = '.$piloto_id.'
-                                ');
+        $temporada = Temporada::find($temporada_id);
 
-        return $classificacao != null ? $classificacao[0]->posicao : '-';
+        $posicaoPiloto = '-';
 
+        $classificacaoPilotos = $temporada->getClassificacao($usuario, $temporada)['resultadoPilotos']; //recebe array da classificação ja montado (as chaves/posições começam no zero)
+        foreach($classificacaoPilotos as $key => $item){
+            if($item->piloto_id == $piloto_id){
+                $posicaoPiloto = $key+1; //adiciona 1 na chave do array (que começa com zero) que ja vem ordenado do banco de dados
+            }
+        }
+
+        return $posicaoPiloto;
     }
-
 }
