@@ -271,12 +271,16 @@
             <table class="mt-5 mb-5 tabela-historico-equipes">
                 <th>Temporada</th>
                 <th>Posição</th>
+                <th>Pontos</th>
                 <th>Ações</th>
                 @foreach ($temporadas as $temporada )
                     <tr>
                         <td>{{$temporada->ano->ano}}</td>
                         <td>
-                            {{Piloto::getInfoCampeonato($temporada->id, $modelPiloto->id)}}
+                            {{Piloto::getInfoCampeonato($temporada->id, $modelPiloto->id)['posicaoPiloto']}}
+                        </td>
+                        <td>
+                            {{Piloto::getInfoCampeonato($temporada->id, $modelPiloto->id)['totalPontos']}}
                         </td>
                         <td>
                             <a data-toggle="tooltip" data-placement="top" title="Classificação" href="{{route('temporadas.classificacao', [$temporada->id])}}"><i class="bi bi-table"></i></a>

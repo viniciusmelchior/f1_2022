@@ -36,20 +36,25 @@ class Piloto extends Model
     }
 
     static function getInfoCampeonato($temporada_id, $piloto_id){
-        
+
         $usuario = Auth::user()->id;
 
         $temporada = Temporada::find($temporada_id);
 
         $posicaoPiloto = '-';
+        $totalPontos = 0;
 
         $classificacaoPilotos = $temporada->getClassificacao($usuario, $temporada)['resultadoPilotos']; //recebe array da classificação ja montado (as chaves/posições começam no zero)
         foreach($classificacaoPilotos as $key => $item){
             if($item->piloto_id == $piloto_id){
+                $totalPontos = $item->total;
                 $posicaoPiloto = $key+1; //adiciona 1 na chave do array (que começa com zero) que ja vem ordenado do banco de dados
             }
         }
 
-        return $posicaoPiloto;
+        return [
+            'posicaoPiloto' => $posicaoPiloto,
+            'totalPontos' => $posicaoPiloto != '-' ? $totalPontos : '-'
+        ];
     }
 }
