@@ -110,6 +110,7 @@ class EquipeController extends Controller
         $gridMedio = 0;
         $mediaChegada = 0;
         $totDobradinhas = 0;
+        $listagemVitorias = [];
 
         $totVoltasRapidas = 0;
 
@@ -135,6 +136,7 @@ class EquipeController extends Controller
                 if($resultado->pilotoEquipe->equipe->id == $id){
                     $possiveisDobradinhas[] = $resultado;
                     $totVitorias++;
+                    $listagemVitorias[] = $resultado;
                 }
             }
 
@@ -304,7 +306,7 @@ class EquipeController extends Controller
             $mediaChegada = round($mediaChegada/$totCorridas);
         }
 
-        return view('site.equipes.show', compact('modelEquipe','totTitulos', 'totCorridas','totTitulosPilotos', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas','temporadasDisputadas','pontuacaoPorTemporada','temporadas','totAbandonos','gridMedio','mediaChegada','totDobradinhas'));
+        return view('site.equipes.show', compact('modelEquipe','totTitulos', 'totCorridas','totTitulosPilotos', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas','temporadasDisputadas','pontuacaoPorTemporada','temporadas','totAbandonos','gridMedio','mediaChegada','totDobradinhas','listagemVitorias'));
     }
 
     /**

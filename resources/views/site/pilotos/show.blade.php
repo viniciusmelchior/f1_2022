@@ -16,6 +16,10 @@
         border-collapse: collapse;
         margin: auto;
     }
+
+    tr:hover{
+        background-color: #dce6eb;
+    }
     
     #driver-container{
         /* border: 1px solid black; */

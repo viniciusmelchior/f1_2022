@@ -1,6 +1,7 @@
 @php 
  use App\Models\Site\Corrida;
  use App\Models\Site\Resultado;
+ use App\Models\Site\Equipe;
 @endphp
 @extends('layouts.main')
 
@@ -11,9 +12,9 @@
     text-align: center;
     }
     
-    table, th, td {
+  /*   table, th, td {
     border: 1px solid black;
-    }
+    } */
     
     table {
     border-collapse: collapse;
@@ -30,14 +31,8 @@
     font-weight: bold;
     }
     
-    
-    tr:nth-child(even) {
-    background-color: #dce6eb;
-    }
-    
-    tr:hover:nth-child(1n + 2) {
-    background-color: #a0200f;
-    color: #fff;
+    tr:hover{
+        background-color: #dce6eb;
     }
     
     .header-tabelas{
@@ -285,6 +280,60 @@
                 <canvas id="historicoPontuacao"></canvas>
             </div>
         </section>
+
+        <hr>
+
+        <section class="" style="height: auto;">
+            <h1 class="mb-3" style="text-transform:uppercase;">Histórico de posição nos campeonatos</h1>
+            <table class="mt-5 mb-5 tabela-historico-equipes">
+                <th>Temporada</th>
+                <th>Posição</th>
+                <th>Pontos</th>
+                <th>Ações</th>
+                @foreach ($temporadas as $temporada )
+                    <tr>
+                        <td>{{$temporada->ano->ano}}</td>
+                        <td>
+                            {{Equipe::getInfoCampeonato($temporada->id, $modelEquipe->id)['posicaoEquipe']}}
+                        </td>
+                        <td>
+                            {{Equipe::getInfoCampeonato($temporada->id, $modelEquipe->id)['totalPontos']}}
+                        </td>
+                        <td>
+                            <a data-toggle="tooltip" data-placement="top" title="Classificação" href="{{route('temporadas.classificacao', [$temporada->id])}}"><i class="bi bi-table"></i></a>
+                        </td>
+                    </tr>
+                @endforeach
+            </table>  
+        </section>   
+
+        <hr>
+
+        <section class="" style="height: auto;">
+            <h1 class="mb-3" style="text-transform:uppercase;">Histórico de Vitórias</h1>
+                <table class="mt-5 mb-5 tabela-historico-equipes">
+                    <tr>
+                        <th>Temporada</th>
+                        <th>Pista</th>
+                        <th>Ações</th>
+                    </tr>
+                    @if (count($listagemVitorias) > 0)
+                        @foreach ($listagemVitorias as $vitoria)
+                            <tr>
+                                <td>{{$vitoria->corrida->temporada->ano->ano}}</td>
+                                <td>{{$vitoria->corrida->pista->nome}}</td>
+                                <td><a data-toggle="tooltip" data-placement="top" title="Visualizar corrida" class="" href="{{route('resultados.show', [$vitoria->corrida->id])}}"><i class="bi bi-eye-fill"></i></a></td>
+                            </tr>
+                        @endforeach
+                    @else 
+                        <tr>
+                            <td colspan="3" style="font-style: italic;">Equipe não tem vitórias</td>    
+                        </tr> 
+                    @endif
+                </table>
+        </section>
+
+        <hr>
 
         {{--Graficos Final--}}
         <div class="mb-5">
