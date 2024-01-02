@@ -36,13 +36,18 @@ class PilotoEquipe extends Model
     /**Função que acha qual posição determinado piloto chegou em tal corrida */
 
     /**recebe a corrida, temporada, piloto_equipe */
-    public static function getResultadoPilotoEquipe($corrida, $pilotoEquipe){
+    public static function getResultadoPilotoEquipe($corrida, $piloto_id){
         // dd($corrida, $pilotoEquipe);
 
-        $resultado = Resultado::select('chegada','flg_abandono')
+        // $resultado = Resultado::select('chegada','flg_abandono')
+        $resultado = Resultado::join('piloto_equipes', 'resultados.pilotoEquipe_id', 'piloto_equipes.id')->select('*')
                             ->where('corrida_id', $corrida)
-                            ->where('pilotoEquipe_id', $pilotoEquipe)
+                            // ->where('pilotoEquipe_id', $pilotoEquipe)
+                            ->where('piloto_equipes.piloto_id', $piloto_id)
+                            // ->first();
                             ->first();
+
+                            // dd($resultado);
 
         $chegada = '-';
 
