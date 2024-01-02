@@ -94,6 +94,7 @@ class EquipeController extends Controller
                                 ->where('resultados.user_id', Auth::user()->id)
                                 ->where('corridas.flg_sprint', 'N')
                                 ->where('piloto_equipes.equipe_id', $modelEquipe->id)
+                                ->orderBy('corridas.id', 'ASC')
                                 ->get();
                                
         $totCorridas = 0;
@@ -305,6 +306,7 @@ class EquipeController extends Controller
             $gridMedio = round($gridMedio/$totCorridas);
             $mediaChegada = round($mediaChegada/$totCorridas);
         }
+
 
         return view('site.equipes.show', compact('modelEquipe','totTitulos', 'totCorridas','totTitulosPilotos', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas','temporadasDisputadas','pontuacaoPorTemporada','temporadas','totAbandonos','gridMedio','mediaChegada','totDobradinhas','listagemVitorias'));
     }
