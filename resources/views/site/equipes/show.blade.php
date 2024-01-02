@@ -2,7 +2,6 @@
  use App\Models\Site\Corrida;
  use App\Models\Site\Resultado;
  use App\Models\Site\Equipe;
- 
 @endphp
 @extends('layouts.main')
 
@@ -316,7 +315,7 @@
                     <tr>
                         <th>Temporada</th>
                         <th>Pista</th>
-                        <th>Vencedor</th>
+                        {{-- <th>Vencedor</th> --}}
                         <th>Ações</th>
                     </tr>
                     @if (count($listagemVitorias) > 0)
@@ -324,11 +323,11 @@
                             <tr>
                                 <td>{{$vitoria->corrida->temporada->ano->ano}}</td>
                                 <td>{{$vitoria->corrida->pista->nome}}</td>
-                                <td>
+                                {{-- <td>
                                     <span style="width: 40px; height:30px;">
                                         <img src="{{asset('images/'.$vitoria->imagem)}}" alt="" srcset="" style="width: 40px; height:30px;" title="{{$vitoria->nome}} {{$vitoria->sobrenome}}">
                                     </span>
-                                </td>
+                                </td> --}}
                                 <td><a data-toggle="tooltip" data-placement="top" title="Visualizar corrida" class="" href="{{route('resultados.show', [$vitoria->corrida->id])}}"><i class="bi bi-eye-fill"></i></a></td>
                             </tr>
                         @endforeach
