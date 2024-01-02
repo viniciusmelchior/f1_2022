@@ -2,6 +2,7 @@
  use App\Models\Site\Corrida;
  use App\Models\Site\Resultado;
  use App\Models\Site\Equipe;
+ 
 @endphp
 @extends('layouts.main')
 
