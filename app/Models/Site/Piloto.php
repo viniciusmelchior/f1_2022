@@ -31,8 +31,15 @@ class Piloto extends Model
         return $this->hasMany(PilotoEquipe::class);
     }
 
-    public function equipeAtual(){
-        return 'Williams';
+    public static function equipeAtual($ano_id, $piloto_id){
+        
+        $equipe = PilotoEquipe::join('equipes', 'piloto_equipes.equipe_id', 'equipes.id')->where('ano_id', $ano_id)
+                            ->where('piloto_id', $piloto_id)
+                            ->where('piloto_equipes.flg_ativo', 'S')
+                            ->orderBy('piloto_equipes.id', 'DESC')
+                            ->first();
+
+        return $equipe;
     }
 
     static function getInfoCampeonato($temporada_id, $piloto_id){

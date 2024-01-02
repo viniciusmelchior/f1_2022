@@ -120,6 +120,7 @@ class TemporadaController extends Controller
     } 
 
     public function montaClassificacao($usuario, $temporada){
+
             
         $cont = 1;
         $queryCountChegadaPilotos = '';
@@ -158,9 +159,14 @@ class TemporadaController extends Controller
                             JOIN temporadas ON temporadas.id = corridas.temporada_id
                             WHERE temporadas.id =  '.$temporada->id.'
                             AND resultados.user_id =  '.$usuario.'
-                            GROUP BY piloto_equipes.piloto_id, piloto_equipes.id, pilotos.nome, pilotos.sobrenome, equipes.nome, equipes.imagem
+                            GROUP BY pilotos.id
                             ORDER BY total DESC '.$queryCountOrderByPilotos.';    
         ');
+
+        //backup da ordenação 
+        //GROUP BY piloto_equipes.piloto_id, piloto_equipes.id, pilotos.nome, pilotos.sobrenome, equipes.nome, equipes.imagem
+
+        // dd($resultadosPilotos);
 
         // dd($resultadosPilotos, $queryCountOrderByPilotos);
         // dd($queryCountChegadaPilotos, $queryCountOrderByPilotos);
@@ -293,7 +299,7 @@ class TemporadaController extends Controller
                                     WHERE temporadas.id =  '.$temporada->id.'
                                     AND resultados.user_id =  '.$usuario.'
                                     AND corridas.flg_sprint = "S"
-                                    GROUP BY piloto_equipes.piloto_id, piloto_equipes.id, pilotos.nome, pilotos.sobrenome, equipes.nome, equipes.imagem
+                                    GROUP BY pilotos.id
                                     ORDER BY total DESC '.$queryCountOrderByPilotos.';    
                 ');
 

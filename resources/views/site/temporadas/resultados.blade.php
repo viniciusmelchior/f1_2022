@@ -1,5 +1,6 @@
 @php
     use App\Models\Site\PilotoEquipe;
+    use App\Models\Site\Piloto;
 @endphp
 
 @extends('layouts.main')
@@ -105,7 +106,10 @@
                             <tr>
                                 <td style="" class="sticky-col">{{$key+1}}</td>
                                 <td style="vertical-align: middle; white-space: nowrap; overflow: hidden;" class="w-100 sticky-col">
-                                    <img src="{{ asset('images/' . $piloto->imagem) }}" alt="" style="width: 25px; height: 25px;">
+                                    @php 
+                                        $equipeAtual = Piloto::equipeAtual($temporada->ano->id, $piloto->piloto_id);
+                                    @endphp 
+                                    <img src="{{ asset('images/' . $equipeAtual->imagem) }}" alt="" style="width: 25px; height: 25px;">
                                     <span style="display: inline-block; vertical-align: middle;">{{ $piloto->nome }}</span>
                                     <span class="driver-surname" style="display: inline-block; vertical-align: middle;">{{ $piloto->sobrenome }}</span>
                                 </td>
