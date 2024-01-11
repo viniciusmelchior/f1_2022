@@ -96,11 +96,18 @@
                     <br>
                     <input type="file" id="inputFileLargada">
                 </div>
-                  <div style="argin-bottom: 25px; ">
-                      <label for="inputFileChegada">Upload JSON Chegada</label>
-                      <br>
-                      <input type="file" id="inputFileChegada">
-                  </div>
+
+                <div style="margin-bottom: 25px;">
+                    <label for="inputFileChegada">Upload JSON Chegada</label>
+                    <br>
+                    <input type="file" id="inputFileChegada">
+                </div>
+
+                <div style="margin-bottom: 25px;">
+                    <label for="inputFileLargadaGridInvertido">Upload JSON Grid Invertido</label>
+                    <br>
+                    <input type="file" id="inputFileLargadaGridInvertido">
+                </div>
             </div>
 
         <hr>
@@ -293,6 +300,20 @@ document.getElementById('inputFileLargada').addEventListener('change', function(
         leitor.readAsText(arquivo);
     });
 
+    document.getElementById('inputFileLargadaGridInvertido').addEventListener('change', function(event) {
+        // console.log('funcionou chegada')
+        const arquivo = event.target.files[0];
+        const leitor = new FileReader();
+
+        leitor.onload = function(e) {
+            const conteudo = e.target.result;
+            let objetoJSON = JSON.parse(conteudo);
+            gerarResultadoGridInvertido(objetoJSON)
+        };
+
+        leitor.readAsText(arquivo);
+    });
+
     function gerarResultadoChegada(resultados) {
        
         var resultados = resultados
@@ -331,6 +352,84 @@ document.getElementById('inputFileLargada').addEventListener('change', function(
             }
         });
     }
+
+    //testes grid invertido
+    function gerarResultadoGridInvertido(resultados) {
+
+        console.log('grid invertido');
+       
+       var resultados = resultados
+       let sessoesDisponiveis = resultados['sessions'];
+       var pilotos = resultados['players'];
+
+       sessoesDisponiveis.forEach((sessao,key) => {
+           if(sessao['name'] == 'Quick Race'){
+               var resultadoFinal = resultados['sessions'][key]['raceResult']; //pega o resultado que está na posição em que a chave Quick Race foi encontrada
+
+               let ordemChegada = [];
+
+               for (let index = 0; index < resultadoFinal.length; index++) {
+                   ordemChegada.push(pilotos[resultadoFinal[index]]['name']);
+               }
+
+               const tabela = document.getElementById('tabela');
+
+               // Obtendo todas as linhas da tabela
+               const linhas = tabela.rows;
+
+               //deixar o código dinâmico
+               const arrayDeLinhas = Array.from(linhas);
+
+               //transformar o array em UPPERCASE
+               ordemChegada = ordemChegada.map(item => item.toUpperCase())
+
+               arrayDeLinhas.forEach((linha, indice) => {
+                   let nomePiloto = linha.cells[1].innerHTML.toUpperCase().trim() //limpa os espaços do inicio e fim da string
+                   nomePiloto = nomePiloto.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); //retira os ascentos
+                   let valorChegada = parseInt(ordemChegada.indexOf(nomePiloto))+1
+                   if(valorChegada > 0){
+
+                    switch (valorChegada) {
+                        case 1:
+                            valorChegada = 10
+                            break;
+                        case 2:
+                            valorChegada = 9
+                            break;
+                        case 3:
+                            valorChegada = 8
+                            break;
+                        case 4:     
+                            valorChegada = 7
+                            break;
+                        case 5:
+                            valorChegada = 6
+                            break;
+                        case 6:
+                            valorChegada = 5
+                            break;
+                        case 7:
+                            valorChegada = 4
+                            break;
+                        case 8:
+                            valorChegada = 3
+                            break;
+                        case 9:
+                            valorChegada = 2
+                            break;
+                        case 10:
+                            valorChegada = 1
+                            break;
+                    }
+
+                       linha.cells[2].querySelector('input[type="number"]').value = valorChegada //posição da coluna em que sera adicionada a largada
+                   }
+               });
+           }
+       });
+   }
+
+
 
     function gerarResultadoLargada(resultados){
         var resultados = resultados;
