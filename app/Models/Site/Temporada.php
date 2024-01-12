@@ -77,6 +77,8 @@ class Temporada extends Model
                                         group by piloto_equipes.equipe_id
                                         order by total desc '.$queryCountOrderByEquipes);
 
+                                        // dd($resultadosPilotos, $resultadosEquipes);
+
         return [
             'resultadoPilotos' => $resultadosPilotos,
             'resultadoEquipes' => $resultadosEquipes,

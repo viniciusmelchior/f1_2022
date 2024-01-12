@@ -1,3 +1,7 @@
+@php 
+    use App\Models\Site\Temporada;
+@endphp
+
 @extends('layouts.main')
 
 @section('section')
@@ -16,8 +20,10 @@
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Descrição</th>
                     <th>Ano</th>
+                    <th>Descrição</th>
+                    <th style="width: 15%; text-align:left;">Camp. Piloto</th>
+                    <th style="width: 15%; text-align:left;">Camp. Construtores</th>
                     <th>Status</th>
                     <th>Ações</th>
                 </tr>
@@ -26,8 +32,28 @@
                 @foreach ($temporadas as $key => $temporada)
                     <tr>
                         <td>{{$key+1}}</td>
-                        <td>{{$temporada->des_temporada}}</td>
                         <td>{{$temporada->ano->ano}}</td>
+                        <td>{{$temporada->des_temporada}}</td>
+                        <td style="width: 15%; text-align:left;">
+                            @if($temporada->flg_finalizada == 'S')
+                            @php 
+                                $imagemPiloto = $temporada->getClassificacao(Auth::user()->id, $temporada)['resultadoPilotos'][0]->imagem ?  $temporada->getClassificacao(Auth::user()->id, $temporada)['resultadoPilotos'][0]->imagem : 'https://icon-library.com/images/person-png-icon/person-png-icon-29.jpg'
+                            @endphp
+                            <img src="{{asset('images/'.$imagemPiloto)}}" alt="" style="width: 25px; height:25px;">
+                                {{$temporada->getClassificacao(Auth::user()->id, $temporada)['resultadoPilotos'][0]->nome}}
+                                {{$temporada->getClassificacao(Auth::user()->id, $temporada)['resultadoPilotos'][0]->sobrenome}}
+                            @else
+                                Em Andamento
+                            @endif
+                        </td>
+                        <td style="width: 15%; text-align:left;">
+                            @if($temporada->flg_finalizada == 'S')
+                            <img src="{{asset('images/'.$temporada->getClassificacao(Auth::user()->id, $temporada)['resultadoEquipes'][0]->imagem)}}" alt="" style="width: 25px; height:25px;">
+                                {{$temporada->getClassificacao(Auth::user()->id, $temporada)['resultadoEquipes'][0]->nome}}
+                            @else
+                                Em Andamento
+                            @endif
+                        </td>
                         <td>@if($temporada->flg_finalizada == 'S')<i class="bi bi-check-square-fill"></i>@else Em Andamento @endif</td>
                         <td class="d-flex" style="justify-content: space-between;">
                             <a data-toggle="tooltip" data-placement="top" title="Classificação" href="{{route('temporadas.classificacao', [$temporada->id])}}"><i class="bi bi-table"></i></a>
