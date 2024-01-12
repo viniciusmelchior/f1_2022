@@ -31,22 +31,29 @@ margin: 0;
     font-weight: bold;
 }
 
-.tabelaEstatisticas th, td{
+.tabelaEstatisticas th{
     /* border: 1px solid black; */
     border-collapse: collapse;
     margin: auto;
     padding: 10px;
-    text-align: center!important;
     width: 190px;
+}
+
+.tabelaEstatisticas td{
+    text-align: center!important;
 }
 
 .tabelaResultadosCorridas th, td{
     /* border: 1px solid black; */
     border-collapse: collapse;
-    margin: auto;
+    /* margin: auto; */
     padding: 10px;
-    text-align: center!important;
+    /* text-align: center; */
     width: 190px;
+}
+
+.tabelaResultadosCorridas td{
+     text-align: center;
 }
 
 .tabelaEstatisticas tr:nth-child(even){
@@ -643,12 +650,12 @@ margin: 0;
                 <tr>
                     <th style="width: 5%;">#</th>
                     <th style="width: 5%;">Temporada</th>
-                    <th style="width: 15%;">Pista</th>
-                    <th>Pole Position</th>
-                    <th>Primeiro</th>
-                    <th>Segundo</th>
-                    <th>Terceiro</th>
-                    <th>Volta Mais Rápida</th>
+                    <th style="width: 15%; text-align:left;">Pista</th>
+                    <th style="text-align: left;">Pole Position</th>
+                    <th style="text-align: left;">Primeiro</th>
+                    <th style="text-align: left;">Segundo</th>
+                    <th style="text-align: left;">Terceiro</th>
+                    <th style="text-align: left;">Volta Mais Rápida</th>
                 </tr>
             </thead>
             <tbody>
@@ -675,53 +682,60 @@ margin: 0;
                     <td>
                         {{$resultadoCorrida->temporada->ano->ano}}
                     </td>
-                    <td>{{$resultadoCorrida->pista->nome}}
-                        @if(isset($resultadoCorrida->condicao_id))
+                    <td style="text-align: left;">
+                         <img src="{{asset('images/'.$resultadoCorrida->pista->pais->imagem)}}" alt="" style="width: 25px; height:20px;">
+                        <a href="{{route('resultados.show',[$resultadoCorrida->id])}}" style="text-decoration: none; color:black;">{{$resultadoCorrida->pista->nome}}</a>
+                        {{-- @if(isset($resultadoCorrida->condicao_id))
                             <i class="{{$resultadoCorrida->condicao->des_icone}}"></i>
-                        @endif
+                        @endif --}}
                         @if($resultadoCorrida->qtd_safety_car > 0)
                             <i class="bi bi-car-front-fill mt-3"></i>
                         @endif
                         </td>
-                    <td>
+                    <td style="text-align: left;">
                         @if(isset($polePosition))
-                        <span style="color:{{$polePosition->pilotoEquipe->equipe->des_cor}};">
+                        <span {{-- style="color:{{$polePosition->pilotoEquipe->equipe->des_cor}};" --}}>
+                            <img src="{{asset('images/'.$polePosition->pilotoEquipe->equipe->imagem)}}" alt="" style="width: 25px; height:25px;">
                             {{$polePosition->pilotoEquipe->piloto->nomeCompleto()}}
                         </span>
                         @else
                         -
                         @endif
                     </td>
-                    <td>
+                    <td style="text-align: left;">
                         @if(isset($primeiro))
-                        <span style="color:{{$primeiro->pilotoEquipe->equipe->des_cor}};">
+                        <span {{-- style="color:{{$primeiro->pilotoEquipe->equipe->des_cor}};" --}}>
+                            <img src="{{asset('images/'.$primeiro->pilotoEquipe->equipe->imagem)}}" alt="" style="width: 25px; height:25px;">
                             {{$primeiro->pilotoEquipe->piloto->nomeCompleto()}} 
                         </span>
                         @else
                         -
                         @endif
                     </td>
-                    <td>
+                    <td style="text-align: left;">
                         @if(isset($segundo))
-                        <span style="color:{{$segundo->pilotoEquipe->equipe->des_cor}};">
+                        <span {{-- style="color:{{$segundo->pilotoEquipe->equipe->des_cor}};" --}}>
+                            <img src="{{asset('images/'.$segundo->pilotoEquipe->equipe->imagem)}}" alt="" style="width: 25px; height:25px;">
                             {{$segundo->pilotoEquipe->piloto->nomeCompleto()}}
                         </span>
                         @else
                         -
                         @endif
                     </td>
-                    <td>
+                    <td style="text-align: left;">
                         @if(isset($terceiro))
-                        <span style="color:{{$terceiro->pilotoEquipe->equipe->des_cor}};">
+                        <span {{-- style="color:{{$terceiro->pilotoEquipe->equipe->des_cor}};" --}}>
+                            <img src="{{asset('images/'.$terceiro->pilotoEquipe->equipe->imagem)}}" alt="" style="width: 25px; height:25px;">
                             {{$terceiro->pilotoEquipe->piloto->nomeCompleto()}}
                         </span>
                         @else
                         -
                         @endif
                     </td>
-                    <td>
+                    <td style="text-align: left;">
                         @if(isset($voltaRapida))
-                            <span style="color:{{$voltaRapida->equipe->des_cor}};">
+                            <span {{-- style="color:{{$voltaRapida->equipe->des_cor}};" --}}>
+                                <img src="{{asset('images/'.$voltaRapida->equipe->imagem)}}" alt="" style="width: 25px; height:25px;">
                                 {{$voltaRapida->piloto->nomeCompleto()}}
                             </span>
                         @else
