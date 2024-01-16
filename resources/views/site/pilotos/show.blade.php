@@ -302,6 +302,7 @@
                     <tr>
                         <th>Temporada</th>
                         <th>Pista</th>
+                        <th class="text-nowrap">Equipe</th>
                         <th>Ações</th>
                     </tr>
                     @if (count($listagemVitorias) > 0)
@@ -309,6 +310,7 @@
                             <tr>
                                 <td>{{$vitoria->corrida->temporada->ano->ano}}</td>
                                 <td>{{$vitoria->corrida->pista->nome}}</td>
+                                <td class="text-nowrap">{{ $vitoria->pilotoEquipe->equipe->nome }}</td>
                                 <td><a data-toggle="tooltip" data-placement="top" title="Visualizar corrida" class="" href="{{route('resultados.show', [$vitoria->corrida->id])}}"><i class="bi bi-eye-fill"></i></a></td>
                             </tr>
                         @endforeach
