@@ -2,6 +2,7 @@
  use App\Models\Site\Corrida;
  use App\Models\Site\Resultado;
  use App\Models\Site\Equipe;
+ use App\Models\Site\PilotoEquipe;
 @endphp
 @extends('layouts.main')
 
@@ -287,12 +288,29 @@
             <h1 class="mb-3" style="text-transform:uppercase;">Histórico de posição nos campeonatos</h1>
             <table class="mt-5 mb-5 tabela-historico-equipes">
                 <th>Temporada</th>
+                <th>Pilotos</th>
                 <th>Posição</th>
                 <th>Pontos</th>
                 <th>Ações</th>
                 @foreach ($temporadas as $temporada )
+                    @php 
+                        $pilotos = PilotoEquipe::where('equipe_id', $modelEquipe->id)->where('ano_id', $temporada->ano_id)->get();
+                    @endphp
                     <tr>
                         <td>{{$temporada->ano->ano}}</td>
+                        <td class="text-nowrap">
+                        @if (count($pilotos) > 0)
+                            @foreach ($pilotos as $key => $piloto)
+                                {{substr($piloto->piloto->nome, 0, 1)}}.
+                                {{$piloto->piloto->sobrenome}}
+                                @if($key !== $pilotos->keys()->last())
+                                /
+                                @endif
+                            @endforeach
+                        @else 
+                            -
+                        @endif
+                        </td>
                         <td>
                             {{Equipe::getInfoCampeonato($temporada->id, $modelEquipe->id)['posicaoEquipe']}}
                         </td>
