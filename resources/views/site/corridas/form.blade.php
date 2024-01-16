@@ -46,6 +46,18 @@
         <input type="number" class="pista_ordem" name="ordem" id="ordem" style="width:30px; height:30px;" value="<?= isset($modelCorrida) ? $modelCorrida->ordem : '' ?>">
         </div>
 
+        <div class="form-group form-check mb-3">
+            <input
+            type="checkbox"
+            class="form-check-input"
+            id="flg_sprint"
+            name="flg_sprint"
+            value="S"
+            @if(isset($modelCorrida) && $modelCorrida->flg_sprint == 'S') checked @endif
+            >
+            <label class="form-check-label" for="flg_sprint">Corrida Sprint</label>
+        </div>
+
         <input type="hidden" name="temporada_id" value="{{$temporada->id}}">
         @if(isset($modelCorrida))
             <input type="hidden" name="corrida_id" value="{{$modelCorrida->id}}">

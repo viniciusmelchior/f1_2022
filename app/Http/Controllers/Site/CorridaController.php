@@ -43,6 +43,7 @@ class CorridaController extends Controller
         $corrida->ordem = $request->ordem;
         $corrida->user_id = Auth::user()->id;
         $corrida->dificuldade_ia = $request->dificuldade_ia;
+        $corrida->flg_sprint = $request->flg_sprint == 'S' ? 'S' : 'N';
         $corrida->qtd_safety_car = $request->qtd_safety_car;
 
         $corrida->save();
@@ -97,6 +98,7 @@ class CorridaController extends Controller
     {   
         $corrida = Corrida::where('id', $request->corrida_id)->first();
         $corrida->ordem = $request->ordem;
+        $corrida->flg_sprint = $request->flg_sprint == 'S' ? 'S' : 'N';
         $corrida->update();
 
         return redirect()->route('corridas.index',[$request->temporada_id])->with('status', 'O GP '.$corrida->pista->nome.' foi editado');
