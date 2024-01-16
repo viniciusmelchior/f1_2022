@@ -97,6 +97,10 @@ class TemporadaController extends Controller
                                     ->first();
 
         $totalCorridas = Corrida::where('user_id', Auth::user()->id)->where('temporada_id', $temporada->id)->where('flg_sprint', 'N')->count();
+        
+        if($totalCorridas == 0){
+            return redirect()->back()->with('error', 'Sem resultados registrados na temporada selecionada');
+        }
 
         $corridaAtual = Corrida::find($corridaAtual->corrida_id);
 
