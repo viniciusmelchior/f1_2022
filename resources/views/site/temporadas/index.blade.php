@@ -43,7 +43,7 @@
                         <td>{{$temporada->des_temporada}}</td>
                         <td style="width: 15%; text-align:left;">
                             @if(isset($temporada->titulo))
-                               @php $imagemPiloto = $temporada->titulo->pilotoEquipe->piloto->imagem; @endphp
+                               @php $imagemPiloto = $temporada->titulo->pilotoEquipe->equipe->imagem; @endphp
                                 <img src="{{asset('images/'.$imagemPiloto)}}" alt="" style="width: 25px; height:25px;">
                                 {{$temporada->titulo->pilotoEquipe->piloto->nomeCompleto()}}
                             @else
