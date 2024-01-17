@@ -42,27 +42,21 @@
                         <td>{{$temporada->ano->ano}}</td>
                         <td>{{$temporada->des_temporada}}</td>
                         <td style="width: 15%; text-align:left;">
-                            {{-- @if($temporada->flg_finalizada == 'S')
-                            @php 
-                                $imagemPiloto = $temporada->getClassificacao(Auth::user()->id, $temporada)['resultadoPilotos'][0]->imagem ?  $temporada->getClassificacao(Auth::user()->id, $temporada)['resultadoPilotos'][0]->imagem : 'https://icon-library.com/images/person-png-icon/person-png-icon-29.jpg'
-                            @endphp
-                            <img src="{{asset('images/'.$imagemPiloto)}}" alt="" style="width: 25px; height:25px;">
-                                {{$temporada->getClassificacao(Auth::user()->id, $temporada)['resultadoPilotos'][0]->nome}}
-                                {{$temporada->getClassificacao(Auth::user()->id, $temporada)['resultadoPilotos'][0]->sobrenome}}
+                            @if(isset($temporada->titulo))
+                               @php $imagemPiloto = $temporada->titulo->pilotoEquipe->piloto->imagem; @endphp
+                                <img src="{{asset('images/'.$imagemPiloto)}}" alt="" style="width: 25px; height:25px;">
+                                {{$temporada->titulo->pilotoEquipe->piloto->nomeCompleto()}}
                             @else
-                                Em Andamento
-                            @endif --}}
-                            -
+                                -
+                            @endif
                         </td>
                         <td style="width: 15%; text-align:left;">
-                          {{--   @if($temporada->flg_finalizada == 'S')
-                            <img src="{{asset('images/'.$temporada->getClassificacao(Auth::user()->id, $temporada)['resultadoEquipes'][0]->imagem)}}" alt="" style="width: 25px; height:25px;">
-                                {{$temporada->getClassificacao(Auth::user()->id, $temporada)['resultadoEquipes'][0]->nome}}
+                            @if(isset($temporada->titulo))
+                            <img src="{{asset('images/'.$temporada->titulo->equipe->imagem)}}" alt="" style="width: 25px; height:25px;">
+                                {{$temporada->titulo->equipe->nome}}
                             @else
-                                Em Andamento
-                            @endif --}}
-
-                            -
+                                -
+                            @endif
                         </td>
                         <td>@if($temporada->flg_finalizada == 'S')<i class="bi bi-check-square-fill"></i>@else Em Andamento @endif</td>
                         <td class="d-flex" style="justify-content: space-between;">
