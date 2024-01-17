@@ -25,6 +25,10 @@ class Temporada extends Model
         return $this->hasMany(Corrida::class);
     }
 
+    public function titulo(){
+        return $this->hasOne(Titulo::class);
+    }
+
     public function getClassificacao($usuario, $temporada){
         $cont = 1;
         $queryCountChegadaPilotos = '';
