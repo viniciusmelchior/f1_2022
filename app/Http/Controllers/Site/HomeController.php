@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Site;
 use App\Http\Controllers\Controller;
 use App\Models\Site\Resultado;
 use App\Models\Site\Temporada;
+use App\Models\Site\Titulo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -13,77 +14,136 @@ class HomeController extends Controller
 {
     public function index(){
 
-        /**Vitoria dos Pilotos */
-        $totVitoriasPorPiloto = DB::select('select
-                                                pilotos.id, COUNT(*) as vitorias, concat(pilotos.nome," ",pilotos.sobrenome) as nome
-                                            from resultados
-                                            join corridas on (corridas.id = resultados.corrida_id)
-                                            join piloto_equipes on (resultados.pilotoEquipe_id = piloto_equipes.id)
-                                            join pilotos on (piloto_equipes.piloto_id = pilotos.id)
-                                            where corridas.temporada_id > 0
-                                            and resultados.chegada = 1
-                                            and corridas.flg_sprint = "N"
-                                            and corridas.user_id = '.Auth::user()->id.'
-                                            group by pilotos.id 
-                                            order by vitorias desc');
+       $temporadas = Temporada::where('user_id', Auth::user()->id)->get();
+       $vitoriasDosPilotos = [];
+       $vitoriasDasEquipes = [];
+       $polePositionDosPilotos = [];
+       $polePositionDasEquipes = [];
+       $podiosDosPilotos = [];
+       $podiosDasEquipes = [];
+       $abandonosDosPilotos = [];
+       $abandonosDasEquipes = [];
+       $chegadasTop10Pilotos = [];
+       $chegadasTop10Equipes = [];
 
-        $temporadas = Temporada::where('user_id', Auth::user()->id)->get();
+        $resultados = $vitoriaEquipes = Resultado::join('piloto_equipes', 'pilotoEquipe_id', 'piloto_equipes.id')
+                                                // ->join('pilotos', 'piloto_equipes.piloto_id', 'pilotos.id')
+                                                // ->join('equipes', 'piloto_equipes.equipe_id', 'equipes.id')
+                                                ->join('corridas', 'resultados.corrida_id', 'corridas.id')
+                                                ->where('resultados.user_id', Auth::user()->id)
+                                                ->where('corridas.flg_sprint', 'N')
+                                                // ->where('corridas.temporada_id', 3)
+                                                ->get();
 
-        /**Vitoria das Equipes */
-        $vitoriaEquipes = Resultado::where('user_id', Auth::user()->id)->where('chegada', 1)->get();
-        $vencedores = [];
-        foreach($vitoriaEquipes as $item){
-            if($item->corrida->flg_sprint == 'N'){
-                array_push($vencedores, $item->pilotoEquipe->equipe->nome);
+        foreach($resultados as $resultado){
+            if($resultado->chegada > 0 && $resultado->chegada <=1){
+                $vitoriasDosPilotos[] = $resultado->pilotoEquipe->piloto->nomeCompleto();
+                $vitoriasDasEquipes[] = $resultado->pilotoEquipe->equipe->nome;
+            }
+
+            if($resultado->largada > 0 && $resultado->largada <=1){
+                $polePositionDosPilotos[] = $resultado->pilotoEquipe->piloto->nomeCompleto();
+                $polePositionDasEquipes[] = $resultado->pilotoEquipe->equipe->nome;
+            }
+
+            if($resultado->chegada >= 1 && $resultado->chegada <=3){
+                $podiosDosPilotos[] = $resultado->pilotoEquipe->piloto->nomeCompleto();
+                $podiosDasEquipes[] = $resultado->pilotoEquipe->equipe->nome;
+            }
+
+            if($resultado->flg_abandono == 'S'){
+                $abandonosDosPilotos[] = $resultado->pilotoEquipe->piloto->nomeCompleto();
+                $abandonosDasEquipes[] = $resultado->pilotoEquipe->equipe->nome;
+            }
+
+            if($resultado->chegada > 0 && $resultado->chegada <= 10){
+                $chegadasTop10Pilotos[] = $resultado->pilotoEquipe->piloto->nomeCompleto();
+                $chegadasTop10Equipes[] = $resultado->pilotoEquipe->equipe->nome;
             }
         }
 
-        $totVitoriasPorEquipe = array_count_values($vencedores);
-        arsort($totVitoriasPorEquipe);
+        $totalVitoriasPorPiloto = array_count_values($vitoriasDosPilotos);
+        arsort($totalVitoriasPorPiloto);
 
-        /**Pole Position dos Pilotos */
-        $polePilotos = Resultado::where('user_id', Auth::user()->id)->where('largada', 1)->get();
-                        $poles = [];
-                        foreach($polePilotos as $item){
-                            if($item->corrida->flg_sprint == 'N'){
-                                array_push($poles, $item->pilotoEquipe->piloto->nomeCompleto());
-                            }
-                        }
+        $totalVitoriasPorEquipe = array_count_values($vitoriasDasEquipes);
+        arsort($totalVitoriasPorEquipe);
 
-                        $totPolesPorPiloto = array_count_values($poles);
-                        arsort($totPolesPorPiloto);
+        $totalPolePositionsPorPiloto = array_count_values($polePositionDosPilotos);
+        arsort($totalPolePositionsPorPiloto);
 
-        /**Retorna dados para montar a classificação geral histórica de pilotos e equipes */
+        $totalPolePositionsPorEquipe = array_count_values($polePositionDasEquipes);
+        arsort($totalPolePositionsPorEquipe);
 
-        $usuario = Auth::user()->id; 
+        $totalPodiosPorPiloto = array_count_values($podiosDosPilotos);
+        arsort($totalPodiosPorPiloto);
 
-        $resultadosPilotosGeral = DB::select('select piloto_id, concat(pilotos.nome, " ", pilotos.sobrenome) as nome, equipes.nome as equipe, sum(pontuacao) as total from resultados
-                                            join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
-                                            join pilotos on pilotos.id = piloto_equipes.piloto_id
-                                            join equipes on equipes.id = piloto_equipes.equipe_id
-                                            join corridas on corridas.id = resultados.corrida_id
-                                            join temporadas on temporadas.id = corridas.temporada_id
-                                            where temporadas.id > 0
-                                            and resultados.user_id = '.$usuario.'
-                                            group by piloto_equipes.piloto_id
-                                            order by total desc');
-            
-        $resultadosEquipesGeral = DB::select('select equipe_id, equipes.nome as nome, sum(pontuacao) as total from resultados
-                            join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
-                            join equipes on equipes.id = piloto_equipes.equipe_id
-                            join corridas on corridas.id = resultados.corrida_id
-                            join temporadas on temporadas.id = corridas.temporada_id
-                            where temporadas.id > 0
-                            and resultados.user_id = '.$usuario.'
-                            group by piloto_equipes.equipe_id
-                            order by total desc');
+        $totalPodiosPorEquipe = array_count_values($podiosDasEquipes);
+        arsort($totalPodiosPorEquipe);
 
-        return view('home.home', compact('totVitoriasPorPiloto','totVitoriasPorEquipe','totPolesPorPiloto', 'temporadas','resultadosPilotosGeral','resultadosEquipesGeral'));
+        $totalAbandonosPorPiloto = array_count_values($abandonosDosPilotos);
+        arsort($totalAbandonosPorPiloto);
+
+        $totalAbandonosPorEquipe = array_count_values($abandonosDasEquipes);
+        arsort($totalAbandonosPorEquipe);
+
+        $totalTop10PorPiloto = array_count_values($chegadasTop10Pilotos);
+        arsort($totalTop10PorPiloto);
+
+        $totalTop10PorEquipe = array_count_values($chegadasTop10Equipes);
+        arsort($totalTop10PorEquipe);
+
+        //Calculo dos títulos conquistados pelos pilotos e equipes 
+
+        $titulosPorPilotos = [];
+        $titulosPorEquipes = [];
+
+        $titulos = Titulo::where('user_id', Auth::user()->id)->get();
+
+        foreach($titulos as $item){
+            array_push($titulosPorPilotos, $item->pilotoEquipe->piloto->nomeCompleto());
+            array_push($titulosPorEquipes, $item->equipe->nome);
+        }
+
+        $totalTitulosPorPiloto = array_count_values($titulosPorPilotos);
+        arsort($totalTitulosPorPiloto);
+
+        $totalTitulosPorEquipe = array_count_values($titulosPorEquipes);
+        arsort($totalTitulosPorEquipe);
+        
+
+        // dd([
+        //     // 'total de vitórias dos pilotos ' => $totalVitoriasPorPiloto,
+        //     // 'total de vitórias das equipes ' => $totalVitoriasPorEquipe,
+        //     // 'total de pole positions dos pilotos ' => $totalPolePositionsPorPiloto,
+        //     // 'total de pole position das equipes ' => $totalPolePositionsPorEquipe
+        //     // 'total de podios dos equipes ' => $totalPodiosPorPiloto,
+        //     // 'total de podios dos pilotos ' => $totalPodiosPorEquipe,
+        //     // 'total de abandonos dos pilotos ' => $totalAbandonosPorPiloto,
+        //     // 'total de abandonos das equipes ' => $totalAbandonosPorEquipe
+        //     // 'total de top 10 dos pilotos ' => $totalTop10PorPiloto,
+        //     // 'total de top 10 das equipes ' => $totalTop10PorEquipe
+        //     // 'total de titulos dos pilotos ' => $totalTitulosPorPiloto,
+        //     // 'total de titulos das equipes ' => $totalTitulosPorEquipe
+        // ]);
+
+        //FINAL DOS ESTUDOS UTILIZANDO APENAS UM LOOP DE RESULTADOS
+
+        return view('home.home', compact(
+            'totalVitoriasPorPiloto',
+            'totalVitoriasPorEquipe',
+            'totalPolePositionsPorPiloto',
+            'totalPolePositionsPorEquipe',
+            'temporadas',
+            'totalPodiosPorPiloto',
+            'totalPodiosPorEquipe',
+            'totalAbandonosPorPiloto',
+            'totalAbandonosPorEquipe',
+            'totalTop10PorPiloto',
+            'totalTop10PorEquipe',
+            'totalTitulosPorPiloto',
+            'totalTitulosPorEquipe'
+        ));
     }
-
-    // public function visualizarVitoriasPiloto(Request $request){
-    //     dd($request->query());
-    // }
 
     public function ajaxGetVitoriasPilotoPorTemporada(Request $request){
 

@@ -115,12 +115,11 @@ margin: 0;
                         <th>Piloto</th>
                         <th>Vitórias</th>
                     </tr>
-                    @foreach($totVitoriasPorPiloto as $key => $piloto)
+                    @foreach($totalVitoriasPorPiloto as $piloto_nome => $total_vitorias_piloto)
                         <tr>
-                            {{-- <td><a href=""><i class="bi bi-eye" style="color:black;"></i></a></td> --}}
                             <td>#</td>
-                            <td>{{$piloto->nome}}</td>
-                            <td>{{$piloto->vitorias}}</td>
+                            <td>{{$piloto_nome}}</td>
+                            <td>{{$total_vitorias_piloto}}</td>
                         </tr>
                     @endforeach
                </table>
@@ -140,11 +139,11 @@ margin: 0;
                          <th>Equipe</th>
                          <th>Vitórias</th>
                      </tr>
-                     @foreach($totVitoriasPorEquipe as $key => $value)
+                     @foreach($totalVitoriasPorEquipe as $equipe_nome => $total_vitorias_equipe)
                         <tr>
                             <td>#</td>
-                            <td>{{$key}}</td>
-                            <td>{{$value}}</td>
+                            <td>{{$equipe_nome}}</td>
+                            <td>{{$total_vitorias_equipe}}</td>
                         </tr>
                      @endforeach
                 </table>
@@ -171,11 +170,11 @@ margin: 0;
                         <th>Piloto</th>
                         <th>Poles</th>
                     </tr>
-                    @foreach($totPolesPorPiloto as $key => $value)
+                    @foreach($totalPolePositionsPorPiloto as $piloto_nome => $total_pole_positions_piloto)
                         <tr>
                             <td>#</td>
-                            <td>{{$key}}</td>
-                            <td>{{$value}}</td>
+                            <td>{{$piloto_nome}}</td>
+                            <td>{{$total_pole_positions_piloto}}</td>
                         </tr>
                     @endforeach
                </table>
@@ -197,23 +196,11 @@ margin: 0;
                          <th>Piloto</th>
                          <th>Poles</th>
                      </tr>
-                     @php 
-                        $poleEquipes = Resultado::where('user_id', Auth::user()->id)->where('largada', 1)->get();
-                        $poles = [];
-                        foreach($poleEquipes as $item){
-                            if($item->corrida->flg_sprint == 'N'){
-                                array_push($poles, $item->pilotoEquipe->equipe->nome);
-                            }
-                        }
-
-                        $totPorEquipe= array_count_values($poles);
-                        arsort($totPorEquipe);
-                     @endphp
-                     @foreach($totPorEquipe as $key => $value)
+                     @foreach($totalPolePositionsPorEquipe as $equipe_nome => $total_pole_positions_equipe)
                         <tr>
                             <td>#</td>
-                            <td>{{$key}}</td>
-                            <td>{{$value}}</td>
+                            <td>{{$equipe_nome}}</td>
+                            <td>{{$total_pole_positions_equipe}}</td>
                         </tr>
                      @endforeach
                 </table>
@@ -241,23 +228,11 @@ margin: 0;
                         <th>Piloto</th>
                         <th>Podios</th>
                     </tr>
-                    @php 
-                        $podiosPilotos = Resultado::where('user_id', Auth::user()->id)->where('chegada', '<=', 3)->get();
-                        $podios = [];
-                        foreach($podiosPilotos as $item){
-                            if($item->corrida->flg_sprint == 'N'){
-                                array_push($podios, $item->pilotoEquipe->piloto->nomeCompleto());
-                            }
-                        }
-
-                        $totPorPiloto = array_count_values($podios);
-                        arsort($totPorPiloto);
-                    @endphp
-                    @foreach($totPorPiloto as $key => $value)
+                    @foreach($totalPodiosPorPiloto as $piloto_nome => $total_podios_piloto)
                         <tr>
                             <td>#</td>
-                            <td>{{$key}}</td>
-                            <td>{{$value}}</td>
+                            <td>{{$piloto_nome}}</td>
+                            <td>{{$total_podios_piloto}}</td>
                         </tr>
                     @endforeach
                 </table>
@@ -278,23 +253,11 @@ margin: 0;
                         <th>Equipe</th>
                         <th>Podios</th>
                     </tr>
-                    @php 
-                        $podiosEquipes = Resultado::where('user_id', Auth::user()->id)->where('chegada','<=', 3)->get();
-                        $podios = [];
-                        foreach($podiosEquipes as $item){
-                            if($item->corrida->flg_sprint == 'N'){
-                                array_push($podios, $item->pilotoEquipe->equipe->nome);
-                            }
-                        }
-
-                        $totPorEquipe= array_count_values($podios);
-                        arsort($totPorEquipe);
-                     @endphp
-                     @foreach($totPorEquipe as $key => $value)
+                     @foreach($totalPodiosPorEquipe as $equipe_nome => $total_podios_equipe)
                         <tr>
                             <td>#</td>
-                            <td>{{$key}}</td>
-                            <td>{{$value}}</td>
+                            <td>{{$equipe_nome}}</td>
+                            <td>{{$total_podios_equipe}}</td>
                         </tr>
                      @endforeach
                 </table>
@@ -314,23 +277,11 @@ margin: 0;
                         <th>Equipe</th>
                         <th>Chegadas</th>
                     </tr>
-                    @php 
-                        $abandonos = Resultado::where('user_id', Auth::user()->id)->where('flg_abandono', 'S')->get();
-                        $totAbandonos = [];
-                        foreach($abandonos as $item){
-                            if($item->corrida->flg_sprint == 'N'){
-                                array_push($totAbandonos, $item->pilotoEquipe->piloto->nomeCompleto());
-                            }
-                        }
-
-                        $totPorPiloto = array_count_values($totAbandonos);
-                        arsort($totPorPiloto);
-                    @endphp
-                    @foreach($totPorPiloto as $key => $value)
+                    @foreach($totalAbandonosPorPiloto as $piloto_nome => $total_abandonos_piloto)
                         <tr>
                             <td>#</td>
-                            <td>{{$key}}</td>
-                            <td>{{$value}}</td>
+                            <td>{{$piloto_nome}}</td>
+                            <td>{{$total_abandonos_piloto}}</td>
                         </tr>
                     @endforeach
                 </table>
@@ -343,23 +294,11 @@ margin: 0;
                         <th>Equipe</th>
                         <th>Chegadas</th>
                     </tr>
-                    @php 
-                        $abandonoEquipes = Resultado::where('user_id', Auth::user()->id)->where('flg_abandono','S')->get();
-                        $totAbandonosEquipes = [];
-                        foreach($abandonoEquipes as $item){
-                            if($item->corrida->flg_sprint == 'N'){
-                                array_push($totAbandonosEquipes, $item->pilotoEquipe->equipe->nome);
-                            }
-                        }
-
-                        $totPorEquipe= array_count_values($totAbandonosEquipes);
-                        arsort($totPorEquipe);
-                     @endphp
-                     @foreach($totPorEquipe as $key => $value)
+                     @foreach($totalAbandonosPorEquipe as $equipe_nome => $total_abandonos_equipe)
                         <tr>
                             <td>#</td>
-                            <td>{{$key}}</td>
-                            <td>{{$value}}</td>
+                            <td>{{$equipe_nome}}</td>
+                            <td>{{$total_abandonos_equipe}}</td>
                         </tr>
                      @endforeach
                 </table>
@@ -404,23 +343,11 @@ margin: 0;
                         <th>Equipe</th>
                         <th>Chegadas</th>
                     </tr>
-                    @php 
-                        $top10Pilotos = Resultado::where('user_id', Auth::user()->id)->where('chegada', '<=', 10)->get();
-                        $top10pilotos = [];
-                        foreach($top10Pilotos as $item){
-                            if($item->corrida->flg_sprint == 'N'){
-                                array_push($top10pilotos, $item->pilotoEquipe->piloto->nomeCompleto());
-                            }
-                        }
-
-                        $totPorPiloto = array_count_values($top10pilotos);
-                        arsort($totPorPiloto);
-                    @endphp
-                    @foreach($totPorPiloto as $key => $value)
+                    @foreach($totalTop10PorPiloto as $piloto_nome => $total_chegadas_piloto)
                         <tr>
                             <td>#</td>
-                            <td>{{$key}}</td>
-                            <td>{{$value}}</td>
+                            <td>{{$piloto_nome}}</td>
+                            <td>{{$total_chegadas_piloto}}</td>
                         </tr>
                     @endforeach
                 </table>
@@ -458,23 +385,11 @@ margin: 0;
                         <th>Equipe</th>
                         <th>Chegadas</th>
                     </tr>
-                    @php 
-                        $top10Equipes = Resultado::where('user_id', Auth::user()->id)->where('chegada','<=', 10)->get();
-                        $top10 = [];
-                        foreach($top10Equipes as $item){
-                            if($item->corrida->flg_sprint == 'N'){
-                                array_push($top10, $item->pilotoEquipe->equipe->nome);
-                            }
-                        }
-
-                        $totPorEquipe= array_count_values($top10);
-                        arsort($totPorEquipe);
-                     @endphp
-                     @foreach($totPorEquipe as $key => $value)
+                     @foreach($totalTop10PorEquipe as $equipe_nome => $total_chegadas_equipe)
                         <tr>
                             <td>#</td>
-                            <td>{{$key}}</td>
-                            <td>{{$value}}</td>
+                            <td>{{$equipe_nome}}</td>
+                            <td>{{$total_chegadas_equipe}}</td>
                         </tr>
                      @endforeach
                 </table>
@@ -495,21 +410,11 @@ margin: 0;
                          <th>Equipe</th>
                          <th>Títulos</th>
                      </tr>
-                     @php 
-                        $titulosPilotos = Titulo::where('user_id', Auth::user()->id)->get();
-                        $titulos = [];
-                        foreach($titulosPilotos as $item){
-                            array_push($titulos, $item->pilotoEquipe->piloto->nomeCompleto());
-                        }
-
-                        $totPorPiloto= array_count_values($titulos);
-                        arsort($totPorPiloto);
-                     @endphp
-                    @foreach($totPorPiloto as $key => $value)
+                    @foreach($totalTitulosPorPiloto as $piloto_nome => $total_titulos_piloto)
                      <tr>
                          <td>#</td>
-                         <td>{{$key}}</td>
-                         <td>{{$value}}</td>
+                         <td>{{$piloto_nome}}</td>
+                         <td>{{$total_titulos_piloto}}</td>
                      </tr>
                   @endforeach
                 </table>
@@ -522,113 +427,17 @@ margin: 0;
                          <th>Piloto</th>
                          <th>Títulos</th>
                      </tr>
-                     @php 
-                        $titulosEquipes = Titulo::where('user_id', Auth::user()->id)->get();
-                        $titulos = [];
-                        foreach($titulosEquipes as $item){
-                            array_push($titulos, $item->equipe->nome);
-                        }
-
-                        $totPorEquipe= array_count_values($titulos);
-                        arsort($totPorEquipe);
-                     @endphp
-                      @foreach($totPorEquipe as $key => $value)
+                      @foreach($totalTitulosPorEquipe as $equipe_nome => $total_titulos_equipe)
                       <tr>
                           <td>#</td>
-                          <td>{{$key}}</td>
-                          <td>{{$value}}</td>
+                          <td>{{$equipe_nome}}</td>
+                          <td>{{$total_titulos_equipe}}</td>
                       </tr>
                    @endforeach
                 </table>
             </div>
         </div>
-
-    <hr class="separador">
-    
-    <div class="header-tabelas m-3">Classificaçao Histórica <span id="toggle_classificacao_historica"><i class="bi bi-plus-circle"></i></span></div>
-    
-    <div class="d-flex d-none" id="div_classificacao_historica">
-        <div class="d-flex">
-            <div class="montaTabelaPilotos">
-                <table class="m-5 tabelaEstatisticas" id="">
-                    <tr>
-                        <th>Posição</th>
-                        <th>Piloto</th>
-                        <th>Pontos</th>
-                    </tr>
-                    <tr>
-                        @foreach( $resultadosPilotosGeral as $key => $piloto )
-                        <tr>
-                            <td>{{$key+1}}</td>
-                            <td>{{$piloto->nome}}</td>
-                            <td>{{$piloto->total}}</td>
-                        </tr>
-                        @endforeach
-                    </tr>
-                </table>
-            </div>
         
-            <div class="montaTabelaEquipes">
-                <table class="m-5 tabelaEstatisticas" id="">
-                    <tr>
-                        <th>Posição</th>
-                        <th>Equipe</th>
-                        <th>Pontos</th>
-                    </tr>
-                    @foreach( $resultadosEquipesGeral as $key => $equipe ) 
-                        <tr>
-                            <td>{{$key+1}}</td>
-                            <td>{{$equipe->nome}}</td>
-                            <td>{{$equipe->total}}</td>
-                        </tr>
-                    @endforeach
-                </table>
-            </div>
-        </div> 
-    </div>                             
-
-
-    <hr class="separador">
-
-    <h1 id="tituloClassificacao" class="descricao-tabela">Classificação Geral</h1>
-    <div class="">
-        <select name="mudarTemporada" id="mudarTemporada" class="form-select mt-3" style="width: 30%; margin:0 auto;">
-            <option value="" selected>Selecione uma Temporada</option>
-            @foreach($temporadas as $temporada)
-                <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
-            @endforeach
-        </select>
-    </div>
-    
-    <div class="d-flex">
-        <div class="montaTabelaPilotos">
-            <table class="m-5 tabelaEstatisticas" id="tabelaClassificacaoPilotos">
-                <tr>
-                    <th>Posição</th>
-                    <th>Equipe</th>
-                    <th>Piloto</th>
-                    <th>Pontos</th>
-                </tr>
-                <tr>
-                    <td colspan="4">Selecione uma Temporada</td>
-                </tr>
-            </table>
-        </div>
-       
-        <div class="montaTabelaEquipes">
-            <table class="m-5 tabelaEstatisticas" id="tabelaClassificacaoEquipes">
-                <tr>
-                    <th>Posição</th>
-                    <th>Equipe</th>
-                    <th>Pontos</th>
-                </tr>
-                <tr>
-                    <td colspan="3">Selecione uma Temporada</td>
-                </tr>
-            </table>
-        </div>
-    </div>
-
     @php 
 
     $resultadoCorridas = Corrida::whereHas('resultado', function($query){
@@ -648,14 +457,14 @@ margin: 0;
         <table class="mt-5 tabelaResultadosCorridas" id="tabelaResultadoCorridas">
             <thead>
                 <tr>
-                    <th style="width: 5%;">#</th>
-                    <th style="width: 5%;">Temporada</th>
-                    <th style="width: 15%; text-align:left;">Pista</th>
-                    <th style="text-align: left;">Pole Position</th>
-                    <th style="text-align: left;">Primeiro</th>
-                    <th style="text-align: left;">Segundo</th>
-                    <th style="text-align: left;">Terceiro</th>
-                    <th style="text-align: left;">Volta Mais Rápida</th>
+                    <th style="width: 5%;" class="text-nowrap">#</th>
+                    <th style="width: 5%;" class="text-nowrap">Temporada</th>
+                    <th style="width: 15%; text-align:left;" class="text-nowrap">Pista</th>
+                    <th style="text-align: left;" class="text-nowrap">Pole Position</th>
+                    <th style="text-align: left;" class="text-nowrap">Primeiro</th>
+                    <th style="text-align: left;" class="text-nowrap">Segundo</th>
+                    <th style="text-align: left;" class="text-nowrap">Terceiro</th>
+                    <th style="text-align: left;" class="text-nowrap">Volta Mais Rápida</th>
                 </tr>
             </thead>
             <tbody>
@@ -672,7 +481,7 @@ margin: 0;
             
             @endphp
                 <tr @if($resultadoCorrida->flg_sprint == 'S') style="font-style:italic;" @endif>
-                    <td>
+                    <td class="text-nowrap">
                         @if($resultadoCorrida->flg_sprint != 'S')
                         {{$resultadoCorrida->ordem}}
                         @else 
@@ -682,7 +491,7 @@ margin: 0;
                     <td>
                         {{$resultadoCorrida->temporada->ano->ano}}
                     </td>
-                    <td style="text-align: left;">
+                    <td style="text-align: left;" class="text-nowrap">
                          <img src="{{asset('images/'.$resultadoCorrida->pista->pais->imagem)}}" alt="" style="width: 25px; height:20px;">
                         <a href="{{route('resultados.show',[$resultadoCorrida->id])}}" style="text-decoration: none; color:black;">{{$resultadoCorrida->pista->nome}}</a>
                         {{-- @if(isset($resultadoCorrida->condicao_id))
@@ -692,7 +501,7 @@ margin: 0;
                             <i class="bi bi-car-front-fill mt-3"></i>
                         @endif
                         </td>
-                    <td style="text-align: left;">
+                    <td style="text-align: left;" class="text-nowrap">
                         @if(isset($polePosition))
                         <span {{-- style="color:{{$polePosition->pilotoEquipe->equipe->des_cor}};" --}}>
                             <img src="{{asset('images/'.$polePosition->pilotoEquipe->equipe->imagem)}}" alt="" style="width: 25px; height:25px;">
@@ -702,7 +511,7 @@ margin: 0;
                         -
                         @endif
                     </td>
-                    <td style="text-align: left;">
+                    <td style="text-align: left;" class="text-nowrap">
                         @if(isset($primeiro))
                         <span {{-- style="color:{{$primeiro->pilotoEquipe->equipe->des_cor}};" --}}>
                             <img src="{{asset('images/'.$primeiro->pilotoEquipe->equipe->imagem)}}" alt="" style="width: 25px; height:25px;">
@@ -712,7 +521,7 @@ margin: 0;
                         -
                         @endif
                     </td>
-                    <td style="text-align: left;">
+                    <td style="text-align: left;" class="text-nowrap">
                         @if(isset($segundo))
                         <span {{-- style="color:{{$segundo->pilotoEquipe->equipe->des_cor}};" --}}>
                             <img src="{{asset('images/'.$segundo->pilotoEquipe->equipe->imagem)}}" alt="" style="width: 25px; height:25px;">
@@ -722,7 +531,7 @@ margin: 0;
                         -
                         @endif
                     </td>
-                    <td style="text-align: left;">
+                    <td style="text-align: left;" class="text-nowrap">
                         @if(isset($terceiro))
                         <span {{-- style="color:{{$terceiro->pilotoEquipe->equipe->des_cor}};" --}}>
                             <img src="{{asset('images/'.$terceiro->pilotoEquipe->equipe->imagem)}}" alt="" style="width: 25px; height:25px;">
@@ -732,7 +541,7 @@ margin: 0;
                         -
                         @endif
                     </td>
-                    <td style="text-align: left;">
+                    <td style="text-align: left;" class="text-nowrap">
                         @if(isset($voltaRapida))
                             <span {{-- style="color:{{$voltaRapida->equipe->des_cor}};" --}}>
                                 <img src="{{asset('images/'.$voltaRapida->equipe->imagem)}}" alt="" style="width: 25px; height:25px;">
@@ -751,13 +560,6 @@ margin: 0;
     <div class="full-table-pagination-wrapper">
         <div id="pagination" class="pagination"></div>
     </div>
-
-    @php 
-        // sleep(1);
-        // $time = microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"];
-        // $tempoExecucao =  "Tempo de execução: ".$time;
-        // dd($tempoExecucao);
-    @endphp
 
     </div>
 @endsection
