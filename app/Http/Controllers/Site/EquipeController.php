@@ -93,12 +93,11 @@ class EquipeController extends Controller
                                 ->join('piloto_equipes', 'piloto_equipes.id', '=', 'resultados.pilotoEquipe_id')
                                 // ->join('pilotos', 'piloto_equipes.piloto_id', 'pilotos.id')
                                 ->where('resultados.user_id', Auth::user()->id)
-                                ->where('corridas.flg_sprint', 'N')
+                                // ->where('corridas.flg_sprint', 'N')
                                 ->where('piloto_equipes.equipe_id', $modelEquipe->id)
                                 ->orderBy('corridas.id', 'ASC')
                                 ->get();
-
-                               
+   
         $totCorridas = 0;
         $totVitorias = 0;
         $totPoles = 0;
@@ -114,6 +113,7 @@ class EquipeController extends Controller
         $mediaChegada = 0;
         $totDobradinhas = 0;
         $listagemVitorias = [];
+        $totPontos = 0;
 
         $totVoltasRapidas = 0;
 
@@ -122,93 +122,99 @@ class EquipeController extends Controller
         //Consideramos apenas o id da equipe pois levamos em consideração a junção do resultado da dupla de pilotos
 
         foreach($resultados as $resultado){
+            if($resultado->corrida->flg_sprint == 'N'){
 
-            if($resultado->chegada == 2){
+                if($resultado->chegada == 2){
+                    if($resultado->pilotoEquipe->equipe->id == $id){
+                        $possiveisDobradinhas[] = $resultado;
+                    }
+                }
+
+                //total de largadas
                 if($resultado->pilotoEquipe->equipe->id == $id){
-                    $possiveisDobradinhas[] = $resultado;
+                    $totCorridas++;
+                }
+
+                //calculo do total de vitórias
+                if($resultado->chegada == 1){
+                    if($resultado->pilotoEquipe->equipe->id == $id){
+                        $possiveisDobradinhas[] = $resultado;
+                        $totVitorias++;
+                        $listagemVitorias[] = $resultado;
+                    }
+                }
+
+                //calculo do total de pole positions
+                if($resultado->largada == 1){
+                    if($resultado->pilotoEquipe->equipe->id == $id){
+                        $totPoles++;
+                    }
+                }
+
+                //calculo de podios
+                if($resultado->chegada <= 3){
+                    if($resultado->pilotoEquipe->equipe->id == $id){
+                        $totPodios++;
+                    }
+                }
+
+                //calculo de chegadas no top 10
+                if($resultado->chegada <= 10){
+                    if($resultado->pilotoEquipe->equipe->id == $id){
+                        $totTopTen++;
+                    }
+                }
+
+                //calculo de total de abandonos
+                if($resultado->flg_abandono == 'S'){
+                    if($resultado->pilotoEquipe->equipe->id == $id){
+                        $totAbandonos++;
+                    }
+                }
+
+                //calculo da Média de Largada
+                if($resultado->pilotoEquipe->equipe->id == $id){
+                    $gridMedio += $resultado->largada;
+                    // $gridMedio = $gridMedio/$totCorridas;
+                }
+
+                //calculo da Média de Chegada
+                if($resultado->pilotoEquipe->equipe->id == $id){
+                    $mediaChegada += $resultado->chegada;
+                    // $mediaChegada = $mediaChegada/$totCorridas;
+                }
+
+                //calculo de melhor posição de largada
+                if($resultado->pilotoEquipe->equipe->id == $id){
+                    if($resultado->largada <= $melhorPosicaoLargada){
+                        $melhorPosicaoLargada = $resultado->largada;
+                    }    
+                }
+
+                //calculo pior posição de largada
+                if($resultado->pilotoEquipe->equipe->id == $id){
+                    if($resultado->largada > $piorPosicaoLargada){
+                        $piorPosicaoLargada = $resultado->largada;
+                    }    
+                }
+
+                //calculo melhor posição de chegada
+                if($resultado->pilotoEquipe->equipe->id == $id){
+                    if($resultado->chegada <= $melhorPosicaoChegada){
+                        $melhorPosicaoChegada = $resultado->chegada;
+                    }    
+                }
+
+                //calculo pior posição de chegada 
+                if($resultado->pilotoEquipe->equipe->id == $id){
+                    if($resultado->chegada > $piorPosicaoChegada){
+                        $piorPosicaoChegada = $resultado->chegada;
+                    }    
                 }
             }
 
-            //total de largadas
             if($resultado->pilotoEquipe->equipe->id == $id){
-                $totCorridas++;
-            }
-
-            //calculo do total de vitórias
-            if($resultado->chegada == 1){
-                if($resultado->pilotoEquipe->equipe->id == $id){
-                    $possiveisDobradinhas[] = $resultado;
-                    $totVitorias++;
-                    $listagemVitorias[] = $resultado;
-                }
-            }
-
-             //calculo do total de pole positions
-             if($resultado->largada == 1){
-                if($resultado->pilotoEquipe->equipe->id == $id){
-                    $totPoles++;
-                }
-            }
-
-             //calculo de podios
-             if($resultado->chegada <= 3){
-                if($resultado->pilotoEquipe->equipe->id == $id){
-                    $totPodios++;
-                }
-            }
-
-             //calculo de chegadas no top 10
-             if($resultado->chegada <= 10){
-                if($resultado->pilotoEquipe->equipe->id == $id){
-                    $totTopTen++;
-                }
-            }
-
-            //calculo de total de abandonos
-            if($resultado->flg_abandono == 'S'){
-                if($resultado->pilotoEquipe->equipe->id == $id){
-                    $totAbandonos++;
-                }
-            }
-
-             //calculo da Média de Largada
-            if($resultado->pilotoEquipe->equipe->id == $id){
-                $gridMedio += $resultado->largada;
-                // $gridMedio = $gridMedio/$totCorridas;
-            }
-
-             //calculo da Média de Chegada
-            if($resultado->pilotoEquipe->equipe->id == $id){
-                $mediaChegada += $resultado->chegada;
-                // $mediaChegada = $mediaChegada/$totCorridas;
-            }
-
-            //calculo de melhor posição de largada
-            if($resultado->pilotoEquipe->equipe->id == $id){
-                if($resultado->largada <= $melhorPosicaoLargada){
-                    $melhorPosicaoLargada = $resultado->largada;
-                }    
-            }
-
-            //calculo pior posição de largada
-            if($resultado->pilotoEquipe->equipe->id == $id){
-                if($resultado->largada > $piorPosicaoLargada){
-                    $piorPosicaoLargada = $resultado->largada;
-                }    
-            }
-
-            //calculo melhor posição de chegada
-            if($resultado->pilotoEquipe->equipe->id == $id){
-                if($resultado->chegada <= $melhorPosicaoChegada){
-                    $melhorPosicaoChegada = $resultado->chegada;
-                }    
-            }
-
-            //calculo pior posição de chegada 
-            if($resultado->pilotoEquipe->equipe->id == $id){
-                if($resultado->chegada > $piorPosicaoChegada){
-                    $piorPosicaoChegada = $resultado->chegada;
-                }    
+                $totPontos += $resultado->pontuacao;
             }
         }
 
@@ -252,31 +258,21 @@ class EquipeController extends Controller
                                             ->where('piloto_equipes.equipe_id', $id)
                                             ->get());
 
-        //Total de Pontos tem cálculo diferente pois envolve sprints
-        $resultados =  Resultado::where('user_id', Auth::user()->id)->get();                     
-        $totPontos = 0;
-        foreach($resultados as $resultado){
-        if($resultado->pilotoEquipe->equipe->id == $id){
-                $totPontos += $resultado->pontuacao;
-            }
-        }
-
         $pilotoEquipe = PilotoEquipe::where('equipe_id', $id)
                                     ->where('user_id', Auth::user()->id)
                                     ->get();
 
+        //lista os pilotos que fizeram/fazem parte da equipe
         $ids = [];
         foreach($pilotoEquipe as $equipeId){
             array_push($ids, $equipeId->id);
         }
 
-        $resultado = Corrida::where('user_id', Auth::user()->id)
-                            ->where('flg_sprint', 'N')
-                            ->where('volta_rapida', '!=', null)
-                            ->whereIn('volta_rapida', $ids)
-                            ->get();
-
-        $totVoltasRapidas = count($resultado); 
+        $totVoltasRapidas = Corrida::where('user_id', Auth::user()->id)
+                                    ->where('flg_sprint', 'N')
+                                    ->where('volta_rapida', '!=', null)
+                                    ->whereIn('volta_rapida', $ids)
+                                    ->count();
 
          //devolve os anos em que o piloto esteve inscrito para correr - Dinamicamente com base nos registros da tabela piloto_equipes
          $temporadasDisputadas = [];
@@ -289,19 +285,19 @@ class EquipeController extends Controller
         
         foreach($temporadasEquipe as $equipeTemporada){
             $retorno =  DB::select('select
-            sum(pontuacao) as totPontos, temporadas.ano_id
-            from resultados
-            join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
-            join equipes on equipes.id = piloto_equipes.equipe_id
-            join corridas on corridas.id = resultados.corrida_id
-            join pilotos on piloto_equipes.piloto_id = pilotos.id
-            join temporadas on temporadas.id = corridas.temporada_id
-            where temporadas.ano_id = '.$equipeTemporada->ano_id.'
-            and resultados.user_id = '. Auth::user()->id.'
-            and equipe_id = '.$equipeTemporada->equipe_id.'');
-        
-            array_push($pontuacaoPorTemporada, $retorno[0]->totPontos);
-            array_push($temporadasDisputadas, $equipeTemporada->ano->ano);
+                                    sum(pontuacao) as totPontos, temporadas.ano_id
+                                    from resultados
+                                    join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
+                                    join equipes on equipes.id = piloto_equipes.equipe_id
+                                    join corridas on corridas.id = resultados.corrida_id
+                                    join pilotos on piloto_equipes.piloto_id = pilotos.id
+                                    join temporadas on temporadas.id = corridas.temporada_id
+                                    where temporadas.ano_id = '.$equipeTemporada->ano_id.'
+                                    and resultados.user_id = '. Auth::user()->id.'
+                                    and equipe_id = '.$equipeTemporada->equipe_id.'');
+                                
+                                    array_push($pontuacaoPorTemporada, $retorno[0]->totPontos);
+                                    array_push($temporadasDisputadas, $equipeTemporada->ano->ano);
         }
 
         if($totCorridas > 0){
