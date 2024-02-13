@@ -7,6 +7,7 @@ use App\Models\Site\Pais;
 use App\Models\Site\Pista;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class PistaController extends Controller
 {
@@ -17,7 +18,7 @@ class PistaController extends Controller
      */
     public function index()
     {
-        $pistas = Pista::where('user_id', Auth::user()->id)->get();
+        $pistas = Pista::where('user_id', Auth::user()->id)->orderBy('nome')->get();
 
         return view('site.pistas.index', compact('pistas'));
     }
@@ -40,7 +41,30 @@ class PistaController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {
+    {   
+        /**
+        * Validação dos inputs
+        */
+        $rules = [
+            'nome' => 'unique:pistas',
+            'tamanho_km' => 'required',
+        ];
+    
+        $messages = [
+            'nome.unique' => 'Já existe uma pista cadastrada com este nome',
+            'tamanho_km.required' => 'O campo :attribute é obrigatório',
+        ];
+    
+        $validator = Validator::make($request->all(), $rules, $messages);    
+
+        if ($validator->fails()) {
+            // Mensagens de erro personalizadas
+            $errors = $validator->errors();
+    
+            // Trate os erros como desejar, por exemplo, redirecione com os erros de volta ao formulário
+            return redirect()->back()->withErrors($errors)->withInput();
+        }
+
         $pista = new Pista();
         $pista->nome = $request->nome;
         $pista->user_id = Auth::user()->id;
@@ -60,7 +84,7 @@ class PistaController extends Controller
 
         $pista->save();
 
-        return redirect()->back();
+        return redirect()->back()->with('success', 'Pista '.$pista->nome.' cadastrada com sucesso.');
     }
 
     /**

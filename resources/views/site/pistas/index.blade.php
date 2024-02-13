@@ -1,7 +1,11 @@
+@php 
+    use App\Models\Site\Pista;
+@endphp
+
 @extends('layouts.main')
 
 @section('section')
-  <div class="container mt-3 mb-3">
+  <div class="container-fluid mt-3 mb-3">
     <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{route('home')}}">Home</a></li>
@@ -22,12 +26,19 @@
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Nome</th>
+                    <th >Nome</th>
                     <th>País</th>
+                    <th>Continente</th>
                     <th>Qtd Carros</th>
-                    <th>Tamanho</th>
-                    <th>Qtd Voltas</th>
-                    <th>Status</th>
+                    <th>Corridas</th>
+                    <th>Sprints</th>
+                    {{-- <th>Tamanho</th> --}}
+                    {{-- <th>Autor</th>
+                    <th>Tipo</th>
+                    <th>DRS</th>
+                    <th>RARE</th>
+                    <th>Pit Stop</th> --}}
+                    
                     <th>Ações</th>
                 </tr>
             </thead>
@@ -37,10 +48,25 @@
                         <td>{{$key+1}}</td>
                         <td>{{$pista->nome}}</td>
                         <td>{{$pista->pais->des_nome}}</td>
-                        <td>{{$pista->qtd_carros != null ? $pista->qtd_carros : '-'}}</td>
-                        <td>{{$pista->tamanho_km != null ? $pista->tamanho_km : '-'}}</td>
-                        <td>{{$pista->qtd_voltas != null ? $pista->qtd_voltas : '-'}}</td>
-                        <td>{{$pista->flg_ativo}}</td>
+                        <td>{{isset($pista->pais->continente->nome) ? $pista->pais->continente->nome : '-' }}</td>
+                        <td>{{$pista->qtd_carros != null ? $pista->qtd_carros : '30'}}</td>
+                        <td>
+                            @php 
+                                echo Pista::getQtdCorridas($pista->id) > 0 ? Pista::getQtdCorridas($pista->id) : '-' ;
+                            @endphp
+                        </td>
+                        <td>
+                            @php 
+                                echo Pista::getQtdCorridasSprints($pista->id) > 0 ? Pista::getQtdCorridasSprints($pista->id) : '-' ;
+                            @endphp
+                        </td>
+                        {{-- <td>{{$pista->tamanho_km != null ? $pista->tamanho_km : '4100'}}</td> --}}
+                        {{-- <td>Rainmaker</td>
+                        <td>Autodromo</td>
+                        <td>Personalizado</td>
+                        <td>Não</td>
+                        <td>Sim</td> --}}
+                        
                         <td class="d-flex" style="justify-content: space-between;">
                             <a data-toggle="tooltip" data-placement="top" title="Visualizar" class="" href="{{route('pistas.show', [$pista->id])}}"><i class="bi bi-eye-fill"></i></a>
                             <a data-toggle="tooltip" data-placement="top" title="Editar" class="" href="{{route('pistas.edit', [$pista->id])}}"><i class="bi bi-pencil-fill"></i></a>

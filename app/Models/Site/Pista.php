@@ -25,4 +25,26 @@ class Pista extends Model
         return $this->hasMany(Corrida::class);
     }
 
+    public static function getQtdCorridasSprints($pista_id){
+        $corridas = Corrida::with('pista')
+                             ->whereHas('pista', function($query) use ($pista_id) {
+                                 $query->where('id', $pista_id);
+                             })
+                             ->where('flg_sprint', '<>', 'N')
+                             ->count();
+ 
+         return $corridas;
+     }
+ 
+     public static function getQtdCorridas($pista_id){
+         $corridas = Corrida::with('pista')
+                             ->whereHas('pista', function($query) use ($pista_id) {
+                                 $query->where('id', $pista_id);
+                             })
+                             ->where('flg_sprint', '<>', 'S')
+                             ->count();
+ 
+        return $corridas;
+     }
+
 }
