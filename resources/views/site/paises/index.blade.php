@@ -1,3 +1,7 @@
+@php 
+    use App\Models\Site\Pais;
+@endphp
+
 @extends('layouts.main')
 
 @section('section')
@@ -34,24 +38,36 @@
             <table class="table" style="width:80%;" id="tabelaPaises">
                 <thead>
                     <tr>
-                        <th>#</th>
+                        <th class="text-nowrap">#</th>
                         <th style="text-align: left;">Nome</th>
                         <th>Continente</th>
+                        <th>Corridas</th>
+                        <th>Sprints</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($paises as $key => $pais)
                         <tr>
-                            <td>{{$key+1}}</td>
-                            <td style="text-align: left;">
+                            <td class="text-nowrap">{{$key+1}}</td>
+                            <td style="text-align: left;" class="text-nowrap">
                                 <span style="width: 30px; height:20px;">
                                     <img src="{{asset('images/'.$pais->imagem)}}" alt="" srcset="" style="width: 30px; height:20px;">
                                 </span>
                                 {{$pais->des_nome}}
                             </td>
-                            <td style="text-align: center;"> 
+                            <td style="text-align: center;" class="text-nowrap"> 
                                 {{isset($pais->continente->nome) ? $pais->continente->nome : '-' }}
+                            </td>
+                            <td style="text-align: center;">
+                                @php 
+                                    echo Pais::getQtdCorridas($pais->id) > 0 ? Pais::getQtdCorridas($pais->id) : '-' ;
+                                @endphp
+                            </td>
+                            <td style="text-align: center;">
+                                @php 
+                                    echo Pais::getQtdCorridasSprints($pais->id) > 0 ? Pais::getQtdCorridasSprints($pais->id) : '-' ;
+                                @endphp
                             </td>
                             <td class="coluna_acoes">
                                 <a href="{{route('paises.show', [$pais->id])}}"><i class="bi bi-eye-fill"></i></a>

@@ -32,4 +32,28 @@ class Pais extends Model
     public function continente(){
         return $this->belongsTo(Continente::class);
     }
+
+    public static function getQtdCorridasSprints($pais_id){
+       $corridas = Corrida::with('pista')
+                            ->whereHas('pista', function($query) use ($pais_id) {
+                                $query->where('pais_id', $pais_id);
+                            })
+                            ->where('flg_sprint', '<>', 'N')
+                            ->count();
+
+        return $corridas;
+    }
+
+    public static function getQtdCorridas($pais_id){
+        $corridas = Corrida::with('pista')
+                            ->whereHas('pista', function($query) use ($pais_id) {
+                                $query->where('pais_id', $pais_id);
+                            })
+                            ->where('flg_sprint', '<>', 'S')
+                            ->count();
+
+return $corridas;
+    }
+  
+
 }

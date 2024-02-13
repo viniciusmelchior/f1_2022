@@ -18,7 +18,7 @@ class PaisesController extends Controller
      */
     public function index()
     {
-        $paises = Pais::where('user_id', Auth::user()->id)->get();
+        $paises = Pais::where('user_id', Auth::user()->id)->orderBy('des_nome')->get();
 
         return view('site.paises.index', compact('paises'));
     }
