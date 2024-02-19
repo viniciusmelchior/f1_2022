@@ -81,10 +81,8 @@ class CorridaController extends Controller
     public function edit($temporada_id, $corrida_id)
     {   
         $temporada = Temporada::where('user_id', Auth::user()->id)->where('id', $temporada_id)->first();
-        $model = Pista::where('user_id', Auth::user()->id)->where('flg_ativo', 'S')->get();
+        $model = Pista::where('user_id', Auth::user()->id)->where('flg_ativo', 'S')->orderBy('nome')->get();
         $modelCorrida = Corrida::where('id', $corrida_id)->first();
-
-        // dd($modelCorrida);
         
         return view('site.corridas.form', compact('model','modelCorrida', 'temporada'));
     }
