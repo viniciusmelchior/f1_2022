@@ -83,6 +83,8 @@ class CorridaController extends Controller
         $temporada = Temporada::where('user_id', Auth::user()->id)->where('id', $temporada_id)->first();
         $model = Pista::where('user_id', Auth::user()->id)->where('flg_ativo', 'S')->get();
         $modelCorrida = Corrida::where('id', $corrida_id)->first();
+
+        // dd($modelCorrida);
         
         return view('site.corridas.form', compact('model','modelCorrida', 'temporada'));
     }
@@ -98,6 +100,7 @@ class CorridaController extends Controller
     {   
         $corrida = Corrida::where('id', $request->corrida_id)->first();
         $corrida->ordem = $request->ordem;
+        $corrida->pista_id = $request->pista_id;
         $corrida->flg_sprint = $request->flg_sprint == 'S' ? 'S' : 'N';
         $corrida->update();
 

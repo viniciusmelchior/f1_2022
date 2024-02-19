@@ -33,11 +33,9 @@
         @csrf
         <div class="mb-3">
             <label for="pista_id">Pista</label>
-            <select <?= isset($modelCorrida) ? 'disabled' : '' ?> name="pista_id" id="pista_id" class="form-control">
+            <select <?= isset($modelCorrida) ? '' : '' ?> name="pista_id" id="pista_id" class="form-control">
                 @foreach($model as $pista)
-                    <option value="<?= isset($modelCorrida) ? $modelCorrida->pista_id: $pista->id ?>">
-                        <?= isset($modelCorrida) ? $modelCorrida->pista->nome : $pista->nome ?>
-                    </option>
+                    <option value="{{ $pista->id }}" @isset($modelCorrida) @if($pista->id == $modelCorrida->pista_id) selected @endisset @endif>{{$pista->nome}}</option>
                 @endforeach
             </select>
         </div>
