@@ -92,6 +92,10 @@ route::put('/pistas/update/{id}', [PistaController::class, 'update'])->name('pis
 route::get('/pistas/show/{id}', [PistaController::class, 'show'])->name('pistas.show')->middleware('auth');
 route::get('/pistas/delete/{id}', [PistaController::class, 'destroy'])->name('pistas.delete')->middleware('auth');
 
+/**Adicionar Autor */
+route::get('/pistas/adicionarAutor', [PistaController::class, 'adicionarAutor'])->name('pistas.adicionarAutor')->middleware('auth');
+
+
 /**Relação de Pilotos e Equipes (montagem das duplas de pilotos por equipe) */
 route::get('/pilotoEquipe/create', [PilotoEquipeController::class, 'create'])->name('pilotoEquipe.create')->middleware('auth');
 route::post('/pilotoEquipe/store', [PilotoEquipeController::class, 'store'])->name('pilotoEquipe.store')->middleware('auth');

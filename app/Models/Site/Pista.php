@@ -13,38 +13,58 @@ class Pista extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['nome', 'pais_id', 'user_id', 'flg_ativo','qtd_carros','tamanho_km','qtd_voltas'];
+    protected $fillable = ['nome', 'pais_id', 'user_id', 'flg_ativo', 'qtd_carros', 'tamanho_km', 'qtd_voltas', 'autor', 'drs', 'tipo'];
+
+    const DRS = [
+        'Sim',
+        'Não',
+        'Personalizado'
+    ];
+
+    const TIPO = [
+        'Autódromo',
+        'Rua',
+        'Oval'
+    ];
 
     /**relacionamentos */
 
-    public function pais(){
+    public function pais()
+    {
         return $this->belongsTo(Pais::class);
     }
 
-     public function corrida(){
+    public function autor()
+    {
+        return $this->belongsTo(Autor::class);
+    }
+
+    public function corrida()
+    {
         return $this->hasMany(Corrida::class);
     }
 
-    public static function getQtdCorridasSprints($pista_id){
+    public static function getQtdCorridasSprints($pista_id)
+    {
         $corridas = Corrida::with('pista')
-                             ->whereHas('pista', function($query) use ($pista_id) {
-                                 $query->where('id', $pista_id);
-                             })
-                             ->where('flg_sprint', '<>', 'N')
-                             ->count();
- 
-         return $corridas;
-     }
- 
-     public static function getQtdCorridas($pista_id){
-         $corridas = Corrida::with('pista')
-                             ->whereHas('pista', function($query) use ($pista_id) {
-                                 $query->where('id', $pista_id);
-                             })
-                             ->where('flg_sprint', '<>', 'S')
-                             ->count();
- 
-        return $corridas;
-     }
+            ->whereHas('pista', function ($query) use ($pista_id) {
+                $query->where('id', $pista_id);
+            })
+            ->where('flg_sprint', '<>', 'N')
+            ->count();
 
+        return $corridas;
+    }
+
+    public static function getQtdCorridas($pista_id)
+    {
+        $corridas = Corrida::with('pista')
+            ->whereHas('pista', function ($query) use ($pista_id) {
+                $query->where('id', $pista_id);
+            })
+            ->where('flg_sprint', '<>', 'S')
+            ->count();
+
+        return $corridas;
+    }
 }
