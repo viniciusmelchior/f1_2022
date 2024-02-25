@@ -107,7 +107,7 @@ use App\Models\Site\PilotoEquipe;
                     <td>
                         {{$resultadoCorrida->temporada->ano->ano}}
                     </td>
-                    <td>{{$resultadoCorrida->evento->des_nome}}
+                    <td>{{$resultadoCorrida->pista->nome}}
                         @if(isset($resultadoCorrida->condicao_id))
                             <i class="{{$resultadoCorrida->condicao->des_icone}}"></i>
                         @endif
