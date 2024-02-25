@@ -19,7 +19,7 @@ class EventoController extends Controller
 	 */
 	public function index()
 	{
-		$eventos = Evento::where('user_id', Auth::user()->id)->orderBy('des_nome')->get();
+		$eventos = Evento::where('user_id', Auth::user()->id)->orderBy('des_nome', 'ASC')->get();
 
 		return view('site.eventos.index', compact('eventos'));
 	}
