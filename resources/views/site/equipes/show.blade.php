@@ -9,6 +9,14 @@
 @section('section')
 <style>
 
+    td{
+        white-space: nowrap;
+    }
+
+    th{
+        white-space: nowrap;
+    }
+
     h1{
     text-align: center;
     }
@@ -332,6 +340,7 @@
                 <table class="mt-5 mb-5 tabela-historico-equipes">
                     <tr>
                         <th>Temporada</th>
+                        <th>Evento</th>
                         <th class="text-nowrap">Pista</th>
                         <th class="text-nowrap">Vencedor</th>
                         <th>Ações</th>
@@ -340,6 +349,13 @@
                         @foreach ($listagemVitorias as $vitoria)
                             <tr>
                                 <td>{{$vitoria->corrida->temporada->ano->ano}}</td>
+                                <td style="text-align: center;">
+                                    @if (isset($vitoria->corrida->evento->des_nome))
+                                        {{$vitoria->corrida->evento->des_nome}}
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                                 <td class="text-nowrap">{{$vitoria->corrida->pista->nome}}</td>
                                 {{-- <td>
                                     <span style="width: 40px; height:30px;">

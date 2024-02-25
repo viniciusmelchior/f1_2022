@@ -13,12 +13,16 @@ class Corrida extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['temporada_id', 'pista_id', 'ordem','volta_rapida','flg_sprint','condicao_id', 'user_id','qtd_safety_car','dificuldade_ia', 'observacoes','flg_super_corrida','updated_at'];
+    protected $fillable = ['temporada_id', 'pista_id', 'ordem','volta_rapida','flg_sprint','condicao_id', 'user_id','qtd_safety_car','dificuldade_ia', 'observacoes','flg_super_corrida','updated_at','evento_id'];
 
     /**Relacionamentos */
 
     public function pista(){
         return $this->belongsTo(Pista::class);
+    }
+
+    public function evento(){
+        return $this->belongsTo(Evento::class);
     }
 
     public function temporada(){

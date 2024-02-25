@@ -8,6 +8,14 @@
 @section('section')
 <style>
 
+    td{
+        white-space: nowrap;
+    }
+
+    th{
+        white-space: nowrap;
+    }
+
     h1{
     text-align: center;
     }
@@ -301,6 +309,7 @@
                 <table class="mt-5 mb-5 tabela-historico-equipes">
                     <tr>
                         <th>Temporada</th>
+                        <th>Evento</th>
                         <th>Pista</th>
                         <th class="text-nowrap">Equipe</th>
                         <th>Ações</th>
@@ -309,6 +318,13 @@
                         @foreach ($listagemVitorias as $vitoria)
                             <tr>
                                 <td>{{$vitoria->corrida->temporada->ano->ano}}</td>
+                                <td>
+                                    @if (isset($vitoria->corrida->evento->des_nome))
+                                        {{$vitoria->corrida->evento->des_nome}}
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                                 <td>{{$vitoria->corrida->pista->nome}}</td>
                                 <td class="text-nowrap">{{ $vitoria->pilotoEquipe->equipe->nome }}</td>
                                 <td><a data-toggle="tooltip" data-placement="top" title="Visualizar corrida" class="" href="{{route('resultados.show', [$vitoria->corrida->id])}}"><i class="bi bi-eye-fill"></i></a></td>
@@ -330,6 +346,7 @@
             <table class="mt-5 mb-5 tabela-resultados">
                 <tr>
                     <th>Temporada</th>
+                    <th style="text-align: center;">Evento</th>
                     <th>Pista</th>
                     <th>Largada</th>
                     <th>Chegada</th>
@@ -339,6 +356,13 @@
                     <tr @if($resultado->corrida->flg_sprint == 'S') style="font-style:italic; color:red;" @endif>
                         @if($resultado->pilotoEquipe->piloto->id == $modelPiloto->id)
                             <td> {{$resultado->corrida->temporada->ano->ano}} </td>
+                            <td style="text-align: center;">
+                                @if (isset($resultado->corrida->evento->des_nome))
+                                    {{$resultado->corrida->evento->des_nome}}
+                                @else
+                                    -
+                                @endif
+                            </td>
                             <td>{{$resultado->corrida->pista->nome}} @if($resultado->corrida->flg_sprint == 'S') - Sprint @endif</td>
                             <td>{{$resultado->largada}}</td>
                             <td>{{$resultado->chegada}} <?= $resultado->flg_abandono == 'S' ? ' - Abandonou' : '' ?></td>

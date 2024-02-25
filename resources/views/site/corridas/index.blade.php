@@ -28,6 +28,7 @@
             <thead>
                 <tr>
                     <th>#</th>
+                    <th style="text-align: left;">Evento</th>
                     <th style="text-align: left;">Pista</th>
                     {{-- <th>Qtd Voltas</th> --}}
                     {{-- <th>Dificuldade IA</th> --}}
@@ -40,6 +41,13 @@
                     <tr @if($corrida->flg_sprint == 'S') style="color:red; font-style: italic;" @endif>
                         {{-- <td>@if($corrida->flg_sprint != 'S') {{$corrida->ordem}} @endif</td> --}}
                         <td>{{$corrida->flg_sprint != 'S' ? $corrida->ordem : 'Sprint' }}</td>
+                        <td style="text-align: left;">
+                            @if (isset($corrida->evento))
+                                {{$corrida->evento->des_nome}}
+                            @else
+                            -
+                            @endif
+                        </td>
                         <td style="text-align: left;">
                             <span style="width: 30px; height:20px;">
                                 <img src="{{asset('images/'.$corrida->pista->pais->imagem)}}" alt="" srcset="" style="width: 30px; height:20px;">

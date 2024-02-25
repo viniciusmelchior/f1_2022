@@ -9,6 +9,7 @@ use App\Http\Controllers\Site\PilotoEquipeController;
 use App\Http\Controllers\Site\CondicaoClimaticaController;
 use App\Http\Controllers\Site\CorridaController;
 use App\Http\Controllers\Site\AnoController;
+use App\Http\Controllers\Site\EventoController;
 use App\Http\Controllers\Site\HomeController;
 use App\Http\Controllers\Site\ResultadoController;
 use App\Http\Controllers\Site\TemporadaController;
@@ -95,6 +96,14 @@ route::get('/pistas/delete/{id}', [PistaController::class, 'destroy'])->name('pi
 /**Adicionar Autor */
 route::get('/pistas/adicionarAutor', [PistaController::class, 'adicionarAutor'])->name('pistas.adicionarAutor')->middleware('auth');
 
+/**Criação de eventos (grand prix ou grande premio) - GP de Madrid (circuito urbano de madrid) Sprint Madrid (circuito urbano de madrid)*/
+route::get('/eventos/index', [EventoController::class, 'index'])->name('eventos.index')->middleware('auth');
+route::get('/eventos/create', [EventoController::class, 'create'])->name('eventos.create')->middleware('auth');
+route::post('/eventos/store', [EventoController::class, 'store'])->name('eventos.store')->middleware('auth');
+route::get('/eventos/edit/{id}', [EventoController::class, 'edit'])->name('eventos.edit')->middleware('auth');
+route::put('/eventos/update/{id}', [EventoController::class, 'update'])->name('eventos.update')->middleware('auth');
+route::get('/eventos/show/{id}', [EventoController::class, 'show'])->name('eventos.show')->middleware('auth');
+route::get('/eventos/delete', [EventoController::class, 'destroy'])->name('eventos.delete')->middleware('auth');
 
 /**Relação de Pilotos e Equipes (montagem das duplas de pilotos por equipe) */
 route::get('/pilotoEquipe/create', [PilotoEquipeController::class, 'create'])->name('pilotoEquipe.create')->middleware('auth');

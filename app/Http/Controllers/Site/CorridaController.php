@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Site;
 
 use App\Http\Controllers\Controller;
 use App\Models\Site\Corrida;
+use App\Models\Site\Evento;
 use App\Models\Site\Pista;
 use App\Models\Site\Resultado;
 use App\Models\Site\Temporada;
@@ -28,8 +29,9 @@ class CorridaController extends Controller
         
         $temporada = Temporada::where('user_id', Auth::user()->id)->where('id', $temporadaId)->first();
         $model = Pista::where('user_id', Auth::user()->id)->where('flg_ativo', 'S')->get();
+        $eventos = Evento::where('user_id', Auth::user()->id)->get();
         
-        return view('site.corridas.form', compact('model', 'temporada'));
+        return view('site.corridas.form', compact('model', 'temporada','eventos'));
     }
 
     /**
@@ -45,6 +47,7 @@ class CorridaController extends Controller
         $corrida->dificuldade_ia = $request->dificuldade_ia;
         $corrida->flg_sprint = $request->flg_sprint == 'S' ? 'S' : 'N';
         $corrida->qtd_safety_car = $request->qtd_safety_car;
+        $corrida->evento_id = $request->evento_id;
 
         $corrida->save();
 
@@ -83,8 +86,9 @@ class CorridaController extends Controller
         $temporada = Temporada::where('user_id', Auth::user()->id)->where('id', $temporada_id)->first();
         $model = Pista::where('user_id', Auth::user()->id)->where('flg_ativo', 'S')->orderBy('nome')->get();
         $modelCorrida = Corrida::where('id', $corrida_id)->first();
+        $eventos = Evento::where('user_id', Auth::user()->id)->get();
         
-        return view('site.corridas.form', compact('model','modelCorrida', 'temporada'));
+        return view('site.corridas.form', compact('model','modelCorrida', 'temporada', 'eventos'));
     }
 
     /**
@@ -100,6 +104,7 @@ class CorridaController extends Controller
         $corrida->ordem = $request->ordem;
         $corrida->pista_id = $request->pista_id;
         $corrida->flg_sprint = $request->flg_sprint == 'S' ? 'S' : 'N';
+        $corrida->evento_id = $request->evento_id;
         $corrida->update();
 
         return redirect()->route('corridas.index',[$request->temporada_id])->with('status', 'O GP '.$corrida->pista->nome.' foi editado');

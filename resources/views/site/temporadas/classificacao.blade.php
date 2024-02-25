@@ -80,7 +80,13 @@
             <i class="bi bi-arrow-right-square" id="proxima_corrida" data-id="{{$corridaAtual->ordem}}" onclick="proximaCorrida(this)"></i>
             Próxima
         </div>
-        <div class="py-3">Após GP <span id="nome_corrida">{{$corridaAtual->pista->nome}}</span><span> (Etapa <span id="ordem_corrida">{{$corridaAtual->ordem}}</span> de {{$totalCorridas}})</span></div>
+        <div class="py-3">Após GP <span id="nome_corrida">
+            @if ($corridaAtual->evento)
+                {{$corridaAtual->evento->des_nome}}
+            @else
+                {{$corridaAtual->pista->nome}}
+            @endif
+        </span><span> (Etapa <span id="ordem_corrida">{{$corridaAtual->ordem}}</span> de {{$totalCorridas}})</span></div>
         <div class="d-flex bg-dark text-light p-3" style="justify-content: space-around; flex-wrap: wrap;">
             <div class="montaTabelaPilotos">
                 <table class="table text-light" id="tabelaClassificacaoPilotos">

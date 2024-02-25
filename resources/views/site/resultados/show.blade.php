@@ -131,7 +131,11 @@
             <div class="row align-items-start">
               <div class="col-md-3">
                   <div class="race-title-mobile text-light p-3">
-                      <h2>{{$corrida->pista->nome}} {{$descEvento}} {{$corrida->temporada->ano->ano}} <span> - Classificação Final</span></h2>
+                        @if (isset($corrida->evento->des_nome))
+                            <h2>{{$corrida->evento->des_nome}} {{$corrida->temporada->ano->ano}} <span> - Classificação Final</span></h2>
+                        @else 
+                            <h2>{{$corrida->pista->nome}} {{$descEvento}} {{$corrida->temporada->ano->ano}} <span> - Classificação Final</span></h2>
+                        @endif
                   </div>
                 <div class="card bg-dark border-white card-vencedor">
                     <img src="{{asset('images/'.$vencedor->pilotoEquipe->piloto->imagem)}}" alt="" srcset="">
@@ -164,7 +168,11 @@
               </div>
               <div class="col-md-9 bg-dark text-light">
                 <div class="race-title">
-                    <h2>{{$corrida->pista->nome}} {{$descEvento}} {{$corrida->temporada->ano->ano}} <span> - Classificação Final</span></h2>
+                    @if (isset($corrida->evento->des_nome))
+                        <h2>{{$corrida->evento->des_nome}} {{$corrida->temporada->ano->ano}} <span> - Classificação Final</span></h2>
+                    @else 
+                        <h2>{{$corrida->pista->nome}} {{$descEvento}} {{$corrida->temporada->ano->ano}} <span> - Classificação Final</span></h2>
+                    @endif
                 </div>
                 <div class="table-responsive">
                     <table class="table text-light table-container">

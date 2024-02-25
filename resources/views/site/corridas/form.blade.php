@@ -31,6 +31,16 @@
     <form method="POST" action="{{ $route }}" class="col-md-6 mt-3 mb-3">
         {{ $method }}
         @csrf
+
+        <div class="mb-3">
+            <label for="evento_id">Evento</label>
+            <select <?= isset($modelCorrida) ? '' : '' ?> name="evento_id" id="evento_id" class="form-control">
+                @foreach($eventos as $evento)
+                    <option value="{{ $evento->id }}" @isset($modelCorrida) @if($evento->id == $modelCorrida->evento_id) selected @endisset @endif>{{$evento->des_nome}}</option>
+                @endforeach
+            </select>
+        </div>
+
         <div class="mb-3">
             <label for="pista_id">Pista</label>
             <select <?= isset($modelCorrida) ? '' : '' ?> name="pista_id" id="pista_id" class="form-control">

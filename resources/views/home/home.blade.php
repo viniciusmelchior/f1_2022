@@ -493,7 +493,14 @@ margin: 0;
                     </td>
                     <td style="text-align: left;" class="text-nowrap">
                          <img src="{{asset('images/'.$resultadoCorrida->pista->pais->imagem)}}" alt="" style="width: 25px; height:20px;">
-                        <a href="{{route('resultados.show',[$resultadoCorrida->id])}}" style="text-decoration: none; color:black;">{{$resultadoCorrida->pista->nome}}</a>
+                        {{-- <a href="{{route('resultados.show',[$resultadoCorrida->id])}}" style="text-decoration: none; color:black;">{{$resultadoCorrida->pista->nome}}</a> --}}
+                        <a href="{{route('resultados.show',[$resultadoCorrida->id])}}" style="text-decoration: none; color:black;" title="{{ $resultadoCorrida->pista->nome }}">
+                            @if (isset($resultadoCorrida->evento->des_nome))
+                                {{$resultadoCorrida->evento->des_nome}}
+                            @else
+                                {{ $resultadoCorrida->pista->nome }}
+                            @endif
+                        </a>
                         {{-- @if(isset($resultadoCorrida->condicao_id))
                             <i class="{{$resultadoCorrida->condicao->des_icone}}"></i>
                         @endif --}}

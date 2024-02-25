@@ -2,13 +2,21 @@
  use App\Models\Site\Corrida;
  use App\Models\Site\Resultado;
  use App\Models\Site\Temporada;
-use App\Models\Site\Titulo;
-use App\Models\Site\PilotoEquipe;
+ use App\Models\Site\Titulo;
+ use App\Models\Site\PilotoEquipe;
 @endphp
 @extends('layouts.main')
 
 @section('section')
 <style>
+
+    td{
+        white-space: nowrap;
+    }
+
+    th{
+        white-space: nowrap;
+    }
 
     h1{
         text-align: center;

@@ -64,15 +64,12 @@ use App\Models\Site\PilotoEquipe;
         color: white;
     }
     </style>
-@php 
-    $resultadoCorridas = Corrida::where('user_id', Auth::user()->id)->where('pista_id', $id)->orderBy('temporada_id', 'DESC')->orderBy('ordem')->get();
-@endphp
 <div class="container mt-3 mb-3">
     <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{route('home')}}">Home</a></li>
             <li class="breadcrumb-item active">Resultados</li>
-            <li class="breadcrumb-item active" aria-current="page">{{$resultadoCorridas[0]->pista->nome}}</li>
+            <li class="breadcrumb-item active" aria-current="page">{{$resultadoCorridas[0]->pista->pais->des_nome}}</li>
         </ol>
     </nav>
    <div class="container">
@@ -81,8 +78,7 @@ use App\Models\Site\PilotoEquipe;
             <tr>
                 <th style="width: 5%;">#</th>
                 <th style="width: 5%;">Temporada</th>
-                <th style="width: 15%;">Evento</th>
-                <th style="width: 1%;">IA</th>
+                <th style="width: 15%;">Pista</th>
                 <th>Pole Position</th>
                 <th>Primeiro</th>
                 <th>Segundo</th>
@@ -111,21 +107,13 @@ use App\Models\Site\PilotoEquipe;
                     <td>
                         {{$resultadoCorrida->temporada->ano->ano}}
                     </td>
-                    <td>
-                        @if ($resultadoCorrida->evento)
-                            {{$resultadoCorrida->evento->des_nome}}
-                        @else
-                            -
-                        @endif
+                    <td>{{$resultadoCorrida->evento->des_nome}}
                         @if(isset($resultadoCorrida->condicao_id))
                             <i class="{{$resultadoCorrida->condicao->des_icone}}"></i>
                         @endif
                         @if($resultadoCorrida->qtd_safety_car > 0)
                             <i class="bi bi-car-front-fill mt-3"></i>
                         @endif
-                    </td>
-                    <td>
-                        {{$resultadoCorrida->dificuldade_ia}}
                     </td>
                     <td>
                         @if(isset($polePosition))
@@ -179,7 +167,7 @@ use App\Models\Site\PilotoEquipe;
             @endforeach
         </table>
     </div>
-    <a href="{{route('pistas.index')}}" class="btn btn-secondary ml-3 mb-3">Voltar</a>
+    <a href="{{route('paises.index')}}" class="btn btn-secondary ml-3 mb-3">Voltar</a>
    </div>
 </div>
 @endsection

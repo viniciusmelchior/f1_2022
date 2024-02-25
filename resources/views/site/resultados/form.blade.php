@@ -23,7 +23,11 @@
 @section('section')
    <div class="container">
         <div>
-            <h2>GP de {{$corrida->pista->nome}} - {{$corrida->temporada->ano->ano}}</h2>
+            @if(isset($corrida->evento->des_nome))
+                <h2>{{ $corrida->evento->des_nome}} - {{$corrida->temporada->ano->ano}}</h2>
+            @else 
+                <h2>GP de {{$corrida->pista->nome}} - {{$corrida->temporada->ano->ano}}</h2>
+            @endif
         </div>
     <form method="POST" action="{{ $route }}" class="col-md-9 mt-3 mb-3">
         {{ $method }}

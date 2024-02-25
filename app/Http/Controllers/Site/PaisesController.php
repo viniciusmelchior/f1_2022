@@ -29,7 +29,7 @@ class PaisesController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function create()
-    {   
+    {
         $continentes = Continente::all();
 
         return view('site.paises.form', compact('continentes'));
@@ -48,11 +48,11 @@ class PaisesController extends Controller
         $pais->continente_id = $request->continente_id;
         $pais->user_id = Auth::user()->id;
 
-        if($request->imagem == ''){
+        if ($request->imagem == '') {
             $newImageName = '';
         } else {
-           $newImageName = time().'-'.$request->nome.'.'.$request->imagem->extension();
-           $request->imagem->move(public_path('images'), $newImageName);
+            $newImageName = time() . '-' . $request->nome . '.' . $request->imagem->extension();
+            $request->imagem->move(public_path('images'), $newImageName);
         }
 
         $pais->imagem = $newImageName;
@@ -72,16 +72,16 @@ class PaisesController extends Controller
     {
 
         $resultadoCorridas = Corrida::where('user_id', Auth::user()->id)
-                                    ->whereHas('pista', function ($query) use ($id) {
-                                        $query->where('pais_id', $id);
-                                    })
-                                    ->orderBy('temporada_id', 'DESC')
-                                    ->orderBy('ordem', 'DESC')
-                                    ->get();
+            ->whereHas('pista', function ($query) use ($id) {
+                $query->where('pais_id', $id);
+            })
+            ->orderBy('temporada_id', 'DESC')
+            ->orderBy('ordem', 'DESC')
+            ->get();
 
-        if(count($resultadoCorridas) > 0){
+        if (count($resultadoCorridas) > 0) {
             return view('site.paises.show', compact('resultadoCorridas'));
-        }else{
+        } else {
             return redirect()->route('paises.index')->with('error', 'Não existem corridas disputadas no país selecionado');
         }
     }
@@ -97,7 +97,7 @@ class PaisesController extends Controller
         $model = Pais::where('id', $id)->where('user_id', Auth::user()->id)->first();
         $continentes = Continente::all();
 
-        return view('site.paises.form', compact('model','continentes'));
+        return view('site.paises.form', compact('model', 'continentes'));
     }
 
     /**
@@ -114,17 +114,17 @@ class PaisesController extends Controller
         $pais->continente_id = $request->continente_id;
 
         //se tiver foto criar span no form pra nao precisar alterar,  caso queira, apagar a antiga e colocar outra
-        if($request->imagem == ''){
+        if ($request->imagem == '') {
             $newImageName = '';
         } else {
-            if(file_exists(public_path('images/'.$pais->imagem))){
-                if($pais->imagem != null){
-                    unlink(public_path('images/'.$pais->imagem));
+            if (file_exists(public_path('images/' . $pais->imagem))) {
+                if ($pais->imagem != null) {
+                    unlink(public_path('images/' . $pais->imagem));
                 }
             }
-           $newImageName = time().'-'.$request->nome.'.'.$request->imagem->extension();
-           $request->imagem->move(public_path('images'), $newImageName);
-           $pais->imagem = $newImageName;
+            $newImageName = time() . '-' . $request->nome . '.' . $request->imagem->extension();
+            $request->imagem->move(public_path('images'), $newImageName);
+            $pais->imagem = $newImageName;
         }
 
         $pais->update();
@@ -140,21 +140,21 @@ class PaisesController extends Controller
      */
 
     public function destroy(Request $request)
-    {      
-        
+    {
+
         try {
             $id = $request->pais_id;
             $pais = Pais::where('id', $id)->where('user_id', Auth::user()->id)->first();
             $pais->delete();
-    
+
             //apagando a foto do país
-            if($pais->imagem != null){
-                if(file_exists(public_path('images/'.$pais->imagem))){
-                    unlink(public_path('images/'.$pais->imagem));
+            if ($pais->imagem != null) {
+                if (file_exists(public_path('images/' . $pais->imagem))) {
+                    unlink(public_path('images/' . $pais->imagem));
                 }
             }
-        
-            return redirect()->route('paises.index')->with('status', 'O pais '.$pais->des_nome.' foi excluído com sucesso');
+
+            return redirect()->route('paises.index')->with('status', 'O pais ' . $pais->des_nome . ' foi excluído com sucesso');
         } catch (\Throwable $th) {
             return redirect()->route('paises.index')->with('error', 'Não foi possível excluir o país selecionado');
         }

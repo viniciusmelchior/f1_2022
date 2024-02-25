@@ -113,14 +113,15 @@
             <div class="iocn-link">
               <a href="#">
                 <i class='bx bxs-location-plus'></i>
-                <span class="link_name">Pistas</span>
+                <span class="link_name">Eventos</span>
               </a>
               <i class='bx bxs-chevron-down arrow'></i>
             </div>
             <ul class="sub-menu">
-              <li><a class="link_name" href="#">Pistas</a></li>
-              <li><a href="{{route('pistas.index')}}">Visualizar</a></li>
-              <li><a href="{{route('pistas.create')}}">Cadastrar</a></li>
+              <li><a class="link_name" href="#">Eventos</a></li>
+              <li><a href="{{route('eventos.index')}}">Eventos</a></li>
+              <li><a href="{{route('pistas.index')}}">Pistas</a></li>
+              {{-- <li><a href="{{route('pistas.create')}}">Cadastrar Pistas</a></li> --}}
             </ul>
           </li>
           <li>
