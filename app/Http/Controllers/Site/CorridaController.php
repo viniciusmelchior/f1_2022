@@ -22,6 +22,7 @@ class CorridaController extends Controller
     {   
         $temporada = Temporada::where('id', $temporadaId)->first();
         $corridas = Corrida::where('user_id', Auth::user()->id)->where('temporada_id', $temporadaId)->orderBy('ordem')->orderBy('flg_sprint', 'DESC')->get();
+        
         return view('site.corridas.index', compact('corridas', 'temporada'));
     }
 
