@@ -55,7 +55,7 @@ class EventoController extends Controller
 			$evento->user_id = Auth::user()->id;
 			$evento->save();
 
-			return redirect()->route('eventos.index')->with('status', 'Evento cadastrado com sucesso');
+			return redirect()->back()->with('status', 'Evento cadastrado com sucesso');
 		} catch (\Throwable $th) {
 			throw $th;
 		}
