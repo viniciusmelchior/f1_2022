@@ -4,7 +4,7 @@
    <div class="container">
     <div class="">
         <div style="margin-bottom: 25px;">
-            <label for="inputFileLargada">Upload JSON Largada</label>
+            <label for="inputFileLargada">Upload do arquivo</label>
             <br>
             <input type="file" id="inputFileLargada">
         </div> 
@@ -17,7 +17,7 @@
         </div>
     </div>
 
-    <table class="table text-center" id="table">
+    <table class="table table-striped text-center" id="table">
         <thead>
             <tr>
                 <th onclick="sortTable(0)">Piloto</th>
