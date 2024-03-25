@@ -49,6 +49,7 @@
             </a>
             <ul class="sub-menu blank">
               <li><a class="link_name" href="{{route('home')}}">Estatisticas</a></li>
+              <li><a class="link_name" href="{{route('tempos')}}">Análises de Voltas</a></li>
             </ul>
           </li>
           <li>

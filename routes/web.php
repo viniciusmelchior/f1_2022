@@ -198,6 +198,6 @@ route::post('/ajax/ajaxGetChegadasEquipesPorTemporada', [HomeController::class, 
 
 route::get('tempos', function(){
     return view('site.listagemTempos.index');
-})->middleware('auth');
+})->name('tempos')->middleware('auth');
 
 
