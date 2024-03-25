@@ -196,4 +196,8 @@ route::post('/ajax/ajaxGetPodiosEquipesPorTemporada', [HomeController::class, 'a
 route::post('/ajax/ajaxGetChegadasPilotosPorTemporada', [HomeController::class, 'ajaxGetChegadasPilotosPorTemporada'])->name('ajax.ajaxGetChegadasPilotosPorTemporada')->middleware('auth');
 route::post('/ajax/ajaxGetChegadasEquipesPorTemporada', [HomeController::class, 'ajaxGetChegadasEquipesPorTemporada'])->name('ajax.ajaxGetChegadasEquipesPorTemporada')->middleware('auth');
 
+route::get('tempos', function(){
+    return view('site.listagemTempos.index');
+})->middleware('auth');
+
 
