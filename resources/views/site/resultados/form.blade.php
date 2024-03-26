@@ -358,82 +358,155 @@ document.getElementById('inputFileLargada').addEventListener('change', function(
     }
 
     //testes grid invertido
-    function gerarResultadoGridInvertido(resultados) {
+//     function gerarResultadoGridInvertido(resultados) {
 
-        console.log('grid invertido');
+//         console.log('grid invertido');
        
-       var resultados = resultados
-       let sessoesDisponiveis = resultados['sessions'];
-       var pilotos = resultados['players'];
+//        var resultados = resultados
+//        let sessoesDisponiveis = resultados['sessions'];
+//        var pilotos = resultados['players'];
 
-       sessoesDisponiveis.forEach((sessao,key) => {
-           if(sessao['name'] == 'Quick Race'){
-               var resultadoFinal = resultados['sessions'][key]['raceResult']; //pega o resultado que está na posição em que a chave Quick Race foi encontrada
+//        sessoesDisponiveis.forEach((sessao,key) => {
+//            if(sessao['name'] == 'Quick Race'){
+//                var resultadoFinal = resultados['sessions'][key]['raceResult']; //pega o resultado que está na posição em que a chave Quick Race foi encontrada
 
-               let ordemChegada = [];
+//                let ordemChegada = [];
 
-               for (let index = 0; index < resultadoFinal.length; index++) {
-                   ordemChegada.push(pilotos[resultadoFinal[index]]['name']);
-               }
+//                for (let index = 0; index < resultadoFinal.length; index++) {
+//                    ordemChegada.push(pilotos[resultadoFinal[index]]['name']);
+//                }
 
-               const tabela = document.getElementById('tabela');
+//                const tabela = document.getElementById('tabela');
 
-               // Obtendo todas as linhas da tabela
-               const linhas = tabela.rows;
+//                // Obtendo todas as linhas da tabela
+//                const linhas = tabela.rows;
 
-               //deixar o código dinâmico
-               const arrayDeLinhas = Array.from(linhas);
+//                //deixar o código dinâmico
+//                const arrayDeLinhas = Array.from(linhas);
 
-               //transformar o array em UPPERCASE
-               ordemChegada = ordemChegada.map(item => item.toUpperCase())
+//                //transformar o array em UPPERCASE
+//                ordemChegada = ordemChegada.map(item => item.toUpperCase())
 
-               arrayDeLinhas.forEach((linha, indice) => {
-                   let nomePiloto = linha.cells[1].innerHTML.toUpperCase().trim() //limpa os espaços do inicio e fim da string
-                   nomePiloto = nomePiloto.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); //retira os ascentos
-                   let valorChegada = parseInt(ordemChegada.indexOf(nomePiloto))+1
-                   if(valorChegada > 0){
+//                arrayDeLinhas.forEach((linha, indice) => {
+//                    let nomePiloto = linha.cells[1].innerHTML.toUpperCase().trim() //limpa os espaços do inicio e fim da string
+//                    nomePiloto = nomePiloto.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); //retira os ascentos
+//                    let valorChegada = parseInt(ordemChegada.indexOf(nomePiloto))+1
+//                    if(valorChegada > 0){
 
-                    switch (valorChegada) {
+//                     switch (valorChegada) {
+//                         case 1:
+//                             valorChegada = 10
+//                             break;
+//                         case 2:
+//                             valorChegada = 9
+//                             break;
+//                         case 3:
+//                             valorChegada = 8
+//                             break;
+//                         case 4:     
+//                             valorChegada = 7
+//                             break;
+//                         case 5:
+//                             valorChegada = 6
+//                             break;
+//                         case 6:
+//                             valorChegada = 5
+//                             break;
+//                         case 7:
+//                             valorChegada = 4
+//                             break;
+//                         case 8:
+//                             valorChegada = 3
+//                             break;
+//                         case 9:
+//                             valorChegada = 2
+//                             break;
+//                         case 10:
+//                             valorChegada = 1
+//                             break;
+//                     }
+
+//                        linha.cells[2].querySelector('input[type="number"]').value = valorChegada //posição da coluna em que sera adicionada a largada
+//                    }
+//                });
+//            }
+//        });
+//    }
+
+    function gerarResultadoGridInvertido(resultados){
+        var resultados = resultados;
+        let sessoesDisponiveis = resultados['sessions'];
+        var pilotos = resultados['players'];
+
+        sessoesDisponiveis.forEach((sessao,key) => {
+            if(sessao['name'] == 'Qualifying'){
+
+                var resultadoFinal = resultados['sessions'][key]['bestLaps'].sort((a, b) => a.time - b.time); //pega o resultado que está na posição em que a chave Qualyfying foi encontrada
+                
+                let ordemLargada = [];
+
+                for (let index = 0; index < resultadoFinal.length; index++) {
+                    ordemLargada.push(pilotos[resultadoFinal[index]['car']]['name']);
+                }
+
+                const tabela = document.getElementById('tabela');
+
+                // Obtendo todas as linhas da tabela
+                const linhas = tabela.rows;
+                
+                //deixar o código dinâmico
+                const arrayDeLinhas = Array.from(linhas);
+
+                //transformar o array em UPPERCASE
+                ordemLargada = ordemLargada.map(item => item.toUpperCase())
+
+                arrayDeLinhas.forEach((linha, indice) => {
+                    let nomePiloto = linha.cells[1].innerHTML.toUpperCase().trim() //limpa os espaços do inicio e fim da string
+                    nomePiloto = nomePiloto.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); ///retira os ascentos
+                    let valorLargada = parseInt(ordemLargada.indexOf(nomePiloto))+1
+
+                    if(valorLargada > 0){
+
+                        switch (valorLargada) {
                         case 1:
-                            valorChegada = 10
+                            valorLargada = 10
                             break;
                         case 2:
-                            valorChegada = 9
+                            valorLargada = 9
                             break;
                         case 3:
-                            valorChegada = 8
+                            valorLargada = 8
                             break;
                         case 4:     
-                            valorChegada = 7
+                            valorLargada = 7
                             break;
                         case 5:
-                            valorChegada = 6
+                            valorLargada = 6
                             break;
                         case 6:
-                            valorChegada = 5
+                            valorLargada = 5
                             break;
                         case 7:
-                            valorChegada = 4
+                            valorLargada = 4
                             break;
                         case 8:
-                            valorChegada = 3
+                            valorLargada = 3
                             break;
                         case 9:
-                            valorChegada = 2
+                            valorLargada = 2
                             break;
                         case 10:
-                            valorChegada = 1
+                            valorLargada = 1
                             break;
                     }
 
-                       linha.cells[2].querySelector('input[type="number"]').value = valorChegada //posição da coluna em que sera adicionada a largada
-                   }
-               });
-           }
-       });
-   }
+                        linha.cells[2].querySelector('input[type="number"]').value = valorLargada
+                    }
+                });
 
-
+            }
+        });
+    }
 
     function gerarResultadoLargada(resultados){
         var resultados = resultados;
