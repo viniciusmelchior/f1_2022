@@ -332,7 +332,43 @@
                         @endforeach
                     @else 
                         <tr>
-                            <td colspan="3" style="font-style: italic;">Piloto não tem vitórias</td>    
+                            <td colspan="5" style="font-style: italic;">Piloto não tem vitórias</td>    
+                        </tr> 
+                    @endif
+                </table>
+        </section>
+
+        <hr>
+
+        <section class="" style="height: auto;">
+            <h1 class="mb-3" style="text-transform:uppercase;">Histórico de Pole Positions</h1>
+                <table class="mt-5 mb-5 tabela-historico-equipes">
+                    <tr>
+                        <th>Temporada</th>
+                        <th>Evento</th>
+                        <th>Pista</th>
+                        <th class="text-nowrap">Equipe</th>
+                        <th>Ações</th>
+                    </tr>
+                    @if (count($listagemPolePositions) > 0)
+                        @foreach ($listagemPolePositions as $polePosition)
+                            <tr>
+                                <td>{{$polePosition->corrida->temporada->ano->ano}}</td>
+                                <td>
+                                    @if (isset($polePosition->corrida->evento->des_nome))
+                                        {{$polePosition->corrida->evento->des_nome}}
+                                    @else
+                                        -
+                                    @endif
+                                </td>
+                                <td>{{$polePosition->corrida->pista->nome}}</td>
+                                <td class="text-nowrap">{{ $polePosition->pilotoEquipe->equipe->nome }}</td>
+                                <td><a data-toggle="tooltip" data-placement="top" title="Visualizar corrida" class="" href="{{route('resultados.show', [$polePosition->corrida->id])}}"><i class="bi bi-eye-fill"></i></a></td>
+                            </tr>
+                        @endforeach
+                    @else 
+                        <tr>
+                            <td colspan="5" style="font-style: italic;">Piloto não tem pole positions</td>    
                         </tr> 
                     @endif
                 </table>

@@ -115,9 +115,6 @@ class ResultadoController extends Controller
         if ($request->categoria == 'SC') {
             $corrida->flg_super_corrida = 'S';
             $corrida->flg_sprint = 'S';
-        } else {
-            $corrida->flg_super_corrida = 'N';
-            $corrida->flg_sprint = 'N';
         }
         
         $corrida->update();
