@@ -287,7 +287,8 @@
                 <th>Ações</th>
                 @foreach ($temporadas as $temporada )
                     <tr>
-                        <td>{{$temporada->ano->ano}}</td>
+                        {{-- <td>{{$temporada->ano->ano}}</td> --}}
+                        <td> {{ substr($temporada->des_temporada, 0, strpos($temporada->des_temporada, ' ')) }}</td>
                         <td>
                             {{Piloto::getInfoCampeonato($temporada->id, $modelPiloto->id)['posicaoPiloto']}}
                         </td>
@@ -317,7 +318,8 @@
                     @if (count($listagemVitorias) > 0)
                         @foreach ($listagemVitorias as $vitoria)
                             <tr>
-                                <td>{{$vitoria->corrida->temporada->ano->ano}}</td>
+                                {{-- <td>{{$vitoria->corrida->temporada->ano->ano}}</td> --}}
+                                <td> {{ substr($vitoria->corrida->temporada->des_temporada, 0, strpos($vitoria->corrida->temporada->des_temporada, ' ')) }}</td>
                                 <td>
                                     @if (isset($vitoria->corrida->evento->des_nome))
                                         {{$vitoria->corrida->evento->des_nome}}
@@ -353,7 +355,8 @@
                     @if (count($listagemPolePositions) > 0)
                         @foreach ($listagemPolePositions as $polePosition)
                             <tr>
-                                <td>{{$polePosition->corrida->temporada->ano->ano}}</td>
+                                {{-- <td>{{$polePosition->corrida->temporada->ano->ano}}</td> --}}
+                                <td> {{ substr($polePosition->corrida->temporada->des_temporada, 0, strpos($polePosition->corrida->temporada->des_temporada, ' ')) }}</td>
                                 <td>
                                     @if (isset($polePosition->corrida->evento->des_nome))
                                         {{$polePosition->corrida->evento->des_nome}}
@@ -381,7 +384,7 @@
             <h1>Resultados por Corrida</h1>
             <table class="mt-5 mb-5 tabela-resultados">
                 <tr>
-                    <th>Temporada</th>
+                    <th style="text-align: center;">Temporada</th>
                     <th style="text-align: center;">Evento</th>
                     <th>Pista</th>
                     <th>Largada</th>
@@ -391,7 +394,8 @@
                 @foreach($resultadosPorCorrida as $resultado)
                     <tr @if($resultado->corrida->flg_sprint == 'S') style="font-style:italic; color:red;" @endif>
                         @if($resultado->pilotoEquipe->piloto->id == $modelPiloto->id)
-                            <td> {{$resultado->corrida->temporada->ano->ano}} </td>
+                            {{-- <td> {{$resultado->corrida->temporada->ano->ano}} </td> --}}
+                            <td style="text-align: center;"> {{ substr($resultado->corrida->temporada->des_temporada, 0, strpos($resultado->corrida->temporada->des_temporada, ' ')) }}</td>
                             <td style="text-align: center;">
                                 @if (isset($resultado->corrida->evento->des_nome))
                                     {{$resultado->corrida->evento->des_nome}}

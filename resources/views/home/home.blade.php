@@ -440,6 +440,9 @@ margin: 0;
         
     @php 
 
+    // $resultadoCorridas = Corrida::whereHas('resultado', function($query){
+    //    $query->where('user_id', Auth::user()->id)->orderBy('temporada_id','DESC')->orderBy('ordem','DESC');
+    // })->get();
     $resultadoCorridas = Corrida::whereHas('resultado', function($query){
        $query->where('user_id', Auth::user()->id)->orderBy('temporada_id','DESC')->orderBy('ordem','DESC');
     })->get();
@@ -489,7 +492,9 @@ margin: 0;
                         @endif
                     </td>
                     <td>
-                        {{$resultadoCorrida->temporada->ano->ano}}
+                        {{-- {{$resultadoCorrida->temporada->ano->ano}} --}}
+                        {{-- {{substr($resultadoCorrida->temporada->des_temporada, 0, 2)}} --}}
+                        {{ substr($resultadoCorrida->temporada->des_temporada, 0, strpos($resultadoCorrida->temporada->des_temporada, ' ')) }}
                     </td>
                     <td style="text-align: left;" class="text-nowrap">
                          <img src="{{asset('images/'.$resultadoCorrida->pista->pais->imagem)}}" alt="" style="width: 25px; height:20px;">

@@ -305,7 +305,10 @@
                         $pilotos = PilotoEquipe::where('equipe_id', $modelEquipe->id)->where('ano_id', $temporada->ano_id)->get();
                     @endphp
                     <tr>
-                        <td>{{$temporada->ano->ano}}</td>
+                        {{-- <td>{{$temporada->ano->ano}}</td> --}}
+                        <td>
+                            {{ substr($temporada->des_temporada, 0, strpos($temporada->des_temporada, ' ')) }}
+                        </td>
                         <td class="text-nowrap">
                         @if (count($pilotos) > 0)
                             @foreach ($pilotos as $key => $piloto)
@@ -348,7 +351,10 @@
                     @if (count($listagemVitorias) > 0)
                         @foreach ($listagemVitorias as $vitoria)
                             <tr>
-                                <td>{{$vitoria->corrida->temporada->ano->ano}}</td>
+                                {{-- <td>{{$vitoria->corrida->temporada->ano->ano}}</td> --}}
+                                <td>
+                                    {{ substr($vitoria->corrida->temporada->des_temporada, 0, strpos($vitoria->corrida->temporada->des_temporada, ' ')) }}
+                                </td>
                                 <td style="text-align: center;">
                                     @if (isset($vitoria->corrida->evento->des_nome))
                                         {{$vitoria->corrida->evento->des_nome}}
@@ -389,7 +395,10 @@
                     @if (count($listagemPolePositions) > 0)
                         @foreach ($listagemPolePositions as $polePosition)
                             <tr>
-                                <td>{{$polePosition->corrida->temporada->ano->ano}}</td>
+                                {{-- <td>{{$polePosition->corrida->temporada->ano->ano}}</td> --}}
+                                <td>
+                                    {{ substr($polePosition->corrida->temporada->des_temporada, 0, strpos($polePosition->corrida->temporada->des_temporada, ' ')) }}
+                                </td>
                                 <td style="text-align: center;">
                                     @if (isset($polePosition->corrida->evento->des_nome))
                                         {{$polePosition->corrida->evento->des_nome}}
