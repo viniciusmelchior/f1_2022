@@ -204,7 +204,7 @@
                                     <td>+{{$item->pontuacao}}</td>
                                 </tr>
                             @endforeach
-                            @if($corrida->flg_sprint == 'N')
+                            @if($corrida->flg_sprint == 'N' || $corrida->flg_super_corrida == 'S')
                                 <tr>
                                     <td colspan="5">
                                         <span style="color:rgb(107, 34, 175); font-weight:bold; margin-right:1rem;">Volta Mais rápida</span>

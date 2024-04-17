@@ -53,9 +53,9 @@
                                 <img src="{{asset('images/'.$corrida->pista->pais->imagem)}}" alt="" srcset="" style="width: 30px; height:20px;">
                             </span>
                             {{$corrida->pista->nome}}
-                            @if($corrida->flg_super_corrida == 'S')
+                           {{--  @if($corrida->flg_super_corrida == 'S')
                                 - Super Corrida
-                            @endif
+                            @endif --}}
                         </td>
                         {{-- <td>
                             {{$corrida->pista->qtd_voltas != null ? $corrida->pista->qtd_voltas : '-'}}
