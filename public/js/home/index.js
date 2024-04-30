@@ -387,7 +387,9 @@ $(document).ready(function () {
         inicioPosicaoChegadasPilotos = $('#inicioPosicaoChegadasPilotos').val();
         fimPosicaoChegadasPilotos = $('#fimPosicaoChegadasPilotos').val();
 
-        getChegadasPilotosPorPosicao(temporadaId, inicioPosicaoChegadasPilotos, fimPosicaoChegadasPilotos);
+        tipoCorrida = $('#tipoCorridaChegadasPilotos').val();
+
+        getChegadasPilotosPorPosicao(temporadaId, inicioPosicaoChegadasPilotos, fimPosicaoChegadasPilotos, tipoCorrida);
     });
 
     //mudar posição inicial da tabela de chegadas dos pilotos 
@@ -412,9 +414,19 @@ $(document).ready(function () {
         getChegadasPilotosPorPosicao(temporadaId, inicioPosicaoChegadasPilotos, fimPosicaoChegadasPilotos);
     });
 
-    function getChegadasPilotosPorPosicao(temporada, inicio, fim){
+    //muda se queremos os resultados das corridas sprint
+    $('#tipoCorridaChegadasPilotos').change(function (e) { 
+        e.preventDefault();
+        
+        temporadaId = $('#chegadasPilotosPorTemporada').val();
+        inicioPosicaoChegadasPilotos = $('#inicioPosicaoChegadasPilotos').val();
+        fimPosicaoChegadasPilotos = $('#fimPosicaoChegadasPilotos').val();
+        tipoCorrida = $('#tipoCorridaChegadasPilotos').val();
 
-        console.log(temporada, inicio, fim)
+        getChegadasPilotosPorPosicao(temporadaId, inicioPosicaoChegadasPilotos, fimPosicaoChegadasPilotos, tipoCorrida);
+    });
+
+    function getChegadasPilotosPorPosicao(temporada, inicio, fim, tipoCorrida){
 
         tabelaChegadasPilotos = $('#tabelaChegadasPilotos');
         tabelaChegadasPilotos.html('');
@@ -435,7 +447,7 @@ $(document).ready(function () {
         $.ajax({
             type: "POST",
             url: ajaxGetChegadasPilotosPorTemporada,
-            data: {temporada: temporada, inicio:inicio, fim:fim},
+            data: {temporada: temporada, inicio:inicio, fim:fim, tipoCorrida:tipoCorrida},
             contentType: "application/x-www-form-urlencoded;charset=UTF-8",
             success: function (response) {
                 console.log('ok')

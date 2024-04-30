@@ -307,6 +307,8 @@ margin: 0;
 
         <hr class="separador">
 
+        {{-- lista todas as chegadas dos pilotos e a possibilidade de escolher a posição de inicio e de fim, e se é sprint ou comum --}}
+
         <div class="header-tabelas m-3">Chegadas <span id="toggle_chegadastop10"><i class="bi bi-plus-circle"></i></span></div>
 
         <div class="d-flex d-none" id="div_chegadastop10">
@@ -323,8 +325,8 @@ margin: 0;
                         </select>
                     </div>
                 
-                    <div class="mt-3">
-                        <div style="display: flex; justify-content: center; align-items: center;">
+                    {{-- <div class="mt-3">
+                        <div style="display: flex; justify-content: center; align-items: space-around;" class="bg-primary">
                             <div>
                                 <label for="">Inicio</label>
                                 <input type="number" name="inicioPosicaoChegadasPilotos" id="inicioPosicaoChegadasPilotos" style="width:30px; height:30px; text-align: center;" value="1">
@@ -333,8 +335,33 @@ margin: 0;
                                 <label for="" style="margin-left: 1rem;">Fim</label>
                                 <input type="number" name="fimPosicaoChegadasPilotos" id="fimPosicaoChegadasPilotos" style="width:30px; height:30px; text-align: center;" value="10">
                             </div>
+                            <div>
+                                <label for="" style="margin-left: 1rem;">Sprint</label>
+                                <input type="checkbox" name="" id="">
+                            </div>
+                        </div>
+                    </div> --}}
+                    <div class="mt-3">
+                        <div style="display: flex; justify-content: center; align-items: center;">
+                            <div style="display: flex; align-items: center;">
+                                <label for="inicioPosicaoChegadasPilotos">Inicio</label>
+                                <input type="number" name="inicioPosicaoChegadasPilotos" id="inicioPosicaoChegadasPilotos" style="width:35px; height:25px; text-align: center; margin-left:0.6rem;" value="1">
+                            </div>
+                            <div style="display: flex; align-items: center; margin-left: 1rem;">
+                                <label for="fimPosicaoChegadasPilotos">Fim</label>
+                                <input type="number" name="fimPosicaoChegadasPilotos" id="fimPosicaoChegadasPilotos" style="width:35px; height:25px; text-align: center; margin-left:0.6rem;" value="10">
+                            </div>
+                            <div style="display: flex; align-items: center; margin-left: 1rem;">
+                                <label for="sprint">Corrida</label>
+                                <select name="tipoCorridaChegadasPilotos" id="tipoCorridaChegadasPilotos" class="form-select" style="margin-left: 0.6rem;">
+                                    <option value="completa">Completa</option>
+                                    <option value="sprint">Sprint</option>
+                                </select>
+                                {{-- <input type="checkbox" name="tipoCorridaChegadasPilotos" id="tipoCorridaChegadasPilotos" style="margin-left: 0.6rem; width:15px; height:15px;" class="form-check-input mt-0"> --}}
+                            </div>
                         </div>
                     </div>
+                    
                 </div>
                 
                 <table class="m-5 tabelaEstatisticas" id="tabelaChegadasPilotos">

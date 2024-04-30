@@ -342,6 +342,11 @@ class HomeController extends Controller
         $temporada_id = $request->post('temporada');
         $operadorConsulta = '=';
         $condicao = $temporada_id;
+        $tipoCorrida = 'N';
+
+        if($request->tipoCorrida == 'sprint'){
+            $tipoCorrida = 'S';
+        }
         
         if($temporada_id == null){
             $operadorConsulta = '>';
@@ -357,7 +362,7 @@ class HomeController extends Controller
                                     where corridas.temporada_id '.$operadorConsulta.' '.$condicao.'
                                     and resultados.chegada >= '.$request->inicio.'
                                     and resultados.chegada <= '.$request->fim.'
-                                    and corridas.flg_sprint = "N"
+                                    and corridas.flg_sprint = "'.$tipoCorrida.'"
                                     and corridas.user_id = '.Auth::user()->id.'
                                     group by pilotos.id 
                                     order by chegadas desc');
