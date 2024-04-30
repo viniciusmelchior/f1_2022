@@ -269,6 +269,27 @@
 
         <hr>
 
+        <section class="resultados-por-corrida">
+            <h1>Corridas por equipe</h1>
+            <table class="mt-5 mb-5 tabela-historico-equipes">
+                <tr>
+                    <th>Equipe</th>
+                    <th>Quantidade</th>
+                </tr>
+                @foreach($corridasPorEquipe as $corridaPorEquipe)
+                    <tr>
+                        <td style="vertical-align: middle;">
+                            <img src="{{asset('images/'.$corridaPorEquipe->imagem)}}" style="width:25px; height:25px;">
+                            <span style="display: inline-block; vertical-align: middle;">{{$corridaPorEquipe->nome}}</span>
+                        </td>
+                        <td>{{$corridaPorEquipe->quantidade}}</td>
+                    </tr>
+                @endforeach
+            </table>
+        </section>
+
+        <hr>
+
         <section class="" style="height: 400px;">
             <h1 class="mb-3" style="text-transform:uppercase;">Histórico de Pontuação</h1>
             <div style="width: 550px; height: 550px; margin: 0 auto;">

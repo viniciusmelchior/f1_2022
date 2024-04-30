@@ -292,6 +292,27 @@
 
         <hr>
 
+        <section class="resultados-por-corrida">
+            <h1>Corridas por piloto</h1>
+            <table class="mt-5 mb-5 tabela-historico-equipes">
+                <tr>
+                    <th>Piloto</th>
+                    <th>Quantidade</th>
+                </tr>
+                @foreach($corridasPorPiloto as $corridaPorPiloto)
+                    <tr>
+                        <td style="vertical-align: middle;">
+                            <img src="{{asset('images/'.$corridaPorPiloto->imagem)}}" style="width:25px; height:25px;">
+                            <span style="display: inline-block; vertical-align: middle;">{{$corridaPorPiloto->nome}} {{$corridaPorPiloto->sobrenome}}</span>
+                        </td>
+                        <td>{{$corridaPorPiloto->quantidade}}</td>
+                    </tr>
+                @endforeach
+            </table>
+        </section>
+
+        <hr>
+
         <section class="" style="height: auto;">
             <h1 class="mb-3" style="text-transform:uppercase;">Histórico de posição nos campeonatos</h1>
             <table class="mt-5 mb-5 tabela-historico-equipes">

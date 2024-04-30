@@ -91,7 +91,7 @@ class PilotoController extends Controller
         $modelPiloto = Piloto::where('id', $id)
                         ->where('user_id', Auth::user()->id)
                         ->first();
-        
+
         //total de corridas
         $resultados = Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
                                     ->join('piloto_equipes', 'piloto_equipes.id', '=', 'resultados.pilotoEquipe_id')
@@ -278,7 +278,18 @@ class PilotoController extends Controller
 
         $temporadas = Temporada::where('user_id', Auth::user()->id)->get();
 
-        return view('site.pilotos.show', compact('modelPiloto','totTitulos','totAbandonos', 'totCorridas', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas', 'equipes','mediaChegada','gridMedio','temporadasDisputadas','pontuacaoPorTemporada','resultadosPorCorrida','temporadas','listagemVitorias', 'listagemPolePositions'));
+        $corridasPorEquipe = Resultado::join('corridas', 'resultados.corrida_id', '=', 'corridas.id')
+                                                ->join('piloto_equipes', 'resultados.pilotoEquipe_id', '=', 'piloto_equipes.id')
+                                                ->join('equipes', 'equipes.id', 'piloto_equipes.equipe_id')
+                                                ->where('resultados.user_id', Auth::user()->id)
+                                                ->where('piloto_equipes.piloto_id', $modelPiloto->id)
+                                                ->where('corridas.flg_sprint', '<>', 'S')
+                                                ->groupBy('piloto_equipes.equipe_id')
+                                                ->select('piloto_equipes.equipe_id', 'equipes.nome','equipes.imagem', DB::raw('COUNT(*) as quantidade'))
+                                                ->orderBy('quantidade', 'DESC')
+                                                ->get();
+
+        return view('site.pilotos.show', compact('modelPiloto','totTitulos','totAbandonos', 'totCorridas', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas', 'equipes','mediaChegada','gridMedio','temporadasDisputadas','pontuacaoPorTemporada','resultadosPorCorrida','temporadas','listagemVitorias', 'listagemPolePositions', 'corridasPorEquipe'));
     }
 
     /**

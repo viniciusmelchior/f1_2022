@@ -307,8 +307,21 @@ class EquipeController extends Controller
             $mediaChegada = round($mediaChegada/$totCorridas);
         }
 
+        $corridasPorPiloto = Resultado::join('corridas', 'resultados.corrida_id', '=', 'corridas.id')
+                                        ->join('piloto_equipes', 'resultados.pilotoEquipe_id', '=', 'piloto_equipes.id')
+                                        ->join('pilotos', 'pilotos.id', 'piloto_equipes.piloto_id')
+                                        ->where('resultados.user_id', Auth::user()->id)
+                                        ->where('piloto_equipes.equipe_id', $modelEquipe->id)
+                                        ->where('corridas.flg_sprint', '<>', 'S')
+                                        ->groupBy('piloto_equipes.piloto_id')
+                                        ->select('piloto_equipes.piloto_id', 'pilotos.nome', 'pilotos.sobrenome', 'pilotos.imagem', DB::raw('COUNT(*) as quantidade'))
+                                        ->orderBy('quantidade', 'DESC')
+                                        ->get();
 
-        return view('site.equipes.show', compact('modelEquipe','totTitulos', 'totCorridas','totTitulosPilotos', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas','temporadasDisputadas','pontuacaoPorTemporada','temporadas','totAbandonos','gridMedio','mediaChegada','totDobradinhas','listagemVitorias', 'listagemPolePositions'));
+                                        // dd($corridasPorPiloto);
+
+
+        return view('site.equipes.show', compact('modelEquipe','totTitulos', 'totCorridas','totTitulosPilotos', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas','temporadasDisputadas','pontuacaoPorTemporada','temporadas','totAbandonos','gridMedio','mediaChegada','totDobradinhas','listagemVitorias', 'listagemPolePositions','corridasPorPiloto'));
     }
 
     /**
