@@ -115,10 +115,14 @@ class PilotoController extends Controller
         $mediaChegada = 0;
         $listagemVitorias = [];
         $listagemPolePositions = [];
+        $pistasVitorias = [];
+        $pistasPoles = [];
+        $corridasDisputadas = [];
         
         foreach($resultados as $resultado){
             if($resultado->pilotoEquipe->piloto->id == $id){
                 $totCorridas++;
+                $corridasDisputadas[] = $resultado->corrida->pista->nome;
             }
 
             //calculo do total de vitórias
@@ -126,6 +130,7 @@ class PilotoController extends Controller
                 if($resultado->pilotoEquipe->piloto->id == $id){
                     $totVitorias++;
                     $listagemVitorias[] = $resultado;
+                    $pistasVitorias[] = $resultado->corrida->pista->nome;
                 }
             }
 
@@ -134,6 +139,7 @@ class PilotoController extends Controller
                 if($resultado->pilotoEquipe->piloto->id == $id){
                     $totPoles++;
                     $listagemPolePositions[] = $resultado;
+                    $pistasPoles[] = $resultado->corrida->pista->nome;
                 }
             }
 
@@ -289,7 +295,19 @@ class PilotoController extends Controller
                                                 ->orderBy('quantidade', 'DESC')
                                                 ->get();
 
-        return view('site.pilotos.show', compact('modelPiloto','totTitulos','totAbandonos', 'totCorridas', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas', 'equipes','mediaChegada','gridMedio','temporadasDisputadas','pontuacaoPorTemporada','resultadosPorCorrida','temporadas','listagemVitorias', 'listagemPolePositions', 'corridasPorEquipe'));
+        $pistasEmQueOPilotoNaoVenceu = array_diff($corridasDisputadas, $pistasVitorias);
+        $pistasEmQueOPilotoNaoVenceu = array_unique($pistasEmQueOPilotoNaoVenceu);
+
+        $pistasEmQueOPilotoNaoFoiPolePosition = array_diff($corridasDisputadas, $pistasPoles);
+        $pistasEmQueOPilotoNaoFoiPolePosition = array_unique($pistasEmQueOPilotoNaoFoiPolePosition);
+
+        $vitoriasPorPista = array_count_values($pistasVitorias);
+        arsort($vitoriasPorPista);
+
+        $polesPorPista = array_count_values($pistasPoles);
+        arsort($polesPorPista);
+
+        return view('site.pilotos.show', compact('modelPiloto','totTitulos','totAbandonos', 'totCorridas', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas', 'equipes','mediaChegada','gridMedio','temporadasDisputadas','pontuacaoPorTemporada','resultadosPorCorrida','temporadas','listagemVitorias', 'listagemPolePositions', 'corridasPorEquipe','vitoriasPorPista', 'polesPorPista','pistasEmQueOPilotoNaoVenceu','pistasEmQueOPilotoNaoFoiPolePosition'));
     }
 
     /**

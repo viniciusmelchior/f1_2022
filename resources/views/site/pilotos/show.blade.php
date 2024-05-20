@@ -363,6 +363,44 @@
 
         <hr>
 
+        @if(count($vitoriasPorPista) > 0)
+            <section class="resultados-por-corrida">
+                <h1>Vitórias por Pista</h1>
+                <table class="mt-5 mb-5 tabela-historico-equipes">
+                    <tr>
+                        <th>Pista</th>
+                        <th>Quantidade</th>
+                    </tr>
+                    @foreach($vitoriasPorPista as $key => $vitoriaPorPista)
+                        <tr>
+                            <td style="vertical-align: middle;">
+                                <span style="display: inline-block; vertical-align: middle;">{{$key}}</span>
+                            </td>
+                            <td>{{$vitoriaPorPista}}</td>
+                        </tr>
+                    @endforeach
+                </table>
+            </section>
+            <hr>
+        @endif
+
+        <section class="resultados-por-corrida">
+            <h1>Pistas em que o piloto não venceu</h1>
+            <table class="mt-5 mb-5 tabela-historico-equipes">
+                <tr>
+                    <th>
+                        Pista
+                    </th>
+                </tr>
+                @foreach($pistasEmQueOPilotoNaoVenceu as $key => $pistaEmQueOPilotoNaoVenceu)
+                    <tr>
+                        <td>{{$pistaEmQueOPilotoNaoVenceu}}</td>
+                    </tr>
+                @endforeach
+            </table>
+        </section>
+        <hr>
+
         <section class="" style="height: auto;">
             <h1 class="mb-3" style="text-transform:uppercase;">Histórico de Pole Positions</h1>
                 <table class="mt-5 mb-5 tabela-historico-equipes">
@@ -398,6 +436,44 @@
                 </table>
         </section>
 
+        <hr>
+
+        @if(count($polesPorPista) > 0)
+            <section class="resultados-por-corrida">
+                <h1>Pole Positions por Pista</h1>
+                <table class="mt-5 mb-5 tabela-historico-equipes">
+                    <tr>
+                        <th>Pista</th>
+                        <th>Quantidade</th>
+                    </tr>
+                    @foreach($polesPorPista as $key => $polePorPista)
+                        <tr>
+                            <td style="vertical-align: middle;">
+                                <span style="display: inline-block; vertical-align: middle;">{{$key}}</span>
+                            </td>
+                            <td>{{$polePorPista}}</td>
+                        </tr>
+                    @endforeach
+                </table>
+            </section>
+            <hr>
+        @endif
+
+        <section class="resultados-por-corrida">
+            <h1>Pistas em que o piloto não foi Pole Position</h1>
+            <table class="mt-5 mb-5 tabela-historico-equipes">
+                <tr>
+                    <th>
+                        Pista
+                    </th>
+                </tr>
+                @foreach($pistasEmQueOPilotoNaoFoiPolePosition as $key => $pistaEmQueOPilotoNaoFoiPolePosition)
+                    <tr>
+                        <td>{{$pistaEmQueOPilotoNaoFoiPolePosition}}</td>
+                    </tr>
+                @endforeach
+            </table>
+        </section>
         <hr>
 
         {{--Tabela de Largada e chegada--}}
