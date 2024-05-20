@@ -41,7 +41,7 @@
                     <tr>
                         <th class="text-nowrap">#</th>
                         <th style="text-align: left;">Nome</th>
-                        <th style="text-align: left;">Ultimo Evento</th>
+                        <th style="text-align: left;" class="text-nowrap">Ultimo Evento</th>
                         <th>Quantidade</th>
                         <th>Ações</th>
                     </tr>
@@ -53,7 +53,7 @@
                             <td style="text-align: left;" class="text-nowrap">
                                 {{$evento->des_nome}}
                             </td>
-                            <td style="text-align: left;">
+                            <td style="text-align: left;" class="text-nowrap">
                                 {{Evento::getUltimoEvento($evento->id)['ultimoEvento']}}
                             </td>
                             {{-- <td style="text-align: center;">
