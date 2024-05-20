@@ -4,6 +4,7 @@ namespace App\Models\Site;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class Pais extends Model
 {
@@ -52,8 +53,24 @@ class Pais extends Model
                             ->where('flg_sprint', '<>', 'S')
                             ->count();
 
-return $corridas;
+        return $corridas;
     }
+
+    public static function getUltimaCorrida($pais_id){
+
+        $ultimaCorrida = Corrida::with('pista')
+                                ->whereHas('pista', function ($query) use ($pais_id) {
+                                    $query->where('pais_id', $pais_id);
+                                })
+                                ->where('user_id', Auth::user()->id)
+                                ->where('flg_sprint', 'N')
+                                ->orderBy('id', 'DESC')
+                                ->first();
+
+    return [
+        'ultimaCorrida' => isset($ultimaCorrida->temporada->des_temporada) ? $ultimaCorrida->temporada->des_temporada : '-'
+    ];
+}
   
 
 }

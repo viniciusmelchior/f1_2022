@@ -40,6 +40,7 @@
                     <th style="text-align: left;">Nome</th>
                     <th  style="text-align: left;">País</th>
                     <th style="text-align: left;">Continente</th>
+                    <th style="text-align: left;">Última corrida</th>
                     <th>Qtd Carros</th>
                     <th>Corridas</th>
                     <th>Sprints</th>
@@ -65,6 +66,9 @@
                         </td>
                         <td style="text-align: left;">{{$pista->pais->des_nome}}</td>
                         <td style="text-align: left;">{{isset($pista->pais->continente->nome) ? $pista->pais->continente->nome : '-' }}</td>
+                        <td style="text-align: left;">
+                            {{Pista::getUltimaCorrida($pista->id)['ultimaCorrida']}}
+                        </td>
                         <td>{{$pista->qtd_carros != null ? $pista->qtd_carros : '30'}}</td>
                         <td>
                             @php 

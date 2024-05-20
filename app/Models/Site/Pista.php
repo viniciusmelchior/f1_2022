@@ -4,6 +4,7 @@ namespace App\Models\Site;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class Pista extends Model
 {
@@ -66,5 +67,18 @@ class Pista extends Model
             ->count();
 
         return $corridas;
+    }
+
+    public static function getUltimaCorrida($pista_id)
+    {
+        $ultimaCorrida = Corrida::where('pista_id', $pista_id)
+                                ->where('user_id', Auth::user()->id)
+                                ->where('flg_sprint', 'N')
+                                ->orderBy('id', 'DESC')
+                                ->first();
+
+        return [
+            'ultimaCorrida' => isset($ultimaCorrida->temporada->des_temporada) ? $ultimaCorrida->temporada->des_temporada : '-'
+        ];
     }
 }

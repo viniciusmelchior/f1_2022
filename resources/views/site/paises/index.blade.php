@@ -35,12 +35,13 @@
 
     <div class="left_table">
         @if(count($paises) > 0)
-            <table class="table" style="width:80%;" id="tabelaPaises">
+            <table class="table" style="width:100%;" id="tabelaPaises">
                 <thead>
                     <tr>
                         <th class="text-nowrap">#</th>
                         <th style="text-align: left;">Nome</th>
                         <th>Continente</th>
+                        <th class="text-nowrap">Última Corrida</th>
                         <th>Corridas</th>
                         <th>Sprints</th>
                         <th>Ações</th>
@@ -58,6 +59,9 @@
                             </td>
                             <td style="text-align: center;" class="text-nowrap"> 
                                 {{isset($pais->continente->nome) ? $pais->continente->nome : '-' }}
+                            </td>
+                            <td style="text-align: left;" class="text-nowrap">
+                                {{Pais::getUltimaCorrida($pais->id)['ultimaCorrida']}}
                             </td>
                             <td style="text-align: center;">
                                 @php 
