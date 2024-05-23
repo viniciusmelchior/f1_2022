@@ -14,6 +14,7 @@ use App\Http\Controllers\Site\HomeController;
 use App\Http\Controllers\Site\ResultadoController;
 use App\Http\Controllers\Site\TemporadaController;
 use App\Http\Controllers\Site\PDFController;
+use App\Http\Controllers\Site\SkinController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpKernel\DataCollector\AjaxDataCollector;
@@ -70,6 +71,10 @@ route::get('/pilotos/show/{id}', [PilotoController::class, 'show'])->name('pilot
 route::get('/pilotos/comparativo', [PilotoController::class, 'comparativo'])->name('pilotos.comparativo')->middleware('auth');
 route::put('/pilotos/update/{id}', [PilotoController::class, 'update'])->name('pilotos.update')->middleware('auth');
 route::get('/pilotos/delete', [PilotoController::class, 'destroy'])->name('pilotos.delete')->middleware('auth');
+route::get('/pilotos/relacaoForcas/index', [PilotoController::class, 'relacaoForcasIndex'])->name('pilotos.relacaoForcas.index')->middleware('auth');
+route::get('/pilotos/relacaoForcas/listagemPilotos/{temporada_id}', [PilotoController::class, 'relacaoForcasIndexListagemPilotos'])->name('pilotos.relacaoForcas.listagemPilotos')->middleware('auth');
+route::get('/pilotos/relacaoForcas/edit/{ano_id}/{temporada_id}', [PilotoController::class, 'relacaoForcasEdit'])->name('pilotos.relacaoForcas.edit')->middleware('auth');
+route::post('/pilotos/relacaoForcas/update', [PilotoController::class, 'relacaoForcasUpdate'])->name('pilotos.relacaoForcas.update')->middleware('auth');
 
 /**Equipes */
 route::get('/equipes/create', [EquipeController::class, 'create'])->name('equipes.create')->middleware('auth');
@@ -79,6 +84,16 @@ route::get('/equipes/edit/{id}', [EquipeController::class, 'edit'])->name('equip
 route::get('/equipes/show/{id}', [EquipeController::class, 'show'])->name('equipes.show')->middleware('auth');
 route::put('/equipes/update/{id}', [EquipeController::class, 'update'])->name('equipes.update')->middleware('auth');
 route::get('/equipes/delete/{id}', [EquipeController::class, 'destroy'])->name('equipes.delete')->middleware('auth');
+route::get('/equipes/relacaoForcas/index', [EquipeController::class, 'relacaoForcasIndex'])->name('equipes.relacaoForcas.index')->middleware('auth');
+route::get('/equipes/relacaoForcas/listagemEquipes/{temporada_id}', [EquipeController::class, 'relacaoForcasIndexListagemEquipes'])->name('equipes.relacaoForcas.listagemEquipes')->middleware('auth');
+route::get('/equipes/relacaoForcas/edit/{ano_id}/{temporada_id}', [EquipeController::class, 'relacaoForcasEdit'])->name('equipes.relacaoForcas.edit')->middleware('auth');
+route::post('/equipes/relacaoForcas/update', [EquipeController::class, 'relacaoForcasUpdate'])->name('equipes.relacaoForcas.update')->middleware('auth');
+
+route::get('/skin/index', [SkinController::class, 'index'])->name('skins.index')->middleware('auth');
+route::get('/skin/create', [SkinController::class, 'create'])->name('skins.create')->middleware('auth');
+route::post('/skin/store', [SkinController::class, 'store'])->name('skins.store')->middleware('auth');
+route::put('/skin/update/{id}', [SkinController::class, 'update'])->name('skins.update')->middleware('auth');
+route::get('/skin/edit/{id}', [SkinController::class, 'edit'])->name('skins.edit')->middleware('auth');
 
 route::post('/ajax/ajaxGetStatsEquipePorTemporada', [AjaxController::class, 'ajaxGetStatsEquipePorTemporada'])->name('ajax.ajaxGetStatsEquipePorTemporada')->middleware('auth');
 

@@ -8,6 +8,7 @@ use App\Models\Site\Equipe;
 use App\Models\Site\Pais;
 use App\Models\Site\Piloto;
 use App\Models\Site\PilotoEquipe;
+use App\Models\Site\Skin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -36,7 +37,9 @@ class PilotoEquipeController extends Controller
         $pilotos = Piloto::where('user_id', Auth::user()->id)->where('flg_ativo', 'S')->get();
         $equipes = Equipe::where('user_id', Auth::user()->id)->where('flg_ativo', 'S')->get();
         $anos = Ano::where('user_id', Auth::user()->id)->orderBy('ano', 'DESC')->get();
-        return view('site.pilotoEquipe.form', compact('paises', 'pilotos', 'equipes', 'anos'));
+        $skins = Skin::where('user_id', Auth::user()->id)->get();
+
+        return view('site.pilotoEquipe.form', compact('paises', 'pilotos', 'equipes', 'anos', 'skins'));
     }
 
     /**
@@ -53,6 +56,7 @@ class PilotoEquipeController extends Controller
         $pilotoEquipe->user_id = Auth::user()->id;
         $pilotoEquipe->ano_id = $request->ano_id;
         $pilotoEquipe->flg_ativo = 'S';
+        $pilotoEquipe->skin_id = $request->skin_id;
 
         if ($request->has('flg_super_corrida')) {
             $pilotoEquipe->flg_super_corrida = $request->flg_super_corrida;
@@ -88,7 +92,9 @@ class PilotoEquipeController extends Controller
         $pilotos = Piloto::where('user_id', Auth::user()->id)->where('flg_ativo', 'S')->get();
         $equipes = Equipe::where('user_id', Auth::user()->id)->where('flg_ativo', 'S')->get();
         $anos = Ano::where('user_id', Auth::user()->id)->orderBy('ano', 'DESC')->get();
-        return view('site.pilotoEquipe.form', compact('model', 'pilotos', 'equipes', 'anos'));
+        $skins = Skin::where('user_id', Auth::user()->id)->get();
+
+        return view('site.pilotoEquipe.form', compact('model', 'pilotos', 'equipes', 'anos', 'skins'));
     }
 
     /**
@@ -105,6 +111,7 @@ class PilotoEquipeController extends Controller
         $pilotoEquipe->equipe_id = $request->equipe_id;
         $pilotoEquipe->user_id = Auth::user()->id;
         $pilotoEquipe->ano_id = $request->ano_id;
+        $pilotoEquipe->skin_id = $request->skin_id;
         if ($request->has('flg_ativo')) {
             $pilotoEquipe->flg_ativo = $request->flg_ativo;
         } else {

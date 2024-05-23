@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Exports\PilotosExport;
 use App\Models\Site\Corrida;
+use App\Models\Site\ForcaPiloto;
 use App\Models\Site\Temporada;
 use App\Models\Site\PilotoEquipe;
 use App\Models\Site\Titulo;
@@ -528,5 +529,60 @@ class PilotoController extends Controller
 
 
         return Excel::download(new PilotosExport($id), $nomeArquivo.'.xlsx');
+    }
+
+    public function relacaoForcasIndex(){
+        $temporadas = Temporada::where('user_id', Auth::user()->id)->get();
+
+        return view('site.pilotos.relacaoForcas.index', compact('temporadas'));
+    }
+
+    public function relacaoForcasIndexListagemPilotos($temporada_id){
+        
+        $temporada = Temporada::find($temporada_id);
+       
+        $pilotos = PilotoEquipe::with('piloto')
+                        ->where('user_id', Auth::user()->id)
+                        ->where('ano_id', $temporada->ano->id)
+                        ->orderBy('id')
+                        ->distinct('piloto_id')
+                        ->get();
+
+        return view('site.pilotos.relacaoForcas.listagemPilotos', compact('pilotos', 'temporada'));
+
+    }
+
+    public function relacaoForcasEdit($ano_id, $piloto_id){
+
+        $piloto = Piloto::find($piloto_id);
+
+        $model = ForcaPiloto::where('piloto_id', $piloto_id)
+                            ->where('ano_id', $ano_id)
+                            ->where('user_id', Auth::user()->id)
+                            ->first();
+
+        return view('site.pilotos.relacaoForcas.form', compact('piloto', 'ano_id', 'model'));
+    }
+
+    public function relacaoForcasUpdate(Request $request){
+
+        $model = ForcaPiloto::where('piloto_id', $request->piloto_id)
+                            ->where('ano_id', $request->ano_id)
+                            ->where('user_id', Auth::user()->id)
+                            ->first();
+
+        if(isset($model)){
+            $model->forca = $request->forca;
+            $model->update();
+        }else{
+            $newModel = new ForcaPiloto;
+            $newModel->piloto_id = $request->piloto_id;
+            $newModel->ano_id = $request->ano_id;
+            $newModel->user_id = Auth::user()->id;
+            $newModel->forca = $request->forca;
+            $newModel->save();
+        }
+               
+        return redirect()->back()->with('status', 'Salvo com sucesso');
     }
 }

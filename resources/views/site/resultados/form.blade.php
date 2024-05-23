@@ -140,7 +140,7 @@
                         <td> <img src="{{asset('images/'.$pilotoEquipe->equipe->imagem)}}" alt="" style="width: 25px; height:25px;"></td>
                         <td style="vertical-align: middle;">
                             {{-- <img src="{{asset('images/'.$pilotoEquipe->equipe->imagem)}}" alt="" style="width: 25px; height:25px;"> --}}
-                            {{$pilotoEquipe->piloto->nome}} {{$pilotoEquipe->piloto->sobrenome}} 
+                            {{$pilotoEquipe->piloto->nome}} {{$pilotoEquipe->piloto->sobrenome}} {{-- - {{$pilotoEquipe->id}} --}}
                             {{-- <span> <input type="hidden" name="pilotoEquipe_id[]" value="{{$pilotoEquipe->id}}"></span> --}}
                         </td>
                         <td>
@@ -269,6 +269,17 @@
                 <span>Atualizado em {{date('d/m/Y', strtotime($corrida->updated_at))}} às {{date('H:i:s', strtotime($corrida->updated_at))}}</span>
             </div>
         @endif
+
+        <div class="form-group form-check mb-3">
+            <input
+            type="checkbox"
+            class="form-check-input"
+            id="gerarGridLargada"
+            name="gerarGridLargada"
+            value="S"
+            >
+            <label class="form-check-label" for="flg_ativo">Gerar Grid de Largada</label>
+        </div>
 
         <button type="submit" class="btn btn-primary">Salvar</button>
         <a href="{{route('temporadas.index')}}" class="btn btn-secondary ml-3">Voltar</a>

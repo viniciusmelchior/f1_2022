@@ -33,6 +33,10 @@ class PilotoEquipe extends Model
         return $this->hasMany(Resultado::class);
     }
 
+    public function skin(){
+        return $this->belongsTo(Skin::class);
+    }
+
     /**Função que acha qual posição determinado piloto chegou em tal corrida */
 
     /**recebe a corrida, temporada, piloto_equipe */

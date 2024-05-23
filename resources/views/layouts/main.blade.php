@@ -78,6 +78,7 @@
               <li><a class="link_name" href="#">Pilotos</a></li>
               <li><a href="{{route('pilotos.index')}}">Visualizar</a></li>
               <li><a href="{{route('pilotos.create')}}">Cadastrar</a></li>
+              <li><a href="{{route('pilotos.relacaoForcas.index')}}">Relação de Forças</a></li>
               <li><a href="{{route('pilotos.comparativo')}}">Comparativos</a></li>
             </ul>
           </li>
@@ -92,8 +93,10 @@
             </div>
             <ul class="sub-menu">
               <li><a class="link_name" href="#">Equipes</a></li>
+              <li><a href="{{route('skins.index')}}">Skins (Assetto Corsa)</a></li>
               <li><a href="{{route('equipes.index')}}">Visualizar</a></li>
               <li><a href="{{route('equipes.create')}}">Cadastrar</a></li>
+              <li><a href="{{route('equipes.relacaoForcas.index')}}">Relação de Forças</a></li>
             </ul>
           </li>
           <li>

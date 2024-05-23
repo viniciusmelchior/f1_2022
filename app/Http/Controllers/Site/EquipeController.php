@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Site;
 use App\Http\Controllers\Controller;
 use App\Models\Site\Corrida;
 use App\Models\Site\Equipe;
+use App\Models\Site\ForcaEquipe;
 use App\Models\Site\Pais;
 use App\Models\Site\Piloto;
 use App\Models\Site\PilotoEquipe;
@@ -388,4 +389,61 @@ class EquipeController extends Controller
         $equipe->delete();
         return redirect()->back();
     }
+
+    public function relacaoForcasIndex(){
+        $temporadas = Temporada::where('user_id', Auth::user()->id)->get();
+
+        return view('site.equipes.relacaoForcas.index', compact('temporadas'));
+    }
+
+    public function relacaoForcasIndexListagemEquipes($temporada_id){
+        
+        $temporada = Temporada::find($temporada_id);
+       
+        $equipes = PilotoEquipe::with('equipe')
+                        ->where('user_id', Auth::user()->id)
+                        ->where('ano_id', $temporada->ano->id)
+                        ->orderBy('id')
+                        ->groupBy('equipe_id')
+                        ->get();
+
+        return view('site.equipes.relacaoForcas.listagemEquipes', compact('equipes', 'temporada'));
+
+    }
+
+    public function relacaoForcasEdit($ano_id, $equipe_id){
+
+        $equipe = Equipe::find($equipe_id);
+
+        $model = ForcaEquipe::where('equipe_id', $equipe_id)
+                            ->where('ano_id', $ano_id)
+                            ->where('user_id', Auth::user()->id)
+                            ->first();
+
+        return view('site.equipes.relacaoForcas.form', compact('equipe', 'ano_id', 'model'));
+    }
+
+    public function relacaoForcasUpdate(Request $request){
+
+        $model = ForcaEquipe::where('equipe_id', $request->equipe_id)
+                            ->where('ano_id', $request->ano_id)
+                            ->where('user_id', Auth::user()->id)
+                            ->first();
+
+        if(isset($model)){
+            $model->forca = $request->forca;
+            $model->update();
+        }else{
+            $newModel = new ForcaEquipe;
+            $newModel->equipe_id = $request->equipe_id;
+            $newModel->ano_id = $request->ano_id;
+            $newModel->user_id = Auth::user()->id;
+            $newModel->forca = $request->forca;
+            $newModel->save();
+        }
+               
+        return redirect()->back()->with('status', 'Salvo com sucesso');
+    }
+
+
 }

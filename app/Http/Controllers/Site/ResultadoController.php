@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Mail;
+use App\Models\Site\ForcaPiloto;
+use App\Models\Site\ForcaEquipe;
 
 class ResultadoController extends Controller
 {
@@ -97,7 +99,7 @@ class ResultadoController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
-    {
+    {   
         $corrida = Corrida::where('id', $id)->where('user_id', Auth::user()->id)->first();
         $corrida->volta_rapida = $request->volta_rapida;
         $corrida->condicao_id = $request->condicao_id;
@@ -341,7 +343,110 @@ class ResultadoController extends Controller
             }
         }
 
-        return redirect()->back();
+        //pega as posições de largada dos pilotos
+        $arrayPilotoEquipe_id = $request->pilotoEquipe_id;
+        $arrayPosicaoLargada = $request->largada;
+        
+        // Criando o array associativo com chave = pilotoEquipe_id e valor = largada
+        $arrayOrdemLargada = array();
+        for ($i = 0; $i < count($arrayPilotoEquipe_id); $i++) {
+            if ($arrayPosicaoLargada[$i] !== null) {
+                $arrayOrdemLargada[$arrayPilotoEquipe_id[$i]] = $arrayPosicaoLargada[$i];
+            }
+        }
+
+        // Ordenando o array pelos valores (largada)
+        asort($arrayOrdemLargada);
+
+        //fazer foreach consultando na tabela de forças e skins e ir montando o arquivo de acordo com o arquivo PHP puro
+        $ballast = [];
+        $restrictor = [];
+        $skins = [];
+
+        foreach($arrayOrdemLargada as $pilotoEquipe_id => $largada){
+
+            //descubro o piloto baseado no pilotoEquipe_id ordenado do grid de largada
+            $pilotoEquipe = PilotoEquipe::find($pilotoEquipe_id);
+            $piloto = $pilotoEquipe->piloto->id;
+            $equipe = $pilotoEquipe->equipe->id;
+
+            //descubro a força do piloto
+            $pilotoForca = ForcaPiloto::where('piloto_id', $piloto)
+                                        ->where('ano_id', $corrida->temporada->ano->id)
+                                        ->where('user_id', Auth::user()->id)
+                                        ->first();
+
+            //adiciona ao array de forças que será colocado no documento
+            $ballast[] = isset($pilotoForca) ? $pilotoForca->forca : 'null';
+
+            //descubro a força da equipe
+            $equipeForca = ForcaEquipe::where('equipe_id', $equipe)
+                                        ->where('ano_id', $corrida->temporada->ano->id)
+                                        ->where('user_id', Auth::user()->id)
+                                        ->first();
+
+             //adiciona ao array de forças que será colocado no documento
+             $restrictor[] = isset($equipeForca) ? $equipeForca->forca : 'null';
+
+             $skins[] = isset($pilotoEquipe->skin) ? $pilotoEquipe->skin->skin : null;
+
+        }
+        
+        // dd($arrayPilotoEquipe_id, $arrayPosicaoLargada, $arrayOrdemLargada);
+        //dd($ballast, $restrictor, $skins);
+
+        //colocar os dados no documento fixado e gerar o download
+
+        if($request->gerarGridLargada == 'S'){
+
+           $json_string = '{"ModeId":"custom","FilterValue":"","CarIds":["rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023"],"AiLevels":["100","100","100","100","100","100","100","100","100","100","100","100","100","100","100","100","100","100","100","100","100","100","100","100","100"],"Ballasts":["70","90","100","9","12","10","11","13","17","20","11","2","17","11","17","1","10","16","17","19","17","16","17","2","19"],"Restrictors":["2","2","0","3","0","5","8","14","10","10","5","17","13","6","18","3","12","12","18","13","14","18","17","6","18"],"PlayerRestrictor":8.0,"SkinIds":["MCL38_4_Norris","MCL38_81_Piastri","RB20_1_Verstappen_concept","SF24_Miami_16_Leclerc","RB20_11_Perez_bee_concept-1","W15_63_Russell","24_Sean_Bull_Maserati__Concept_#48","24_Audi_Sport_Sauber_Concept_JQKA_5-1","VCARB01_22_Tsunoda","VCARB01_22_Tsunoda-1","W15_44_Albon","24_Sean_Bull_BMW_Concept_#5-1","VF24_20_Magnussen","AMR24_18_Leclerc-1","2024_Andretti_Cadillac_9","SF24_Miami_55_Sainz","23_Renault_Concept_31","23_Renault_Concept_10","2024_Andretti_Cadillac_26","VF24_27_Hulkenberg-1","24_Audi_Sport_Sauber_Concept_JQKA_47","FW46_2_Perez-1","24_Sean_Bull_BMW_Concept_#50-1","AMR24_14_Alonso-1","FW46_2_Antonelli"],"ShuffleCandidates":true,"VarietyLimitation":0,"OpponentsNumber":25,"StartingPosition":6,"AiLevel":100.0,"AiLevelMin":99.0,"AiLevelArrangeRandom":0.1,"AiLevelArrangeReverse":false,"AiLevelArrangePowerRatio":false,"AiAggression":59.6,"AiAggressionMin":18.6,"AiAggressionArrangeRandom":0.1,"AiAggressionArrangeReverse":false}';
+
+           // Decodifica a string JSON em um array associativo
+            $data = json_decode($json_string, true);
+
+            // Substitui os valores do array "Ballasts"
+            $data['Ballasts'] = $ballast;
+            $data['Restrictors'] = $restrictor;
+            $data['StartingPosition'] = 26;
+            $data['PlayerRestrictor'] = 50;
+            $data['SkinIds'] = $skins;
+
+            // Codifica o array associativo de volta para uma string JSON
+            $new_json_string = json_encode($data);
+
+            // Converte a string JSON para um array associativo PHP
+            $conteudo = json_encode($new_json_string, true);
+            $conteudo = stripslashes($conteudo);
+            $conteudo = substr($conteudo, 1, -1);
+
+            // Nome do arquivo que será criado
+
+            //se for menos que dez e maior que 0, colocar o zero antes do numero
+            $nomeArquivoOrdem = $corrida->ordem;
+            if($corrida->ordem > 0 || $corrida->ordem < 10){
+                $nomeArquivoOrdem = '0'.$corrida->ordem; 
+            }
+
+            $nomeArquivoTipo = 'Sprint';
+            $nomeArquivoPista = $corrida->pista->nome;
+
+            $nomeArquivo = $nomeArquivoOrdem.'_'.$nomeArquivoPista.".CMPRESET";
+
+            if($corrida->flg_sprint != 'N'){
+                $nomeArquivo = $nomeArquivoOrdem.'_'.$nomeArquivoTipo.'_'.$nomeArquivoPista.".CMPRESET";
+            }
+
+            // Define os cabeçalhos HTTP para forçar o download do arquivo
+            header('Content-Type: text/plain');
+            header('Content-Disposition: attachment; filename="' . $nomeArquivo . '"');
+            header('Content-Length: ' . strlen($conteudo));
+
+            // Envia o conteúdo do arquivo
+            echo $conteudo;
+        }else{
+            return redirect()->back();
+        }
+       
     }
 
     /**

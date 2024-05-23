@@ -25,7 +25,7 @@
                 <th>Ano</th>
                 <th>Piloto</th>
                 <th>Equipe</th>
-                <th>SC</th>
+                <th>Skin</th>
                 <th>Status</th>
                 <th>ações</th>
             </tr>
@@ -35,9 +35,12 @@
                 <tr style="color:{{$pilotoEquipe->equipe->des_cor}};">
                     <td>{{$key+1}}</td>
                     <td>{{$pilotoEquipe->ano->ano}}</td>
-                    <td>{{$pilotoEquipe->piloto->nome}} {{$pilotoEquipe->piloto->sobrenome}}</td>
-                    <td>{{$pilotoEquipe->equipe->nome}}</td>
-                    <td>{{$pilotoEquipe->flg_super_corrida == 'S' ? 'SIM': '-'}}</td>
+                    <td  class="text-nowrap">{{$pilotoEquipe->piloto->nome}} {{$pilotoEquipe->piloto->sobrenome}}</td>
+                    <td  class="text-nowrap">{{$pilotoEquipe->equipe->nome}}</td>
+                    {{-- <td>{{$pilotoEquipe->flg_super_corrida == 'S' ? 'SIM': '-'}}</td> --}}
+                    <td class="text-nowrap">
+                        {{isset($pilotoEquipe->skin) ? $pilotoEquipe->skin->skin : '-'}}
+                    </td>
                     <td>{{$pilotoEquipe->flg_ativo}}</td>
                     <td>
                         <a href="{{route('pilotoEquipe.edit', [$pilotoEquipe->id])}}"><i class="bi bi-pencil-fill"></i></a>

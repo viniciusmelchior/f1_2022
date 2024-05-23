@@ -33,6 +33,15 @@
             </select>
         </div>
         <div class="mb-3">
+            <label for="skin_id" class="form-label">Skin</label>
+            <select name="skin_id" id="skin_id" class="form-control">
+                <option value="">Selecione</option>
+                @foreach($skins as $skin)
+                    <option value="{{$skin->id}}" @if(isset($model) && $model->skin_id == $skin->id) selected @endif>{{$skin->skin}}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="mb-3">
             <label for="ano_id" class="form-label">Temporada/Ano</label>
             <select name="ano_id" id="ano_id" class="form-control" required>
                 @foreach($anos as $ano)
