@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Site\CondicaoClimatica;
 use App\Models\Site\Corrida;
 use App\Models\Site\PilotoEquipe;
+use App\Models\Site\Piloto;
 use App\Models\Site\Resultado;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -363,6 +364,29 @@ class ResultadoController extends Controller
         $restrictor = [];
         $skins = [];
 
+        //descubro meu piloto talvez pesquisar pelo pilotoEquipe_id
+        $meuPiloto = PilotoEquipe::with('piloto')
+                                ->where('user_id', Auth::user()->id)
+                                ->where('ano_id', $corrida->temporada->ano->id)
+                                ->whereHas('piloto', function($query) {
+                                    $query->where('nome', 'Vinicius')
+                                        ->where('sobrenome', 'Melchior');
+                                })
+                                ->first();
+        
+        //pego a posição do array em que ele estava, guardo na variavel que vou usar como posição de largada
+        $minhaPosicaoLargada = $arrayOrdemLargada[$meuPiloto->id];
+        $minhaForcaPiloto = ForcaPiloto::where('user_id', Auth::user()->id)
+                                        ->where('ano_id', $corrida->temporada->ano->id)
+                                        ->where('piloto_id', $meuPiloto->piloto->id)
+                                        ->first()->forca;
+
+        unset($arrayOrdemLargada[$meuPiloto->id]);
+
+        // dd($meuPiloto, $arrayOrdemLargada, $minhaPosicaoLargada);
+
+        //excluo do array de largadas
+
         foreach($arrayOrdemLargada as $pilotoEquipe_id => $largada){
 
             //descubro o piloto baseado no pilotoEquipe_id ordenado do grid de largada
@@ -407,8 +431,8 @@ class ResultadoController extends Controller
             // Substitui os valores do array "Ballasts"
             $data['Ballasts'] = $ballast;
             $data['Restrictors'] = $restrictor;
-            $data['StartingPosition'] = 26;
-            $data['PlayerRestrictor'] = 50;
+            $data['StartingPosition'] = $minhaPosicaoLargada;
+            $data['PlayerRestrictor'] = $minhaForcaPiloto;
             $data['SkinIds'] = $skins;
 
             // Codifica o array associativo de volta para uma string JSON
@@ -435,6 +459,8 @@ class ResultadoController extends Controller
             if($corrida->flg_sprint != 'N'){
                 $nomeArquivo = $nomeArquivoOrdem.'_'.$nomeArquivoTipo.'_'.$nomeArquivoPista.".CMPRESET";
             }
+
+            // dd($ballast, $restrictor, $skins);
 
             // Define os cabeçalhos HTTP para forçar o download do arquivo
             header('Content-Type: text/plain');
