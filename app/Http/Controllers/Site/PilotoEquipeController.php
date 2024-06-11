@@ -53,6 +53,7 @@ class PilotoEquipeController extends Controller
         $pilotoEquipe = new PilotoEquipe();
         $pilotoEquipe->piloto_id = $request->piloto_id;
         $pilotoEquipe->equipe_id = $request->equipe_id;
+        $pilotoEquipe->modelo_carro = $request->modelo_carro;
         $pilotoEquipe->user_id = Auth::user()->id;
         $pilotoEquipe->ano_id = $request->ano_id;
         $pilotoEquipe->flg_ativo = 'S';
@@ -109,6 +110,7 @@ class PilotoEquipeController extends Controller
         $pilotoEquipe = PilotoEquipe::where('id', $id)->where('user_id', Auth::user()->id)->first();
         $pilotoEquipe->piloto_id = $request->piloto_id;
         $pilotoEquipe->equipe_id = $request->equipe_id;
+        $pilotoEquipe->modelo_carro = $request->modelo_carro;
         $pilotoEquipe->user_id = Auth::user()->id;
         $pilotoEquipe->ano_id = $request->ano_id;
         $pilotoEquipe->skin_id = $request->skin_id;

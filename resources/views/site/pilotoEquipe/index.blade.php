@@ -25,6 +25,7 @@
                 <th>Ano</th>
                 <th>Piloto</th>
                 <th>Equipe</th>
+                <th>Carro</th>
                 <th>Skin</th>
                 <th>Status</th>
                 <th>ações</th>
@@ -37,7 +38,7 @@
                     <td>{{$pilotoEquipe->ano->ano}}</td>
                     <td  class="text-nowrap">{{$pilotoEquipe->piloto->nome}} {{$pilotoEquipe->piloto->sobrenome}}</td>
                     <td  class="text-nowrap">{{$pilotoEquipe->equipe->nome}}</td>
-                    {{-- <td>{{$pilotoEquipe->flg_super_corrida == 'S' ? 'SIM': '-'}}</td> --}}
+                    <td>{{$pilotoEquipe->modelo_carro == null ? '-': $pilotoEquipe->modelo_carro}}</td>
                     <td class="text-nowrap">
                         {{isset($pilotoEquipe->skin) ? $pilotoEquipe->skin->skin : '-'}}
                     </td>

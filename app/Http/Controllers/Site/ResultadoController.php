@@ -363,6 +363,7 @@ class ResultadoController extends Controller
         $ballast = [];
         $restrictor = [];
         $skins = [];
+        $CarIds = [];
 
         //descubro meu piloto talvez pesquisar pelo pilotoEquipe_id
         $meuPiloto = PilotoEquipe::with('piloto')
@@ -413,6 +414,7 @@ class ResultadoController extends Controller
              $restrictor[] = isset($equipeForca) ? $equipeForca->forca : 'null';
 
              $skins[] = isset($pilotoEquipe->skin) ? $pilotoEquipe->skin->skin : null;
+             $CarIds[] = isset($pilotoEquipe->modelo_carro) ? $pilotoEquipe->modelo_carro : null;
 
         }
         
@@ -434,6 +436,7 @@ class ResultadoController extends Controller
             $data['StartingPosition'] = $minhaPosicaoLargada;
             $data['PlayerRestrictor'] = $minhaForcaPiloto;
             $data['SkinIds'] = $skins;
+            $data['CarIds'] = $CarIds;
 
             // Codifica o array associativo de volta para uma string JSON
             $new_json_string = json_encode($data);
@@ -447,7 +450,7 @@ class ResultadoController extends Controller
 
             //se for menos que dez e maior que 0, colocar o zero antes do numero
             $nomeArquivoOrdem = $corrida->ordem;
-            if($corrida->ordem > 0 || $corrida->ordem < 10){
+            if($corrida->ordem > 0 && $corrida->ordem < 10){
                 $nomeArquivoOrdem = '0'.$corrida->ordem; 
             }
 

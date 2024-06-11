@@ -1,6 +1,7 @@
 @extends('layouts.main')
 
 @php 
+    use App\Models\Site\PilotoEquipe;
     $route = route('pilotoEquipe.store');
     $method = method_field('POST');
     if(isset($model)){
@@ -32,6 +33,18 @@
                 @endforeach
             </select>
         </div>
+
+        {{--modelo do carro--}}
+        <div class="mb-3">
+            <label for="skin_id" class="form-label">Modelo do Carro</label>
+            <select name="modelo_carro" id="modelo_carro" class="form-control">
+                <option value="">Selecione</option>
+                @foreach(PilotoEquipe::getCarros() as $carro)
+                    <option value="{{$carro}}" @if(isset($model) && $model->modelo_carro == $carro) selected @endif>{{$carro}}</option>
+                @endforeach
+            </select>
+        </div>
+
         <div class="mb-3">
             <label for="skin_id" class="form-label">Skin</label>
             <select name="skin_id" id="skin_id" class="form-control">

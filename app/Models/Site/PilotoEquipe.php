@@ -13,7 +13,7 @@ class PilotoEquipe extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['piloto_id', 'equipe_id', 'user_id', 'ano_id', 'flg_ativo','flg_super_corrida'];
+    protected $fillable = ['piloto_id', 'equipe_id', 'modelo_carro', 'user_id', 'ano_id', 'flg_ativo','flg_super_corrida'];
 
     /**relacionamentos */
 
@@ -63,6 +63,19 @@ class PilotoEquipe extends Model
         }
 
         return $chegada;
+
+    }
+
+    public static function getCarros() {
+
+        return $carros = [
+            'RB20',
+            'FW46',
+            'W15',
+            'rss_formula_hybrid_2023',
+            'rss_formula_hybrid_2022_s',
+            'vrc_formula_alpha_2023'
+        ];
 
     }
 }
