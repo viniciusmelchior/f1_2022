@@ -22,7 +22,7 @@ class TemporadaController extends Controller
      */
     public function index()
     {
-        $temporadas = Temporada::where('user_id', Auth::user()->id)->get();
+        $temporadas = Temporada::where('user_id', Auth::user()->id)->orderBy('id', 'ASC')->get();
 
         return view('site.temporadas.index', compact('temporadas'));
     }

@@ -96,9 +96,12 @@ class PilotoController extends Controller
         //total de corridas
         $resultados = Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
                                     ->join('piloto_equipes', 'piloto_equipes.id', '=', 'resultados.pilotoEquipe_id')
+                                    ->join('temporadas', 'temporadas.id', '=', 'corridas.temporada_id')
                                     ->where('resultados.user_id', Auth::user()->id)
                                     ->where('corridas.flg_sprint', 'N')
                                     ->where('piloto_equipes.piloto_id', $modelPiloto->id)
+                                    ->orderBy('temporadas.id', 'DESC')
+                                    ->orderBy('resultados.id', 'DESC')
                                     ->get();
     
         $totCorridas = 0;
@@ -274,10 +277,14 @@ class PilotoController extends Controller
 
         // $resultadosPorCorrida = Resultado::where('user_id', Auth::user()->id)->orderBy('id', 'DESC')->get();
         $resultadosPorCorrida = Resultado::join('piloto_equipes', 'resultados.pilotoEquipe_id', '=', 'piloto_equipes.id')
+                                ->join('corridas', 'resultados.corrida_id', '=', 'corridas.id')
+                                ->join('temporadas', 'temporadas.id', '=', 'corridas.temporada_id')
                                 ->where('resultados.user_id', Auth::user()->id)
                                 ->where('piloto_equipes.piloto_id', $modelPiloto->id)
+                                ->orderBy('temporadas.id', 'DESC')
                                 ->orderBy('resultados.id', 'DESC')
                                 ->paginate(30);
+
         // sleep(1);
         // $time = microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"];
         // $tempoExecucao =  "Tempo de execução: ".$time;

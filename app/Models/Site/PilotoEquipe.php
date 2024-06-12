@@ -69,12 +69,10 @@ class PilotoEquipe extends Model
     public static function getCarros() {
 
         return $carros = [
-            'RB20',
-            'FW46',
-            'W15',
             'rss_formula_hybrid_2023',
             'rss_formula_hybrid_2022_s',
-            'vrc_formula_alpha_2023'
+            'vrc_formula_alpha_2023',
+            'rss_formula_hybrid_2021'
         ];
 
     }

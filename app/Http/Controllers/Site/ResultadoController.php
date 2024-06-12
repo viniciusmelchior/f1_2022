@@ -195,6 +195,10 @@ class ResultadoController extends Controller
                     }
                 }
 
+                if ($request->categoria == 'F1_todos_pontuam') {
+                    $model->pontuacao = $this->F1_todos_pontuam($model, $chegada);
+                }
+
                 if ($request->categoria == 'Stock1') {
                     //Regra de 2 pontos para o pole position da Corrida 1
                     if ($model->largada == 1) {
@@ -287,6 +291,10 @@ class ResultadoController extends Controller
                         $model->pontuacao_classica = $this->calcularPontuacaoClassica($model, $chegada);
                         $model->pontuacao_invertida = $this->calcularPontuacaoInvertida($model, $chegada);
                     }
+                }
+
+                if ($request->categoria == 'F1_todos_pontuam') {
+                    $model->pontuacao = $this->F1_todos_pontuam($model, $chegada);
                 }
 
                 if ($request->categoria == 'Stock1') {
@@ -539,6 +547,151 @@ class ResultadoController extends Controller
 
         return $model->pontuacao;
     }
+
+    public function F1_todos_pontuam($model, $chegada)
+    {   
+        $primeiro = 50;
+        $segundo = 40;
+        $terceiro = 35;
+        $quarto = 32;
+        $quinto = 30;
+        $sexto = 28;
+        $setimo = 26;
+        $oitavo = 24;
+        $nono = 22;
+        $decimo = 21;
+        $decimoPrimeiro = 20;
+        $decimoSegundo = 19;
+        $decimoTerceiro = 18;
+        $decimoQuarto = 17;
+        $decimoQuinto = 16;
+        $decimoSexto = 15;
+        $decimoSetimo = 14;
+        $decimoOitavo = 13;
+        $decimoNono = 12;
+        $vigesimo = 11;
+        $vigesimoPrimeiro = 10;
+        $vigesimoSegundo = 9;
+        $vigesimoTerceiro = 8;
+        $vigesimoQuarto = 7;
+        $vigesimoQuinto = 6;
+        $vigesimoSexto = 5;
+        $vigesimoSetimo = 4;
+        $vigesimoOitavo = 3;
+        $vigesimoNono = 2;
+        $trigesimo = 1;
+        $trigesimoPrimeiro = 1;
+        $trigesimoSegundo = 1;
+        $trigesimoTerceiro = 1;
+
+        switch ($chegada) {
+            case 1:
+                $model->pontuacao = $primeiro;
+                break;
+            case 2:
+                $model->pontuacao = $segundo;
+                break;
+            case 3:
+                $model->pontuacao = $terceiro;
+                break;
+            case 4:
+                $model->pontuacao = $quarto;
+                break;
+            case 5:
+                $model->pontuacao = $quinto;
+                break;
+            case 6:
+                $model->pontuacao = $sexto;
+                break;
+            case 7:
+                $model->pontuacao = $setimo;
+                break;
+            case 8:
+                $model->pontuacao = $oitavo;
+                break;
+            case 9:
+                $model->pontuacao = $nono;
+                break;
+            case 10:
+                $model->pontuacao = $decimo;
+                break;
+            case 11:
+                $model->pontuacao = $decimoPrimeiro;
+                break;
+            case 12:
+                $model->pontuacao = $decimoSegundo;
+                break;
+            case 13:
+                $model->pontuacao = $decimoTerceiro;
+                break;
+            case 14:
+                $model->pontuacao = $decimoQuarto;
+                break;
+            case 15:
+                $model->pontuacao = $decimoQuinto;
+                break;
+            case 16:
+                $model->pontuacao = $decimoSexto;
+                break;
+            case 17:
+                $model->pontuacao = $decimoSetimo;
+                break;
+            case 18:
+                $model->pontuacao = $decimoOitavo;
+                break;
+            case 19:
+                $model->pontuacao = $decimoNono;
+                break;
+            case 20:
+                $model->pontuacao = $vigesimo;
+                break;
+            case 21:
+                $model->pontuacao = $vigesimoPrimeiro;
+                break;
+            case 22:
+                $model->pontuacao = $vigesimoSegundo;
+                break;
+            case 23:
+                $model->pontuacao = $vigesimoTerceiro;
+                break;
+            case 24:
+                $model->pontuacao = $vigesimoQuarto;
+                break;
+            case 25:
+                $model->pontuacao = $vigesimoQuinto;
+                break;
+            case 26:
+                $model->pontuacao = $vigesimoSexto;
+                break;
+            case 27:
+                $model->pontuacao = $vigesimoSetimo;
+                break;
+            case 28:
+                $model->pontuacao = $vigesimoOitavo;
+                break;
+            case 29:
+                $model->pontuacao = $vigesimoNono;
+                break;
+            case 30:
+                $model->pontuacao = $trigesimo;
+                break;
+            case 31:
+                $model->pontuacao = $trigesimoPrimeiro;
+                break;
+            case 32:
+                $model->pontuacao = $trigesimoSegundo;
+                break;
+            case 33:
+                $model->pontuacao = $trigesimoTerceiro;
+                break;
+            default:
+                $model->pontuacao = 1;
+        }
+        
+
+        return $model->pontuacao;
+    }
+
     public function calcularPontuacaoFormulaE($model, $chegada)
     {
         $primeiro = 25;
