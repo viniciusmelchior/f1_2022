@@ -63,7 +63,7 @@ class Pais extends Model
                                     $query->where('pais_id', $pais_id);
                                 })
                                 ->where('user_id', Auth::user()->id)
-                                ->where('flg_sprint', 'N')
+                                // ->where('flg_sprint', 'N')
                                 ->orderBy('id', 'DESC')
                                 ->first();
 

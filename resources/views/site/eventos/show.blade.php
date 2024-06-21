@@ -37,7 +37,7 @@ use App\Models\Site\PilotoEquipe;
     
     th, td{
         padding: 10px;
-        text-align: center!important;
+        /* text-align: center!important; */
         width: 190px;
     }
     
@@ -76,15 +76,15 @@ use App\Models\Site\PilotoEquipe;
     <div class="montaTabelaEquipes">
         <table class="mb-5 mt-5" id="tabelaClassificacaoEquipes">
             <tr>
-                <th style="width: 5%;">#</th>
-                <th style="width: 5%;">Temporada</th>
-                <th style="width: 15%;">Pista</th>
-                <th>Pole Position</th>
-                <th>Primeiro</th>
-                <th>Segundo</th>
-                <th>Terceiro</th>
-                <th>Volta Rápida</th>
-                <th>Visualizar</th>
+                <th style="width: 5%;" class="text-nowrap">#</th>
+                <th style="width: 5%;" class="text-nowrap">Temporada</th>
+                <th style="width: 15%; text-align: left;" class="text-nowrap">Pista</th>
+                <th style="text-align: left;" class="text-nowrap">Pole Position</th>
+                <th style="text-align: left;" class="text-nowrap">Primeiro</th>
+                <th style="text-align: left;" class="text-nowrap">Segundo</th>
+                <th style="text-align: left;" class="text-nowrap">Terceiro</th>
+                <th style="text-align: left;" class="text-nowrap">Volta Rápida</th>
+                <th style="text-align: left;" class="text-nowrap">Visualizar</th>
             </tr>
             @foreach($resultadoCorridas as $key => $resultadoCorrida)
             @php 
@@ -97,15 +97,15 @@ use App\Models\Site\PilotoEquipe;
             
             @endphp
                 <tr @if($resultadoCorrida->flg_sprint == 'S') style="font-style:italic;" @endif>
-                    <td>
+                    <td style="text-align: center;" class="text-nowrap">
                         @if($resultadoCorrida->flg_sprint != 'S')
                         {{$resultadoCorrida->ordem}}
                         @else 
                         Sprint
                         @endif
                     </td>
-                    <td>
-                        {{$resultadoCorrida->temporada->ano->ano}}
+                    <td style="text-align: center;">
+                        {{ substr($resultadoCorrida->temporada->des_temporada, 0, strpos($resultadoCorrida->temporada->des_temporada, ' ')) }}
                     </td>
                     <td>{{$resultadoCorrida->pista->nome}}
                         @if(isset($resultadoCorrida->condicao_id))
@@ -115,47 +115,52 @@ use App\Models\Site\PilotoEquipe;
                             <i class="bi bi-car-front-fill mt-3"></i>
                         @endif
                     </td>
-                    <td>
+                    <td style="text-align: left;" class="text-nowrap">
                         @if(isset($polePosition))
-                        <span style="color:{{$polePosition->pilotoEquipe->equipe->des_cor}};">
-                            {{$polePosition->pilotoEquipe->piloto->nomeCompleto()}}
-                        </span>
+                            <span>
+                                <img src="{{asset('images/'.$polePosition->pilotoEquipe->equipe->imagem)}}" alt="" style="width: 25px; height:25px;">
+                                {{$polePosition->pilotoEquipe->piloto->nomeCompleto()}}
+                            </span>
                         @else
                         -
                         @endif
                     </td>
-                    <td>
+                    <td style="text-align: left;" class="text-nowrap">
                         @if(isset($primeiro))
-                        <span style="color:{{$primeiro->pilotoEquipe->equipe->des_cor}};">
-                            {{$primeiro->pilotoEquipe->piloto->nomeCompleto()}} 
-                        </span>
+                            <span>
+                                <img src="{{asset('images/'.$primeiro->pilotoEquipe->equipe->imagem)}}" alt="" style="width: 25px; height:25px;">
+                                {{$primeiro->pilotoEquipe->piloto->nomeCompleto()}} 
+                            </span>
                         @else
                         -
                         @endif
                     </td>
-                    <td>
+                    <td style="text-align: left;" class="text-nowrap">
                         @if(isset($segundo))
-                        <span style="color:{{$segundo->pilotoEquipe->equipe->des_cor}};">
+                        <span>
+                            <img src="{{asset('images/'.$segundo->pilotoEquipe->equipe->imagem)}}" alt="" style="width: 25px; height:25px;">
                             {{$segundo->pilotoEquipe->piloto->nomeCompleto()}}
                         </span>
                         @else
                         -
                         @endif
                     </td>
-                    <td>
+                    <td style="text-align: left;" class="text-nowrap">
                         @if(isset($terceiro))
-                        <span style="color:{{$terceiro->pilotoEquipe->equipe->des_cor}};">
-                            {{$terceiro->pilotoEquipe->piloto->nomeCompleto()}}
-                        </span>
+                            <span>
+                                <img src="{{asset('images/'.$terceiro->pilotoEquipe->equipe->imagem)}}" alt="" style="width: 25px; height:25px;">
+                                {{$terceiro->pilotoEquipe->piloto->nomeCompleto()}}
+                            </span>
                         @else
                         -
                         @endif
                     </td>
-                    <td>
+                    <td style="text-align: left;" class="text-nowrap">
                         @if(isset($voltaRapida))
-                            <span style="color:{{$voltaRapida->equipe->des_cor}};">
-                                {{$voltaRapida->piloto->nomeCompleto()}}
-                            </span>
+                        <span {{-- style="color:{{$voltaRapida->equipe->des_cor}};" --}}>
+                            <img src="{{asset('images/'.$voltaRapida->equipe->imagem)}}" alt="" style="width: 25px; height:25px;">
+                            {{$voltaRapida->piloto->nomeCompleto()}}
+                        </span>
                         @else
                         -
                         @endif 
@@ -167,7 +172,7 @@ use App\Models\Site\PilotoEquipe;
             @endforeach
         </table>
     </div>
-    <a href="{{route('paises.index')}}" class="btn btn-secondary ml-3 mb-3">Voltar</a>
+    <a href="{{route('eventos.index')}}" class="btn btn-secondary ml-3 mb-3">Voltar</a>
    </div>
 </div>
 @endsection

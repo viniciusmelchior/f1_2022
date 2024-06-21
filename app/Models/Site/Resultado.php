@@ -25,4 +25,36 @@ class Resultado extends Model
         return $this->belongsTo(Corrida::class);
     }
 
+    public static function podio($posicaoChegada){
+
+        $podio = false;
+        if($posicaoChegada >= 1 && $posicaoChegada <=3){
+            $podio = true;
+        }
+
+        return $podio;
+    }
+
+    public static function topTen($posicaoChegada){
+
+        $topTen = false;
+        if($posicaoChegada >= 1 && $posicaoChegada <=10){
+            $topTen = true;
+        }
+
+        return $topTen;
+    }
+
+    //usado para mostrar todas as corridas que o piloto/equipe completou (chegada diferente de nula)
+    public static function chegadaValida($posicaoChegada){
+
+        $chegada = false;
+        
+        if($posicaoChegada >= 1){
+            $chegada = true;
+        }
+
+        return $chegada;
+    }
+
 }

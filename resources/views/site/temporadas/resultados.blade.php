@@ -117,7 +117,7 @@
                                 @foreach ($corridas as $corrida)
                                     @if(isset($corrida->resultado))
                                         @php 
-                                            $posicao = PilotoEquipe::getResultadoPilotoEquipe($corrida->id, $piloto->piloto_id);
+                                            $posicao = PilotoEquipe::getResultadoPilotoEquipe($corrida->id, $piloto->piloto_id);  
                                         @endphp
                                         <td class="text-center" @if($corrida->flg_sprint == 'S') style="color:yellow;" @endif>
                                         @if($posicao)

@@ -69,7 +69,7 @@ class EventoController extends Controller
 	 */
 	public function show($id)
 	{
-		$resultadoCorridas = Corrida::where('user_id', Auth::user()->id)
+		$resultadoCorridas = Corrida::with('resultado')->where('user_id', Auth::user()->id)
 									->where('evento_id', $id)
 									->orderBy('temporada_id', 'DESC')
 									->orderBy('ordem', 'DESC')

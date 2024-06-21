@@ -148,14 +148,14 @@ class PilotoController extends Controller
             }
 
              //calculo de podios
-             if($resultado->chegada <= 3){
+             if(Resultado::podio($resultado->chegada) == true){
                 if($resultado->pilotoEquipe->piloto->id == $id){
                     $totPodios++;
                 }
             }
 
             //calculo de chegadas no top 10
-            if($resultado->chegada <= 10){
+            if(Resultado::topTen($resultado->chegada) == true){
                 if($resultado->pilotoEquipe->piloto->id == $id){
                     $totTopTen++;
                 }
@@ -194,14 +194,14 @@ class PilotoController extends Controller
             }
 
             //calculo melhor posição de chegada
-            if($resultado->pilotoEquipe->piloto->id == $id){
+            if($resultado->pilotoEquipe->piloto->id == $id && Resultado::chegadaValida($resultado->chegada) == true){
                 if($resultado->chegada <= $melhorPosicaoChegada){
                     $melhorPosicaoChegada = $resultado->chegada;
                 }    
             }
 
             //calculo pior posição de chegada 
-            if($resultado->pilotoEquipe->piloto->id == $id){
+            if($resultado->pilotoEquipe->piloto->id == $id && Resultado::chegadaValida($resultado->chegada) == true){
                 if($resultado->chegada > $piorPosicaoChegada){
                     $piorPosicaoChegada = $resultado->chegada;
                 }    
@@ -290,7 +290,15 @@ class PilotoController extends Controller
         // $tempoExecucao =  "Tempo de execução: ".$time;
         // dd($tempoExecucao);
 
+        // dd($temporadasDisputadas);
+
         $temporadas = Temporada::where('user_id', Auth::user()->id)->get();
+        // $temporadas = Temporada::join('anos', 'anos.id', '=', 'temporadas.ano_id')
+        //                         ->where('temporadas.user_id', Auth::user()->id)
+        //                         ->whereIn('anos.ano', $temporadasDisputadas)
+        //                         ->get();
+
+                                // dd($temporadas);
 
         $corridasPorEquipe = Resultado::join('corridas', 'resultados.corrida_id', '=', 'corridas.id')
                                                 ->join('piloto_equipes', 'resultados.pilotoEquipe_id', '=', 'piloto_equipes.id')

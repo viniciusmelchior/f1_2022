@@ -420,14 +420,14 @@ class AjaxController extends Controller
             }
 
              //calculo de podios
-             if($resultado->chegada <= 3){
+             if(Resultado::podio($resultado->chegada) == true){
                 if($resultado->pilotoEquipe->equipe->id == $id){
                     $totPodios++;
                 }
             }
 
              //calculo de chegadas no top 10
-             if($resultado->chegada <= 10){
+             if(Resultado::topTen($resultado->chegada) == true){
                 if($resultado->pilotoEquipe->equipe->id == $id){
                     $totTopTen++;
                 }
@@ -467,14 +467,14 @@ class AjaxController extends Controller
             }
 
             //calculo melhor posição de chegada
-            if($resultado->pilotoEquipe->equipe->id == $id){
+            if($resultado->pilotoEquipe->equipe->id == $id  && Resultado::chegadaValida($resultado->chegada) == true){
                 if($resultado->chegada <= $melhorPosicaoChegada){
                     $melhorPosicaoChegada = $resultado->chegada;
                 }    
             }
 
             //calculo pior posição de chegada 
-            if($resultado->pilotoEquipe->equipe->id == $id){
+            if($resultado->pilotoEquipe->equipe->id == $id && Resultado::chegadaValida($resultado->chegada) == true){
                 if($resultado->chegada > $piorPosicaoChegada){
                     $piorPosicaoChegada = $resultado->chegada;
                 }    
@@ -642,16 +642,20 @@ class AjaxController extends Controller
         $totAbandonos = 0;
         $gridMedio = 0;
         $mediaChegada = 0;
+        $listagemVitorias = [];
         
         foreach($resultados as $resultado){
             if($resultado->pilotoEquipe->piloto->id == $id){
-                $totCorridas++;
+                // if($resultado->chegada != null){ //tentar por aqui para filtrar só corridas finalizadas. Trocar a nomenclatura de largadas para corridas
+                    $totCorridas++;
+                // }
             }
 
             //calculo do total de vitórias
             if($resultado->chegada == 1){
                 if($resultado->pilotoEquipe->piloto->id == $id){
                     $totVitorias++;
+                    $listagemVitorias[] = $resultado;
                 }
             }
 
@@ -663,14 +667,14 @@ class AjaxController extends Controller
             }
 
              //calculo de podios
-             if($resultado->chegada <= 3){
+             if(Resultado::podio($resultado->chegada) == true){ 
                 if($resultado->pilotoEquipe->piloto->id == $id){
                     $totPodios++;
                 }
             }
 
             //calculo de chegadas no top 10
-            if($resultado->chegada <= 10){
+            if(Resultado::topTen($resultado->chegada) == true){
                 if($resultado->pilotoEquipe->piloto->id == $id){
                     $totTopTen++;
                 }
@@ -709,14 +713,14 @@ class AjaxController extends Controller
             }
 
             //calculo melhor posição de chegada
-            if($resultado->pilotoEquipe->piloto->id == $id){
+            if($resultado->pilotoEquipe->piloto->id == $id && Resultado::chegadaValida($resultado->chegada) == true){
                 if($resultado->chegada <= $melhorPosicaoChegada){
                     $melhorPosicaoChegada = $resultado->chegada;
                 }    
             }
 
             //calculo pior posição de chegada 
-            if($resultado->pilotoEquipe->piloto->id == $id){
+            if($resultado->pilotoEquipe->piloto->id == $id && Resultado::chegadaValida($resultado->chegada) == true){
                 if($resultado->chegada > $piorPosicaoChegada){
                     $piorPosicaoChegada = $resultado->chegada;
                 }    
@@ -807,7 +811,8 @@ class AjaxController extends Controller
             'totVoltasRapidas' => $totVoltasRapidas,
             'totAbandonos' => $totAbandonos,
             'gridMedio' => $gridMedio,
-            'mediaChegada' => $mediaChegada
+            'mediaChegada' => $mediaChegada,
+            'listagemVitorias' => $listagemVitorias
         ]);  
     }
 }

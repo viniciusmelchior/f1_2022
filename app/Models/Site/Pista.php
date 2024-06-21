@@ -73,7 +73,7 @@ class Pista extends Model
     {
         $ultimaCorrida = Corrida::where('pista_id', $pista_id)
                                 ->where('user_id', Auth::user()->id)
-                                ->where('flg_sprint', 'N')
+                                // ->where('flg_sprint', 'N')
                                 ->orderBy('id', 'DESC')
                                 ->first();
 

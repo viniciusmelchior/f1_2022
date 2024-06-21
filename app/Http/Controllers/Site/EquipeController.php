@@ -157,14 +157,14 @@ class EquipeController extends Controller
                 }
 
                 //calculo de podios
-                if($resultado->chegada <= 3){
+                if(Resultado::podio($resultado->chegada) == true){
                     if($resultado->pilotoEquipe->equipe->id == $id){
                         $totPodios++;
                     }
                 }
 
                 //calculo de chegadas no top 10
-                if($resultado->chegada <= 10){
+                if(Resultado::topTen($resultado->chegada) == true){
                     if($resultado->pilotoEquipe->equipe->id == $id){
                         $totTopTen++;
                     }
@@ -204,14 +204,14 @@ class EquipeController extends Controller
                 }
 
                 //calculo melhor posição de chegada
-                if($resultado->pilotoEquipe->equipe->id == $id){
+                if($resultado->pilotoEquipe->equipe->id == $id && Resultado::chegadaValida($resultado->chegada) == true){
                     if($resultado->chegada <= $melhorPosicaoChegada){
                         $melhorPosicaoChegada = $resultado->chegada;
                     }    
                 }
 
                 //calculo pior posição de chegada 
-                if($resultado->pilotoEquipe->equipe->id == $id){
+                if($resultado->pilotoEquipe->equipe->id == $id  && Resultado::chegadaValida($resultado->chegada) == true){
                     if($resultado->chegada > $piorPosicaoChegada){
                         $piorPosicaoChegada = $resultado->chegada;
                     }    

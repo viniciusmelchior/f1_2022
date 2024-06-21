@@ -34,7 +34,7 @@ class Evento extends Model
 
             $ultimoEvento = Corrida::where('evento_id', $evento_id)
                                     ->where('user_id', Auth::user()->id)
-                                    ->where('flg_sprint', 'N')
+                                    // ->where('flg_sprint', 'N')
                                     ->orderBy('id', 'DESC')
                                     ->first();
 

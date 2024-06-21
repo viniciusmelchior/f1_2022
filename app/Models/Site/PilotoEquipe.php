@@ -4,6 +4,7 @@ namespace App\Models\Site;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Route;
 
 class PilotoEquipe extends Model
 {
@@ -41,7 +42,6 @@ class PilotoEquipe extends Model
 
     /**recebe a corrida, temporada, piloto_equipe */
     public static function getResultadoPilotoEquipe($corrida, $piloto_id){
-        // dd($corrida, $pilotoEquipe);
 
         // $resultado = Resultado::select('chegada','flg_abandono')
         $resultado = Resultado::join('piloto_equipes', 'resultados.pilotoEquipe_id', 'piloto_equipes.id')->select('*')
@@ -59,6 +59,12 @@ class PilotoEquipe extends Model
             $chegada = $resultado['chegada'];
             if($resultado->flg_abandono == 'S'){
                 $chegada = 'NC';
+            }
+        }
+
+        if(Route::current()->parameter('porPontuacao')){
+            if(isset($resultado)){
+                $chegada = $resultado['pontuacao'];
             }
         }
 
