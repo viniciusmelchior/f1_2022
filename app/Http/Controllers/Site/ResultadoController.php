@@ -68,7 +68,7 @@ class ResultadoController extends Controller
         }
 
         $condicoesClimaticas = CondicaoClimatica::where('user_id', Auth::user()->id)->get();
-        $model = Resultado::where('user_id', Auth::user()->id)->where('corrida_id', $corrida->id)->orderBy('chegada')->paginate(11);
+        $model = Resultado::where('user_id', Auth::user()->id)->where('corrida_id', $corrida->id)->orderBy('chegada')->paginate(30);
         $vencedor = Resultado::where('user_id', Auth::user()->id)->where('corrida_id', $corrida->id)->where('chegada', 1)->orderBy('chegada')->first();
         if (count($model) == 0) {
             return redirect()->back()->with('error', 'Não existem resultados cadastrados para o evento selecionado');
@@ -388,6 +388,11 @@ class ResultadoController extends Controller
         $minhaForcaPiloto = ForcaPiloto::where('user_id', Auth::user()->id)
                                         ->where('ano_id', $corrida->temporada->ano->id)
                                         ->where('piloto_id', $meuPiloto->piloto->id)
+                                        ->first()->forca; 
+        
+        $minhaForcaEquipe = ForcaEquipe::where('user_id', Auth::user()->id)
+                                        ->where('ano_id', $corrida->temporada->ano->id)
+                                        ->where('equipe_id', $meuPiloto->equipe->id)
                                         ->first()->forca;
 
         unset($arrayOrdemLargada[$meuPiloto->id]);
@@ -425,11 +430,6 @@ class ResultadoController extends Controller
              $CarIds[] = isset($pilotoEquipe->modelo_carro) ? $pilotoEquipe->modelo_carro : null;
 
         }
-        
-        // dd($arrayPilotoEquipe_id, $arrayPosicaoLargada, $arrayOrdemLargada);
-        //dd($ballast, $restrictor, $skins);
-
-        //colocar os dados no documento fixado e gerar o download
 
         if($request->gerarGridLargada == 'S'){
 
@@ -442,7 +442,8 @@ class ResultadoController extends Controller
             $data['Ballasts'] = $ballast;
             $data['Restrictors'] = $restrictor;
             $data['StartingPosition'] = $minhaPosicaoLargada;
-            $data['PlayerRestrictor'] = $minhaForcaPiloto;
+            // $data['PlayerRestrictor'] = $minhaForcaPiloto;
+            $data['PlayerRestrictor'] = $minhaForcaEquipe;
             $data['SkinIds'] = $skins;
             $data['CarIds'] = $CarIds;
 
