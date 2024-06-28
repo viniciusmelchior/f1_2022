@@ -74,6 +74,10 @@ class ResultadoController extends Controller
             return redirect()->back()->with('error', 'Não existem resultados cadastrados para o evento selecionado');
         }
 
+        if($model[0]->chegada == null){
+            return redirect()->back()->with('error', 'Evento não finalizado. Resultado final indisponível');
+        }
+
         return view('site.resultados.show', compact('corrida', 'model', 'condicoesClimaticas', 'vencedor', 'descEvento', 'voltaRapida'));
     }
 

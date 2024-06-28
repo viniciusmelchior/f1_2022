@@ -1,6 +1,12 @@
 @extends('layouts.main')
 
 <style>
+
+    .trAbandono {
+        color: rgb(255, 0, 0);
+        font-style: italic;
+    }
+
     .info-winner{
         /* background-color: red; */
         padding: 0.8rem;
@@ -175,20 +181,20 @@
                     @endif
                 </div>
                 <div class="table-responsive">
-                    <table class="table text-light table-container">
+                    <table class="table text-light table-container" id="driverTable">
                         <thead>
                             <tr>
-                                <th class="text-start text-upper">#</th>
+                                <th class="text-start text-upper" onclick="sortTable(0)" style="cursor: pointer">#</th>
                                 <th class="text-start text-upper">Piloto</th>
                                 <th class="text-start text-upper">Equipe</th>
-                                <th class="text-start text-upper">Largada</th>
+                                <th class="text-start text-upper" onclick="sortTable(3)" style="cursor: pointer">Largada</th>
                                 <th class="text-start text-upper">Pontos</th>
                             </tr>
                         </thead>
                         <tbody class="text-left">
                             @foreach($model as $key => $item)
                                 <tr <?= $item->flg_abandono == 'S' ? "class='trAbandono'" : "" ?>>
-                                    <td><?= $item->flg_abandono == 'S' ? "DNF" : $item->chegada ?></td>
+                                    <td>{{$item->chegada}}</td>
                                     <td>
                                         <img src="{{asset('images/'.$item->pilotoEquipe->piloto->pais->imagem)}}" alt="" style="width:35px; height: 25px;" class="ocultar-mobile">
                                         <span style="display: inline-block; vertical-align: middle;">{{$item->pilotoEquipe->piloto->nome}}</span>
@@ -196,7 +202,7 @@
                                     </td>
                                     <td style="vertical-align: middle;">
                                         <img src="{{asset('images/'.$item->pilotoEquipe->equipe->imagem)}}" style="width:25px; height: 25px;" class="ocultar-mobile">
-                                        <span class="text-upper team-name" style="display: inline-block; vertical-align: middle;">
+                                        <span class="text-upper" style="display: inline-block; vertical-align: middle;">
                                         {{$item->pilotoEquipe->equipe->nome}}
                                         </span>
                                     </td>
@@ -245,4 +251,55 @@
        </div>
     </div>
 </div>
+
+<script>
+    function sortTable(n) {
+        var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+        table = document.getElementById("driverTable");
+        switching = true;
+        // Define a direção de ordenação inicial
+        dir = "asc"; 
+        // Realiza o loop até que nenhuma troca seja feita
+        while (switching) {
+            switching = false;
+            rows = table.rows;
+            // Loop por todas as linhas da tabela (exceto o cabeçalho)
+            for (i = 1; i < (rows.length - 1); i++) {
+                shouldSwitch = false;
+                // Obtém os dois elementos que serão comparados
+                x = rows[i].getElementsByTagName("TD")[n];
+                y = rows[i + 1].getElementsByTagName("TD")[n];
+                // Verifica se as duas linhas devem ser trocadas de acordo com a direção ascendente ou descendente
+                if (dir == "asc") {
+                    if (Number(x.innerHTML) > Number(y.innerHTML)) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                } else if (dir == "desc") {
+                    if (Number(x.innerHTML) < Number(y.innerHTML)) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                }
+            }
+            if (shouldSwitch) {
+                // Se uma troca deve ser feita, realiza a troca e marca que uma troca foi feita
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+                // Cada vez que uma troca é feita, incrementa a contagem de trocas
+                switchcount++; 
+            } else {
+                // Se nenhuma troca foi feita e a direção é "asc", define a direção como "desc" e reinicia o loop
+                if (switchcount == 0 && dir == "asc") {
+                    dir = "desc";
+                    switching = true;
+                }
+            }
+        }
+    }
+</script>
+</body>
+</html>
+
+</script>
 @endsection
