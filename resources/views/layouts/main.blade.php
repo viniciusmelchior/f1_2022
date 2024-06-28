@@ -24,6 +24,9 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.css">
   
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.js"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 </head>
 <body>
     <div class="sidebar close">
@@ -257,6 +260,14 @@
     sidebarBtn.addEventListener("click", ()=>{
     sidebar.classList.toggle("close");
     });
+
+// In your Javascript (external .js resource or <script> tag)
+$(document).ready(function() {
+    $('select').select2({
+       theme: 'classic'
+    });
+});
+
 </script>
 </body>
 </html>

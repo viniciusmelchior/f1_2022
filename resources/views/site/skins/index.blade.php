@@ -33,6 +33,10 @@
         </div>
     </div>
 
+    <div class="my-3">
+        <a href="{{route('skins.create')}}" class="btn btn-primary">Adicionar skin</a>
+    </div>
+
     <div class="left_table">
         @if(count($model) > 0)
             <table class="table" style="width:100%;" id="tabelaPaises">

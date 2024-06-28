@@ -29,6 +29,7 @@
 
     <div>
         <button class="btn btn-secondary my-3 adicionar_autor" id="adicionar_autor">Adicionar Autor</button>
+        <a href="{{route('pistas.create')}}" class="btn btn-primary">Adicionar pista</a>
     </div>
 
     @if(count($pistas) > 0)
