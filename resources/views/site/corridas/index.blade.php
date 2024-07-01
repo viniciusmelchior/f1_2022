@@ -1,3 +1,7 @@
+@php 
+    use App\Models\Site\Corrida;
+@endphp
+
 @extends('layouts.main')
 
 @section('section')
@@ -30,9 +34,10 @@
                     <th>#</th>
                     <th style="text-align: left;">Evento</th>
                     <th style="text-align: left;">Pista</th>
-                    {{-- <th>Qtd Voltas</th> --}}
-                    {{-- <th>Dificuldade IA</th> --}}
-                    <th>Atualizado Em</th>
+                    <th>Pole</th>
+                    <th>Vencedor</th>
+                    <th>Abandonos</th>
+                    <th class="text-nowrap">Atualizado Em</th>
                     <th>Ações</th>
                 </tr>
             </thead>
@@ -41,14 +46,14 @@
                     <tr @if($corrida->flg_sprint == 'S') style="color:red; font-style: italic;" @endif>
                         {{-- <td>@if($corrida->flg_sprint != 'S') {{$corrida->ordem}} @endif</td> --}}
                         <td>{{$corrida->flg_sprint != 'S' ? $corrida->ordem : 'Sprint' }}</td>
-                        <td style="text-align: left;">
+                        <td style="text-align: left;" class="text-nowrap">
                             @if (isset($corrida->evento))
                                 {{$corrida->evento->des_nome}}
                             @else
                             -
                             @endif
                         </td>
-                        <td style="text-align: left;">
+                        <td style="text-align: left;" class="text-nowrap">
                             <span style="width: 30px; height:20px;">
                                 <img src="{{asset('images/'.$corrida->pista->pais->imagem)}}" alt="" srcset="" style="width: 30px; height:20px;">
                             </span>
@@ -61,7 +66,11 @@
                             {{$corrida->pista->qtd_voltas != null ? $corrida->pista->qtd_voltas : '-'}}
                         </td> --}}
                         {{-- <td>{{$corrida->dificuldade_ia}}</td> --}}
-                        <td>
+                        {{-- {{dd(Corrida::getInfoCorrida($corrida->id))}} --}}
+                        <td class="text-nowrap">{{Corrida::getInfoCorrida($corrida->id)['polePosition']}}</td>
+                        <td class="text-nowrap">{{Corrida::getInfoCorrida($corrida->id)['vencedor']}}</td>
+                        <td class="text-nowrap">{{Corrida::getInfoCorrida($corrida->id)['totAbandonos']}}</td>
+                        <td class="text-nowrap">
                             @if (isset($corrida->updated_at))
                                 {{-- {{date('d/m/Y', strtotime($corrida->updated_at))}} às {{date('H:m:s', strtotime($corrida->updated_at))}} --}}
                                 {{date('d/m/Y', strtotime($corrida->updated_at))}} às {{date('H:i:s', strtotime($corrida->updated_at))}}

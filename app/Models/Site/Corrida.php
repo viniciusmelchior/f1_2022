@@ -36,4 +36,33 @@ class Corrida extends Model
     public function resultado(){
         return $this->hasOne(Resultado::class);
     }
+
+    public static function getInfoCorrida($corrida_id){
+
+        $polePosition = '-';
+        $vencedor = '-';
+        $totAbandonos = '-';
+
+        $resultado = Resultado::where('corrida_id', $corrida_id)->get();
+
+        if($resultado){
+            $polePosition = $resultado->where('largada', 1)->first(); 
+            $polePosition = isset($polePosition) ? $polePosition->pilotoEquipe->piloto->nomeCompleto() : '-';
+
+            $vencedor = $resultado->where('chegada', 1)->first(); 
+            $vencedor = isset($vencedor) ? $vencedor->pilotoEquipe->piloto->nomeCompleto() : '-';
+
+            $totAbandonos = $resultado->where('flg_abandono', 'S')->count();
+        }
+
+        // dd($polePosition);
+
+        // dd( $polePosition,$vencedor, $totAbandonos);
+
+        return [
+            'polePosition' => $polePosition,
+            'vencedor' => $vencedor,
+            'totAbandonos' => $totAbandonos
+        ];
+    }
 }
