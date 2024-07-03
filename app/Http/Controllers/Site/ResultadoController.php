@@ -338,7 +338,10 @@ class ResultadoController extends Controller
                 ->first();
 
             if ($resultadoVoltaRapida->chegada <= 10 || ($corrida->flg_super_corrida == 'S' && $resultadoVoltaRapida->chegada <= 8)) {
-                $resultadoVoltaRapida->pontuacao = $resultadoVoltaRapida->pontuacao + 1;
+                if($request->categoria != 'F1_todos_pontuam'){
+                    $resultadoVoltaRapida->pontuacao = $resultadoVoltaRapida->pontuacao + 1;
+                }
+
                 $resultadoVoltaRapida->update();
             }
         }
@@ -553,41 +556,28 @@ class ResultadoController extends Controller
         return $model->pontuacao;
     }
 
-    public function F1_todos_pontuam($model, $chegada)
+    public function F1_todos_pontuam($model, $chegada) //agora apenas os 20 primeiros pontuam; O nome da função faz referencia aos 20 do grid REAL da formula 1
     {   
-        $primeiro = 50;
-        $segundo = 40;
-        $terceiro = 35;
-        $quarto = 32;
-        $quinto = 30;
-        $sexto = 28;
-        $setimo = 26;
-        $oitavo = 24;
-        $nono = 22;
-        $decimo = 21;
-        $decimoPrimeiro = 20;
-        $decimoSegundo = 19;
-        $decimoTerceiro = 18;
-        $decimoQuarto = 17;
-        $decimoQuinto = 16;
-        $decimoSexto = 15;
-        $decimoSetimo = 14;
-        $decimoOitavo = 13;
-        $decimoNono = 12;
-        $vigesimo = 11;
-        $vigesimoPrimeiro = 10;
-        $vigesimoSegundo = 9;
-        $vigesimoTerceiro = 8;
-        $vigesimoQuarto = 7;
-        $vigesimoQuinto = 6;
-        $vigesimoSexto = 5;
-        $vigesimoSetimo = 4;
-        $vigesimoOitavo = 3;
-        $vigesimoNono = 2;
-        $trigesimo = 1;
-        $trigesimoPrimeiro = 1;
-        $trigesimoSegundo = 1;
-        $trigesimoTerceiro = 1;
+        $primeiro = 43;
+        $segundo = 35;
+        $terceiro = 30;
+        $quarto = 26;
+        $quinto = 23;
+        $sexto = 20;
+        $setimo = 18;
+        $oitavo = 16;
+        $nono = 14;
+        $decimo = 12;
+        $decimoPrimeiro = 10;
+        $decimoSegundo = 9;
+        $decimoTerceiro = 8;
+        $decimoQuarto = 7;
+        $decimoQuinto = 6;
+        $decimoSexto = 5;
+        $decimoSetimo = 4;
+        $decimoOitavo = 3;
+        $decimoNono = 2;
+        $vigesimo = 1;
 
         switch ($chegada) {
             case 1:
@@ -650,47 +640,8 @@ class ResultadoController extends Controller
             case 20:
                 $model->pontuacao = $vigesimo;
                 break;
-            case 21:
-                $model->pontuacao = $vigesimoPrimeiro;
-                break;
-            case 22:
-                $model->pontuacao = $vigesimoSegundo;
-                break;
-            case 23:
-                $model->pontuacao = $vigesimoTerceiro;
-                break;
-            case 24:
-                $model->pontuacao = $vigesimoQuarto;
-                break;
-            case 25:
-                $model->pontuacao = $vigesimoQuinto;
-                break;
-            case 26:
-                $model->pontuacao = $vigesimoSexto;
-                break;
-            case 27:
-                $model->pontuacao = $vigesimoSetimo;
-                break;
-            case 28:
-                $model->pontuacao = $vigesimoOitavo;
-                break;
-            case 29:
-                $model->pontuacao = $vigesimoNono;
-                break;
-            case 30:
-                $model->pontuacao = $trigesimo;
-                break;
-            case 31:
-                $model->pontuacao = $trigesimoPrimeiro;
-                break;
-            case 32:
-                $model->pontuacao = $trigesimoSegundo;
-                break;
-            case 33:
-                $model->pontuacao = $trigesimoTerceiro;
-                break;
             default:
-                $model->pontuacao = 1;
+                $model->pontuacao = 0;
         }
         
 
