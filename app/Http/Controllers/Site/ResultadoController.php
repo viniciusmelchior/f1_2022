@@ -378,6 +378,8 @@ class ResultadoController extends Controller
             }
         }
 
+        if($request->gerarGridLargada == 'S'){
+
         //pega as posições de largada dos pilotos
         $arrayPilotoEquipe_id = $request->pilotoEquipe_id;
         $arrayPosicaoLargada = $request->largada;
@@ -457,7 +459,7 @@ class ResultadoController extends Controller
 
         }
 
-        if($request->gerarGridLargada == 'S'){
+        // if($request->gerarGridLargada == 'S'){
 
            $json_string = '{"ModeId":"custom","FilterValue":"","CarIds":["rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023","rss_formula_hybrid_2023"],"AiLevels":["100","100","100","100","100","100","100","100","100","100","100","100","100","100","100","100","100","100","100","100","100","100","100","100","100"],"Ballasts":["70","90","100","9","12","10","11","13","17","20","11","2","17","11","17","1","10","16","17","19","17","16","17","2","19"],"Restrictors":["2","2","0","3","0","5","8","14","10","10","5","17","13","6","18","3","12","12","18","13","14","18","17","6","18"],"PlayerRestrictor":8.0,"SkinIds":["MCL38_4_Norris","MCL38_81_Piastri","RB20_1_Verstappen_concept","SF24_Miami_16_Leclerc","RB20_11_Perez_bee_concept-1","W15_63_Russell","24_Sean_Bull_Maserati__Concept_#48","24_Audi_Sport_Sauber_Concept_JQKA_5-1","VCARB01_22_Tsunoda","VCARB01_22_Tsunoda-1","W15_44_Albon","24_Sean_Bull_BMW_Concept_#5-1","VF24_20_Magnussen","AMR24_18_Leclerc-1","2024_Andretti_Cadillac_9","SF24_Miami_55_Sainz","23_Renault_Concept_31","23_Renault_Concept_10","2024_Andretti_Cadillac_26","VF24_27_Hulkenberg-1","24_Audi_Sport_Sauber_Concept_JQKA_47","FW46_2_Perez-1","24_Sean_Bull_BMW_Concept_#50-1","AMR24_14_Alonso-1","FW46_2_Antonelli"],"ShuffleCandidates":true,"VarietyLimitation":0,"OpponentsNumber":25,"StartingPosition":6,"AiLevel":100.0,"AiLevelMin":99.0,"AiLevelArrangeRandom":0.1,"AiLevelArrangeReverse":false,"AiLevelArrangePowerRatio":false,"AiAggression":59.6,"AiAggressionMin":18.6,"AiAggressionArrangeRandom":0.1,"AiAggressionArrangeReverse":false}';
 
