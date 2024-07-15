@@ -57,9 +57,9 @@ class PilotoEquipe extends Model
 
         if(isset($resultado)){
             $chegada = $resultado['chegada'];
-            if($resultado->flg_abandono == 'S'){
-                $chegada = 'NC';
-            }
+            // if($resultado->flg_abandono == 'S'){
+            //     $chegada = 'NC';
+            // }
         }
 
         if(Route::current()->parameter('porPontuacao')){
