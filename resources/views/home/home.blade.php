@@ -102,12 +102,14 @@ margin: 0;
             <div>
                 <div class="">
                     <h1 class="descricao-tabela">Pilotos</h1>
-                    <select name="vitoriasPilotosPorTemporada" id="vitoriasPilotosPorTemporada" class="form-select mt-3" style="width: 50%; margin:0 auto;">
-                        <option value="" selected id="selectTemporadaVitoriasPiloto">Selecione uma Temporada</option>
-                        @foreach($temporadas as $temporada)
-                            <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
-                        @endforeach
-                    </select>
+                    <div style="width: 50%; margin:0 auto;" >
+                        <select name="vitoriasPilotosPorTemporada" id="vitoriasPilotosPorTemporada" class="form-select mt-3">
+                            <option value="" selected id="selectTemporadaVitoriasPiloto">Selecione uma Temporada</option>
+                            @foreach($temporadas as $temporada)
+                                <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
                <table class="m-5 tabelaEstatisticas" id="tabelaVitoriasPilotos">
                     <tr>
@@ -127,12 +129,14 @@ margin: 0;
 
             <div>
                 <h1 class="descricao-tabela">Equipes</h1>
-                <select name="vitoriasEquipesPorTemporada" id="vitoriasEquipesPorTemporada" class="form-select mt-3" style="width: 50%; margin:0 auto;">
-                    <option value="" selected id="selectTemporadaVitoriasEquipes">Selecione uma Temporada</option>
-                    @foreach($temporadas as $temporada)
-                        <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
-                    @endforeach
-                </select>
+                <div style="width: 50%; margin:0 auto;" >
+                    <select name="vitoriasEquipesPorTemporada" id="vitoriasEquipesPorTemporada" class="form-select mt-3">
+                        <option value="" selected id="selectTemporadaVitoriasEquipes">Selecione uma Temporada</option>
+                        @foreach($temporadas as $temporada)
+                            <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
+                        @endforeach
+                    </select>
+                </div>
                 <table class="m-5 tabelaEstatisticas" id="tabelaVitoriasEquipes">
                      <tr>
                          <th>#</th>
@@ -158,12 +162,14 @@ margin: 0;
             <div>
                <h1 class="descricao-tabela">Pilotos</h1>
 
-               <select name="PolesPilotosPorTemporada" id="PolesPilotosPorTemporada" class="form-select mt-3" style="width: 50%; margin:0 auto;">
-                    <option value="" selected id="selectTemporadaPolesPilotos">Selecione uma Temporada</option>
-                @foreach($temporadas as $temporada)
-                    <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
-                @endforeach
-                </select>
+               <div style="width: 50%; margin:0 auto;" >
+                <select name="PolesPilotosPorTemporada" id="PolesPilotosPorTemporada" class="form-select mt-3">
+                        <option value="" selected id="selectTemporadaPolesPilotos">Selecione uma Temporada</option>
+                    @foreach($temporadas as $temporada)
+                        <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
+                    @endforeach
+                    </select>
+               </div>
                <table class="m-5 tabelaEstatisticas" id="tabelaPolesPilotos">
                     <tr>
                         <th>#</th>
@@ -183,12 +189,14 @@ margin: 0;
             <div>
                 <h1 class="descricao-tabela">Equipes</h1>
 
-                <select name="PolesEquipesPorTemporada" id="PolesEquipesPorTemporada" class="form-select mt-3" style="width: 50%; margin:0 auto;">
-                    <option value="" selected id="selectTemporadaPolesEquipes">Selecione uma Temporada</option>
-                @foreach($temporadas as $temporada)
-                    <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
-                @endforeach
-                </select>
+                <div style="width: 50%; margin:0 auto;" >
+                    <select name="PolesEquipesPorTemporada" id="PolesEquipesPorTemporada" class="form-select mt-3">
+                        <option value="" selected id="selectTemporadaPolesEquipes">Selecione uma Temporada</option>
+                    @foreach($temporadas as $temporada)
+                        <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
+                    @endforeach
+                    </select>
+                </div>
 
                 <table class="m-5 tabelaEstatisticas" id="tabelaPolesEquipes">
                      <tr>
@@ -214,13 +222,15 @@ margin: 0;
         <div class="d-flex d-none" id="div_podios">
             <div>
                 <h1 class="descricao-tabela">Pilotos</h1>
-
-                <select name="podiosPilotosPorTemporada" id="podiosPilotosPorTemporada" class="form-select mt-3" style="width: 50%; margin:0 auto;">
-                    <option value="" selected id="selectTemporadaPodiosPilotos">Selecione uma Temporada</option>
-                @foreach($temporadas as $temporada)
-                    <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
-                @endforeach
-                </select>
+                
+                <div style="width: 50%; margin:0 auto;" >
+                    <select name="podiosPilotosPorTemporada" id="podiosPilotosPorTemporada" class="form-select mt-3">
+                        <option value="" selected id="selectTemporadaPodiosPilotos">Selecione uma Temporada</option>
+                    @foreach($temporadas as $temporada)
+                        <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
+                    @endforeach
+                    </select>
+                </div>
 
                 <table class="m-5 tabelaEstatisticas" id="tabelaPodiosPilotos">
                     <tr>
@@ -240,12 +250,14 @@ margin: 0;
             <div>
                 <h1 class="descricao-tabela">Equipes</h1>
 
-                <select name="podiosEquipesPorTemporada" id="podiosEquipesPorTemporada" class="form-select mt-3" style="width: 50%; margin:0 auto;">
-                    <option value="" selected id="selectTemporadaPodiosEquipes">Selecione uma Temporada</option>
-                    @foreach($temporadas as $temporada)
-                        <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
-                    @endforeach
-                </select>
+                <div style="width: 50%; margin:0 auto;" >
+                    <select name="podiosEquipesPorTemporada" id="podiosEquipesPorTemporada" class="form-select mt-3">
+                        <option value="" selected id="selectTemporadaPodiosEquipes">Selecione uma Temporada</option>
+                        @foreach($temporadas as $temporada)
+                            <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
+                        @endforeach
+                    </select>
+                </div>
 
                 <table class="m-5 tabelaEstatisticas" id="tabelaPodiosEquipes">
                     <tr>
@@ -316,8 +328,8 @@ margin: 0;
                 <h1 class="descricao-tabela">Pilotos</h1>
 
                 <div>
-                    <div>
-                        <select name="chegadasPilotosPorTemporada" id="chegadasPilotosPorTemporada" class="form-select mt-3" style="width: 50%; margin:0 auto;">
+                    <div style="width: 50%; margin:0 auto;" >
+                        <select name="chegadasPilotosPorTemporada" id="chegadasPilotosPorTemporada" class="form-select mt-3">
                             <option value="" selected id="selectTemporadaChegadasPilotos">Selecione uma Temporada</option>
                         @foreach($temporadas as $temporada)
                             <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
@@ -383,8 +395,8 @@ margin: 0;
                 <h1 class="descricao-tabela">Equipes</h1>
 
                 <div>
-                    <div>
-                        <select name="chegadasEquipesPorTemporada" id="chegadasEquipesPorTemporada" class="form-select mt-3" style="width: 50%; margin:0 auto;">
+                    <div style="width: 50%; margin:0 auto;">
+                        <select name="chegadasEquipesPorTemporada" id="chegadasEquipesPorTemporada" class="form-select mt-3">
                             <option value="" selected id="selectTemporadaChegadasEquipes">Selecione uma Temporada</option>
                         @foreach($temporadas as $temporada)
                             <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
