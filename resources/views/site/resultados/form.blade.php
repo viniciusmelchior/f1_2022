@@ -2,6 +2,7 @@
 
 @php 
     use App\Models\Site\Resultado;
+    use App\Models\Site\ImagensCorrida;
     use Illuminate\Support\Facades\Artisan;
     $route = route('resultados.update', [$corrida->id]);
     $method = method_field('POST');
@@ -29,7 +30,7 @@
                 <h2>GP de {{$corrida->pista->nome}} - {{$corrida->temporada->ano->ano}}</h2>
             @endif
         </div>
-    <form method="POST" action="{{ $route }}" class="col-md-9 mt-3 mb-3">
+    <form method="POST" action="{{ $route }}" class="col-md-9 mt-3 mb-3"  enctype="multipart/form-data">
         {{ $method }}
         @csrf
 
@@ -55,7 +56,7 @@
                     <option value="Stock2">Stock Car (Corrida 2)</option>
                 </select>
             </div>
-            <div class="mb-3">
+            {{-- <div class="mb-3">
                 <label for="qtd_safety_car" class="form-label">Quantidade Safety Car</label>
                 <input
                     type="number"
@@ -67,8 +68,8 @@
                     @else 
                         value="0">
                     @endif 
-            </div>
-            <div class="mb-3 mt-3">
+            </div> --}}
+            {{-- <div class="mb-3 mt-3">
                 <label for="dificuldade_ia" class="form-label">Dificuldade IA</label>
                 <input
                     type="number"
@@ -80,9 +81,9 @@
                     @else 
                         value="">
                     @endif 
-            </div>
+            </div> --}}
 
-            <div class="form-group form-check mt-3 mb-3">
+           {{--  <div class="form-group form-check mt-3 mb-3">
                 <input
                 type="checkbox"
                 class="form-check-input"
@@ -91,7 +92,7 @@
                 value="S"
                 >
                 <label class="form-check-label" for="flg_super_corrida">Super Corrida F1</label>
-            </div>
+            </div> --}}
 
             <hr>
 
@@ -112,6 +113,27 @@
                     <label for="inputFileLargadaGridInvertido">Upload JSON Grid Invertido</label>
                     <br>
                     <input type="file" id="inputFileLargadaGridInvertido">
+                   
+                </div>
+
+                <hr>
+
+                <div style="margin-bottom: 25px;">
+                    <label for="inputFileLargadaGridInvertido">Arquivos da corrida</label>
+                    <br>
+                    <input type="file" id="imagens_corrida" name="imagens_corrida[]" multiple>
+                    <!--adicionar validação que verifica se o evento já possui arquivos salvos -->
+                    @if(count(ImagensCorrida::getImagensCorrida($corrida->id)) > 0)
+                        <div class="mt-2">
+                            <span style="font-style: italic; color: red;">*Corrida já possui arquivos salvos</span>
+                        </div>
+
+                        <div class="mt-2">
+                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#photoModal">
+                                Visualizar arquivos
+                            </button>
+                        </div>
+                    @endif
                 </div>
             </div>
 
@@ -286,6 +308,8 @@
         <a href="{{route('temporadas.index')}}" class="btn btn-secondary ml-3">Voltar</a>
       </form>
    </div>
+
+   @include('site.resultados._modal')
 @endsection
 <script type="module">
 document.getElementById('inputFileLargada').addEventListener('change', function(event) {
@@ -574,5 +598,16 @@ document.getElementById('inputFileLargada').addEventListener('change', function(
             // $(".linha_resultados").addClass("d-none");
             location.reload()
         }
+    });
+
+    var swiper = new Swiper('.swiper-container', {
+        pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+        },
+        navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+        },
     });
 </script>

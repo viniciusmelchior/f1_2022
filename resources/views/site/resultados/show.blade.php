@@ -1,3 +1,7 @@
+@php 
+    use App\Models\Site\ImagensCorrida;
+@endphp
+
 @extends('layouts.main')
 
 <style>
@@ -171,6 +175,15 @@
                         {{ $model->links() }}
                     </div>
                 </div>
+
+                @if(count(ImagensCorrida::getImagensCorrida($corrida->id)) > 0)
+                    <div class="mt-2">
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#photoModal">
+                            Visualizar arquivos
+                        </button>
+                    </div>
+                @endif
+            
               </div>
               <div class="col-md-9 bg-dark text-light">
                 <div class="race-title">
@@ -251,6 +264,8 @@
        </div>
     </div>
 </div>
+
+@include('site.resultados._modal')
 
 <script>
     function sortTable(n) {

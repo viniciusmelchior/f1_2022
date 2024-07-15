@@ -14,6 +14,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Mail;
 use App\Models\Site\ForcaPiloto;
 use App\Models\Site\ForcaEquipe;
+use App\Models\Site\ImagensCorrida;
 
 class ResultadoController extends Controller
 {
@@ -105,6 +106,7 @@ class ResultadoController extends Controller
      */
     public function update(Request $request, $id)
     {   
+        // dd($request->all());
         $corrida = Corrida::where('id', $id)->where('user_id', Auth::user()->id)->first();
         $corrida->volta_rapida = $request->volta_rapida;
         $corrida->condicao_id = $request->condicao_id;
@@ -125,6 +127,23 @@ class ResultadoController extends Controller
         }
 
         $corrida->update();
+
+        if($request->hasfile('imagens_corrida')){
+            foreach($request->file('imagens_corrida') as $file){
+                if (is_object($file) && method_exists($file, 'getClientOriginalName')) {
+                    // Cria um nome único para cada arquivo
+                    $name = time().'_'.$file->getClientOriginalName();
+                    $name = str_replace(' ', '', $name);
+                    // Salva o arquivo no diretório 'uploads'
+                    $file->move(public_path('images'), $name);
+                    $imagem_corrida = new ImagensCorrida();
+                    $imagem_corrida->corrida_id = $corrida_id = $corrida->id;
+                    $imagem_corrida->user_id = $user_id = Auth::user()->id;
+                    $imagem_corrida->imagem = $name;
+                    $imagem_corrida->save();
+                }
+            }
+        }
 
         foreach ($request->pilotoEquipe_id as $key => $pilotoEquipe) {
             $model = Resultado::where('user_id', Auth::user()->id)->where('pilotoEquipe_id', $pilotoEquipe)->where('corrida_id', $corrida->id)->first();
