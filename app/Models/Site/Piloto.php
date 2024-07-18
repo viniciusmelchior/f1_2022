@@ -64,4 +64,22 @@ class Piloto extends Model
             'totalPontos' => $posicaoPiloto != '-' ? $totalPontos : '-'
         ];
     }
+
+    public static function getInfoPorEquipe($idPiloto, $equipeId, $posicao_minima_chegada = 1, $posicao_maxima_chegada = 1000, $posicao_minima_largada = 1, $posicao_maxima_largada = 1000){
+
+        $info = Resultado::join('corridas', 'resultados.corrida_id', '=', 'corridas.id')
+                                                ->join('piloto_equipes', 'resultados.pilotoEquipe_id', '=', 'piloto_equipes.id')
+                                                ->join('equipes', 'equipes.id', 'piloto_equipes.equipe_id')
+                                                ->where('resultados.user_id', Auth::user()->id)
+                                                ->where('piloto_equipes.piloto_id', $idPiloto)
+                                                ->where('equipes.id', $equipeId)
+                                                ->where('resultados.largada', '>=', $posicao_minima_largada)
+                                                ->where('resultados.largada', '<=', $posicao_maxima_largada)
+                                                ->where('corridas.flg_sprint', '<>', 'S')
+                                                ->where('resultados.chegada', '>=', $posicao_minima_chegada)
+                                                ->where('resultados.chegada', '<=', $posicao_maxima_chegada)
+                                                ->count();
+
+        return $info;
+    }
 }

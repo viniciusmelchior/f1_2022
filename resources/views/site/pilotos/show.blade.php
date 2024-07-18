@@ -274,7 +274,9 @@
             <table class="mt-5 mb-5 tabela-historico-equipes">
                 <tr>
                     <th>Equipe</th>
-                    <th>Quantidade</th>
+                    <th>Corridas</th>
+                    <th>Vitórias</th>
+                    <th>Poles</th>
                 </tr>
                 @foreach($corridasPorEquipe as $corridaPorEquipe)
                     <tr>
@@ -283,6 +285,8 @@
                             <span style="display: inline-block; vertical-align: middle;">{{$corridaPorEquipe->nome}}</span>
                         </td>
                         <td>{{$corridaPorEquipe->quantidade}}</td>
+                        <td>{{Piloto::getInfoPorEquipe($modelPiloto->id, $corridaPorEquipe->equipe_id, 1, 1, 1, 1000)}}</td>
+                        <td>{{Piloto::getInfoPorEquipe($modelPiloto->id, $corridaPorEquipe->equipe_id, 1, 1000, 1,1)}}</td>
                     </tr>
                 @endforeach
             </table>

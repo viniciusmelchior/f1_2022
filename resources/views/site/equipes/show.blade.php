@@ -2,6 +2,7 @@
  use App\Models\Site\Corrida;
  use App\Models\Site\Resultado;
  use App\Models\Site\Equipe;
+ use App\Models\Site\Piloto;
  use App\Models\Site\PilotoEquipe;
 @endphp
 @extends('layouts.main')
@@ -297,7 +298,9 @@
             <table class="mt-5 mb-5 tabela-historico-equipes">
                 <tr>
                     <th>Piloto</th>
-                    <th>Quantidade</th>
+                    <th>Corridas</th>
+                    <th>Vitórias</th>
+                    <th>Poles</th>
                 </tr>
                 @foreach($corridasPorPiloto as $corridaPorPiloto)
                     <tr>
@@ -306,6 +309,8 @@
                             <span style="display: inline-block; vertical-align: middle;">{{$corridaPorPiloto->nome}} {{$corridaPorPiloto->sobrenome}}</span>
                         </td>
                         <td>{{$corridaPorPiloto->quantidade}}</td>
+                        <td>{{Piloto::getInfoPorEquipe($corridaPorPiloto->piloto_id, $modelEquipe->id, 1, 1, 1, 1000)}}</td>
+                        <td>{{Piloto::getInfoPorEquipe($corridaPorPiloto->piloto_id, $modelEquipe->id, 1, 1000, 1,1)}}</td>
                     </tr>
                 @endforeach
             </table>
