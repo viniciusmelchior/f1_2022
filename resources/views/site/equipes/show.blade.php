@@ -301,6 +301,8 @@
                     <th>Corridas</th>
                     <th>Vitórias</th>
                     <th>Poles</th>
+                    <th>Podios</th>
+                    <th>Top 10</th>
                 </tr>
                 @foreach($corridasPorPiloto as $corridaPorPiloto)
                     <tr>
@@ -311,6 +313,8 @@
                         <td>{{$corridaPorPiloto->quantidade}}</td>
                         <td>{{Piloto::getInfoPorEquipe($corridaPorPiloto->piloto_id, $modelEquipe->id, 1, 1, 1, 1000)}}</td>
                         <td>{{Piloto::getInfoPorEquipe($corridaPorPiloto->piloto_id, $modelEquipe->id, 1, 1000, 1,1)}}</td>
+                        <td>{{Piloto::getInfoPorEquipe($corridaPorPiloto->piloto_id, $modelEquipe->id, 1, 3, 1, 1000)}}</td>
+                        <td>{{Piloto::getInfoPorEquipe($corridaPorPiloto->piloto_id, $modelEquipe->id, 1, 10, 1, 1000)}}</td>
                     </tr>
                 @endforeach
             </table>

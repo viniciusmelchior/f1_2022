@@ -271,12 +271,14 @@
 
         <section class="resultados-por-corrida">
             <h1>Corridas por equipe</h1>
-            <table class="mt-5 mb-5 tabela-historico-equipes">
+            <table class="mt-5 mb-5 tabela-historico-equipes" style="width: 40%!important">
                 <tr>
                     <th>Equipe</th>
                     <th>Corridas</th>
                     <th>Vitórias</th>
                     <th>Poles</th>
+                    <th>Podios</th>
+                    <th>Top 10</th>
                 </tr>
                 @foreach($corridasPorEquipe as $corridaPorEquipe)
                     <tr>
@@ -287,6 +289,8 @@
                         <td>{{$corridaPorEquipe->quantidade}}</td>
                         <td>{{Piloto::getInfoPorEquipe($modelPiloto->id, $corridaPorEquipe->equipe_id, 1, 1, 1, 1000)}}</td>
                         <td>{{Piloto::getInfoPorEquipe($modelPiloto->id, $corridaPorEquipe->equipe_id, 1, 1000, 1,1)}}</td>
+                        <td>{{Piloto::getInfoPorEquipe($modelPiloto->id, $corridaPorEquipe->equipe_id, 1, 3, 1, 1000)}}</td>
+                        <td>{{Piloto::getInfoPorEquipe($modelPiloto->id, $corridaPorEquipe->equipe_id, 1, 10, 1, 1000)}}</td>
                     </tr>
                 @endforeach
             </table>
