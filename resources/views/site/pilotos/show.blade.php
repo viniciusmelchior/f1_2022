@@ -336,6 +336,10 @@
 
         <section class="" style="height: auto;">
             <h1 class="mb-3" style="text-transform:uppercase;">Histórico de Vitórias</h1>
+            <p class="text-center">Corridas seguidas sem vitória: {{$corridaSeguidasSemVencer}}</p>
+            {{-- <span>Corridas seguidas sem pole position: {{$corridaSeguidasSemVencer}}</span>
+            <span>Ultima Vitória Barcelona</span>
+            <span>Ultima Pole Position Barcelona </span> --}}
                 <table class="mt-5 mb-5 tabela-historico-equipes">
                     <tr>
                         <th>Temporada</th>
@@ -413,6 +417,7 @@
 
         <section class="" style="height: auto;">
             <h1 class="mb-3" style="text-transform:uppercase;">Histórico de Pole Positions</h1>
+            <p class="text-center">Corridas seguidas sem pole position: {{$corridaSeguidasSemPolePosition}}</p>
                 <table class="mt-5 mb-5 tabela-historico-equipes">
                     <tr>
                         <th>Temporada</th>

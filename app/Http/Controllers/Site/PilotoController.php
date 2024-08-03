@@ -100,8 +100,8 @@ class PilotoController extends Controller
                                     ->where('resultados.user_id', Auth::user()->id)
                                     ->where('corridas.flg_sprint', 'N')
                                     ->where('piloto_equipes.piloto_id', $modelPiloto->id)
-                                    ->orderBy('temporadas.id', 'DESC')
-                                    ->orderBy('resultados.id', 'DESC')
+                                    ->orderBy('resultados.id', 'ASC')
+                                    ->orderBy('temporadas.id', 'ASC')
                                     ->get();
     
         $totCorridas = 0;
@@ -122,8 +122,15 @@ class PilotoController extends Controller
         $pistasVitorias = [];
         $pistasPoles = [];
         $corridasDisputadas = [];
+        $corridaSeguidasSemVencer = 0;
+        $corridaSeguidasSemPolePosition = 0;
         
         foreach($resultados as $resultado){
+
+            //ao iniciar o loop eu ja suponho que ele nao venceu e nem fez pole position
+            $corridaSeguidasSemVencer++;
+            $corridaSeguidasSemPolePosition++;
+
             if($resultado->pilotoEquipe->piloto->id == $id){
                 $totCorridas++;
                 $corridasDisputadas[] = $resultado->corrida->pista->nome;
@@ -135,6 +142,7 @@ class PilotoController extends Controller
                     $totVitorias++;
                     $listagemVitorias[] = $resultado;
                     $pistasVitorias[] = $resultado->corrida->pista->nome;
+                    $corridaSeguidasSemVencer = 0;
                 }
             }
 
@@ -144,6 +152,7 @@ class PilotoController extends Controller
                     $totPoles++;
                     $listagemPolePositions[] = $resultado;
                     $pistasPoles[] = $resultado->corrida->pista->nome;
+                    $corridaSeguidasSemPolePosition = 0;
                 }
             }
 
@@ -323,7 +332,7 @@ class PilotoController extends Controller
         $polesPorPista = array_count_values($pistasPoles);
         arsort($polesPorPista);
 
-        return view('site.pilotos.show', compact('modelPiloto','totTitulos','totAbandonos', 'totCorridas', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas', 'equipes','mediaChegada','gridMedio','temporadasDisputadas','pontuacaoPorTemporada','resultadosPorCorrida','temporadas','listagemVitorias', 'listagemPolePositions', 'corridasPorEquipe','vitoriasPorPista', 'polesPorPista','pistasEmQueOPilotoNaoVenceu','pistasEmQueOPilotoNaoFoiPolePosition'));
+        return view('site.pilotos.show', compact('modelPiloto','totTitulos','totAbandonos', 'totCorridas', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas', 'equipes','mediaChegada','gridMedio','temporadasDisputadas','pontuacaoPorTemporada','resultadosPorCorrida','temporadas','listagemVitorias', 'listagemPolePositions', 'corridasPorEquipe','vitoriasPorPista', 'polesPorPista','pistasEmQueOPilotoNaoVenceu','pistasEmQueOPilotoNaoFoiPolePosition', 'corridaSeguidasSemVencer', 'corridaSeguidasSemPolePosition'));
     }
 
     /**

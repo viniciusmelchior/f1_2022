@@ -92,7 +92,7 @@ class ResultadoController extends Controller
     {
         $corrida = Corrida::where('id', $id)->first();
         $condicoesClimaticas = CondicaoClimatica::where('user_id', Auth::user()->id)->get();
-        $model = PilotoEquipe::where('user_id', Auth::user()->id)->where('ano_id', $corrida->temporada->ano_id)->where('flg_ativo', 'S')->orderBy('equipe_id')->get();
+        $model = PilotoEquipe::where('user_id', Auth::user()->id)->where('ano_id', $corrida->temporada->ano_id)->where('flg_ativo', 'S')->orderBy('id')->get();
 
         return view('site.resultados.form', compact('corrida', 'model', 'condicoesClimaticas'));
     }

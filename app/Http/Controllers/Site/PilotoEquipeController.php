@@ -20,10 +20,11 @@ class PilotoEquipeController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index()
-    {
+    {   
+        $anos = Ano::where('user_id', Auth::user()->id)->orderBy('ano', 'DESC')->get();
         $pilotoEquipes = PilotoEquipe::where('user_id', Auth::user()->id)->orderBy('ano_id', 'DESC')->orderBy('equipe_id')->get();
 
-        return view('site.pilotoEquipe.index', compact('pilotoEquipes'));
+        return view('site.pilotoEquipe.index', compact('pilotoEquipes', 'anos'));
     }
 
     /**
@@ -68,6 +69,37 @@ class PilotoEquipeController extends Controller
         $pilotoEquipe->save();
 
         return redirect()->back();
+    }
+
+    public function replicarPilotoEquipe(Request $request){
+       try {
+			// dd($request->all());
+
+			$pilotoEquipeParaReplicar = PilotoEquipe::find($request->pilotoEquipe_id);
+
+			if($pilotoEquipeParaReplicar){
+				$pilotoEquipe = new PilotoEquipe();
+				$pilotoEquipe->piloto_id = $pilotoEquipeParaReplicar->piloto_id;
+				$pilotoEquipe->equipe_id = $pilotoEquipeParaReplicar->equipe_id;
+				$pilotoEquipe->modelo_carro = $pilotoEquipeParaReplicar->modelo_carro;
+				$pilotoEquipe->user_id = Auth::user()->id;
+				$pilotoEquipe->ano_id = $request->ano_id;
+				$pilotoEquipe->flg_ativo = 'S';
+				$pilotoEquipe->skin_id = $pilotoEquipeParaReplicar->skin_id;
+
+			if ($request->has('flg_super_corrida')) {
+				$pilotoEquipe->flg_super_corrida = $pilotoEquipeParaReplicar->flg_super_corrida;
+			} else {
+				$pilotoEquipe->flg_super_corrida = 'N';
+			}
+
+			$pilotoEquipe->save();
+
+			return redirect()->back()->with('status', 'Piloto/Equipe replicado com sucesso');;
+			}
+       } catch (\Throwable $th) {
+        	throw $th;
+       }
     }
 
     /**

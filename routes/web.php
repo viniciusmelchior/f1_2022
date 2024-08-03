@@ -123,6 +123,7 @@ route::get('/eventos/delete', [EventoController::class, 'destroy'])->name('event
 /**Relação de Pilotos e Equipes (montagem das duplas de pilotos por equipe) */
 route::get('/pilotoEquipe/create', [PilotoEquipeController::class, 'create'])->name('pilotoEquipe.create')->middleware('auth');
 route::post('/pilotoEquipe/store', [PilotoEquipeController::class, 'store'])->name('pilotoEquipe.store')->middleware('auth');
+route::post('/pilotoEquipe/replicarPilotoEquipe', [PilotoEquipeController::class, 'replicarPilotoEquipe'])->name('pilotoEquipe.replicarPilotoEquipe')->middleware('auth');
 route::get('/pilotoEquipe/index', [PilotoEquipeController::class, 'index'])->name('pilotoEquipe.index')->middleware('auth');
 route::get('/pilotoEquipe/edit/{id}', [PilotoEquipeController::class, 'edit'])->name('pilotoEquipe.edit')->middleware('auth');
 route::put('/pilotoEquipe/update/{id}', [PilotoEquipeController::class, 'update'])->name('pilotoEquipe.update')->middleware('auth');
