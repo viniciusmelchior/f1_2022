@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Site;
 use App\Http\Controllers\Controller;
 use App\Models\Site\Continente;
 use App\Models\Site\Corrida;
+use App\Models\Site\Resultado;
 use App\Models\Site\Pais;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class PaisesController extends Controller
 {
@@ -69,7 +71,80 @@ class PaisesController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show($id)
-    {
+    {   
+        $pais = Pais::find($id);
+
+        $totalVitoriasPorPiloto = DB::table('resultados')
+                                    ->join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                    ->join('pistas', 'pistas.id', '=', 'corridas.pista_id')
+                                    ->join('piloto_equipes', 'resultados.pilotoEquipe_id', '=', 'piloto_equipes.id')
+                                    ->join('pilotos', 'pilotos.id', '=', 'piloto_equipes.piloto_id')
+                                    ->join('equipes', 'equipes.id', '=', 'piloto_equipes.equipe_id')
+                                    ->where('resultados.user_id',  Auth::user()->id)
+                                    ->where('resultados.chegada', '>=', 1)
+                                    ->where('resultados.chegada', '<=', 1)
+                                    ->where('corridas.flg_sprint', 'N')
+                                    ->where('pistas.pais_id',  $pais->id)
+                                    ->select('pilotos.id as piloto_id',
+                                                DB::raw("CONCAT(pilotos.nome, ' ', pilotos.sobrenome) as piloto_nome_completo"),
+                                                DB::raw('COUNT(resultados.id) as vitorias'))
+                                    ->groupBy('pilotos.id', 'pilotos.nome')
+                                    ->orderByDesc('vitorias')
+                                    ->get();
+
+        $totalLargadasPorPiloto = DB::table('resultados')
+                                    ->join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                    ->join('pistas', 'pistas.id', '=', 'corridas.pista_id')
+                                    ->join('piloto_equipes', 'resultados.pilotoEquipe_id', '=', 'piloto_equipes.id')
+                                    ->join('pilotos', 'pilotos.id', '=', 'piloto_equipes.piloto_id')
+                                    ->join('equipes', 'equipes.id', '=', 'piloto_equipes.equipe_id')
+                                    ->where('resultados.user_id',  Auth::user()->id)
+                                    ->where('resultados.largada', '>=', 1)
+                                    ->where('resultados.largada', '<=', 1)
+                                    ->where('corridas.flg_sprint', 'N')
+                                    ->where('pistas.pais_id',  $pais->id)
+                                    ->select('pilotos.id as piloto_id',
+                                                DB::raw("CONCAT(pilotos.nome, ' ', pilotos.sobrenome) as piloto_nome_completo"),
+                                                DB::raw('COUNT(resultados.id) as largadas'))
+                                    ->groupBy('pilotos.id', 'pilotos.nome')
+                                    ->orderByDesc('largadas')
+                                    ->get();
+        
+        $totalVitoriasPorEquipe = DB::table('resultados')
+                                    ->join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                    ->join('pistas', 'pistas.id', '=', 'corridas.pista_id')
+                                    ->join('piloto_equipes', 'resultados.pilotoEquipe_id', '=', 'piloto_equipes.id')
+                                    ->join('pilotos', 'pilotos.id', '=', 'piloto_equipes.piloto_id')
+                                    ->join('equipes', 'equipes.id', '=', 'piloto_equipes.equipe_id')
+                                    ->where('resultados.user_id',  Auth::user()->id)
+                                    ->where('resultados.chegada', '>=', 1)
+                                    ->where('resultados.chegada', '<=', 1)
+                                    ->where('corridas.flg_sprint', 'N')
+                                    ->where('pistas.pais_id',  $pais->id)
+                                    ->select('equipes.id as equipe_id',
+                                                'equipes.nome as equipe_nome',
+                                                DB::raw('COUNT(resultados.id) as vitorias'))
+                                    ->groupBy('equipes.id', 'equipes.nome')
+                                    ->orderByDesc('vitorias')
+                                    ->get();
+
+        $totalLargadasPorEquipe = DB::table('resultados')
+                                    ->join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                    ->join('pistas', 'pistas.id', '=', 'corridas.pista_id')
+                                    ->join('piloto_equipes', 'resultados.pilotoEquipe_id', '=', 'piloto_equipes.id')
+                                    ->join('pilotos', 'pilotos.id', '=', 'piloto_equipes.piloto_id')
+                                    ->join('equipes', 'equipes.id', '=', 'piloto_equipes.equipe_id')
+                                    ->where('resultados.user_id',  Auth::user()->id)
+                                    ->where('resultados.largada', '>=', 1)
+                                    ->where('resultados.largada', '<=', 1)
+                                    ->where('corridas.flg_sprint', 'N')
+                                    ->where('pistas.pais_id',  $pais->id)
+                                    ->select('equipes.id as equipe_id',
+                                                'equipes.nome as equipe_nome',
+                                                DB::raw('COUNT(resultados.id) as largadas'))
+                                    ->groupBy('equipes.id', 'equipes.nome')
+                                    ->orderByDesc('largadas')
+                                    ->get();
 
         $resultadoCorridas = Corrida::where('user_id', Auth::user()->id)
             ->whereHas('pista', function ($query) use ($id) {
@@ -80,10 +155,178 @@ class PaisesController extends Controller
             ->get();
 
         if (count($resultadoCorridas) > 0) {
-            return view('site.paises.show', compact('resultadoCorridas'));
+            return view('site.paises.show', compact('resultadoCorridas', 'totalVitoriasPorPiloto', 'totalVitoriasPorEquipe', 'totalLargadasPorPiloto', 'totalLargadasPorEquipe'));
         } else {
             return redirect()->route('paises.index')->with('error', 'Não existem corridas disputadas no país selecionado');
         }
+    }
+
+    /**
+     * Função responsável por buscar e montar a tabela de chegadas, de acordo com o que foi colocado nos inputs de inicio e fim
+     */
+    public function ajaxGetChegadasPilotos(Request $request){
+        
+        try {
+
+            $inicio = $request->inicio;
+            $fim = $request->fim;
+            $pais_id = $request->pais_id;
+           
+            $totalVitoriasPorPiloto = DB::table('resultados')
+                                        ->join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                        ->join('pistas', 'pistas.id', '=', 'corridas.pista_id')
+                                        ->join('piloto_equipes', 'resultados.pilotoEquipe_id', '=', 'piloto_equipes.id')
+                                        ->join('pilotos', 'pilotos.id', '=', 'piloto_equipes.piloto_id')
+                                        ->join('equipes', 'equipes.id', '=', 'piloto_equipes.equipe_id')
+                                        ->where('resultados.user_id',  Auth::user()->id)
+                                        ->where('resultados.chegada', '>=', $inicio)
+                                        ->where('resultados.chegada', '<=', $fim)
+                                        ->where('corridas.flg_sprint', 'N')
+                                        ->where('pistas.pais_id',  $pais_id)
+                                        ->select('pilotos.id as piloto_id',
+                                                    DB::raw("CONCAT(pilotos.nome, ' ', pilotos.sobrenome) as piloto_nome_completo"),
+                                                    DB::raw('COUNT(resultados.id) as chegadas'))
+                                        ->groupBy('pilotos.id', 'pilotos.nome')
+                                        ->orderByDesc('chegadas')
+                                        ->get();
+
+            return response()->json([
+                'message' => 'OK',
+                'totalVitoriasPorPiloto' => $totalVitoriasPorPiloto
+            ]);
+        } catch (\Throwable $th) {
+
+            return response()->json([
+                'message' => 'Erro na requisição'
+            ]);
+
+        }
+
+    }
+
+    /**
+     * Função responsável por buscar e montar a tabela de chegadas, de acordo com o que foi colocado nos inputs de inicio e fim
+     */
+    public function ajaxGetChegadasEquipes(Request $request){
+        
+        try {
+
+            $inicio = $request->inicio;
+            $fim = $request->fim;
+            $pais_id = $request->pais_id;
+           
+            $totalVitoriasPorEquipe = DB::table('resultados')
+                                    ->join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                    ->join('pistas', 'pistas.id', '=', 'corridas.pista_id')
+                                    ->join('piloto_equipes', 'resultados.pilotoEquipe_id', '=', 'piloto_equipes.id')
+                                    ->join('pilotos', 'pilotos.id', '=', 'piloto_equipes.piloto_id')
+                                    ->join('equipes', 'equipes.id', '=', 'piloto_equipes.equipe_id')
+                                    ->where('resultados.user_id',  Auth::user()->id)
+                                    ->where('resultados.chegada', '>=', $inicio)
+                                    ->where('resultados.chegada', '<=', $fim)
+                                    ->where('corridas.flg_sprint', 'N')
+                                    ->where('pistas.pais_id', $pais_id)
+                                    ->select('equipes.id as equipe_id',
+                                                'equipes.nome as equipe_nome',
+                                                DB::raw('COUNT(resultados.id) as chegadas'))
+                                    ->groupBy('equipes.id', 'equipes.nome')
+                                    ->orderByDesc('chegadas')
+                                    ->get();
+
+            return response()->json([
+                'message' => 'OK',
+                'totalVitoriasPorEquipe' => $totalVitoriasPorEquipe
+            ]);
+        } catch (\Throwable $th) {
+
+            return response()->json([
+                'message' => 'Erro na requisição'
+            ]);
+
+        }
+
+    }
+
+    /**
+     * Função responsável por buscar e montar a tabela de chegadas, de acordo com o que foi colocado nos inputs de inicio e fim
+     */
+    public function ajaxGetLargadasPilotos(Request $request){
+        
+        try {
+            $inicio = $request->inicio;
+            $fim = $request->fim;
+            $pais_id = $request->pais_id;
+           
+            $totalLargadasPorPiloto = DB::table('resultados')
+                                        ->join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                        ->join('pistas', 'pistas.id', '=', 'corridas.pista_id')
+                                        ->join('piloto_equipes', 'resultados.pilotoEquipe_id', '=', 'piloto_equipes.id')
+                                        ->join('pilotos', 'pilotos.id', '=', 'piloto_equipes.piloto_id')
+                                        ->join('equipes', 'equipes.id', '=', 'piloto_equipes.equipe_id')
+                                        ->where('resultados.user_id',  Auth::user()->id)
+                                        ->where('resultados.largada', '>=', $inicio)
+                                        ->where('resultados.largada', '<=', $fim)
+                                        ->where('corridas.flg_sprint', 'N')
+                                        ->where('pistas.pais_id',  $pais_id)
+                                        ->select('pilotos.id as piloto_id',
+                                                    DB::raw("CONCAT(pilotos.nome, ' ', pilotos.sobrenome) as piloto_nome_completo"),
+                                                    DB::raw('COUNT(resultados.id) as largadas'))
+                                        ->groupBy('pilotos.id', 'pilotos.nome')
+                                        ->orderByDesc('largadas')
+                                        ->get();
+
+            return response()->json([
+                'message' => 'OK',
+                'totalLargadasPorPiloto' => $totalLargadasPorPiloto
+            ]);
+        } catch (\Throwable $th) {
+
+            return response()->json([
+                'message' => 'Erro na requisição'
+            ]);
+
+        }
+
+    }
+
+    public function ajaxGetLargadasEquipes(Request $request){
+        
+        try {
+            // dd("largadas Equipes");
+            $inicio = $request->inicio;
+            $fim = $request->fim;
+            $pais_id = $request->pais_id;
+           
+            $totalLargadasPorEquipe = DB::table('resultados')
+                                        ->join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                        ->join('pistas', 'pistas.id', '=', 'corridas.pista_id')
+                                        ->join('piloto_equipes', 'resultados.pilotoEquipe_id', '=', 'piloto_equipes.id')
+                                        ->join('pilotos', 'pilotos.id', '=', 'piloto_equipes.piloto_id')
+                                        ->join('equipes', 'equipes.id', '=', 'piloto_equipes.equipe_id')
+                                        ->where('resultados.user_id',  Auth::user()->id)
+                                        ->where('resultados.largada', '>=', $inicio)
+                                        ->where('resultados.largada', '<=', $fim)
+                                        ->where('corridas.flg_sprint', 'N')
+                                        ->where('pistas.pais_id',  $pais_id)
+                                        ->select('equipes.id as equipe_id',
+                                                    'equipes.nome',
+                                                    DB::raw('COUNT(resultados.id) as largadas'))
+                                        ->groupBy('equipes.id', 'equipes.nome')
+                                        ->orderByDesc('largadas')
+                                        ->get();
+
+            return response()->json([
+                'message' => 'OK',
+                'totalLargadasPorEquipe' => $totalLargadasPorEquipe
+            ]);
+        } catch (\Throwable $th) {
+
+            return response()->json([
+                'message' => 'Erro na requisição'
+            ]);
+
+        }
+
     }
 
     /**

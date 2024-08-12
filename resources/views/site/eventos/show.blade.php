@@ -165,7 +165,7 @@ use App\Models\Site\PilotoEquipe;
                         -
                         @endif 
                     </td>
-                    <td>
+                    <td class="text-center">
                         <a data-toggle="tooltip" data-placement="top" title="Visualizar" class="" href="{{route('resultados.show', [$resultadoCorrida->id])}}"><i class="bi bi-eye-fill" style="color: black;"></i></a>
                     </td>
                 </tr>

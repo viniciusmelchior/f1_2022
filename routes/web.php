@@ -61,6 +61,10 @@ route::get('/paises/edit/{id}', [PaisesController::class, 'edit'])->name('paises
 route::put('/paises/update/{id}', [PaisesController::class, 'update'])->name('paises.update')->middleware('auth');
 route::get('/paises/show/{id}', [PaisesController::class, 'show'])->name('paises.show')->middleware('auth');
 route::get('/paises/delete', [PaisesController::class, 'destroy'])->name('paises.delete')->middleware('auth');
+route::post('/paises/ajaxGetChegadasPilotos', [PaisesController::class, 'ajaxGetChegadasPilotos'])->name('paises.ajaxGetChegadasPilotos')->middleware('auth');
+route::post('/paises/ajaxGetLargadasPilotos', [PaisesController::class, 'ajaxGetLargadasPilotos'])->name('paises.ajaxGetLargadasPilotos')->middleware('auth');
+route::post('/paises/ajaxGetChegadasEquipes', [PaisesController::class, 'ajaxGetChegadasEquipes'])->name('paises.ajaxGetChegadasEquipes')->middleware('auth');
+route::post('/paises/ajaxGetLargadasEquipes', [PaisesController::class, 'ajaxGetLargadasEquipes'])->name('paises.ajaxGetLargadasEquipes')->middleware('auth');
 
 /**Pilotos */
 route::get('/pilotos/create', [PilotoController::class, 'create'])->name('pilotos.create')->middleware('auth');
