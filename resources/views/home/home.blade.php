@@ -41,6 +41,7 @@ margin: 0;
 
 .tabelaEstatisticas td{
     text-align: center!important;
+    text-wrap: nowrap;
 }
 
 .tabelaResultadosCorridas th, td{
