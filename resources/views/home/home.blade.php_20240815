@@ -490,7 +490,6 @@ margin: 0;
     $resultadoCorridas = $resultadoCorridas->where('flg_sprint', "<>", 'S');
     $resultadoCorridas = $resultadoCorridas->sortByDesc('ordem');
     $resultadoCorridas = $resultadoCorridas->sortByDesc('temporada_id');
-
     @endphp
 
     <hr>

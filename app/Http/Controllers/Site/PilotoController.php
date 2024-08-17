@@ -45,6 +45,29 @@ class PilotoController extends Controller
         return view('site.pilotos.form', compact('paises'));
     }
 
+    // public function listAllDrivers(){
+    //     return view('site.pilotos.allDrivers');
+    // }
+
+    // public function getAllDrivers(Request $request){
+        
+    //     $retorno = Piloto::with('pais');
+
+    //     if($request->busca){
+    //         $retorno = $retorno->where('nome', 'LIKE', '%'.$request->busca.'%');
+            
+    //         $retorno = $retorno->orWhereHas('pais', function($query) use ($request){
+    //             $query = $query->where('des_nome', 'LIKE', '%'.$request->busca.'%');
+    //         });
+    //     }
+
+    //     $retorno = $retorno->paginate($request->qtdResultados);
+
+    //     return response()->json([
+    //         'pilotos' => $retorno
+    //     ]);
+    // }
+
     /**
      * Store a newly created resource in storage.
      *

@@ -58,7 +58,8 @@
               <span class="link_name">Estatisticas</span>
             </a>
             <ul class="sub-menu blank">
-              <li><a class="link_name" href="{{route('home')}}">Estatisticas</a></li>
+              <li><a class="link_name" href="{{route('home')}}">Home (antiga)</a></li>
+              <li><a class="link_name" href="{{route('estatisticas')}}">Estatisticas</a></li>
               <li><a class="link_name" href="{{route('tempos')}}">Análises de Voltas</a></li>
             </ul>
           </li>
@@ -268,18 +269,11 @@
     sidebar.classList.toggle("close");
     });
 
-// In your Javascript (external .js resource or <script> tag)
-// $(document).ready(function() {
-//     $('select').select2({
-//        theme: 'classic'
-//     });
-// });
-
-$(document).ready(function() {
-    $('select:not(#selectReplicarPiloto)').select2({
-       theme: 'classic'
-    });
-});
+  $(document).ready(function() {
+      $('select:not(#selectReplicarPiloto, #qtdResultados)').select2({
+        theme: 'classic'
+      });
+  });
 
 
 </script>

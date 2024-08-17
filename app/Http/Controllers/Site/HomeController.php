@@ -6,9 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\Site\Resultado;
 use App\Models\Site\Temporada;
 use App\Models\Site\Titulo;
+use App\Models\Site\Corrida;
 use Illuminate\Http\Request;
+use App\Models\Site\PilotoEquipe;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 
 class HomeController extends Controller
 {
@@ -143,6 +148,285 @@ class HomeController extends Controller
             'totalTitulosPorPiloto',
             'totalTitulosPorEquipe'
         ));
+    }
+
+    public function chegada_pilotos(Request $request){
+        try {
+
+            $inicio = $request->inicio;
+            $fim = $request->fim;
+            $pais_id = $request->pais_id;
+           
+            $totalVitoriasPorPiloto = DB::table('resultados')
+                                        ->join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                        ->join('pistas', 'pistas.id', '=', 'corridas.pista_id')
+                                        ->join('piloto_equipes', 'resultados.pilotoEquipe_id', '=', 'piloto_equipes.id')
+                                        ->join('pilotos', 'pilotos.id', '=', 'piloto_equipes.piloto_id')
+                                        ->join('equipes', 'equipes.id', '=', 'piloto_equipes.equipe_id')
+                                        ->where('resultados.user_id',  Auth::user()->id)
+                                        ->where('resultados.chegada', '>=', $inicio)
+                                        ->where('resultados.chegada', '<=', $fim)
+                                        ->where('corridas.flg_sprint', 'N')
+                                        ->select('pilotos.id as piloto_id',
+                                                    DB::raw("CONCAT(pilotos.nome, ' ', pilotos.sobrenome) as piloto_nome_completo"),
+                                                    DB::raw('COUNT(resultados.id) as chegadas'))
+                                        ->groupBy('pilotos.id', 'pilotos.nome')
+                                        ->orderByDesc('chegadas')
+                                        ->get();
+
+            return response()->json([
+                'message' => 'OK',
+                'totalVitoriasPorPiloto' => $totalVitoriasPorPiloto
+            ]);
+        } catch (\Throwable $th) {
+
+            return response()->json([
+                'message' => 'Erro na requisição'
+            ]);
+        }
+    }
+
+    public function chegada_equipes(Request $request){
+        try {
+
+            $inicio = $request->inicio;
+            $fim = $request->fim;
+            $pais_id = $request->pais_id;
+           
+            $totalVitoriasPorEquipe = DB::table('resultados')
+                                    ->join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                    ->join('pistas', 'pistas.id', '=', 'corridas.pista_id')
+                                    ->join('piloto_equipes', 'resultados.pilotoEquipe_id', '=', 'piloto_equipes.id')
+                                    ->join('pilotos', 'pilotos.id', '=', 'piloto_equipes.piloto_id')
+                                    ->join('equipes', 'equipes.id', '=', 'piloto_equipes.equipe_id')
+                                    ->where('resultados.user_id',  Auth::user()->id)
+                                    ->where('resultados.chegada', '>=', $inicio)
+                                    ->where('resultados.chegada', '<=', $fim)
+                                    ->where('corridas.flg_sprint', 'N')
+                                    ->select('equipes.id as equipe_id',
+                                                'equipes.nome as equipe_nome',
+                                                DB::raw('COUNT(resultados.id) as chegadas'))
+                                    ->groupBy('equipes.id', 'equipes.nome')
+                                    ->orderByDesc('chegadas')
+                                    ->get();
+
+            return response()->json([
+                'message' => 'OK',
+                'totalVitoriasPorEquipe' => $totalVitoriasPorEquipe
+            ]);
+        } catch (\Throwable $th) {
+
+            return response()->json([
+                'message' => 'Erro na requisição'
+            ]);
+
+        }
+    }
+
+    public function largada_pilotos(Request $request){
+        try {
+            $inicio = $request->inicio;
+            $fim = $request->fim;
+            $pais_id = $request->pais_id;
+           
+            $totalLargadasPorPiloto = DB::table('resultados')
+                                        ->join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                        ->join('pistas', 'pistas.id', '=', 'corridas.pista_id')
+                                        ->join('piloto_equipes', 'resultados.pilotoEquipe_id', '=', 'piloto_equipes.id')
+                                        ->join('pilotos', 'pilotos.id', '=', 'piloto_equipes.piloto_id')
+                                        ->join('equipes', 'equipes.id', '=', 'piloto_equipes.equipe_id')
+                                        ->where('resultados.user_id',  Auth::user()->id)
+                                        ->where('resultados.largada', '>=', $inicio)
+                                        ->where('resultados.largada', '<=', $fim)
+                                        ->where('corridas.flg_sprint', 'N')
+                                        ->select('pilotos.id as piloto_id',
+                                                    DB::raw("CONCAT(pilotos.nome, ' ', pilotos.sobrenome) as piloto_nome_completo"),
+                                                    DB::raw('COUNT(resultados.id) as largadas'))
+                                        ->groupBy('pilotos.id', 'pilotos.nome')
+                                        ->orderByDesc('largadas')
+                                        ->get();
+
+            return response()->json([
+                'message' => 'OK',
+                'totalLargadasPorPiloto' => $totalLargadasPorPiloto
+            ]);
+        } catch (\Throwable $th) {
+
+            return response()->json([
+                'message' => 'Erro na requisição'
+            ]);
+
+        }
+    }
+
+    public function largada_equipes(Request $request){
+
+        try {
+
+            $inicio = $request->inicio;
+            $fim = $request->fim;
+            $pais_id = $request->pais_id;
+           
+            $totalLargadasPorEquipe = DB::table('resultados')
+                                        ->join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                        ->join('pistas', 'pistas.id', '=', 'corridas.pista_id')
+                                        ->join('piloto_equipes', 'resultados.pilotoEquipe_id', '=', 'piloto_equipes.id')
+                                        ->join('pilotos', 'pilotos.id', '=', 'piloto_equipes.piloto_id')
+                                        ->join('equipes', 'equipes.id', '=', 'piloto_equipes.equipe_id')
+                                        ->where('resultados.user_id',  Auth::user()->id)
+                                        ->where('resultados.largada', '>=', $inicio)
+                                        ->where('resultados.largada', '<=', $fim)
+                                        ->where('corridas.flg_sprint', 'N')
+                                        ->select('equipes.id as equipe_id',
+                                                    'equipes.nome',
+                                                    DB::raw('COUNT(resultados.id) as largadas'))
+                                        ->groupBy('equipes.id', 'equipes.nome')
+                                        ->orderByDesc('largadas')
+                                        ->get();
+
+            return response()->json([
+                'message' => 'OK',
+                'totalLargadasPorEquipe' => $totalLargadasPorEquipe
+            ]);
+        } catch (\Throwable $th) {
+
+            return response()->json([
+                'message' => 'Erro na requisição'
+            ]);
+
+        }
+    }
+
+    public function indexEstatisticas(){
+
+        //Calculo dos títulos conquistados pelos pilotos e equipes 
+
+        $titulosPorPilotos = [];
+        $titulosPorEquipes = [];
+
+        $titulos = Titulo::where('user_id', Auth::user()->id)->get();
+
+        foreach($titulos as $item){
+            array_push($titulosPorPilotos, $item->pilotoEquipe->piloto->nomeCompleto());
+            array_push($titulosPorEquipes, $item->equipe->nome);
+        }
+
+        $totalTitulosPorPiloto = array_count_values($titulosPorPilotos);
+        arsort($totalTitulosPorPiloto);
+
+        $totalTitulosPorEquipe = array_count_values($titulosPorEquipes);
+        arsort($totalTitulosPorEquipe);
+
+        return view('home.novaHome', compact('totalTitulosPorPiloto', 'totalTitulosPorEquipe'));
+    }
+
+    public function buscaResultadosCorrida(Request $request){
+
+        //collection vazia que será utilizada para dar vida ao backend. Os dados de primeiro, segunda, terceiro vão ser armazenados aí
+        $resultadoCorridas = collect([]);
+
+        // Página atual (normalmente obtida da request)
+        $page = Paginator::resolveCurrentPage();
+        
+        //primeiro encontra as corridas
+        $corridas = Corrida::where('user_id', Auth::user()->id)
+                            ->where('flg_sprint', 'N')
+                            ->get();
+
+        foreach ($corridas as $corrida) {
+
+            $resultados = Resultado::where(function($query) use ($corrida){
+                    $query->where('user_id', 3)
+                        ->where('corrida_id', $corrida->id)
+                        ->where('largada', 1);
+                    })
+                    ->orWhere(function($query) use ($corrida) {
+                        $query->where('user_id', 3)
+                            ->where('corrida_id', $corrida->id)
+                            ->where('chegada', '<=', 3);
+                    })
+                    ->get();
+
+            foreach($resultados as $resultado){
+
+                $resultadosCorrida['ordem'] = $resultado->corrida->ordem;
+                $resultadosCorrida['imagemPaisCorrida'] = $resultado->corrida->pista->pais->imagem;
+                $resultadosCorrida['resultadoID'] = $resultado->id;
+                $resultadosCorrida['temporada_id'] = $resultado->corrida->temporada->id;
+                $resultadosCorrida['pista'] = $resultado->corrida->pista->nome;
+                // $resultadosCorrida['voltaRapida'] = PilotoEquipe::find($resultado->corrida->volta_rapida)->piloto->nomeCompleto();
+                $voltaRapida = PilotoEquipe::find($resultado->corrida->volta_rapida);
+                $resultadosCorrida['voltaRapida'] = $voltaRapida->piloto->nomeCompleto();
+                $resultadosCorrida['equipeVoltaRapida'] = $voltaRapida->equipe->imagem;
+                $resultadosCorrida['temporada'] = substr($resultado->corrida->temporada->des_temporada, 0, strpos($resultado->corrida->temporada->des_temporada, ' '));
+
+                if($resultado->largada == 1){
+                    $resultadosCorrida['polePosition'] = $resultado->pilotoEquipe->piloto->nomeCompleto();
+                    $resultadosCorrida['equipePolePosition'] = $resultado->pilotoEquipe->equipe->imagem;
+                }
+
+                if($resultado->chegada == 1){
+                    $resultadosCorrida['primeiro'] = $resultado->pilotoEquipe->piloto->nomeCompleto();
+                    $resultadosCorrida['equipePrimeiro'] = $resultado->pilotoEquipe->equipe->imagem;
+                }
+
+                if($resultado->chegada == 2){
+                    $resultadosCorrida['segundo'] = $resultado->pilotoEquipe->piloto->nomeCompleto();
+                    $resultadosCorrida['equipeSegundo'] = $resultado->pilotoEquipe->equipe->imagem;
+                }
+
+                if($resultado->chegada == 3){
+                    $resultadosCorrida['terceiro'] = $resultado->pilotoEquipe->piloto->nomeCompleto();
+                    $resultadosCorrida['equipeTerceiro'] = $resultado->pilotoEquipe->equipe->imagem;
+                }
+            }
+
+            if(isset($resultadosCorrida['primeiro'])){
+                $resultadoCorridas->push($resultadosCorrida);
+            }
+
+        }   
+
+        if($request->busca){
+            $busca = $request->busca;
+    
+            //faz o filtro de acordo com a busca
+            $resultadoCorridas = $resultadoCorridas->filter(function ($item) use ($busca) {
+                return Str::contains($item['ordem'], $busca)
+                    || Str::contains($item['temporada'], $busca)
+                    || Str::contains($item['pista'], $busca)
+                    || Str::contains($item['polePosition'], $busca)
+                    || Str::contains($item['primeiro'], $busca) 
+                    || Str::contains($item['segundo'], $busca)
+                    || Str::contains($item['terceiro'], $busca)
+                    || Str::contains($item['voltaRapida'], $busca);
+            });
+        }
+
+        //Ordenação pelos campos 'temporada' e 'ordem'
+        $resultadoCorridas = $resultadoCorridas->sortBy([
+            ['temporada_id', 'DESC'],
+            ['ordem', 'DESC'],
+        ]);
+
+        $perPage = $request->qtdResultados == 'todos' ? $resultadoCorridas->count(): $request->qtdResultados;
+
+         // Dividindo a coleção com base na página atual e itens por página
+         $currentPageItems = $resultadoCorridas->slice(($page - 1) * $perPage, $perPage)->values();
+
+         // Criando o LengthAwarePaginator
+         $resultadosCorrida = new LengthAwarePaginator(
+            $currentPageItems,
+            $resultadoCorridas->count(), // Total de itens na coleção
+            $perPage,
+            $page,
+            ['path' => Paginator::resolveCurrentPath()] // Para gerar os links corretamente
+        );
+
+        return response()->json([
+            'resultadosCorrida' => $resultadosCorrida
+        ]);
+
     }
 
     public function ajaxGetVitoriasPilotoPorTemporada(Request $request){

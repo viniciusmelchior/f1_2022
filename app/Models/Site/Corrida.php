@@ -37,6 +37,10 @@ class Corrida extends Model
         return $this->hasOne(Resultado::class);
     }
 
+    // public function resultados(){
+    //     return $this->hasMany(Resultado::class);
+    // }
+
     public static function getInfoCorrida($corrida_id){
 
         $polePosition = '-';

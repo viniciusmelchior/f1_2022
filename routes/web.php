@@ -187,6 +187,12 @@ route::post('/ajax/ajaxGetPolesPilotosPorTemporada', [HomeController::class, 'aj
 
 route::post('/ajax/ajaxGetPolesEquipesPorTemporada', [HomeController::class, 'ajaxGetPolesEquipesPorTemporada'])->name('ajax.ajaxGetPolesEquipesPorTemporada')->middleware('auth');
 
+/**montagem da nova tela de HOME 16/08/2024 */
+route::post('/ajax/url_chegada_pilotos', [HomeController::class, 'chegada_pilotos'])->name('url_chegada_pilotos')->middleware('auth');
+route::post('/ajax/url_chegada_equipes', [HomeController::class, 'chegada_equipes'])->name('url_chegada_equipes')->middleware('auth');
+route::post('/ajax/url_largada_pilotos', [HomeController::class, 'largada_pilotos'])->name('url_largada_pilotos')->middleware('auth');
+route::post('/ajax/url_largada_equipes', [HomeController::class, 'largada_equipes'])->name('url_largada_equipes')->middleware('auth');
+
 /**Rotas Excel */
 Route::get('pilotos/export/{id}', [PilotoController::class, 'export'])->name('pilotos.export');
 
@@ -219,5 +225,13 @@ route::post('/ajax/ajaxGetChegadasEquipesPorTemporada', [HomeController::class, 
 route::get('tempos', function(){
     return view('site.listagemTempos.index');
 })->name('tempos')->middleware('auth');
+
+
+/**ESTUDOS PAGINACAO */
+// route::get('/allDrivers', [PilotoController::class, 'listAllDrivers'])->name('allDrivers');
+route::get('/estatisticas', [HomeController::class, 'indexEstatisticas'])->name('estatisticas');
+route::post('/buscaResultadosCorrida', [HomeController::class, 'buscaResultadosCorrida'])->name('buscaResultadosCorrida');
+// route::post('/getAllDrivers', [PilotoController::class, 'getAllDrivers'])->name('getAllDrivers');
+
 
 
