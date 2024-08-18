@@ -156,6 +156,14 @@ class HomeController extends Controller
             $inicio = $request->inicio;
             $fim = $request->fim;
             $pais_id = $request->pais_id;
+            $temporada_id = $request->temporada_id;
+
+            $operadorConsultaTemporada = '=';
+
+            if($temporada_id == null){
+                $operadorConsultaTemporada = '>';
+                $temporada_id = 0;
+            }
            
             $totalVitoriasPorPiloto = DB::table('resultados')
                                         ->join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
@@ -167,6 +175,7 @@ class HomeController extends Controller
                                         ->where('resultados.chegada', '>=', $inicio)
                                         ->where('resultados.chegada', '<=', $fim)
                                         ->where('corridas.flg_sprint', 'N')
+                                        ->where('corridas.temporada_id', $operadorConsultaTemporada, $temporada_id)
                                         ->select('pilotos.id as piloto_id',
                                                     DB::raw("CONCAT(pilotos.nome, ' ', pilotos.sobrenome) as piloto_nome_completo"),
                                                     DB::raw('COUNT(resultados.id) as chegadas'))
@@ -192,6 +201,15 @@ class HomeController extends Controller
             $inicio = $request->inicio;
             $fim = $request->fim;
             $pais_id = $request->pais_id;
+
+            $temporada_id = $request->temporada_id;
+
+            $operadorConsultaTemporada = '=';
+
+            if($temporada_id == null){
+                $operadorConsultaTemporada = '>';
+                $temporada_id = 0;
+            }
            
             $totalVitoriasPorEquipe = DB::table('resultados')
                                     ->join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
@@ -203,6 +221,7 @@ class HomeController extends Controller
                                     ->where('resultados.chegada', '>=', $inicio)
                                     ->where('resultados.chegada', '<=', $fim)
                                     ->where('corridas.flg_sprint', 'N')
+                                    ->where('corridas.temporada_id', $operadorConsultaTemporada, $temporada_id)
                                     ->select('equipes.id as equipe_id',
                                                 'equipes.nome as equipe_nome',
                                                 DB::raw('COUNT(resultados.id) as chegadas'))
@@ -228,6 +247,15 @@ class HomeController extends Controller
             $inicio = $request->inicio;
             $fim = $request->fim;
             $pais_id = $request->pais_id;
+
+            $temporada_id = $request->temporada_id;
+
+            $operadorConsultaTemporada = '=';
+
+            if($temporada_id == null){
+                $operadorConsultaTemporada = '>';
+                $temporada_id = 0;
+            }
            
             $totalLargadasPorPiloto = DB::table('resultados')
                                         ->join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
@@ -239,6 +267,7 @@ class HomeController extends Controller
                                         ->where('resultados.largada', '>=', $inicio)
                                         ->where('resultados.largada', '<=', $fim)
                                         ->where('corridas.flg_sprint', 'N')
+                                        ->where('corridas.temporada_id', $operadorConsultaTemporada, $temporada_id)
                                         ->select('pilotos.id as piloto_id',
                                                     DB::raw("CONCAT(pilotos.nome, ' ', pilotos.sobrenome) as piloto_nome_completo"),
                                                     DB::raw('COUNT(resultados.id) as largadas'))
@@ -266,6 +295,15 @@ class HomeController extends Controller
             $inicio = $request->inicio;
             $fim = $request->fim;
             $pais_id = $request->pais_id;
+
+            $temporada_id = $request->temporada_id;
+
+            $operadorConsultaTemporada = '=';
+
+            if($temporada_id == null){
+                $operadorConsultaTemporada = '>';
+                $temporada_id = 0;
+            }
            
             $totalLargadasPorEquipe = DB::table('resultados')
                                         ->join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
@@ -277,6 +315,7 @@ class HomeController extends Controller
                                         ->where('resultados.largada', '>=', $inicio)
                                         ->where('resultados.largada', '<=', $fim)
                                         ->where('corridas.flg_sprint', 'N')
+                                        ->where('corridas.temporada_id', $operadorConsultaTemporada, $temporada_id)
                                         ->select('equipes.id as equipe_id',
                                                     'equipes.nome',
                                                     DB::raw('COUNT(resultados.id) as largadas'))
@@ -306,6 +345,8 @@ class HomeController extends Controller
 
         $titulos = Titulo::where('user_id', Auth::user()->id)->get();
 
+        $temporadas = Temporada::where('user_id', Auth::user()->id)->get();
+
         foreach($titulos as $item){
             array_push($titulosPorPilotos, $item->pilotoEquipe->piloto->nomeCompleto());
             array_push($titulosPorEquipes, $item->equipe->nome);
@@ -317,7 +358,7 @@ class HomeController extends Controller
         $totalTitulosPorEquipe = array_count_values($titulosPorEquipes);
         arsort($totalTitulosPorEquipe);
 
-        return view('home.novaHome', compact('totalTitulosPorPiloto', 'totalTitulosPorEquipe'));
+        return view('home.novaHome', compact('totalTitulosPorPiloto', 'totalTitulosPorEquipe', 'temporadas'));
     }
 
     public function buscaResultadosCorrida(Request $request){
@@ -346,18 +387,26 @@ class HomeController extends Controller
                             ->where('chegada', '<=', 3);
                     })
                     ->get();
+                    
+                $resultadosCorrida['polePosition'] = '-';
+                $resultadosCorrida['equipePolePosition'] = '';
+                $resultadosCorrida['primeiro'] = '';
+                $resultadosCorrida['equipePrimeiro'] = '';
+                $resultadosCorrida['segundo'] = '';
+                $resultadosCorrida['equipeSegundo'] = '';
+                $resultadosCorrida['terceiro'] = '';
+                $resultadosCorrida['equipeTerceiro'] = '';
+
+                $resultadosCorrida['ordem'] = $corrida->ordem;
+                $resultadosCorrida['imagemPaisCorrida'] = $corrida->pista->pais->imagem;
+                $resultadosCorrida['temporada_id'] = $corrida->temporada->id;
+                $resultadosCorrida['pista'] = $corrida->pista->nome;
 
             foreach($resultados as $resultado){
-
-                $resultadosCorrida['ordem'] = $resultado->corrida->ordem;
-                $resultadosCorrida['imagemPaisCorrida'] = $resultado->corrida->pista->pais->imagem;
-                $resultadosCorrida['resultadoID'] = $resultado->id;
-                $resultadosCorrida['temporada_id'] = $resultado->corrida->temporada->id;
-                $resultadosCorrida['pista'] = $resultado->corrida->pista->nome;
-                // $resultadosCorrida['voltaRapida'] = PilotoEquipe::find($resultado->corrida->volta_rapida)->piloto->nomeCompleto();
+                
                 $voltaRapida = PilotoEquipe::find($resultado->corrida->volta_rapida);
-                $resultadosCorrida['voltaRapida'] = $voltaRapida->piloto->nomeCompleto();
-                $resultadosCorrida['equipeVoltaRapida'] = $voltaRapida->equipe->imagem;
+                $resultadosCorrida['voltaRapida'] = isset($voltaRapida) ? $voltaRapida->piloto->nomeCompleto() : '';
+                $resultadosCorrida['equipeVoltaRapida'] = isset($voltaRapida) ? $voltaRapida->equipe->imagem : '';
                 $resultadosCorrida['temporada'] = substr($resultado->corrida->temporada->des_temporada, 0, strpos($resultado->corrida->temporada->des_temporada, ' '));
 
                 if($resultado->largada == 1){
@@ -381,10 +430,8 @@ class HomeController extends Controller
                 }
             }
 
-            if(isset($resultadosCorrida['primeiro'])){
-                $resultadoCorridas->push($resultadosCorrida);
-            }
-
+            $resultadoCorridas->push($resultadosCorrida);
+            
         }   
 
         if($request->busca){

@@ -130,10 +130,19 @@ margin: 0;
                         </div>
                         <div style="display: flex; align-items: center; margin-left: 1rem;">
                             <label for="fimPosicaoChegadasPilotos">Fim</label>
-                            <input type="number" name="fimPosicaoChegadasPilotos" id="fimChegadaPilotos" style="width:35px; height:25px; text-align: center; margin-left:0.6rem;" value="1" onchange="buscaChegadasPilotos()">
+                            <input type="number" name="fimPosicaoChegadasPilotos" id="fimChegadaPilotos" style="width:35px; height:25px; text-align: center; margin-left:0.6rem; margin-right:1rem;" value="1" onchange="buscaChegadasPilotos()">
+                        </div>
+                        <div>
+                            <select name="vitoriasPilotosPorTemporada" id="vitoriasPilotosPorTemporada" class="form-select mt-3" onchange="buscaChegadasPilotos()">
+                                <option value="" selected id="selectTemporadaVitoriasPiloto">Selecione uma Temporada</option>
+                                @foreach($temporadas as $temporada)
+                                    <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
+                                @endforeach
+                            </select>
                         </div>
                     </div>
                 </div>
+               
                 <table class="m-5 tabelaEstatisticas" id="tabelaChegadasPilotos">
                     <thead>
                         <tr>
@@ -158,6 +167,14 @@ margin: 0;
                         <div style="display: flex; align-items: center; margin-left: 1rem;">
                             <label for="fimChegadaEquipes">Fim</label>
                             <input type="number" name="fimPosicaoChegadasEquipes" id="fimChegadaEquipes" style="width:35px; height:25px; text-align: center; margin-left:0.6rem;" value="1" onchange="buscaChegadasEquipes()">
+                        </div>
+                        <div>
+                            <select name="vitoriasEquipesPorTemporada" id="vitoriasEquipesPorTemporada" class="form-select mt-3" onchange="buscaChegadasEquipes()">
+                                <option value="" selected id="selectTemporadaVitoriasEquipe">Selecione uma Temporada</option>
+                                @foreach($temporadas as $temporada)
+                                    <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
+                                @endforeach
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -192,6 +209,14 @@ margin: 0;
                         <label for="fimPosicaoLargadasPilotos">Fim</label>
                         <input type="number" name="fimPosicaoLargadasPilotos" id="fimLargadaPilotos" style="width:35px; height:25px; text-align: center; margin-left:0.6rem;" value="1" onchange="buscaLargadasPilotos()">
                     </div>
+                    <div>
+                        <select name="largadasPilotosPorTemporada" id="largadasPilotosPorTemporada" class="form-select mt-3" onchange="buscaLargadasPilotos()">
+                            <option value="" selected id="selectLargadasPilotosPorTemporada">Selecione uma Temporada</option>
+                            @foreach($temporadas as $temporada)
+                                <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
             </div>
             <table class="m-5 tabelaEstatisticas" id="tabelaLargadasPilotos">
@@ -218,6 +243,14 @@ margin: 0;
                     <div style="display: flex; align-items: center; margin-left: 1rem;">
                         <label for="fimPosicaoLargadasPilotos">Fim</label>
                         <input type="number" name="fimPosicaoLargadasEquipes" id="fimLargadaEquipes" style="width:35px; height:25px; text-align: center; margin-left:0.6rem;" value="1" onchange="buscaLargadasEquipes()">
+                    <div>
+                        <select name="largadasEquipesPorTemporada" id="largadasEquipesPorTemporada" class="form-select mt-3" onchange="buscaLargadasEquipes()">
+                            <option value="" selected id="selectLargadasEquipesPorTemporada">Selecione uma Temporada</option>
+                            @foreach($temporadas as $temporada)
+                                <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
+                            @endforeach
+                        </select>
+                    </div>
                     </div>
                 </div>
             </div>
@@ -459,6 +492,7 @@ margin: 0;
     async function buscaChegadasPilotos(inicio = 1, fim = 1){
         inicio = document.getElementById('inicioChegadaPilotos').value
         fim = document.getElementById('fimChegadaPilotos').value
+        let temporada_id = document.getElementById('vitoriasPilotosPorTemporada').value
         url = document.getElementById('url_chegada_pilotos').value;
         const token = document.querySelector('meta[name="csrf-token"]').content
 
@@ -475,7 +509,8 @@ margin: 0;
             },
             body: JSON.stringify({
                 inicio:inicio,
-                fim:fim
+                fim:fim,
+                temporada_id:temporada_id
             })
         })
 
@@ -500,6 +535,7 @@ margin: 0;
         inicio = document.getElementById('inicioChegadaEquipes').value
         fim = document.getElementById('fimChegadaEquipes').value
         url = document.getElementById('url_chegada_equipes').value;
+        let temporada_id = document.getElementById('vitoriasEquipesPorTemporada').value;
         const token = document.querySelector('meta[name="csrf-token"]').content
 
         if(inicio > fim){
@@ -515,7 +551,8 @@ margin: 0;
             },
             body: JSON.stringify({
                 inicio:inicio,
-                fim:fim
+                fim:fim,
+                temporada_id:temporada_id
             })
         })
 
@@ -540,6 +577,7 @@ margin: 0;
         inicio = document.getElementById('inicioLargadaEquipes').value
         fim = document.getElementById('fimLargadaEquipes').value
         url = document.getElementById('url_largada_equipes').value;
+        let temporada_id = document.getElementById('largadasEquipesPorTemporada').value;
         const token = document.querySelector('meta[name="csrf-token"]').content
 
         if(inicio > fim){
@@ -555,7 +593,8 @@ margin: 0;
             },
             body: JSON.stringify({
                 inicio:inicio,
-                fim:fim
+                fim:fim,
+                temporada_id:temporada_id
             })
         })
 
@@ -580,6 +619,7 @@ margin: 0;
         inicio = document.getElementById('inicioLargadaPilotos').value
         fim = document.getElementById('fimLargadaPilotos').value
         url = document.getElementById('url_largada_pilotos').value;
+        let temporada_id = document.getElementById('largadasPilotosPorTemporada').value;
         const token = document.querySelector('meta[name="csrf-token"]').content
 
         if(inicio > fim){
@@ -595,7 +635,8 @@ margin: 0;
             },
             body: JSON.stringify({
                 inicio:inicio,
-                fim:fim
+                fim:fim,
+                temporada_id:temporada_id
             })
         })
 
