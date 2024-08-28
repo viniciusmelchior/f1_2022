@@ -113,6 +113,7 @@ class ResultadoController extends Controller
         $corrida->qtd_safety_car = $request->qtd_safety_car;
         $corrida->dificuldade_ia = $request->dificuldade_ia;
         $corrida->observacoes = $request->observacoes;
+        $corrida->exibir_resultado = 1; //assim que eu carregar qualquer resultado, automaticamente torna-se uma corrida visivel
         $corrida->updated_at = date('Y-m-d H:i:s');
 
         if ($request->categoria == 'F1Sprint') {

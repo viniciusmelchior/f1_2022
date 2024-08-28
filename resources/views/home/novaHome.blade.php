@@ -113,9 +113,32 @@ margin: 0;
         margin-right: 0;
     }
 
+     /* Estilo do loader */
+     #loader {
+        border: 8px solid #f3f3f3;
+        border-radius: 50%;
+        border-top: 8px solid #3498db;
+        width: 60px;
+        height: 60px;
+        animation: spin 2s linear infinite;
+        display: none; /* Escondido por padrão */
+        position: absolute;
+        top: 80%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    /* Animação de rotação */
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
 </style>
 
 @section('section')
+    <div id="loader"></div>
+    <div id="content"></div>
     <div class="container">
 
         <div class="header-tabelas m-3">Chegadas <span id="toggle_chegadas"><i class="bi bi-plus-circle" id="icon_chegadas"></i></span></div>
@@ -327,10 +350,13 @@ margin: 0;
             </div>
             <div class="my-3">
                 <select name="" id="qtdResultados" onchange="buscaResultadosCorrida()" class="form-select">
-                    <option value="3">3</option>
-                    <option value="6">6</option>
-                    <option value="9">9</option>
-                    <option value="9" selected>10</option>
+                    <option value="5">5</option>
+                    <option value="10" selected>10</option>
+                    <option value="15">15</option>
+                    <option value="20">20</option>
+                    <option value="30">30</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
                     <option value="todos">Todos</option>
                 </select>
             </div>
@@ -414,10 +440,22 @@ margin: 0;
     };
 
     async function buscaResultadosCorrida(url = null){
+
+        let tbody = document.querySelector('#tbodyResultadoCorridas')
+        tbody.innerHTML = ''; //limpa a tabela a cada clique
+        let paginacao = document.getElementById('paginacao');
+        paginacao.innerHTML = ''; //limpa os botões de paginação a cada clique
+
         let busca = document.getElementById('busca').value
         let qtdResultados = document.getElementById('qtdResultados').value
         url = url ? url : document.getElementById('url_busca').value;
         const token = document.querySelector('meta[name="csrf-token"]').content
+
+        const loader = document.getElementById('loader');
+        const content = document.getElementById('content');
+
+        // Mostrar o loader
+        loader.style.display = 'block';
 
         const req = await fetch(url, {
             method: 'POST',
@@ -434,6 +472,7 @@ margin: 0;
         const res = await req.json();
 
         //preencher TBODY da tabela
+        loader.style.display = 'none';
         preencherTbodyTabelaResultados(res.resultadosCorrida.data);
         preencherPaginacao(res.resultadosCorrida.links);
 
@@ -676,5 +715,28 @@ margin: 0;
         })
 
     }
+
+    // function loadData() {
+    //         const loader = document.getElementById('loader');
+    //         const content = document.getElementById('content');
+
+    //         // Mostrar o loader
+    //         loader.style.display = 'block';
+
+    //         // Simular uma requisição fetch
+    //         fetch('https://jsonplaceholder.typicode.com/posts')
+    //             .then(response => response.json())
+    //             .then(data => {
+    //                 // Esconder o loader
+    //                 loader.style.display = 'none';
+
+    //                 // Mostrar o conteúdo
+    //                 content.innerHTML = '<p>Dados carregados com sucesso!</p>';
+    //             })
+    //             .catch(error => {
+    //                 loader.style.display = 'none';
+    //                 content.innerHTML = `<p>Erro ao carregar os dados: ${error}</p>`;
+    //             });
+    //     }
 
 </script>

@@ -92,7 +92,7 @@
                                     @if(isset($corrida->resultado))
                                         <th class="">
                                             {{-- <span style="display: inline-block; vertical-align: middle; white-space: nowrap;">{{$corrida->pista->nome}}</span> --}}
-                                            <img src="{{asset('images/'.$corrida->pista->pais->imagem)}}" alt="" srcset="" style="width:35px; height: 25px;" data-toggle="tooltip" data-placement="top" title="{{$corrida->pista->nome}} @if($corrida->flg_sprint == 'S') (Sprint) @endif">
+                                            <img src="{{asset('images/'.$corrida->pista->pais->imagem)}}" alt="" srcset="" style="width:35px; height: 25px;" data-toggle="tooltip" data-placement="top" title="{{$corrida->ordem}}. {{$corrida->pista->nome}} @if($corrida->flg_sprint == 'S') (Sprint) @endif">
                                         </th>
                                     @endif
                                 @endforeach

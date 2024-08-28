@@ -372,6 +372,7 @@ class HomeController extends Controller
         //primeiro encontra as corridas
         $corridas = Corrida::where('user_id', Auth::user()->id)
                             ->where('flg_sprint', 'N')
+                            ->where('exibir_resultado',1)
                             ->get();
 
         foreach ($corridas as $corrida) {
@@ -382,13 +383,13 @@ class HomeController extends Controller
                         ->where('largada', 1);
                     })
                     ->orWhere(function($query) use ($corrida) {
-                        $query->where('user_id', 3)
+                        $query->where('user_id', Auth::user()->id)
                             ->where('corrida_id', $corrida->id)
-                            ->where('chegada', '<=', 3);
+                            ->where('chegada', '<=', Auth::user()->id);
                     })
                     ->get();
                     
-                $resultadosCorrida['polePosition'] = '-';
+                $resultadosCorrida['polePosition'] = '';
                 $resultadosCorrida['equipePolePosition'] = '';
                 $resultadosCorrida['primeiro'] = '';
                 $resultadosCorrida['equipePrimeiro'] = '';
@@ -401,6 +402,9 @@ class HomeController extends Controller
                 $resultadosCorrida['imagemPaisCorrida'] = $corrida->pista->pais->imagem;
                 $resultadosCorrida['temporada_id'] = $corrida->temporada->id;
                 $resultadosCorrida['pista'] = $corrida->pista->nome;
+                $resultadosCorrida['temporada'] = substr($corrida->temporada->des_temporada, 0, strpos($corrida->temporada->des_temporada, ' '));
+                $resultadosCorrida['voltaRapida'] = '';
+                $resultadosCorrida['equipeVoltaRapida'] = '';
 
             foreach($resultados as $resultado){
                 
