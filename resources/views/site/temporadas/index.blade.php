@@ -29,7 +29,7 @@
                     <th>#</th>
                     <th>Ano</th>
                     <th>Descrição</th>
-                    <th style="width: 15%; text-align:left;">Camp. Piloto</th>
+                    <th style="width: 20%; text-align:left;">Camp. Piloto</th>
                     <th style="width: 15%; text-align:left;">Camp. Construtores</th>
                     <th>Status</th>
                     <th>Ações</th>
