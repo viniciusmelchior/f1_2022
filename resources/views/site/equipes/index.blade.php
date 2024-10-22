@@ -39,8 +39,16 @@
                 @foreach ($equipes as $key => $equipe)
                     <tr>
                         <td>{{$key+1}}</td>
-                        <td style="color:{{$equipe->des_cor}};">{{$equipe->nome}}</td>
-                        <td>{{$equipe->pais->des_nome}}</td>
+                        {{-- <td style="color:{{$equipe->des_cor}};">{{$equipe->nome}}</td> --}}
+                        <td style="vertical-align: middle; text-align:left;">
+                            <img src="{{asset('images/'.$equipe->imagem)}}" style="width:25px; height:25px;">
+                            <span style="display: inline-block; vertical-align: middle;">{{$equipe->nome}}</span>
+                        </td>
+                        {{-- <td>{{$equipe->pais->des_nome}}</td> --}}
+                        <td style="vertical-align: middle; text-align:left;">
+                            <img src="{{asset('images/'.$equipe->pais->imagem)}}" style="width:25px; height:20px;">
+                            <span style="display: inline-block; vertical-align: middle;">{{$equipe->pais->des_nome}}</span>
+                        </td>
                         <td>{{$equipe->flg_ativo}}</td>
                         <td class="coluna_acoes">
                             <a href="{{route('equipes.show', [$equipe->id])}}"><i class="bi bi-eye-fill"></i></a>

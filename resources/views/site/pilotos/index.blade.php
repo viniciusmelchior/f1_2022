@@ -50,7 +50,7 @@
                             </td>
                             {{-- <td>{{$piloto->pais->des_nome}}</td> --}}
                             <td style="vertical-align: middle; text-align:left;">
-                                <img src="{{asset('images/'.$piloto->pais->imagem)}}" style="width:25px; height:25px;">
+                                <img src="{{asset('images/'.$piloto->pais->imagem)}}" style="width:25px; height:20px;">
                                 <span style="display: inline-block; vertical-align: middle;">{{$piloto->pais->des_nome}}</span>
                             </td>
                             <td>{{$piloto->flg_ativo}}</td>
