@@ -368,11 +368,20 @@ class HomeController extends Controller
 
         // Página atual (normalmente obtida da request)
         $page = Paginator::resolveCurrentPage();
+
+        $operadorConsulta = '=';
+        $condicao = $request->temporada;
+        
+        if($request->temporada == 'todas'){
+            $operadorConsulta = '>';
+            $condicao = 0; 
+        }
         
         //primeiro encontra as corridas
         $corridas = Corrida::where('user_id', Auth::user()->id)
                             ->where('flg_sprint', 'N')
                             ->where('exibir_resultado',1)
+                            ->where('temporada_id', $operadorConsulta, $condicao)
                             ->get();
 
         foreach ($corridas as $corrida) {

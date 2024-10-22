@@ -270,7 +270,7 @@
     });
 
   $(document).ready(function() {
-      $('select:not(#selectReplicarPiloto, #qtdResultados)').select2({
+      $('select:not(#selectReplicarPiloto, #qtdResultados, #temporada)').select2({
         theme: 'classic'
       });
   });

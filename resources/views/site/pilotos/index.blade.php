@@ -34,7 +34,7 @@
                     <tr>
                         <th>#</th>
                         <th>Nome</th>
-                        <th>País</th>
+                        <th style="text-align:left;">País</th>
                         <th>Status</th>
                         <th>ações</th>
                     </tr>
@@ -43,8 +43,16 @@
                     @foreach ($pilotos as $key => $piloto)
                         <tr style="<?= $piloto->flg_ativo == 'N' ? "color:red;" : "" ?>">
                             <td>{{$key+1}}</td>
-                            <td>{{$piloto->nome}} {{$piloto->sobrenome}}</td>
-                            <td>{{$piloto->pais->des_nome}}</td>
+                            {{-- <td>{{$piloto->nome}} {{$piloto->sobrenome}}</td> --}}
+                            <td style="vertical-align: middle; text-align:left;">
+                                <img src="{{asset('images/'.$piloto->imagem)}}" style="width:25px; height:25px;">
+                                <span style="display: inline-block; vertical-align: middle;">{{$piloto->nome}} {{$piloto->sobrenome}}</span>
+                            </td>
+                            {{-- <td>{{$piloto->pais->des_nome}}</td> --}}
+                            <td style="vertical-align: middle; text-align:left;">
+                                <img src="{{asset('images/'.$piloto->pais->imagem)}}" style="width:25px; height:25px;">
+                                <span style="display: inline-block; vertical-align: middle;">{{$piloto->pais->des_nome}}</span>
+                            </td>
                             <td>{{$piloto->flg_ativo}}</td>
                             <td class="coluna_acoes">
                                 <a href="{{route('pilotos.show', [$piloto->id])}}"><i class="bi bi-eye-fill"></i></a>

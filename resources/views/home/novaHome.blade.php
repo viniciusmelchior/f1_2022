@@ -353,11 +353,23 @@ margin: 0;
                     <option value="5">5</option>
                     <option value="10" selected>10</option>
                     <option value="15">15</option>
+                    <option value="17">17</option>
                     <option value="20">20</option>
+                    <option value="25">25</option>
                     <option value="30">30</option>
-                    <option value="50">50</option>
-                    <option value="100">100</option>
+                    <option value="36">36</option>
                     <option value="todos">Todos</option>
+                </select>
+            </div>
+            <div>
+                <label for="">Temporada:</label>
+            </div>
+            <div class="my-3">
+                <select name="" id="temporada" onchange="buscaResultadosCorrida()" class="form-select">
+                    <option value="todas">Todas</option>
+                @foreach ($temporadas as $temporada)
+                    <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
+                @endforeach
                 </select>
             </div>
        </div>
@@ -451,6 +463,8 @@ margin: 0;
         url = url ? url : document.getElementById('url_busca').value;
         const token = document.querySelector('meta[name="csrf-token"]').content
 
+        let temporada = document.getElementById('temporada').value
+
         const loader = document.getElementById('loader');
         const content = document.getElementById('content');
 
@@ -465,7 +479,8 @@ margin: 0;
             },
             body: JSON.stringify({
                 busca: busca,
-                qtdResultados:qtdResultados
+                qtdResultados:qtdResultados,
+                temporada:temporada
             })
         })
 
