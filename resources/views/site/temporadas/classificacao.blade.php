@@ -68,7 +68,7 @@
             </li>
             <li class="breadcrumb-item active">Temporadas</li>
             <li class="breadcrumb-item active" aria-current="page">
-                <span class="breadcrumb-icon"><i class="fas fa-calendar"></i></span> Classificação Geral - {{$temporada->ano->ano}}
+                <span class="breadcrumb-icon"><i class="fas fa-calendar"></i></span> Classificação Geral - {{$temporada->des_temporada}}
             </li>
         </ol>
     </nav>
