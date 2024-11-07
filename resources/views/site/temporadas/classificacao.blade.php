@@ -80,7 +80,7 @@
             <i class="bi bi-arrow-right-square" id="proxima_corrida" data-id="{{$corridaAtual->ordem}}" onclick="proximaCorrida(this)"></i>
             Próxima
         </div>
-        <div class="py-3">Após GP <span id="nome_corrida">
+        <div class="py-3">Após <span id="nome_corrida">
             @if ($corridaAtual->evento)
                 {{$corridaAtual->evento->des_nome}}
             @else

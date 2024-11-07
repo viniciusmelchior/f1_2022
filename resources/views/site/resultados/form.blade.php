@@ -46,8 +46,8 @@
             <div class="mb-3">
                 <label for="categoria" class="form-label">Categoria</label>
                 <select name="categoria" id="categoria" class="form-control">
-                    <option value="F1">Formula 1</option>
-                    <option value="F1_todos_pontuam">F1 (Todos Pontuam)</option>
+                    <option value="F1" {{$corrida->categoria == 'F1' ? 'selected' : ''}}>Formula 1</option>
+                    <option value="F1_todos_pontuam" {{$corrida->categoria == 'F1_todos_pontuam' ? 'selected' : ''}}>F1 (Todos Pontuam)</option>
                     <option value="F1Sprint" {{ $corrida->flg_sprint == 'S' ? 'selected': '' }} >Formula 1 (Sprint)</option>
                     <option value="SC" {{ $corrida->flg_super_corrida == 'S' ? 'selected': '' }}>Super Sprint</option>
                     <option value="Indy">Indy</option>

@@ -13,7 +13,7 @@ class Corrida extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['temporada_id', 'pista_id', 'ordem','volta_rapida','flg_sprint','condicao_id', 'user_id','qtd_safety_car','dificuldade_ia', 'observacoes','flg_super_corrida','updated_at','evento_id', 'exibir_resultado'];
+    protected $fillable = ['temporada_id', 'pista_id', 'ordem','volta_rapida','flg_sprint','condicao_id','categoria', 'user_id','qtd_safety_car','dificuldade_ia', 'observacoes','flg_super_corrida','updated_at','evento_id', 'exibir_resultado'];
 
     /**Relacionamentos */
 
