@@ -40,7 +40,11 @@
                     <tr>
                         <td>{{$key+1}}</td>
                         <td>{{$temporada->ano->ano}}</td>
-                        <td>{{$temporada->des_temporada}}</td>
+                        <td>{{$temporada->des_temporada}}
+                            @isset($temporada->observacoes)
+                                <i class="bi bi-info-circle text-primary" data-toggle="tooltip" data-placement="top" title="{{$temporada->observacoes}}">  
+                            @endisset
+                        </td>
                         <td style="width: 15%; text-align:left;">
                             @if(isset($temporada->titulo))
                                @php $imagemPiloto = $temporada->titulo->pilotoEquipe->equipe->imagem; @endphp
