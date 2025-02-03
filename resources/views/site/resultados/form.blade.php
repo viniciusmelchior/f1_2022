@@ -383,7 +383,8 @@ document.getElementById('inputFileLargada').addEventListener('change', function(
 
                 arrayDeLinhas.forEach((linha, indice) => {
                     let nomePiloto = linha.cells[1].innerHTML.toUpperCase().trim() //limpa os espaços do inicio e fim da string
-                    nomePiloto = nomePiloto.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); //retira os ascentos
+                    // nomePiloto = nomePiloto.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); //retira os ascentos
+                    // nomePiloto = nomePiloto.normalize("NFD").replace(/[\u0300-\u036f&&[^\u00e7\u00c7]]/g, ""); 
                     const valorChegada = parseInt(ordemChegada.indexOf(nomePiloto))+1
                     if(valorChegada > 0){
                         linha.cells[3].querySelector('input[type="number"]').value = valorChegada
@@ -573,7 +574,7 @@ document.getElementById('inputFileLargada').addEventListener('change', function(
 
                 arrayDeLinhas.forEach((linha, indice) => {
                     let nomePiloto = linha.cells[1].innerHTML.toUpperCase().trim() //limpa os espaços do inicio e fim da string
-                    nomePiloto = nomePiloto.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); ///retira os ascentos
+                    // nomePiloto = nomePiloto.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); ///retira os ascentos
                     const valorLargada = parseInt(ordemLargada.indexOf(nomePiloto))+1
 
                     if(valorLargada > 0){

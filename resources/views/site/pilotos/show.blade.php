@@ -149,6 +149,7 @@
             <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
         @endforeach
     </select>
+
     <div id="driver-container">
         <div id="driver-details" class="bg-dark text-light">
             <div>
@@ -396,7 +397,7 @@
             <hr>
         @endif
         
-        @if(count($listagemVitorias) > 0)
+        {{-- @if(count($listagemVitorias) > 0)
             <section class="resultados-por-corrida">
                 <h1>Pistas em que o piloto não venceu</h1>
                 <table class="mt-5 mb-5 tabela-historico-equipes">
@@ -413,7 +414,7 @@
                 </table>
             </section>
             <hr>
-        @endif
+        @endif --}}
 
         <section class="" style="height: auto;">
             <h1 class="mb-3" style="text-transform:uppercase;">Histórico de Pole Positions</h1>
@@ -494,7 +495,7 @@
         @endif
 
         {{--Tabela de Largada e chegada--}}
-        <section class="resultados-por-corrida">
+        <!--<section class="resultados-por-corrida">
             <h1>Resultados por Corrida</h1>
             <table class="mt-5 mb-5 tabela-resultados">
                 <tr>
@@ -528,7 +529,9 @@
             <div class="d-flex justify-content-center">
                 {{ $resultadosPorCorrida->links() }}
             </div>
-        </section>
+        </section> 
+
+    -->
        
         {{-- <div>
             <canvas id="myChart"></canvas>
