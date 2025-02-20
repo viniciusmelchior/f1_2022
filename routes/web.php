@@ -16,6 +16,7 @@ use App\Http\Controllers\Site\TemporadaController;
 use App\Http\Controllers\Site\PDFController;
 use App\Http\Controllers\Site\SkinController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\Site\EstatisticasPilotosEquipes;
 use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpKernel\DataCollector\AjaxDataCollector;
 
@@ -230,8 +231,12 @@ route::get('tempos', function(){
 /**ESTUDOS PAGINACAO */
 // route::get('/allDrivers', [PilotoController::class, 'listAllDrivers'])->name('allDrivers');
 route::get('/estatisticas', [HomeController::class, 'indexEstatisticas'])->name('estatisticas');
+route::get('/teste', [HomeController::class, 'teste'])->name('teste');
 route::post('/buscaResultadosCorrida', [HomeController::class, 'buscaResultadosCorrida'])->name('buscaResultadosCorrida');
 // route::post('/getAllDrivers', [PilotoController::class, 'getAllDrivers'])->name('getAllDrivers');
 
+/** 19/02/2025 - tela de estatisticas de pilotos e equipes */
+route::get('/estatisticasPilotosEquipes/index', [EstatisticasPilotosEquipes::class, 'index'])->name('estatisticas.pilotos.equipes.index');
+route::post('/estatisticasPilotosEquipes/buscar', [EstatisticasPilotosEquipes::class, 'buscar'])->name('estatisticas.pilotos.equipes.buscar');
 
 

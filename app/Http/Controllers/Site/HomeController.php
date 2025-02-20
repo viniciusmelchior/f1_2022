@@ -361,6 +361,11 @@ class HomeController extends Controller
         return view('home.novaHome', compact('totalTitulosPorPiloto', 'totalTitulosPorEquipe', 'temporadas'));
     }
 
+    public function teste(){
+
+        
+    }
+
     public function buscaResultadosCorrida(Request $request){
 
         //collection vazia que será utilizada para dar vida ao backend. Os dados de primeiro, segunda, terceiro vão ser armazenados aí

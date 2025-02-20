@@ -61,6 +61,7 @@
               <li><a class="link_name" href="{{route('home')}}">Home (antiga)</a></li>
               <li><a class="link_name" href="{{route('estatisticas')}}">Estatisticas</a></li>
               <li><a class="link_name" href="{{route('tempos')}}">Análises de Voltas</a></li>
+              <li><a class="link_name" href="{{route('estatisticas.pilotos.equipes.index')}}">Dados pilotos/equipes</a></li>
             </ul>
           </li>
           <li>
@@ -270,7 +271,7 @@
     });
 
   $(document).ready(function() {
-      $('select:not(#selectReplicarPiloto, #qtdResultados, #temporada)').select2({
+      $('select:not(#selectReplicarPiloto, #qtdResultados, #temporada, #tipoConsulta, #pilotos_ignorados, #equipes_ignoradas)').select2({
         theme: 'classic'
       });
   });
