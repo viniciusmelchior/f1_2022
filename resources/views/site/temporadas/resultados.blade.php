@@ -117,13 +117,19 @@
                                 @foreach ($corridas as $corrida)
                                     @if(isset($corrida->resultado))
                                         @php 
-                                            $posicao = PilotoEquipe::getResultadoPilotoEquipe($corrida->id, $piloto->piloto_id);  
+                                            $posicao = PilotoEquipe::getResultadoPilotoEquipe($corrida->id, $piloto->piloto_id, true);  
+                                            $backgroundColor = $posicao[1] ?? '';
                                         @endphp
                                         <td class="text-center" @if($corrida->flg_sprint == 'S') style="color:yellow;" @endif>
-                                        @if($posicao)
-                                            <div @if($corrida->volta_rapida == $piloto->pilotoEquipe_id) style="widh:100%; height:100%; background-color: purple; padding:0" @endif>
+                                        @if($posicao[0])
+                                            <div
+                                                @if($corrida->volta_rapida == $piloto->pilotoEquipe_id)
+                                                    {{-- style="widh:100%; height:100%; background-color: purple; padding:0" --}}
+                                                @else
+                                                    style="widh:100%; height:100%; background-color: {{$backgroundColor}}; padding:0; border-radius:3px;"
+                                                @endif >
                                                 <span @if($corrida->volta_rapida == $piloto->piloto_id) style="font-weight: bolder;" @endif>
-                                                    {{$posicao}}
+                                                    {{$posicao[0]}}
                                                 </span>
                                             </div>
                                         @else

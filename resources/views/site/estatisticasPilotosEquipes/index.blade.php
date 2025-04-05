@@ -66,6 +66,21 @@
                 </div>
             </div>
 
+            {{--filtro de consulta por tipo de corrida--}}
+            <div class="row m-1 mb-3">
+                <div class="col-md-6">
+                    <div class="form-group row">
+                        <label for="flg_sprint" class="col-sm-2 col-form-label">Sprint</label>
+                        <div class="col-sm-10">
+                            <select name="flg_sprint" id="flg_sprint" class="form-control">
+                                <option value="N">Não</option>
+                                <option value="S">Sim</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {{--pilotos que devem ser ignorados na busca--}}
             <div class="row m-1 mb-3">
                 <div class="col-md-6">
@@ -269,7 +284,7 @@
         //Função que busca os dados da tela ao clicar no botão de pesquisa 
 
         async function buscarDados(){
-
+            
             //coleta os dados
             let tipo = document.getElementById('tipoConsulta').value
             let temporada = document.getElementById('temporada').value
@@ -279,7 +294,7 @@
             let equipes_ignoradas = Array.from(selectEquipesIgnoradas.selectedOptions).map(option => option.value);
             let limite =  document.getElementById('limite').value
             let descricaoPagina = document.getElementById('descricaoPagina')
-            
+            let flg_sprint = document.getElementById('flg_sprint').value
 
             // console.log(tipo, temporada, pilotos_ignorados, equipes_ignoradas, limite)
 
@@ -298,7 +313,8 @@
                     temporada: temporada,
                     pilotos_ignorados: pilotos_ignorados,
                     equipes_ignoradas: equipes_ignoradas,
-                    limite: limite
+                    limite: limite,
+                    flg_sprint:flg_sprint
                 })
             })
 

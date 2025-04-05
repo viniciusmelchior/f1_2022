@@ -62,7 +62,7 @@ class EstatisticasPilotosEquipes extends Controller
 
         //primeiro encontra as corridas
         $corridas = Corrida::where('user_id', Auth::user()->id)
-                            ->where('flg_sprint', 'N')
+                            ->where('flg_sprint', $request->flg_sprint)
                             ->where('exibir_resultado',1)
                             // ->whereIn('id', [278, 248, 261])//fixado temporariamente
                             ->where('temporada_id', $operadorConsultaTemporada, $condicaoConsultaTemporada)//fixado temporariamente

@@ -361,11 +361,6 @@ class HomeController extends Controller
         return view('home.novaHome', compact('totalTitulosPorPiloto', 'totalTitulosPorEquipe', 'temporadas'));
     }
 
-    public function teste(){
-
-        
-    }
-
     public function buscaResultadosCorrida(Request $request){
 
         //collection vazia que será utilizada para dar vida ao backend. Os dados de primeiro, segunda, terceiro vão ser armazenados aí
@@ -384,7 +379,7 @@ class HomeController extends Controller
         
         //primeiro encontra as corridas
         $corridas = Corrida::where('user_id', Auth::user()->id)
-                            ->where('flg_sprint', 'N')
+                            ->where('flg_sprint', $request->flg_sprint)
                             ->where('exibir_resultado',1)
                             ->where('temporada_id', $operadorConsulta, $condicao)
                             ->get();

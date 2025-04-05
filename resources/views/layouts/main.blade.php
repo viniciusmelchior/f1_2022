@@ -271,7 +271,7 @@
     });
 
   $(document).ready(function() {
-      $('select:not(#selectReplicarPiloto, #qtdResultados, #temporada, #tipoConsulta, #pilotos_ignorados, #equipes_ignoradas)').select2({
+      $('select:not(#selectReplicarPiloto, #qtdResultados, #temporada, #tipoConsulta, #pilotos_ignorados, #equipes_ignoradas, #flg_sprint)').select2({
         theme: 'classic'
       });
   });

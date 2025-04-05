@@ -192,6 +192,7 @@
                     @else 
                         <h2>{{$corrida->pista->nome}} {{$descEvento}} {{$corrida->temporada->ano->ano}} <span> - Classificação Final</span></h2>
                     @endif
+                    <span style="font-style:italic; font-size:14px;">Disputada na pista: {{$corrida->pista->nome}}</span>
                 </div>
                 <div class="table-responsive">
                     <table class="table text-light table-container" id="driverTable">

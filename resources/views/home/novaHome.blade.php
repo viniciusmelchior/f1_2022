@@ -372,6 +372,15 @@ margin: 0;
                 @endforeach
                 </select>
             </div>
+            <div>
+                <label for="">Sprint:</label>
+            </div>
+            <div class="my-3">
+                <select name="" id="flg_sprint" onchange="buscaResultadosCorrida()" class="form-select">
+                    <option value="N">Não</option>
+                    <option value="S">Sim</option>
+                </select>
+            </div>
        </div>
         <table id="tabelaResultadosCorridas" class="tabelaResultadosCorridas">
             <thead>
@@ -464,6 +473,7 @@ margin: 0;
         const token = document.querySelector('meta[name="csrf-token"]').content
 
         let temporada = document.getElementById('temporada').value
+        let flg_sprint = document.getElementById('flg_sprint').value
 
         const loader = document.getElementById('loader');
         const content = document.getElementById('content');
@@ -480,7 +490,8 @@ margin: 0;
             body: JSON.stringify({
                 busca: busca,
                 qtdResultados:qtdResultados,
-                temporada:temporada
+                temporada:temporada,
+                flg_sprint:flg_sprint
             })
         })
 

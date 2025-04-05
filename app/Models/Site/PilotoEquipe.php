@@ -41,7 +41,7 @@ class PilotoEquipe extends Model
     /**Função que acha qual posição determinado piloto chegou em tal corrida */
 
     /**recebe a corrida, temporada, piloto_equipe */
-    public static function getResultadoPilotoEquipe($corrida, $piloto_id){
+    public static function getResultadoPilotoEquipe($corrida, $piloto_id, $buscaPorAbandonos = false){
 
         // $resultado = Resultado::select('chegada','flg_abandono')
         $resultado = Resultado::join('piloto_equipes', 'resultados.pilotoEquipe_id', 'piloto_equipes.id')->select('*')
@@ -54,12 +54,14 @@ class PilotoEquipe extends Model
                             // dd($resultado);
 
         $chegada = '-';
+        $backgroundAbandonos = '';
 
         if(isset($resultado)){
             $chegada = $resultado['chegada'];
-            // if($resultado->flg_abandono == 'S'){
-            //     $chegada = 'NC';
-            // }
+            if($resultado->flg_abandono == 'S'){
+                // $chegada = 'NC';
+                $backgroundAbandonos = '#b81414';
+            }
         }
 
         if(Route::current()->parameter('porPontuacao')){
@@ -68,7 +70,11 @@ class PilotoEquipe extends Model
             }
         }
 
-        return $chegada;
+        if($buscaPorAbandonos == false){
+            return $chegada;
+        }
+
+        return [$chegada, $backgroundAbandonos];
 
     }
 
