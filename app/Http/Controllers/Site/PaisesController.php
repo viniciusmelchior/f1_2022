@@ -20,7 +20,11 @@ class PaisesController extends Controller
      */
     public function index()
     {
-        $paises = Pais::where('user_id', Auth::user()->id)->orderBy('des_nome')->get();
+        // $paises = Pais::where('user_id', Auth::user()->id)->orderBy('des_nome')->get();
+       $paises = Pais::where('user_id', 3)
+                    ->whereHas('continente') // Isso verifica se o país tem um continente relacionado
+                    ->orderBy('des_nome')
+                    ->get();
 
         return view('site.paises.index', compact('paises'));
     }

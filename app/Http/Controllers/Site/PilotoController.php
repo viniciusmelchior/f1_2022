@@ -26,7 +26,8 @@ class PilotoController extends Controller
      */
     public function index()
     {
-        $pilotos = Piloto::where('user_id', Auth::user()->id)
+        // $pilotos = Piloto::where('user_id', Auth::user()->id)
+        $pilotos = Piloto::where('user_id', 3)
                             ->orderBy('flg_ativo', 'DESC')
                             ->orderBy('id')
                             ->get();
@@ -113,7 +114,8 @@ class PilotoController extends Controller
     {   
         //Dados do Piloto 
         $modelPiloto = Piloto::where('id', $id)
-                        ->where('user_id', Auth::user()->id)
+                        // ->where('user_id', Auth::user()->id)
+                        ->where('user_id', 3)
                         ->first();
 
         //total de corridas
