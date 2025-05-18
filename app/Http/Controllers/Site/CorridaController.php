@@ -29,8 +29,10 @@ class CorridaController extends Controller
     public function adicionar($temporadaId){
         
         $temporada = Temporada::where('user_id', Auth::user()->id)->where('id', $temporadaId)->first();
-        $model = Pista::where('user_id', Auth::user()->id)->where('flg_ativo', 'S')->get();
-        $eventos = Evento::where('user_id', Auth::user()->id)->orderBy('des_nome', 'ASC')->get();
+        // $model = Pista::where('user_id', Auth::user()->id)->where('flg_ativo', 'S')->get();
+        $model = Pista::where('user_id', 3)->where('flg_ativo', 'S')->get();
+        // $eventos = Evento::where('user_id', Auth::user()->id)->orderBy('des_nome', 'ASC')->get();
+        $eventos = Evento::where('user_id', 3)->orderBy('des_nome', 'ASC')->get();
         
         return view('site.corridas.form', compact('model', 'temporada','eventos'));
     }

@@ -40,6 +40,7 @@ class Pais extends Model
                                 $query->where('pais_id', $pais_id);
                             })
                             ->where('flg_sprint', '<>', 'N')
+                            ->where('user_id', Auth::user()->id)
                             ->count();
 
         return $corridas;
@@ -51,6 +52,7 @@ class Pais extends Model
                                 $query->where('pais_id', $pais_id);
                             })
                             ->where('flg_sprint', '<>', 'S')
+                             ->where('user_id', Auth::user()->id)
                             ->count();
 
         return $corridas;

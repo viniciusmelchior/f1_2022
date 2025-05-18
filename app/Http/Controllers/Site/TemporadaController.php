@@ -34,7 +34,8 @@ class TemporadaController extends Controller
      */
     public function create()
     {
-        $anos = Ano::where('user_id', Auth::user()->id)->get();
+        // $anos = Ano::where('user_id', Auth::user()->id)->get();
+        $anos = Ano::where('user_id', 3)->get();
         return view('site.temporadas.form', compact('anos'));
     }
 
@@ -78,8 +79,9 @@ class TemporadaController extends Controller
     public function edit($id)
     {   
         $usuario = Auth::user()->id;
-        $model = Temporada::where('id', $id)->where('user_id', Auth::user()->id)->first();
-        $anos = Ano::where('user_id', Auth::user()->id)->get();
+        $model = Temporada::where('id', $id)->first();
+        // $anos = Ano::where('user_id', Auth::user()->id)->get();
+        $anos = Ano::where('user_id', 3)->get();
         //$retorno = $this->montaClassificacao($usuario, $model);
 
         return view('site.temporadas.form', compact('model','anos'));

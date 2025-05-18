@@ -16,7 +16,8 @@ class AnoController extends Controller
      */
     public function index()
     {   
-        $anos = Ano::where('user_id', Auth::user()->id)->get();
+        // $anos = Ano::where('user_id', Auth::user()->id)->get();
+        $anos = Ano::where('user_id', 3)->get();
         
         return view('site.anos.index', compact('anos'));
     }
@@ -74,7 +75,8 @@ class AnoController extends Controller
      */
     public function edit($id)
     {
-        $model = Ano::where('user_id', Auth::user()->id)->where('id', $id)->first();
+        // $model = Ano::where('user_id', Auth::user()->id)->where('id', $id)->first();
+        $model = Ano::where('user_id', 3)->where('id', $id)->first();
         return view('site.anos.form', compact('model'));
     }
 
@@ -87,8 +89,9 @@ class AnoController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $ano = Ano::where('id', $id)->where('user_id', Auth::user()->id)->first();
-        $ano->user_id = Auth::user()->id;
+        // $ano = Ano::where('id', $id)->where('user_id', Auth::user()->id)->first();
+        $ano = Ano::where('id', $id)->first();
+        // $ano->user_id = Auth::user()->id;
         $ano->ano = $request->ano;
         if ($request->has('flg_ativo')) {
             $ano->flg_ativo = $request->flg_ativo;

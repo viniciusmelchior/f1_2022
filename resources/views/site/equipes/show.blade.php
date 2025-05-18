@@ -332,7 +332,7 @@
                 <th>Ações</th>
                 @foreach ($temporadas as $temporada )
                     @php 
-                        $pilotos = PilotoEquipe::where('equipe_id', $modelEquipe->id)->where('ano_id', $temporada->ano_id)->get();
+                        $pilotos = PilotoEquipe::where('equipe_id', $modelEquipe->id)->where('ano_id', $temporada->ano->ano_id)->get();
                     @endphp
                     <tr>
                         {{-- <td>{{$temporada->ano->ano}}</td> --}}

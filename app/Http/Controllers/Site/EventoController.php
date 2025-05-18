@@ -19,7 +19,8 @@ class EventoController extends Controller
 	 */
 	public function index()
 	{
-		$eventos = Evento::where('user_id', Auth::user()->id)->orderBy('des_nome', 'ASC')->get();
+		// $eventos = Evento::where('user_id', Auth::user()->id)->orderBy('des_nome', 'ASC')->get();
+		$eventos = Evento::where('user_id', 3)->orderBy('des_nome', 'ASC')->get();
 
 		return view('site.eventos.index', compact('eventos'));
 	}
@@ -92,7 +93,7 @@ class EventoController extends Controller
 	 */
 	public function edit($id)
 	{
-		$model = Evento::where('id', $id)->where('user_id', Auth::user()->id)->first();
+		$model = Evento::where('id', $id)->first();
 
 		return view('site.eventos.form', compact('model'));
 	}

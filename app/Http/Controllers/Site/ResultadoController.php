@@ -91,7 +91,8 @@ class ResultadoController extends Controller
     public function edit($id)
     {   
         $corrida = Corrida::where('id', $id)->first();
-        $condicoesClimaticas = CondicaoClimatica::where('user_id', Auth::user()->id)->get();
+        // $condicoesClimaticas = CondicaoClimatica::where('user_id', Auth::user()->id)->get();
+        $condicoesClimaticas = CondicaoClimatica::where('user_id', 3)->get();
         // $model = PilotoEquipe::where('user_id', Auth::user()->id)->where('ano_id', $corrida->temporada->ano_id)->where('flg_ativo', 'S')->orderBy('id')->orderBy('equipe_id')->get();
         $model = PilotoEquipe::where('user_id', Auth::user()->id)->where('ano_id', $corrida->temporada->ano_id)->where('flg_ativo', 'S')->orderBy('equipe_id')->get();
 

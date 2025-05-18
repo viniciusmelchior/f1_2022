@@ -52,6 +52,7 @@ class Pista extends Model
                 $query->where('id', $pista_id);
             })
             ->where('flg_sprint', '<>', 'N')
+            ->where('user_id', Auth::user()->id)
             ->count();
 
         return $corridas;
@@ -64,6 +65,7 @@ class Pista extends Model
                 $query->where('id', $pista_id);
             })
             ->where('flg_sprint', '<>', 'S')
+            ->where('user_id', Auth::user()->id)
             ->count();
 
         return $corridas;

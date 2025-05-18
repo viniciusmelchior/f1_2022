@@ -34,10 +34,14 @@ class PilotoEquipeController extends Controller
      */
     public function create()
     {
-        $paises = Pais::where('user_id', Auth::user()->id)->get();
-        $pilotos = Piloto::where('user_id', Auth::user()->id)->where('flg_ativo', 'S')->get();
-        $equipes = Equipe::where('user_id', Auth::user()->id)->where('flg_ativo', 'S')->get();
-        $anos = Ano::where('user_id', Auth::user()->id)->orderBy('ano', 'DESC')->get();
+        // $paises = Pais::where('user_id', Auth::user()->id)->get();
+        $paises = Pais::where('user_id', 3)->get();
+        // $pilotos = Piloto::where('user_id', Auth::user()->id)->where('flg_ativo', 'S')->get();
+        $pilotos = Piloto::where('user_id', 3)->where('flg_ativo', 'S')->get();
+        // $equipes = Equipe::where('user_id', Auth::user()->id)->where('flg_ativo', 'S')->get();
+        $equipes = Equipe::where('user_id', 3)->where('flg_ativo', 'S')->get();
+        // $anos = Ano::where('user_id', Auth::user()->id)->orderBy('ano', 'DESC')->get();
+        $anos = Ano::where('user_id', 3)->orderBy('ano', 'DESC')->get();
         $skins = Skin::where('user_id', Auth::user()->id)->get();
 
         return view('site.pilotoEquipe.form', compact('paises', 'pilotos', 'equipes', 'anos', 'skins'));
