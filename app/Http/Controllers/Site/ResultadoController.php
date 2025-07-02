@@ -226,6 +226,19 @@ class ResultadoController extends Controller
                     $model->pontuacao = $this->F1_todos_pontuam($model, $chegada);
                 }
 
+                if ($request->categoria == 'F1_todos_pontuam_incompleto') {
+                    $model->pontuacao = $this->f1_corrida_incompleta_todos_pontuam($model, $chegada);
+                }
+
+                if ($request->categoria == 'F1_12_pontuam') {
+                    $model->pontuacao = $this->F1_12_pontuam($model, $chegada);
+                }
+
+                if ($request->categoria == 'F1_12_pontuam_incompleto') {
+                    $model->pontuacao = $this->F1_12_pontuam_incompleto($model, $chegada);
+                }
+
+
                 if ($request->categoria == 'Stock1') {
                     //Regra de 2 pontos para o pole position da Corrida 1
                     if ($model->largada == 1) {
@@ -355,18 +368,18 @@ class ResultadoController extends Controller
 
         /**Cáculo da volta mais rapida Formula 1 */
         if ($corrida->volta_rapida != null && $corrida->flg_super_corrida != 'S') {
-            $resultadoVoltaRapida = Resultado::where('pilotoEquipe_id', $corrida->volta_rapida)
-                ->where('user_id', Auth::user()->id)
-                ->where('corrida_id', $corrida->id)
-                ->first();
+            // $resultadoVoltaRapida = Resultado::where('pilotoEquipe_id', $corrida->volta_rapida)
+            //     ->where('user_id', Auth::user()->id)
+            //     ->where('corrida_id', $corrida->id)
+            //     ->first();
 
-            if ($resultadoVoltaRapida->chegada <= 10 || ($corrida->flg_super_corrida == 'S' && $resultadoVoltaRapida->chegada <= 8)) {
-                if($request->categoria != 'F1_todos_pontuam'){
-                    $resultadoVoltaRapida->pontuacao = $resultadoVoltaRapida->pontuacao + 1;
-                }
+            // if ($resultadoVoltaRapida->chegada <= 10 || ($corrida->flg_super_corrida == 'S' && $resultadoVoltaRapida->chegada <= 8)) {
+            //     if($request->categoria != 'F1_todos_pontuam'){
+            //         $resultadoVoltaRapida->pontuacao = $resultadoVoltaRapida->pontuacao + 1;
+            //     }
 
-                $resultadoVoltaRapida->update();
-            }
+            //     $resultadoVoltaRapida->update();
+            // }
         }
 
         /**calcula das super corridas F1 */
@@ -581,6 +594,97 @@ class ResultadoController extends Controller
         return $model->pontuacao;
     }
 
+    public function f1_corrida_incompleta_todos_pontuam($model, $chegada){
+        $primeiro = 21.5;
+        $segundo = 17.5;
+        $terceiro = 15;
+        $quarto = 13;
+        $quinto = 11.5;
+        $sexto = 10;
+        $setimo = 9;
+        $oitavo = 8;
+        $nono = 7;
+        $decimo = 6;
+        $decimoPrimeiro = 5;
+        $decimoSegundo = 4.5;
+        $decimoTerceiro = 4;
+        $decimoQuarto = 3.5;
+        $decimoQuinto = 3;
+        $decimoSexto = 2.5;
+        $decimoSetimo = 2;
+        $decimoOitavo = 1.5;
+        $decimoNono = 1;
+        $vigesimo = 0.5;
+
+        switch ($chegada) {
+            case 1:
+                $model->pontuacao = $primeiro;
+                break;
+            case 2:
+                $model->pontuacao = $segundo;
+                break;
+            case 3:
+                $model->pontuacao = $terceiro;
+                break;
+            case 4:
+                $model->pontuacao = $quarto;
+                break;
+            case 5:
+                $model->pontuacao = $quinto;
+                break;
+            case 6:
+                $model->pontuacao = $sexto;
+                break;
+            case 7:
+                $model->pontuacao = $setimo;
+                break;
+            case 8:
+                $model->pontuacao = $oitavo;
+                break;
+            case 9:
+                $model->pontuacao = $nono;
+                break;
+            case 10:
+                $model->pontuacao = $decimo;
+                break;
+            case 11:
+                $model->pontuacao = $decimoPrimeiro;
+                break;
+            case 12:
+                $model->pontuacao = $decimoSegundo;
+                break;
+            case 13:
+                $model->pontuacao = $decimoTerceiro;
+                break;
+            case 14:
+                $model->pontuacao = $decimoQuarto;
+                break;
+            case 15:
+                $model->pontuacao = $decimoQuinto;
+                break;
+            case 16:
+                $model->pontuacao = $decimoSexto;
+                break;
+            case 17:
+                $model->pontuacao = $decimoSetimo;
+                break;
+            case 18:
+                $model->pontuacao = $decimoOitavo;
+                break;
+            case 19:
+                $model->pontuacao = $decimoNono;
+                break;
+            case 20:
+                $model->pontuacao = $vigesimo;
+                break;
+            default:
+                $model->pontuacao = 0;
+        }
+        
+
+        return $model->pontuacao;
+    }
+
     public function F1_todos_pontuam($model, $chegada) //agora apenas os 20 primeiros pontuam; O nome da função faz referencia aos 20 do grid REAL da formula 1
     {   
         $primeiro = 43;
@@ -670,6 +774,124 @@ class ResultadoController extends Controller
         }
         
 
+        return $model->pontuacao;
+    }
+
+    public function F1_12_pontuam($model, $chegada){
+
+        $primeiro = 25;
+        $segundo = 18;
+        $terceiro = 15;
+        $quarto = 12;
+        $quinto = 10;
+        $sexto = 8;
+        $setimo = 6;
+        $oitavo = 5;
+        $nono = 4;
+        $decimo = 3;
+        $decimoPrimeiro = 2;   
+        $decimoSegundo = 1; 
+
+        switch ($chegada) {
+            case 1:
+                $model->pontuacao = $primeiro;
+                break;
+            case 2:
+                $model->pontuacao = $segundo;
+                break;
+            case 3:
+                $model->pontuacao = $terceiro;
+                break;
+            case 4:
+                $model->pontuacao = $quarto;
+                break;
+            case 5:
+                $model->pontuacao = $quinto;
+                break;
+            case 6:
+                $model->pontuacao = $sexto;
+                break;
+            case 7:
+                $model->pontuacao = $setimo;
+                break;
+            case 8:
+                $model->pontuacao = $oitavo;
+                break;
+            case 9:
+                $model->pontuacao = $nono;
+                break;
+            case 10:
+                $model->pontuacao = $decimo;
+                break;
+            case 11:
+                $model->pontuacao = $decimoPrimeiro;
+                break;
+            case 12:
+                $model->pontuacao = $decimoSegundo;
+                break;
+            default:
+                $model->pontuacao = 0;
+        }
+        
+        return $model->pontuacao;
+    }
+
+    public function F1_12_pontuam_incompleto($model, $chegada){
+
+        $primeiro = 12.5;
+        $segundo = 9;
+        $terceiro = 7.5;
+        $quarto = 6;
+        $quinto = 5;
+        $sexto = 4;
+        $setimo = 3;
+        $oitavo = 2.5;
+        $nono = 2;
+        $decimo = 1.5;
+        $decimoPrimeiro = 1;   
+        $decimoSegundo = 0.5; 
+
+        switch ($chegada) {
+            case 1:
+                $model->pontuacao = $primeiro;
+                break;
+            case 2:
+                $model->pontuacao = $segundo;
+                break;
+            case 3:
+                $model->pontuacao = $terceiro;
+                break;
+            case 4:
+                $model->pontuacao = $quarto;
+                break;
+            case 5:
+                $model->pontuacao = $quinto;
+                break;
+            case 6:
+                $model->pontuacao = $sexto;
+                break;
+            case 7:
+                $model->pontuacao = $setimo;
+                break;
+            case 8:
+                $model->pontuacao = $oitavo;
+                break;
+            case 9:
+                $model->pontuacao = $nono;
+                break;
+            case 10:
+                $model->pontuacao = $decimo;
+                break;
+            case 11:
+                $model->pontuacao = $decimoPrimeiro;
+                break;
+            case 12:
+                $model->pontuacao = $decimoSegundo;
+                break;
+            default:
+                $model->pontuacao = 0;
+        }
+        
         return $model->pontuacao;
     }
 
