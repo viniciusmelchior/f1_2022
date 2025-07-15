@@ -251,14 +251,14 @@
         //pega o penultimo e soma adiciona no ultimo. Por isso tem ser o total -2()
         for(let i = 0; i < tdPontuacaoPilotos.length; i = i + 1 ) {
             if(i <= contadorPilotos){
-                diferencaPilotos = parseInt(tdPontuacaoPilotos[0].innerText) - parseInt(tdPontuacaoPilotos[i+1].innerText ) 
+                diferencaPilotos = parseFloat(tdPontuacaoPilotos[0].innerText) - parseFloat(tdPontuacaoPilotos[i+1].innerText ) 
                 tdDiferencaPilotos[i+1].innerText = ` - ${diferencaPilotos}`;
             }
         }
         
         for(let j = 0; j < tdPontuacaoEquipes.length; j = j + 1 ) {
             if(j <= contadorEquipes){
-                diferencaEquipes = parseInt(tdPontuacaoEquipes[0].innerText) - parseInt(tdPontuacaoEquipes[j+1].innerText ) 
+                diferencaEquipes = parseFloat(tdPontuacaoEquipes[0].innerText) - parseFloat(tdPontuacaoEquipes[j+1].innerText ) 
                 tdDiferencaEquipes[j+1].innerText = ` - ${diferencaEquipes}`;
             }
         }
