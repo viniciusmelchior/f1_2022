@@ -48,7 +48,7 @@
                         <td>{{$corrida->flg_sprint != 'S' ? $corrida->ordem : 'Sprint' }}</td>
                         <td style="text-align: left;" class="text-nowrap">
                             @if (isset($corrida->evento))
-                                {{$corrida->evento->des_nome}}
+                                <a href="{{route("eventos.show", [$corrida->evento->id])}}" style="color: inherit; text-decoration: inherit;">{{$corrida->evento->des_nome}}</a>
                             @else
                             -
                             @endif
@@ -57,7 +57,7 @@
                             <span style="width: 30px; height:20px;">
                                 <img src="{{asset('images/'.$corrida->pista->pais->imagem)}}" alt="" srcset="" style="width: 30px; height:20px;">
                             </span>
-                            {{$corrida->pista->nome}}
+                            <a href="{{route("pistas.show", [$corrida->pista->id])}}" style="color: inherit; text-decoration: inherit;">{{$corrida->pista->nome}}</a>
                            {{--  @if($corrida->flg_super_corrida == 'S')
                                 - Super Corrida
                             @endif --}}
@@ -67,8 +67,8 @@
                         </td> --}}
                         {{-- <td>{{$corrida->dificuldade_ia}}</td> --}}
                         {{-- {{dd(Corrida::getInfoCorrida($corrida->id))}} --}}
-                        <td class="text-nowrap">{{Corrida::getInfoCorrida($corrida->id)['polePosition']}}</td>
-                        <td class="text-nowrap">{{Corrida::getInfoCorrida($corrida->id)['vencedor']}}</td>
+                        <td class="text-nowrap"><a href="{{route('pilotos.show', [Corrida::getInfoCorrida($corrida->id)['polePositionId']])}}" style="color: inherit; text-decoration: inherit;">{{Corrida::getInfoCorrida($corrida->id)['polePositionNome']}}</a></td>
+                        <td class="text-nowrap"><a href="{{route('pilotos.show', [Corrida::getInfoCorrida($corrida->id)['vencedorId']])}}" style="color: inherit; text-decoration: inherit;">{{Corrida::getInfoCorrida($corrida->id)['vencedorNome']}}</a></td>
                         <td class="text-nowrap">{{Corrida::getInfoCorrida($corrida->id)['totAbandonos']}}</td>
                         <td class="text-nowrap">
                             @if (isset($corrida->updated_at))
