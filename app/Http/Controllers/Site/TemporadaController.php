@@ -358,9 +358,13 @@ class TemporadaController extends Controller
         //pesquisa pela classificação atualizada
         $retorno = $this->montaClassificacao($usuario, $temporada);
 
-        if ($request->has('flg_finalizada')) {
-            $temporada->flg_finalizada = $request->flg_finalizada;
-            //criar o título
+        //apaga todos os titulos 
+        $titulo = Titulo::where('user_id', Auth::user()->id)->delete();
+        $temporadas = Temporada::where('user_id', Auth::user()->id)->where('flg_finalizada', 'S')->get();
+        
+        foreach($temporadas as $temporada){
+            $retorno = $this->montaClassificacao($usuario, $temporada);
+
             if(count($retorno['piloto_campeao']) > 0){
                 $titulo = new Titulo();
                 $titulo->temporada_id = $temporada->id;
@@ -369,15 +373,31 @@ class TemporadaController extends Controller
                 $titulo->user_id = Auth::user()->id;
                 $titulo->save();
             }
-        } else {
-            $temporada->flg_finalizada = 'N';
-
-            //se tiver título registrado, apaga. Se não, sem ação;
-            $titulo = Titulo::where('temporada_id', $temporada->id)->where('user_id', Auth::user()->id)->first();
-            if($titulo != null){
-                $titulo->delete();
-            }
         }
+
+
+        //ajustar aqui os títulos
+
+        // if ($request->has('flg_finalizada')) {
+        //     $temporada->flg_finalizada = $request->flg_finalizada;
+        //     //criar o título
+        //     if(count($retorno['piloto_campeao']) > 0){
+        //         $titulo = new Titulo();
+        //         $titulo->temporada_id = $temporada->id;
+        //         $titulo->pilotoEquipe_id = $retorno['piloto_campeao'][0]->pilotoEquipe_id;
+        //         $titulo->equipe_id = $retorno['equipe_campea'][0]->equipe_id;
+        //         $titulo->user_id = Auth::user()->id;
+        //         $titulo->save();
+        //     }
+        // } else {
+        //     $temporada->flg_finalizada = 'N';
+
+        //     //se tiver título registrado, apaga. Se não, sem ação;
+        //     $titulo = Titulo::where('temporada_id', $temporada->id)->where('user_id', Auth::user()->id)->first();
+        //     if($titulo != null){
+        //         $titulo->delete();
+        //     }
+        // }
 
         $temporada->update();
 
