@@ -66,7 +66,7 @@ class PilotoEquipe extends Model
 
         if(Route::current()->parameter('porPontuacao')){
             if(isset($resultado)){
-                $chegada = $resultado['pontuacao'];
+                $chegada = $resultado['largada'];
             }
         }
 
