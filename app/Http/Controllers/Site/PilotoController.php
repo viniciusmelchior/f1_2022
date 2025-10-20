@@ -346,10 +346,18 @@ class PilotoController extends Controller
                                                 ->get();
 
         $pistasEmQueOPilotoNaoVenceu = array_diff($corridasDisputadas, $pistasVitorias);
-        $pistasEmQueOPilotoNaoVenceu = array_unique($pistasEmQueOPilotoNaoVenceu);
+        // $pistasEmQueOPilotoNaoVenceu = array_unique($pistasEmQueOPilotoNaoVenceu);
+
+        $pistasEmQueOPilotoNaoVenceu = array_count_values($pistasEmQueOPilotoNaoVenceu);
+
+        arsort($pistasEmQueOPilotoNaoVenceu);
 
         $pistasEmQueOPilotoNaoFoiPolePosition = array_diff($corridasDisputadas, $pistasPoles);
-        $pistasEmQueOPilotoNaoFoiPolePosition = array_unique($pistasEmQueOPilotoNaoFoiPolePosition);
+        // $pistasEmQueOPilotoNaoFoiPolePosition = array_unique($pistasEmQueOPilotoNaoFoiPolePosition);
+
+        $pistasEmQueOPilotoNaoFoiPolePosition = array_count_values($pistasEmQueOPilotoNaoFoiPolePosition);
+
+        arsort($pistasEmQueOPilotoNaoFoiPolePosition);
 
         $vitoriasPorPista = array_count_values($pistasVitorias);
         arsort($vitoriasPorPista);

@@ -8,6 +8,22 @@
 @section('section')
 <style>
 
+    .footer-show-pilotos{
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color:#11101d;
+        border-top: 1px solid #ccc;
+        padding: 15px 20px;
+        text-align: center;
+        display: flex;
+        justify-content: space-around; /* distribui os links horizontalmente */
+        align-items: center; /* alinha verticalmente */
+        box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+        z-index: 0;
+    }
+
     td{
         white-space: nowrap;
     }
@@ -299,14 +315,14 @@
 
         <hr>
 
-        <section class="" style="height: 400px;">
+        {{-- <section class="" style="height: 400px;">
             <h1 class="mb-3" style="text-transform:uppercase;">Histórico de Pontuação</h1>
             <div style="width: 550px; height: 550px; margin: 0 auto;">
                 <canvas id="historicoPontuacao"></canvas>
             </div>
-        </section>
+        </section> --}}
        
-        <hr>
+        {{-- <hr> --}}
 
         <section class="" style="height: auto;">
             <h1 class="mb-3" style="text-transform:uppercase;">Histórico de posição nos campeonatos</h1>
@@ -335,7 +351,7 @@
 
         <hr>
 
-        <section class="" style="height: auto;">
+        <section class="" style="height: auto;" id="historico-vitorias">
             <h1 class="mb-3" style="text-transform:uppercase;">Histórico de Vitórias</h1>
             <p class="text-center">Corridas seguidas sem vitória: {{$corridaSeguidasSemVencer}}</p>
             {{-- <span>Corridas seguidas sem pole position: {{$corridaSeguidasSemVencer}}</span>
@@ -377,7 +393,7 @@
         <hr>
 
         @if(count($vitoriasPorPista) > 0)
-            <section class="resultados-por-corrida">
+            <section class="resultados-por-corrida" id="vitorias-pista">
                 <h1>Vitórias por Pista</h1>
                 <table class="mt-5 mb-5 tabela-historico-equipes">
                     <tr>
@@ -397,26 +413,30 @@
             <hr>
         @endif
         
-        {{-- @if(count($listagemVitorias) > 0)
-            <section class="resultados-por-corrida">
+        @if(count($listagemVitorias) > 0)
+            <section class="resultados-por-corrida" id="pistas-sem-vitoria">
                 <h1>Pistas em que o piloto não venceu</h1>
                 <table class="mt-5 mb-5 tabela-historico-equipes">
                     <tr>
                         <th>
                             Pista
                         </th>
+                        <th>
+                            Corridas Disputadas
+                        </th>
                     </tr>
                     @foreach($pistasEmQueOPilotoNaoVenceu as $key => $pistaEmQueOPilotoNaoVenceu)
                         <tr>
+                            <td>{{$key}}</td>
                             <td>{{$pistaEmQueOPilotoNaoVenceu}}</td>
                         </tr>
                     @endforeach
                 </table>
             </section>
             <hr>
-        @endif --}}
+        @endif
 
-        <section class="" style="height: auto;">
+        <section class="" style="height: auto;" id="historico-poles">
             <h1 class="mb-3" style="text-transform:uppercase;">Histórico de Pole Positions</h1>
             <p class="text-center">Corridas seguidas sem pole position: {{$corridaSeguidasSemPolePosition}}</p>
                 <table class="mt-5 mb-5 tabela-historico-equipes">
@@ -455,7 +475,7 @@
         <hr>
 
         @if(count($polesPorPista) > 0)
-            <section class="resultados-por-corrida">
+            <section class="resultados-por-corrida" id="poles-pista">
                 <h1>Pole Positions por Pista</h1>
                 <table class="mt-5 mb-5 tabela-historico-equipes">
                     <tr>
@@ -476,16 +496,20 @@
         @endif
         
         @if (count($listagemPolePositions) > 0)
-            <section class="resultados-por-corrida">
+            <section class="resultados-por-corrida" id="pistas-sem-pole">
                 <h1>Pistas em que o piloto não foi Pole Position</h1>
                 <table class="mt-5 mb-5 tabela-historico-equipes">
                     <tr>
                         <th>
                             Pista
                         </th>
+                        <th>
+                            Corridas Disputadas
+                        </th>
                     </tr>
                     @foreach($pistasEmQueOPilotoNaoFoiPolePosition as $key => $pistaEmQueOPilotoNaoFoiPolePosition)
                         <tr>
+                            <td>{{$key}}</td>
                             <td>{{$pistaEmQueOPilotoNaoFoiPolePosition}}</td>
                         </tr>
                     @endforeach
@@ -548,6 +572,16 @@
             </div>
         </div>   
    </div>
+
+    <div class="text-light footer-show-pilotos">
+        <a href="#ajaxGetStatsPilotoPorTemporada" style="text-decoration:none;" class="text-light">Início</a>
+        <a href="#historico-vitorias" style="text-decoration:none;" class="text-light">Histórico de Vitórias</a>
+        <a href="#vitorias-pista" style="text-decoration:none;" class="text-light">Vitórias por Pista</a>
+        <a href="#pistas-sem-vitoria" style="text-decoration:none;" class="text-light">Pistas sem vitórias</a>
+        <a href="#historico-poles" style="text-decoration:none;" class="text-light">Histórico de Pole Positions</a>
+        <a href="#poles-pista" style="text-decoration:none;" class="text-light">Pole Positions por Pista</a>
+        <a href="#pistas-sem-pole" style="text-decoration:none;" class="text-light">Pistas sem Pole Position</a>
+    </div>
 
    <script>
     ajaxGetStatsPilotoPorTemporada = "<?=route('ajax.ajaxGetStatsPilotoPorTemporada')?>"
