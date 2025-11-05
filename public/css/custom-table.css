@@ -1,0 +1,153 @@
+.custom-responsive-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .custom-responsive-table thead {
+    background-color: #11101d;
+    color: white;
+  }
+
+  .custom-responsive-table th, .custom-responsive-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+  }
+
+  .custom-responsive-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  /* 🔹 Modo responsivo - stacked view */
+  @media (max-width: 700px) {
+    .img-logo-responsiva-piloto{
+        margin-right:-20%;
+    }
+
+    .img-logo-responsiva-equipe{
+        margin-right:-20%;
+    }
+
+    .custom-responsive-table table, .custom-responsive-table thead, .custom-responsive-table tbody, .custom-responsive-table th, .custom-responsive-table td, .custom-responsive-table tr {
+      display: block;
+    }
+
+    .custom-responsive-table {
+        background: transparent; 
+    }
+
+    .custom-responsive-table thead {
+      display: none; /* esconder cabeçalho */
+    }
+
+    #tabelaTemporadas .bi-info-circle {
+        display: none;
+    }
+
+    #toggleColunas {
+        display: none;
+    }
+
+    .custom-responsive-table tr {
+      margin-bottom: 1rem;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 10px;
+    }
+
+    .custom-responsive-table td {
+      border: none;
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 10px;
+      position: relative;
+    }
+
+    .custom-responsive-table td::before {
+      content: attr(data-label); /* mostra o nome da coluna */
+      font-weight: bold;
+      text-transform: uppercase;
+      color: #666;
+    }
+
+    .custom-responsive-table td[data-label="Nome"] {
+      background-color: #f0f7ff;  
+      border-radius:6px;
+      padding:10px;
+      /* cor do nome do piloto */
+      color: black;
+      font-weight:600;
+    }
+
+    .custom-responsive-table td[data-label="Nome"] img {
+        display: none;
+    }
+
+    .custom-responsive-table td[data-label="Nome"]::before {
+      color: #666; 
+    }
+
+  }
+
+  .custom-botao-excluir{
+    color: red;
+    font-size: 14pt;
+  }
+
+  .custom-botao-excluir :hover{
+    color: rgb(161, 36, 36);
+  }
+
+   .custom-botao-visualizar{
+    color: blue;
+    font-size: 14pt;
+  }
+
+   .custom-botao-visualizar :hover{
+    color: rgb(34, 34, 146);
+  }
+
+   .custom-botao-adicionar{
+    color: green;
+    font-size: 14pt;
+  }
+
+   .custom-botao-adicionar :hover{
+    color: rgb(2, 112, 2);
+  }
+
+   .custom-botao-editar{
+    color: orange;
+    font-size: 14pt;
+  }
+
+   .custom-botao-editar :hover{
+    color: rgb(184, 137, 50);
+  }
+
+  .custom-botao-coluna-acoes{
+    color: rgb(5, 8, 190);
+    font-size: 14pt;
+  }
+
+  .custom-botao-coluna-acoes :hover{
+    color: rgb(59, 61, 187);
+    font-size: 14pt;
+  }
+
+  .hidden-col {
+  display: none;
+}
+
+.custom-responsive-table tbody tr:hover {
+  background-color: #c5ddfd; /* cor de destaque ao passar o mouse */
+  transition: background-color 0.2s ease; /* animação suave */
+  cursor: pointer; /* mostra que é interativo */
+  /* color: white; */
+}
+
+

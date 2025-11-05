@@ -11,6 +11,8 @@ class Piloto extends Model
 {
     use HasFactory;
 
+    protected $appends = ['corridas','vitorias', 'poles', 'podios', 'abandonos', 'aproveitamentoVitorias', 'aproveitamentoPodios', 'aproveitamentoPoles', 'aproveitamentoAbandonos'];
+
     protected $table = 'pilotos';
 
     public $timestamps = false;
@@ -19,6 +21,63 @@ class Piloto extends Model
 
     public function nomeCompleto(){
         return $this->nome.' '.$this->sobrenome;
+    }
+
+    public function getCorridasAttribute()
+    {
+        return $this->attributes['corridas'] ?? 0;
+    }
+
+    public function getVitoriasAttribute()
+    {
+        return $this->attributes['vitorias'] ?? 0;
+    }
+
+    public function getPolesAttribute()
+    {
+        return $this->attributes['poles'] ?? 0;
+    }
+
+    public function getPodiosAttribute()
+    {
+         return $this->attributes['podios'] ?? 0;
+    }
+
+    public function getAbandonosAttribute()
+    {
+         return $this->attributes['abandonos'] ?? 0;
+    }
+
+    public function getAproveitamentoVitoriasAttribute()
+    {
+        if (($this->corridas ?? 0) > 0) {
+            return round($this->vitorias / $this->corridas * 100, 1);
+        }
+        return 0;
+    }
+
+    public function getAproveitamentoPolesAttribute()
+    {
+        if (($this->corridas ?? 0) > 0) {
+            return round($this->poles / $this->corridas * 100, 1);
+        }
+        return 0;
+    }
+
+    public function getAproveitamentoPodiosAttribute()
+    {
+        if (($this->corridas ?? 0) > 0) {
+            return round($this->podios / $this->corridas * 100, 1);
+        }
+        return 0;
+    }
+
+    public function getAproveitamentoAbandonosAttribute()
+    {
+        if (($this->corridas ?? 0) > 0) {
+            return round($this->abandonos / $this->corridas * 100, 1);
+        }
+        return 0;
     }
 
     /**relacionamentos */

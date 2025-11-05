@@ -6,58 +6,71 @@
 
 @section('section')
     @if (session('status'))
-    <div class="alert alert-success text-center">
-        {{ session('status') }}
-    </div>
-    @endif
-
-  <div class="container mt-3 mb-3">
-
-    <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{route('home')}}">Home</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Listagem de Pilotos</li>
-        </ol>
-    </nav>
-
-    <div class="card mt-3 mb-3 p-3">
-        <div class="card-body">
-        <label for="">Pesquisar</label>
-        <input type="text" id="caixaBusca">
+        <div class="alert alert-success text-center">
+            {{ session('status') }}
         </div>
-    </div>
+    @endif
+    
+    <div class="mt-3 mb-3">
 
-    <div class="left_table">
+        <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{route('home')}}">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Listagem de Pilotos</li>
+            </ol>
+        </nav>
+
+        <div class="card mt-3 mb-3 p-3">
+            <div class="card-body">
+            <label for="">Pesquisar</label>
+            <input type="text" id="caixaBusca">
+            </div>
+        </div>
+
+        <button id="toggleColunas" class="btn btn-outline-info mb-2">Esconder percentuais</button>
+
         @if(count($pilotos) > 0)
-            <table class="table" id="tabelaPilotos">
+            <table class="custom-responsive-table" id="tabelaPilotos">
                 <thead>
                     <tr>
-                        <th>#</th>
+                        <th onclick="sortTable(0, 'tabelaPilotos')" style="cursor: pointer; text-align: center;">#</th>
                         <th>Nome</th>
-                        <th style="text-align:left;">País</th>
-                        <th>Status</th>
-                        <th>ações</th>
+                        <th onclick="sortTable(2, 'tabelaPilotos')" style="cursor: pointer; text-align: center;">Corridas</th>
+                        <th onclick="sortTable(3, 'tabelaPilotos')" style="cursor: pointer; text-align: center;">Vitórias</th>
+                        <th onclick="sortTable(4, 'tabelaPilotos')" style="cursor: pointer; text-align: center;">% de Vitórias</th>
+                        <th onclick="sortTable(5, 'tabelaPilotos')" style="cursor: pointer; text-align: center;">Poles</th>
+                        <th onclick="sortTable(6, 'tabelaPilotos')" style="cursor: pointer; text-align: center;">% de Poles</th>
+                        <th onclick="sortTable(7, 'tabelaPilotos')" style="cursor: pointer; text-align: center;">Podios</th>
+                        <th onclick="sortTable(8, 'tabelaPilotos')" style="cursor: pointer; text-align: center;">% de Podios</th>
+                        <th onclick="sortTable(9, 'tabelaPilotos')" style="cursor: pointer; text-align: center;">Abandonos</th>
+                        <th onclick="sortTable(10, 'tabelaPilotos')" style="cursor: pointer; text-align: center;">% Abandonos</th>
+                        <th style="text-align: center;">Status</th>
+                        <th style="text-align: center;">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($pilotos as $key => $piloto)
                         <tr style="<?= $piloto->flg_ativo == 'N' ? "color:red;" : "" ?>">
-                            <td>{{$key+1}}</td>
-                            {{-- <td>{{$piloto->nome}} {{$piloto->sobrenome}}</td> --}}
-                            <td style="vertical-align: middle; text-align:left;">
+                            <td data-label="#">{{$key+1}}</td>
+                            <td data-label="Nome" style="vertical-align: middle; text-align:left;">
                                 <img src="{{asset('images/'.$piloto->imagem)}}" style="width:25px; height:25px;">
                                 <span style="display: inline-block; vertical-align: middle;">{{$piloto->nome}} {{$piloto->sobrenome}}</span>
-                            </td>
-                            {{-- <td>{{$piloto->pais->des_nome}}</td> --}}
-                            <td style="vertical-align: middle; text-align:left;">
                                 <img src="{{asset('images/'.$piloto->pais->imagem)}}" style="width:25px; height:20px;">
-                                <span style="display: inline-block; vertical-align: middle;">{{$piloto->pais->des_nome}}</span>
                             </td>
-                            <td>{{$piloto->flg_ativo}}</td>
-                            <td class="coluna_acoes">
-                                <a href="{{route('pilotos.show', [$piloto->id])}}"><i class="bi bi-eye-fill"></i></a>
-                                <a href="{{route('pilotos.edit', [$piloto->id])}}"><i class="bi bi-pencil-fill"></i></a>
-                                <button type="button" class="deletePiloto btn btn-link p-0" value="{{$piloto->id}}"><i class="bi bi-trash-fill"></i></button>
+                            <td data-label="Corridas" >{{$piloto->corridas}}</td>
+                            <td data-label="Vitorias">{{$piloto->vitorias}}</td>
+                            <td data-label="% de Vitorias">{{ $piloto->aproveitamentoVitorias }}%</td> {{--vem do attribute na model--}}
+                            <td data-label="Poles">{{$piloto->poles}}</td>
+                            <td data-label="% de Poles">{{ $piloto->aproveitamentoPoles }}%</td>
+                            <td data-label="Podios">{{$piloto->podios}}</td>
+                            <td data-label="% de Podios">{{ $piloto->aproveitamentoPodios }}%</td>
+                            <td data-label="Abandonos">{{$piloto->abandonos}}</td>
+                            <td data-label="% de Abandonos">{{ $piloto->aproveitamentoAbandonos }}%</td>
+                            <td data-label="Status">{{$piloto->flg_ativo}}</td>
+                            <td data-label="Ações">
+                                <a href="{{route('pilotos.show', [$piloto->id])}}" class="custom-botao-visualizar"><i class="bi bi-eye-fill"></i></a>
+                                <a href="{{route('pilotos.edit', [$piloto->id])}}" class="custom-botao-editar"><i class="bi bi-pencil-fill"></i></a>
+                                <button type="button" class="deletePiloto btn btn-link p-0 custom-botao-excluir" value="{{$piloto->id}}"><i class="bi bi-trash-fill"></i></button>
                             </td>
                         </tr>
                     @endforeach
@@ -66,12 +79,10 @@
         @else
             <p>Nenhum piloto cadastrado</p>
         @endif
-
+        </div>
         <a href="{{route('pilotos.create')}}" class="btn btn-primary">Adicionar Piloto</a>
-    </div>
-  </div>
 
-  <!-- Modal exclsão -->
+ <!-- Modal exclsão -->
 <form id="deleteForm" method="get" action="{{ route('pilotos.delete') }}">
     <input type="hidden" name="_method" value="DELETE">
     <input type="hidden" name="_token" value="{{csrf_token()}}">
@@ -97,42 +108,7 @@
     </div>
 </form>
 
-  <script>
-    let caixaBusca = document.getElementById('caixaBusca');
-    let tabelaPilotos = document.getElementById('tabelaPilotos');
-
-    caixaBusca.addEventListener("keyup",function(){
-    var keyword = this.value;
-    keyword = keyword.toUpperCase();
-    
-    var all_tr = tabelaPilotos.getElementsByTagName("tr");
-
-    for(var i=0; i<all_tr.length; i++){
-        var all_columns = all_tr[i].getElementsByTagName("td");
-        for(j=0;j<all_columns.length; j++){
-            if(all_columns[j]){
-                var column_value = all_columns[j].textContent || all_columns[j].innerText;
-                column_value = column_value.toUpperCase();
-                if(column_value.indexOf(keyword) > -1){
-                    all_tr[i].style.display = ""; // show
-                    break;
-                }else{
-                    all_tr[i].style.display = "none"; // hide
-                }
-            }
-        }
-    }
-    })
-
-    $(document).ready(function () {
-        $('.deletePiloto').click(function (e) { 
-            e.preventDefault();
-            var piloto_id = $(this).val();
-            $('#piloto_id').val(piloto_id);
-            $('#exampleModal').modal('show');
-        });
-    });
-
-</script>
+<script src="{{asset('js/app.js')}}"></script>
+<script src="{{asset('js/pilotos/index.js')}}"></script>
 
 @endsection
