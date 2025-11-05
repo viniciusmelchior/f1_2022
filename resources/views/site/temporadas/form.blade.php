@@ -27,6 +27,10 @@
             </select>
         </div>
         <div class="mb-3">
+            <label for="observacoes" class="form-label">Temporada(s) de Referência</label>
+            <input type="text" class="form-control" name="referencia" id="referencia" value="@if(isset($model)) {{$model->referencia}}  @endif">
+        </div>
+        <div class="mb-3">
             <label for="observacoes" class="form-label">Observações</label>
             <textarea class="form-control" name="observacoes" id="observacoes" rows="10">
                 @if(isset($model->observacoes))

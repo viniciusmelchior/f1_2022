@@ -22,7 +22,7 @@ class TemporadaController extends Controller
      */
     public function index()
     {
-        $temporadas = Temporada::where('user_id', Auth::user()->id)->orderBy('id', 'ASC')->get();
+        $temporadas = Temporada::where('user_id', Auth::user()->id)->orderBy('id', 'DESC')->get();
 
         return view('site.temporadas.index', compact('temporadas'));
     }
@@ -52,6 +52,7 @@ class TemporadaController extends Controller
         $temporada->user_id = Auth::user()->id;
         $temporada->ano_id = $request->ano_id;
         $temporada->observacoes = $request->observacoes;
+        $temporada->referencia = $request->referencia;
         $temporada->flg_finalizada = 'N';
 
         $temporada->save();
@@ -355,6 +356,7 @@ class TemporadaController extends Controller
         $temporada->ano_id = $request->ano_id;
         $usuario = Auth::user()->id; 
         $temporada->observacoes = $request->observacoes;
+        $temporada->referencia = $request->referencia;
         //pesquisa pela classificação atualizada
         $retorno = $this->montaClassificacao($usuario, $temporada);
 

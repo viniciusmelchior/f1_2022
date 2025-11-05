@@ -14,7 +14,7 @@ class Temporada extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['des_temporada', 'user_id', 'ano_id', 'flg_finalizada','observacoes'];
+    protected $fillable = ['des_temporada', 'user_id', 'ano_id', 'flg_finalizada','observacoes', 'referencia'];
 
     /*relacionamentos */
     public function ano(){

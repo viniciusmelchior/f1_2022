@@ -21,14 +21,22 @@
         </ol>
     </nav>
 
+     <div class="card mt-3 mb-3 p-3">
+        <div class="card-body">
+        <label for="">Pesquisar</label>
+        <input type="text" id="caixaBusca">
+        </div>
+    </div>
+
     <div class="table-responsive">
         @if(count($temporadas) > 0)
         <table class="table" id="tabelaTemporadas">
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Ano</th>
+                    <th onclick="sortTable(1)" style="cursor: pointer;">Ano</th>
                     <th>Descrição</th>
+                    <th onclick="sortTable(3)" style="cursor: pointer;">Referência</th>
                     <th style="width: 20%; text-align:left;">Camp. Piloto</th>
                     <th style="width: 15%; text-align:left;">Camp. Construtores</th>
                     <th>Status</th>
@@ -44,6 +52,9 @@
                             @isset($temporada->observacoes)
                                 <i class="bi bi-info-circle text-primary" data-toggle="tooltip" data-placement="top" title="{{$temporada->observacoes}}">  
                             @endisset
+                        </td>
+                        <td>
+                            {{$temporada->referencia ?? '-'}}
                         </td>
                         <td style="width: 15%; text-align:left;">
                             @if(isset($temporada->titulo))
@@ -83,4 +94,78 @@
     <a href="{{route('temporadas.create')}}" class="btn btn-dark">Adicionar temporada</a>
     <a href="{{route('dashboard')}}" class="btn btn-danger ml-3">Voltar</a>
   </div>
+
+  <script>
+    let caixaBusca = document.getElementById('caixaBusca');
+    let tabelaTemporadas = document.getElementById('tabelaTemporadas');
+
+    caixaBusca.addEventListener("keyup",function(){
+        var keyword = this.value;
+        keyword = keyword.toUpperCase();
+        
+        var all_tr = tabelaTemporadas.getElementsByTagName("tr");
+
+        for(var i=0; i<all_tr.length; i++){
+            var all_columns = all_tr[i].getElementsByTagName("td");
+            for(j=0;j<all_columns.length; j++){
+                if(all_columns[j]){
+                    var column_value = all_columns[j].textContent || all_columns[j].innerText;
+                    column_value = column_value.toUpperCase();
+                    if(column_value.indexOf(keyword) > -1){
+                        all_tr[i].style.display = ""; // show
+                        break;
+                    }else{
+                        all_tr[i].style.display = "none"; // hide
+                    }
+                }
+            }
+        }
+    })
+
+    function sortTable(n) {
+        var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+        table = document.getElementById("tabelaTemporadas");
+        switching = true;
+        // Define a direção de ordenação inicial
+        dir = "asc"; 
+        // Realiza o loop até que nenhuma troca seja feita
+        while (switching) {
+            switching = false;
+            rows = table.rows;
+            // Loop por todas as linhas da tabela (exceto o cabeçalho)
+            for (i = 1; i < (rows.length - 1); i++) {
+                shouldSwitch = false;
+                // Obtém os dois elementos que serão comparados
+                x = rows[i].getElementsByTagName("TD")[n];
+                y = rows[i + 1].getElementsByTagName("TD")[n];
+                // Verifica se as duas linhas devem ser trocadas de acordo com a direção ascendente ou descendente
+                if (dir == "asc") {
+                    if (Number(x.innerHTML) > Number(y.innerHTML)) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                } else if (dir == "desc") {
+                    if (Number(x.innerHTML) < Number(y.innerHTML)) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                }
+            }
+            if (shouldSwitch) {
+                // Se uma troca deve ser feita, realiza a troca e marca que uma troca foi feita
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+                // Cada vez que uma troca é feita, incrementa a contagem de trocas
+                switchcount++; 
+            } else {
+                // Se nenhuma troca foi feita e a direção é "asc", define a direção como "desc" e reinicia o loop
+                if (switchcount == 0 && dir == "asc") {
+                    dir = "desc";
+                    switching = true;
+                }
+            }
+        }
+    }
+
+</script>
 @endsection
