@@ -48,17 +48,17 @@
                     </div>
                 </div>
             </div>
-
+        
             {{--filtro de consulta por temporada--}}
             <div class="row m-1 mb-3">
                 <div class="col-md-6">
                     <div class="form-group row">
                         <label for="temporada" class="col-sm-2 col-form-label">Temporada</label>
                         <div class="col-sm-10">
-                            <select name="temporada" id="temporada" class="form-control">
+                            <select name="temporada[]" id="temporada" class="form-select" multiple>
                                 <option value="">Todas</option>
                                 @foreach($temporadas as $temporada)
-                                    <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
+                                    <option value="{{$temporada->id}}">{{$temporada->des_temporada}} - ({{$temporada->referencia}})</option>
                                 @endforeach
                             </select>
                         </div>
@@ -284,10 +284,13 @@
         //Função que busca os dados da tela ao clicar no botão de pesquisa 
 
         async function buscarDados(){
+
+            selectTemporadasSelecionadas = document.getElementById('temporada')
             
             //coleta os dados
             let tipo = document.getElementById('tipoConsulta').value
-            let temporada = document.getElementById('temporada').value
+            // let temporada = document.getElementById('temporada').value
+            let temporada = Array.from(selectTemporadasSelecionadas.selectedOptions).map(option => option.value);
             let selectPilotosIgnorados = document.getElementById('pilotos_ignorados');
             let pilotos_ignorados = Array.from(selectPilotosIgnorados.selectedOptions).map(option => option.value);
             let selectEquipesIgnoradas = document.getElementById('equipes_ignoradas');

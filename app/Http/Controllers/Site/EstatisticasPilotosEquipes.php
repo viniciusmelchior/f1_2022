@@ -27,7 +27,6 @@ class EstatisticasPilotosEquipes extends Controller
     }
 
     public function buscar(Request $request){
-        // dd($request->all());
 
         //A função será reaproveitada e para isso vou decidir algumas configurações que serão usadas no select
         $limite = $request->limite; //define se é vitórias/poles, pódios, top10, top5 etc
@@ -38,10 +37,12 @@ class EstatisticasPilotosEquipes extends Controller
         $temporada_id = $request->temporada;
         $operadorConsultaTemporada = '=';
         $condicaoConsultaTemporada = $temporada_id;
+        $pesquisarTodasTemporadas = false;
         
-        if($temporada_id == null){
+        if(count($temporada_id) == 0 || $temporada_id[0] == null){
             $operadorConsultaTemporada = '>';
             $condicaoConsultaTemporada = 0; 
+            $pesquisarTodasTemporadas = true;
         }
 
         $retornoDadosPilotos = [];
@@ -63,13 +64,27 @@ class EstatisticasPilotosEquipes extends Controller
             }
         }
 
+        if($pesquisarTodasTemporadas == true){
+              $corridas = Corrida::where('user_id', Auth::user()->id)
+                                ->where('flg_sprint', $request->flg_sprint)
+                                ->where('exibir_resultado',1)
+                                ->where('temporada_id', $operadorConsultaTemporada, $condicaoConsultaTemporada)//fixado temporariamente
+                                ->get();
+        }else{
+            $corridas = Corrida::where('user_id', Auth::user()->id)
+                                ->where('flg_sprint', $request->flg_sprint)
+                                ->where('exibir_resultado',1)
+                                ->whereIn('temporada_id', $request->temporada)//fixado temporariamente
+                                ->get();
+        }
+
         //primeiro encontra as corridas
-        $corridas = Corrida::where('user_id', Auth::user()->id)
-                            ->where('flg_sprint', $request->flg_sprint)
-                            ->where('exibir_resultado',1)
-                            // ->whereIn('id', [278, 248, 261])//fixado temporariamente
-                            ->where('temporada_id', $operadorConsultaTemporada, $condicaoConsultaTemporada)//fixado temporariamente
-                            ->get();
+        // $corridas = Corrida::where('user_id', Auth::user()->id)
+        //                     ->where('flg_sprint', $request->flg_sprint)
+        //                     ->where('exibir_resultado',1)
+        //                     // ->whereIn('temporada_id', $operadorConsultaTemporada, $request->temporada)//fixado temporariamente
+        //                     ->whereIn('temporada_id', $request->temporada)//fixado temporariamente
+        //                     ->get();
 
         foreach ($corridas as $corrida) {
 
