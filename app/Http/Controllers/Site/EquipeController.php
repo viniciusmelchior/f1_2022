@@ -25,9 +25,7 @@ class EquipeController extends Controller
      */
     public function index()
     {
-        // $equipes = Equipe::where('user_id', Auth::user()->id)->get();
-        $equipes = Equipe::where('user_id', 3)->get();
-
+        $equipes = Equipe::buscaEstatisticasListagemequipes(Auth::user()->id);
         return view('site.equipes.index', compact('equipes'));
     }
 

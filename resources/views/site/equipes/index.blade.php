@@ -7,7 +7,7 @@
     </div>
     @endif
 
-  <div class="container mt-3 mb-3">
+  <div class="mt-3 mb-3">
 
     <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
         <ol class="breadcrumb">
@@ -23,75 +23,61 @@
         </div>
     </div>
 
-    <div class="left_table">
-        @if(count($equipes) > 0)
-        <table class="table" id="tabelaEquipes">
+    <button id="toggleColunas" class="btn btn-outline-info mb-2">Esconder percentuais</button>
+
+    @if(count($equipes) > 0)
+    <table class="custom-responsive-table" id="tabelaEquipes">
             <thead>
                 <tr>
-                    <th>#</th>
+                    <th onclick="sortTable(0, 'tabelaEquipes')" style="cursor: pointer; text-align: center;">#</th>
                     <th>Nome</th>
-                    <th>País</th>
-                    <th>Status</th>
-                    <th>ações</th>
+                    <th onclick="sortTable(2, 'tabelaEquipes')" style="cursor: pointer; text-align: center;">Corridas</th>
+                    <th onclick="sortTable(3, 'tabelaEquipes')" style="cursor: pointer; text-align: center;">Vitórias</th>
+                    <th onclick="sortTable(4, 'tabelaEquipes')" style="cursor: pointer; text-align: center;">% de Vitórias</th>
+                    <th onclick="sortTable(5, 'tabelaEquipes')" style="cursor: pointer; text-align: center;">Poles</th>
+                    <th onclick="sortTable(6, 'tabelaEquipes')" style="cursor: pointer; text-align: center;">% de Poles</th>
+                    <th onclick="sortTable(7, 'tabelaEquipes')" style="cursor: pointer; text-align: center;">Podios</th>
+                    <th onclick="sortTable(8, 'tabelaEquipes')" style="cursor: pointer; text-align: center;">% de Podios</th>
+                    <th onclick="sortTable(9, 'tabelaEquipes')" style="cursor: pointer; text-align: center;">Abandonos</th>
+                    <th onclick="sortTable(10, 'tabelaEquipes')" style="cursor: pointer; text-align: center;">% Abandonos</th>
+                    <th style="text-align: center;">Status</th>
+                    <th style="text-align: center;">Ações</th>
                 </tr>
             </thead>
-            <tbody>
-                @foreach ($equipes as $key => $equipe)
-                    <tr>
-                        <td>{{$key+1}}</td>
-                        {{-- <td style="color:{{$equipe->des_cor}};">{{$equipe->nome}}</td> --}}
-                        <td style="vertical-align: middle; text-align:left;">
-                            <img src="{{asset('images/'.$equipe->imagem)}}" style="width:25px; height:25px;">
-                            <span style="display: inline-block; vertical-align: middle;">{{$equipe->nome}}</span>
-                        </td>
-                        {{-- <td>{{$equipe->pais->des_nome}}</td> --}}
-                        <td style="vertical-align: middle; text-align:left;">
-                            <img src="{{asset('images/'.$equipe->pais->imagem)}}" style="width:25px; height:20px;">
-                            <span style="display: inline-block; vertical-align: middle;">{{$equipe->pais->des_nome}}</span>
-                        </td>
-                        <td>{{$equipe->flg_ativo}}</td>
-                        <td class="coluna_acoes">
-                            <a href="{{route('equipes.show', [$equipe->id])}}"><i class="bi bi-eye-fill"></i></a>
-                            <a href="{{route('equipes.edit', [$equipe->id])}}"><i class="bi bi-pencil-fill"></i></a>
-                            <a class="" href="{{route('equipes.delete', [$equipe->id])}}"><i class="bi bi-trash-fill"></i></a>
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-        @else
-            <p>Nenhuma equipe cadastrada</p>
-        @endif
+        <tbody>
+            @foreach ($equipes as $key => $equipe)
+                <tr style="<?= $equipe->flg_ativo == 'N' ? "color:red;" : "" ?>">
+                    <td data-label="#">{{$key+1}}</td>
+                    <td data-label="Nome" style="vertical-align: middle; text-align:left;">
+                        <img src="{{asset('images/'.$equipe->imagem_equipe)}}" style="width:25px; height:25px;">
+                        <span style="display: inline-block; vertical-align: middle;">{{$equipe->equipe}}</span>
+                        <img src="{{asset('images/'.$equipe->imagem_pais)}}" style="width:25px; height:20px;">
+                    </td>
+                     <td data-label="Corridas" >{{$equipe->total_corridas}}</td>
+                    <td data-label="Vitorias">{{$equipe->vitorias}}</td>
+                    <td data-label="% de Vitorias">{{ $equipe->aproveitamento_vitorias }}%</td>
+                    <td data-label="Poles">{{$equipe->pole_positions}}</td>
+                    <td data-label="% de Poles">{{ $equipe->aproveitamento_pole_positions }}%</td>
+                    <td data-label="Podios">{{$equipe->podios}}</td>
+                    <td data-label="% de Podios">{{ $equipe->aproveitamento_podios }}%</td>
+                    <td data-label="Abandonos">{{$equipe->abandonos}}</td>
+                    <td data-label="% de Abandonos">{{ $equipe->porcentagem_abandonos }}%</td>
+                    <td data-label="Status">{{$equipe->flg_ativo}}</td>
+                    <td data-label="Ações" class="coluna_acoes">
+                        <a href="{{route('equipes.show', [$equipe->id_da_equipe])}}" class="custom-botao-visualizar"><i class="bi bi-eye-fill"></i></a>
+                        <a href="{{route('equipes.edit', [$equipe->id_da_equipe])}}" class="custom-botao-editar"><i class="bi bi-pencil-fill"></i></a>
+                        <a class="text-danger" href="{{route('equipes.delete', [$equipe->id_da_equipe])}}"><i class="bi bi-trash-fill"></i></a>
+                    </td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+    @else
+        <p>Nenhuma equipe cadastrada</p>
+    @endif
         <a href="{{route('equipes.create')}}" class="btn btn-primary">Adicionar Equipe</a>
     </div>
-  </div>
 
-  <script>
-    let caixaBusca = document.getElementById('caixaBusca');
-    let tabelaPilotos = document.getElementById('tabelaEquipes');
-    console.log(caixaBusca, tabelaPilotos)
-
-    caixaBusca.addEventListener("keyup",function(){
-    var keyword = this.value;
-    keyword = keyword.toUpperCase();
-    
-    var all_tr = tabelaPilotos.getElementsByTagName("tr");
-
-    for(var i=0; i<all_tr.length; i++){
-        var all_columns = all_tr[i].getElementsByTagName("td");
-        for(j=0;j<all_columns.length; j++){
-            if(all_columns[j]){
-                var column_value = all_columns[j].textContent || all_columns[j].innerText;
-                column_value = column_value.toUpperCase();
-                if(column_value.indexOf(keyword) > -1){
-                    all_tr[i].style.display = ""; // show
-                    break;
-                }else{
-                    all_tr[i].style.display = "none"; // hide
-                }
-            }
-        }
-    }
-})
-</script>
+<script src="{{asset('js/app.js')}}"></script>
+<script src="{{asset('js/equipes/index.js')}}"></script>
 @endsection
