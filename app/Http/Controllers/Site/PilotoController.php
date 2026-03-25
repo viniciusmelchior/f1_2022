@@ -26,43 +26,7 @@ class PilotoController extends Controller
      */
     public function index()
     {
-        //pega os pilotos do ID 3 que são uma espécie de usuário padrão; Suponha que tenha dois schumacher, daqui pra frente apenas 1 único será considerado e será o do ID 3
-        $pilotos = Piloto::where('user_id', 3)
-                            ->orderBy('flg_ativo', 'DESC')
-                            ->orderBy('id')
-                            ->get();
-
-        $resultados = Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
-                                    ->join('piloto_equipes', 'piloto_equipes.id', '=', 'resultados.pilotoEquipe_id')
-                                    ->join('temporadas', 'temporadas.id', '=', 'corridas.temporada_id')
-                                    ->where('resultados.user_id', Auth::user()->id)
-                                    ->where('corridas.flg_sprint', 'N')
-                                    ->orderBy('resultados.id', 'ASC')
-                                    ->orderBy('temporadas.id', 'ASC')
-                                    ->get();
-
-        foreach($resultados as $resultado){
-
-            $pilotos->firstWhere('id', $resultado->piloto_id)->corridas++;
-
-            if($resultado->chegada == 1){
-                $pilotos->firstWhere('id', $resultado->piloto_id)->vitorias++;
-            }
-
-            if($resultado->largada == 1){
-                $pilotos->firstWhere('id', $resultado->piloto_id)->poles++;
-            }
-
-            if($resultado->chegada >= 1 && $resultado->chegada <=3){
-                $pilotos->firstWhere('id', $resultado->piloto_id)->podios++;
-            }
-
-            if($resultado->flg_abandono == 'S'){
-                $pilotos->firstWhere('id', $resultado->piloto_id)->abandonos++;
-            }
-
-        }
-
+        $pilotos = Piloto::buscaEstatisticasListagemPilotos(Auth::user()->id);
         return view('site.pilotos.index', compact('pilotos'));
     }
 
@@ -76,29 +40,6 @@ class PilotoController extends Controller
         $paises = Pais::where('user_id', Auth::user()->id)->get();
         return view('site.pilotos.form', compact('paises'));
     }
-
-    // public function listAllDrivers(){
-    //     return view('site.pilotos.allDrivers');
-    // }
-
-    // public function getAllDrivers(Request $request){
-        
-    //     $retorno = Piloto::with('pais');
-
-    //     if($request->busca){
-    //         $retorno = $retorno->where('nome', 'LIKE', '%'.$request->busca.'%');
-            
-    //         $retorno = $retorno->orWhereHas('pais', function($query) use ($request){
-    //             $query = $query->where('des_nome', 'LIKE', '%'.$request->busca.'%');
-    //         });
-    //     }
-
-    //     $retorno = $retorno->paginate($request->qtdResultados);
-
-    //     return response()->json([
-    //         'pilotos' => $retorno
-    //     ]);
-    // }
 
     /**
      * Store a newly created resource in storage.

@@ -53,24 +53,24 @@
                         <tr style="<?= $piloto->flg_ativo == 'N' ? "color:red;" : "" ?>">
                             <td data-label="#">{{$key+1}}</td>
                             <td data-label="Nome" style="vertical-align: middle; text-align:left;">
-                                <img src="{{asset('images/'.$piloto->imagem)}}" style="width:25px; height:25px;">
-                                <span style="display: inline-block; vertical-align: middle;">{{$piloto->nome}} {{$piloto->sobrenome}}</span>
-                                <img src="{{asset('images/'.$piloto->pais->imagem)}}" style="width:25px; height:20px;">
+                                <img src="{{asset('images/'.$piloto->imagem_piloto)}}" style="width:25px; height:25px;">
+                                <span style="display: inline-block; vertical-align: middle;">{{$piloto->piloto}}</span>
+                                <img src="{{asset('images/'.$piloto->imagem_pais)}}" style="width:25px; height:20px;">
                             </td>
-                            <td data-label="Corridas" >{{$piloto->corridas}}</td>
+                            <td data-label="Corridas" >{{$piloto->total_corridas}}</td>
                             <td data-label="Vitorias">{{$piloto->vitorias}}</td>
-                            <td data-label="% de Vitorias">{{ $piloto->aproveitamentoVitorias }}%</td> {{--vem do attribute na model--}}
-                            <td data-label="Poles">{{$piloto->poles}}</td>
-                            <td data-label="% de Poles">{{ $piloto->aproveitamentoPoles }}%</td>
+                            <td data-label="% de Vitorias">{{ $piloto->aproveitamento_vitorias }}%</td>
+                            <td data-label="Poles">{{$piloto->pole_positions}}</td>
+                            <td data-label="% de Poles">{{ $piloto->aproveitamento_pole_positions }}%</td>
                             <td data-label="Podios">{{$piloto->podios}}</td>
-                            <td data-label="% de Podios">{{ $piloto->aproveitamentoPodios }}%</td>
+                            <td data-label="% de Podios">{{ $piloto->aproveitamento_podios }}%</td>
                             <td data-label="Abandonos">{{$piloto->abandonos}}</td>
-                            <td data-label="% de Abandonos">{{ $piloto->aproveitamentoAbandonos }}%</td>
+                            <td data-label="% de Abandonos">{{ $piloto->porcentagem_abandonos }}%</td>
                             <td data-label="Status">{{$piloto->flg_ativo}}</td>
                             <td data-label="Ações">
-                                <a href="{{route('pilotos.show', [$piloto->id])}}" class="custom-botao-visualizar"><i class="bi bi-eye-fill"></i></a>
-                                <a href="{{route('pilotos.edit', [$piloto->id])}}" class="custom-botao-editar"><i class="bi bi-pencil-fill"></i></a>
-                                <button type="button" class="deletePiloto btn btn-link p-0 custom-botao-excluir" value="{{$piloto->id}}"><i class="bi bi-trash-fill"></i></button>
+                                <a href="{{route('pilotos.show', [$piloto->id_do_piloto])}}" class="custom-botao-visualizar"><i class="bi bi-eye-fill"></i></a>
+                                <a href="{{route('pilotos.edit', [$piloto->id_do_piloto])}}" class="custom-botao-editar"><i class="bi bi-pencil-fill"></i></a>
+                                <button type="button" class="deletePiloto btn btn-link p-0 custom-botao-excluir" value="{{$piloto->id_do_piloto}}"><i class="bi bi-trash-fill"></i></button>
                             </td>
                         </tr>
                     @endforeach

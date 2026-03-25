@@ -1,47 +1,33 @@
 function sortTable(n, id) {
-    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-    table = document.getElementById(id);
-    switching = true;
-    // Define a direção de ordenação inicial
-    dir = "asc"; 
-    // Realiza o loop até que nenhuma troca seja feita
-    while (switching) {
-        switching = false;
-        rows = table.rows;
-        // Loop por todas as linhas da tabela (exceto o cabeçalho)
-        for (i = 1; i < (rows.length - 1); i++) {
-            shouldSwitch = false;
-            // Obtém os dois elementos que serão comparados
-            x = rows[i].getElementsByTagName("TD")[n];
-            y = rows[i + 1].getElementsByTagName("TD")[n];
-            // Verifica se as duas linhas devem ser trocadas de acordo com a direção ascendente ou descendente
-            if (dir == "asc") {
-                if (Number(x.innerHTML) > Number(y.innerHTML)) {
-                    shouldSwitch = true;
-                    break;
-                }
-            } else if (dir == "desc") {
-                const cleanX = x.innerHTML.replace(/[^\d.,-]/g, '').replace(',', '.');
-                const cleanY = y.innerHTML.replace(/[^\d.,-]/g, '').replace(',', '.');
+    const table = document.getElementById(id);
+    const tbody = table.tBodies[0] || table;
+    const rows = Array.from(tbody.rows);
+    const isAsc = table.dataset.sortOrder === "asc";
+    
+    // 1. Função para limpar e converter os valores
+    const getCellValue = (row) => {
+        const cell = row.cells[n].innerText || row.cells[n].textContent;
+        // Limpa símbolos, trata vírgula decimal e converte para número
+        const cleanValue = cell.replace(/[^\d.,-]/g, '').replace(',', '.');
+        return isNaN(parseFloat(cleanValue)) ? cell.toLowerCase() : parseFloat(cleanValue);
+    };
 
-                if (Number(cleanX) < Number(cleanY)) {
-                    shouldSwitch = true;
-                    break;
-                }
-            }
-        }
-        if (shouldSwitch) {
-            // Se uma troca deve ser feita, realiza a troca e marca que uma troca foi feita
-            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-            switching = true;
-            // Cada vez que uma troca é feita, incrementa a contagem de trocas
-            switchcount++; 
-        } else {
-            // Se nenhuma troca foi feita e a direção é "asc", define a direção como "desc" e reinicia o loop
-            if (switchcount == 0 && dir == "asc") {
-                dir = "desc";
-                switching = true;
-            }
-        }
-    }
+    // 2. Ordenação em memória (muito mais rápido que Bubble Sort)
+    rows.sort((rowA, rowB) => {
+        const valA = getCellValue(rowA);
+        const valB = getCellValue(rowB);
+
+        if (valA === valB) return 0;
+        
+        const comparison = valA > valB ? 1 : -1;
+        return isAsc ? comparison : -comparison;
+    });
+
+    // 3. Inverte o estado para a próxima clicada
+    table.dataset.sortOrder = isAsc ? "desc" : "asc";
+
+    // 4. Reinserir as linhas (o navegador otimiza isso automaticamente)
+    const fragment = document.createDocumentFragment();
+    rows.forEach(row => fragment.appendChild(row));
+    tbody.appendChild(fragment);
 }
