@@ -159,7 +159,7 @@ margin: 0;
                             <select name="vitoriasPilotosPorTemporada" id="vitoriasPilotosPorTemporada" class="form-select mt-3" onchange="buscaChegadasPilotos()">
                                 <option value="" selected id="selectTemporadaVitoriasPiloto">Selecione uma Temporada</option>
                                 @foreach($temporadas as $temporada)
-                                    <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
+                                    <option value="{{$temporada->id}}">{{$temporada->des_temporada}} ({{$temporada->referencia}})</option>
                                 @endforeach
                             </select>
                         </div>
@@ -195,7 +195,7 @@ margin: 0;
                             <select name="vitoriasEquipesPorTemporada" id="vitoriasEquipesPorTemporada" class="form-select mt-3" onchange="buscaChegadasEquipes()">
                                 <option value="" selected id="selectTemporadaVitoriasEquipe">Selecione uma Temporada</option>
                                 @foreach($temporadas as $temporada)
-                                    <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
+                                    <option value="{{$temporada->id}}">{{$temporada->des_temporada}} ({{$temporada->referencia}})</option>
                                 @endforeach
                             </select>
                         </div>
@@ -236,7 +236,7 @@ margin: 0;
                         <select name="largadasPilotosPorTemporada" id="largadasPilotosPorTemporada" class="form-select mt-3" onchange="buscaLargadasPilotos()">
                             <option value="" selected id="selectLargadasPilotosPorTemporada">Selecione uma Temporada</option>
                             @foreach($temporadas as $temporada)
-                                <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
+                                <option value="{{$temporada->id}}">{{$temporada->des_temporada}} ({{$temporada->referencia}})</option>
                             @endforeach
                         </select>
                     </div>
@@ -270,7 +270,7 @@ margin: 0;
                         <select name="largadasEquipesPorTemporada" id="largadasEquipesPorTemporada" class="form-select mt-3" onchange="buscaLargadasEquipes()">
                             <option value="" selected id="selectLargadasEquipesPorTemporada">Selecione uma Temporada</option>
                             @foreach($temporadas as $temporada)
-                                <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
+                                <option value="{{$temporada->id}}">{{$temporada->des_temporada}} ({{$temporada->referencia}})</option>
                             @endforeach
                         </select>
                     </div>
@@ -368,7 +368,7 @@ margin: 0;
                 <select name="" id="temporada" onchange="buscaResultadosCorrida()" class="form-select">
                     <option value="todas">Todas</option>
                 @foreach ($temporadas as $temporada)
-                    <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
+                    <option value="{{$temporada->id}}">{{$temporada->des_temporada}} ({{$temporada->referencia}})</option>
                 @endforeach
                 </select>
             </div>
@@ -461,7 +461,7 @@ margin: 0;
     };
 
     async function buscaResultadosCorrida(url = null){
-
+        
         let tbody = document.querySelector('#tbodyResultadoCorridas')
         tbody.innerHTML = ''; //limpa a tabela a cada clique
         let paginacao = document.getElementById('paginacao');
@@ -555,6 +555,7 @@ margin: 0;
     }
 
     async function buscaChegadasPilotos(inicio = 1, fim = 1){
+        console.log('buscando chega dos piloitos')
         inicio = document.getElementById('inicioChegadaPilotos').value
         fim = document.getElementById('fimChegadaPilotos').value
         let temporada_id = document.getElementById('vitoriasPilotosPorTemporada').value

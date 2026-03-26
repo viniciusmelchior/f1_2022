@@ -7,12 +7,11 @@ function sortTable(n, id) {
     // 1. Função para limpar e converter os valores
     const getCellValue = (row) => {
         const cell = row.cells[n].innerText || row.cells[n].textContent;
-        // Limpa símbolos, trata vírgula decimal e converte para número
         const cleanValue = cell.replace(/[^\d.,-]/g, '').replace(',', '.');
         return isNaN(parseFloat(cleanValue)) ? cell.toLowerCase() : parseFloat(cleanValue);
     };
 
-    // 2. Ordenação em memória (muito mais rápido que Bubble Sort)
+    // 2. Ordenação em memória
     rows.sort((rowA, rowB) => {
         const valA = getCellValue(rowA);
         const valB = getCellValue(rowB);
@@ -26,8 +25,14 @@ function sortTable(n, id) {
     // 3. Inverte o estado para a próxima clicada
     table.dataset.sortOrder = isAsc ? "desc" : "asc";
 
-    // 4. Reinserir as linhas (o navegador otimiza isso automaticamente)
+    // 4. Reinserir as linhas e RESETAR a numeração da primeira coluna
     const fragment = document.createDocumentFragment();
-    rows.forEach(row => fragment.appendChild(row));
+    rows.forEach((row, index) => {
+        // Esta linha abaixo garante que a primeira coluna (index 0) 
+        // sempre exiba a posição atual, independente do dado original
+        row.cells[0].innerText = index + 1; 
+        
+        fragment.appendChild(row);
+    });
     tbody.appendChild(fragment);
 }
