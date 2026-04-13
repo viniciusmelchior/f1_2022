@@ -19,49 +19,67 @@ class Equipe extends Model
 
     public static function buscaEstatisticasListagemequipes(int $userId, int $temporadaId = 0){
         $sql = "
-            WITH ResultadosReordenados AS (
+                        WITH EstatisticasEquipes AS (
+                -- 1. Calculamos as posições reais dentro de cada corrida (quem venceu o GP, etc)
                 SELECT 
-                    e.nome AS equipe,
-                    e.id AS id_da_equipe,
+                    pe.equipe_id,
+                    r.id AS resultado_id,
                     r.flg_abandono,
-                    e.flg_ativo,
-                    e.imagem as imagem_equipe,
-                    pa.imagem as imagem_pais,
-                    ROW_NUMBER() OVER (
-                        PARTITION BY r.corrida_id 
-                        ORDER BY r.chegada ASC
-                    ) AS nova_posicao,
-                     ROW_NUMBER() OVER (
-                        PARTITION BY r.corrida_id 
-                        ORDER BY r.largada ASC
-                    ) AS nova_posicao_largada
+                    ROW_NUMBER() OVER (PARTITION BY r.corrida_id ORDER BY r.chegada ASC) AS pos_chegada,
+                    ROW_NUMBER() OVER (PARTITION BY r.corrida_id ORDER BY r.largada ASC) AS pos_largada
                 FROM resultados r
+                JOIN piloto_equipes pe ON r.pilotoEquipe_id = pe.id
                 JOIN corridas c ON r.corrida_id = c.id
-                JOIN piloto_equipes pe ON pe.id = r.pilotoEquipe_id
-                JOIN equipes e ON e.id = pe.equipe_id
-                JOIN paises pa on e.pais_id = pa.id
                 WHERE r.user_id = :user_id
-                AND c.temporada_id >= :temporada_id 
+                AND c.temporada_id >= :temporada_id
                 AND c.flg_sprint <> 'S'
+            ),
+            RankingEquipeFinal AS (
+                -- 2. Agrupamos os resultados por EQUIPE para ter os totais somados de seus pilotos
+                SELECT 
+                    equipe_id,
+                    COUNT(resultado_id) AS total_corridas_entradas,
+                    SUM(CASE WHEN flg_abandono = 'S' THEN 1 ELSE 0 END) AS abandonos,
+                    SUM(CASE WHEN pos_chegada = 1 THEN 1 ELSE 0 END) AS vitorias,
+                    SUM(CASE WHEN pos_largada = 1 THEN 1 ELSE 0 END) AS pole_positions,
+                    SUM(CASE WHEN pos_chegada <= 3 THEN 1 ELSE 0 END) AS podios
+                FROM EstatisticasEquipes
+                GROUP BY equipe_id
             )
+            -- 3. Unimos com a tabela de equipes para garantir que todas apareçam (mesmo as sem histórico)
             SELECT 
-                equipe,
-                id_da_equipe,
-                flg_ativo,
-                imagem_equipe,
-                imagem_pais,
-                COUNT(*) AS total_corridas,
-                SUM(CASE WHEN flg_abandono = 'S' THEN 1 ELSE 0 END) AS abandonos,
-                CAST(SUM(CASE WHEN flg_abandono = 'S' THEN 1 ELSE 0 END) * 100.0 / COUNT(*) AS DECIMAL(10,2)) AS porcentagem_abandonos,
-                SUM(CASE WHEN nova_posicao = 1 THEN 1 ELSE 0 END) AS vitorias,
-                SUM(CASE WHEN nova_posicao_largada = 1 THEN 1 ELSE 0 END) AS pole_positions,
-                CAST(SUM(CASE WHEN nova_posicao = 1 THEN 1 ELSE 0 END) * 100.0 / COUNT(*) AS DECIMAL(10,2)) AS aproveitamento_vitorias,
-                CAST(SUM(CASE WHEN nova_posicao_largada = 1 THEN 1 ELSE 0 END) * 100.0 / COUNT(*) AS DECIMAL(10,2)) AS aproveitamento_pole_positions,
-                SUM(CASE WHEN nova_posicao <= 3 THEN 1 ELSE 0 END) AS podios,
-                CAST(SUM(CASE WHEN nova_posicao <= 3 THEN 1 ELSE 0 END) * 100.0 / COUNT(*) AS DECIMAL(10,2)) AS aproveitamento_podios
-            FROM ResultadosReordenados
-            GROUP BY id_da_equipe
-            ORDER BY total_corridas DESC
+                e.id AS id_da_equipe,
+                e.nome AS equipe,
+                e.flg_ativo,
+                e.imagem AS imagem_equipe,
+                pa.imagem AS imagem_pais,
+                
+                -- Tratamento de nulos para equipes sem resultados
+                COALESCE(s.total_corridas_entradas, 0) AS total_corridas,
+                COALESCE(s.abandonos, 0) AS abandonos,
+                COALESCE(s.vitorias, 0) AS vitorias,
+                COALESCE(s.pole_positions, 0) AS pole_positions,
+                COALESCE(s.podios, 0) AS podios,
+                
+                -- Cálculos de porcentagem
+                CAST(CASE WHEN COALESCE(s.total_corridas_entradas, 0) = 0 THEN 0 
+                    ELSE (s.abandonos * 100.0 / s.total_corridas_entradas) END AS DECIMAL(10,2)) AS porcentagem_abandonos,
+                
+                CAST(CASE WHEN COALESCE(s.total_corridas_entradas, 0) = 0 THEN 0 
+                    ELSE (s.vitorias * 100.0 / s.total_corridas_entradas) END AS DECIMAL(10,2)) AS aproveitamento_vitorias,
+                    
+                CAST(CASE WHEN COALESCE(s.total_corridas_entradas, 0) = 0 THEN 0 
+                    ELSE (s.pole_positions * 100.0 / s.total_corridas_entradas) END AS DECIMAL(10,2)) AS aproveitamento_pole_positions,
+                    
+                CAST(CASE WHEN COALESCE(s.total_corridas_entradas, 0) = 0 THEN 0 
+                    ELSE (s.podios * 100.0 / s.total_corridas_entradas) END AS DECIMAL(10,2)) AS aproveitamento_podios
+
+            FROM equipes e
+            JOIN paises pa ON e.pais_id = pa.id
+            LEFT JOIN RankingEquipeFinal s ON e.id = s.equipe_id
+            WHERE e.id <> 0
+            and e.user_id = 3
+            ORDER BY total_corridas DESC, vitorias DESC, equipe ASC;
         ";
 
         return DB::select($sql, [

@@ -23,55 +23,73 @@ class Piloto extends Model
     public static function buscaEstatisticasListagemPilotos(int $userId, int $temporadaId = 0)
     {
         $sql = "
-            WITH ResultadosReordenados AS (
+                WITH EstatisticasPilotos AS (
+                    -- 1. Calculamos as posições reais dentro de cada corrida primeiro
+                    SELECT 
+                        pe.piloto_id,
+                        r.id AS resultado_id,
+                        r.flg_abandono,
+                        ROW_NUMBER() OVER (PARTITION BY r.corrida_id ORDER BY r.chegada ASC) AS pos_chegada,
+                        ROW_NUMBER() OVER (PARTITION BY r.corrida_id ORDER BY r.largada ASC) AS pos_largada
+                    FROM resultados r
+                    JOIN piloto_equipes pe ON r.pilotoEquipe_id = pe.id
+                    JOIN corridas c ON r.corrida_id = c.id
+                    WHERE r.user_id = :user_id
+                    AND c.temporada_id >= :temporada_id
+                    AND c.flg_sprint <> 'S'
+                ),
+                RankingFinal AS (
+                    -- 2. Agrupamos os resultados por piloto para ter totais únicos
+                    SELECT 
+                        piloto_id,
+                        COUNT(resultado_id) AS total_corridas,
+                        SUM(CASE WHEN flg_abandono = 'S' THEN 1 ELSE 0 END) AS abandonos,
+                        SUM(CASE WHEN pos_chegada = 1 THEN 1 ELSE 0 END) AS vitorias,
+                        SUM(CASE WHEN pos_largada = 1 THEN 1 ELSE 0 END) AS pole_positions,
+                        SUM(CASE WHEN pos_chegada <= 3 THEN 1 ELSE 0 END) AS podios
+                    FROM EstatisticasPilotos
+                    GROUP BY piloto_id
+                )
+                -- 3. Unimos com a tabela de pilotos para garantir que todos apareçam
                 SELECT 
                     p.id AS id_do_piloto,
                     CONCAT(p.nome, ' ', p.sobrenome) AS piloto,
-                    e.nome AS equipe,
-                    e.id AS id_da_equipe,
-                    r.flg_abandono,
                     p.flg_ativo,
-                    p.imagem as imagem_piloto,
-                    pa.imagem as imagem_pais,
-                    ROW_NUMBER() OVER (
-                        PARTITION BY r.corrida_id 
-                        ORDER BY r.chegada ASC
-                    ) AS nova_posicao,
-                     ROW_NUMBER() OVER (
-                        PARTITION BY r.corrida_id 
-                        ORDER BY r.largada ASC
-                    ) AS nova_posicao_largada
-                FROM resultados r
-                JOIN corridas c ON r.corrida_id = c.id
-                JOIN piloto_equipes pe ON pe.id = r.pilotoEquipe_id
-                JOIN pilotos p ON p.id = pe.piloto_id
-                JOIN equipes e ON e.id = pe.equipe_id
-                JOIN paises pa on p.pais_id = pa.id
-                WHERE r.user_id = :user_id
-                AND c.temporada_id >= :temporada_id
-                AND p.id <> 0 
-                AND c.flg_sprint <> 'S'
-            )
-            SELECT 
-                id_do_piloto,
-                piloto,
-                equipe,
-                id_da_equipe,
-                flg_ativo,
-                imagem_piloto,
-                imagem_pais,
-                COUNT(*) AS total_corridas,
-                SUM(CASE WHEN flg_abandono = 'S' THEN 1 ELSE 0 END) AS abandonos,
-                CAST(SUM(CASE WHEN flg_abandono = 'S' THEN 1 ELSE 0 END) * 100.0 / COUNT(*) AS DECIMAL(10,2)) AS porcentagem_abandonos,
-                SUM(CASE WHEN nova_posicao = 1 THEN 1 ELSE 0 END) AS vitorias,
-                SUM(CASE WHEN nova_posicao_largada = 1 THEN 1 ELSE 0 END) AS pole_positions,
-                CAST(SUM(CASE WHEN nova_posicao = 1 THEN 1 ELSE 0 END) * 100.0 / COUNT(*) AS DECIMAL(10,2)) AS aproveitamento_vitorias,
-                CAST(SUM(CASE WHEN nova_posicao_largada = 1 THEN 1 ELSE 0 END) * 100.0 / COUNT(*) AS DECIMAL(10,2)) AS aproveitamento_pole_positions,
-                SUM(CASE WHEN nova_posicao <= 3 THEN 1 ELSE 0 END) AS podios,
-                CAST(SUM(CASE WHEN nova_posicao <= 3 THEN 1 ELSE 0 END) * 100.0 / COUNT(*) AS DECIMAL(10,2)) AS aproveitamento_podios
-            FROM ResultadosReordenados
-            GROUP BY id_do_piloto
-            ORDER BY total_corridas DESC
+                    p.imagem AS imagem_piloto,
+                    pa.imagem AS imagem_pais,
+                    -- Caso o piloto não tenha corridas, transformamos o NULL em 0
+                    COALESCE(s.total_corridas, 0) AS total_corridas,
+                    COALESCE(s.abandonos, 0) AS abandonos,
+                    COALESCE(s.vitorias, 0) AS vitorias,
+                    COALESCE(s.pole_positions, 0) AS pole_positions,
+                    COALESCE(s.podios, 0) AS podios,
+                    
+                    -- Cálculos de porcentagem com tratamento para evitar divisão por zero
+                    CAST(CASE WHEN COALESCE(s.total_corridas, 0) = 0 THEN 0 
+                        ELSE (s.abandonos * 100.0 / s.total_corridas) END AS DECIMAL(10,2)) AS porcentagem_abandonos,
+                    
+                    CAST(CASE WHEN COALESCE(s.total_corridas, 0) = 0 THEN 0 
+                        ELSE (s.vitorias * 100.0 / s.total_corridas) END AS DECIMAL(10,2)) AS aproveitamento_vitorias,
+                        
+                    CAST(CASE WHEN COALESCE(s.total_corridas, 0) = 0 THEN 0 
+                        ELSE (s.pole_positions * 100.0 / s.total_corridas) END AS DECIMAL(10,2)) AS aproveitamento_pole_positions,
+                        
+                    CAST(CASE WHEN COALESCE(s.total_corridas, 0) = 0 THEN 0 
+                        ELSE (s.podios * 100.0 / s.total_corridas) END AS DECIMAL(10,2)) AS aproveitamento_podios,
+
+                    -- Para a equipe, pegamos a última equipe vinculada para não duplicar
+                    (SELECT e.nome 
+                    FROM piloto_equipes pe2 
+                    JOIN equipes e ON pe2.equipe_id = e.id 
+                    WHERE pe2.piloto_id = p.id 
+                    ORDER BY pe2.id DESC LIMIT 1) AS equipe
+
+                FROM pilotos p
+                JOIN paises pa ON p.pais_id = pa.id
+                LEFT JOIN RankingFinal s ON p.id = s.piloto_id
+                WHERE p.id <> 0
+                and p.user_id = 3
+                ORDER BY total_corridas DESC, vitorias DESC, piloto ASC;
         ";
 
         return DB::select($sql, [
