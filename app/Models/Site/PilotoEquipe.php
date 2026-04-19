@@ -88,4 +88,19 @@ class PilotoEquipe extends Model
         ];
 
     }
+
+    public static function getContrastColor($hexColor) {
+        $hex = str_replace('#', '', $hexColor);
+
+        // Converte Hex para RGB
+        $r = hexdec(substr($hex, 0, 2));
+        $g = hexdec(substr($hex, 2, 2));
+        $b = hexdec(substr($hex, 4, 2));
+
+        // Cálculo YIQ
+        $yiq = (($r * 299) + ($g * 587) + ($b * 114)) / 1000;
+
+        // Se o brilho for maior que 128, a cor é clara (retorna preto), senão retorna branco
+        return ($yiq >= 128) ? '#000000' : '#FFFFFF';
+}
 }
