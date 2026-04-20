@@ -126,7 +126,7 @@
             position: absolute;
             top: 15px;
             left: 10px;
-            font-size: 4.5rem;
+            font-size: 5.5rem;
             font-weight: 900;
             opacity: 0.8;
             z-index: 2;
@@ -134,10 +134,11 @@
 
         .driver-photo-main {
             position: absolute;
-            top: 0px;
+            /* top: 0px; */
             left: 0;
             width: 100%;
-            height: auto;
+            /* height: auto; */
+            height: 90%;
             object-fit: cover;
             z-index: 1;
         }
@@ -160,7 +161,7 @@
         }
 
         .points-badge b {
-            font-size: 1.1rem;
+            font-size: 1.5rem;
             color: var(--placeholder-gold);
         }
 
@@ -180,7 +181,7 @@
 
         .driver-name-dynamic {
             font-weight: 900;
-            font-size: 0.85rem;
+            font-size: 1rem;
             text-transform: uppercase;
         }
 
@@ -204,7 +205,7 @@
         }
 
         .row-driver-name {
-            font-size: 0.85rem;
+            font-size: 1rem;
             font-weight: 400;
         }
 
@@ -214,7 +215,7 @@
 
         .row-team-name {
             color: var(--text-gray);
-            font-size: 0.75rem;
+            font-size: 0.9rem;
         }
 
         .row-points {
@@ -229,14 +230,14 @@
         }
 
         .flag-img {
-            width: 22px;
-            height: 14px;
+            width: 30px;
+            height: 22px;
             object-fit: cover;
         }
 
         .team-logo-img {
-            width: 24px;
-            height: 24px;
+            width: 34px;
+            height: 34px;
         }
 
         /* --- GRID DE LARGADA --- */
@@ -277,8 +278,8 @@
         }
 
         .grid-mini-face-img {
-            width: 32px;
-            height: 32px;
+            width: 34px;
+            height: 34px;
             object-fit: cover;
             border-radius: 50%;
         }
@@ -518,13 +519,13 @@
     @if(isset($posicoes[2]))
         @php $p2 = $posicoes[2]; @endphp
         <div class="driver-card p2" style="background: linear-gradient(180deg, {{$p2->pilotoEquipe->equipe->des_cor}} 0%, #000 140%)">
-            <div class="pos-number">{{$p2->chegada}}</div>
+            <div class="pos-number" style="color: {{ PilotoEquipe::getContrastColor($p2->pilotoEquipe->equipe->des_cor) }}">{{$p2->chegada}}</div>
             <img src="{{asset('images/'.$p2->pilotoEquipe->piloto->imagem)}}" class="driver-photo-main" alt="Driver">
             <div class="driver-info">
                 <div class="points-badge"><b>{{$p2->pontuacao}}</b><span>PTS</span></div>
                 <div class="name-container" style="background-color: {{$p2->pilotoEquipe->equipe->des_cor}}">
                     <img src="{{asset('images/'.$p2->pilotoEquipe->piloto->pais->imagem)}}" class="flag-img" alt="Flag">
-                    <span class="driver-name-dynamic" style="color: #000;">{{$p2->pilotoEquipe->piloto->sobrenome}}</span>
+                    <span class="driver-name-dynamic" style="color: {{ PilotoEquipe::getContrastColor($p2->pilotoEquipe->equipe->des_cor) }}">{{$p2->pilotoEquipe->piloto->sobrenome}}</span>
                     <img src="{{asset('images/'.$p2->pilotoEquipe->equipe->imagem)}}" class="team-logo-img" alt="Logo">
                 </div>
             </div>
@@ -535,7 +536,7 @@
    @if(isset($posicoes[1]))
         @php $p1 = $posicoes[1]; @endphp
         <div class="driver-card p1" style="background: linear-gradient(180deg, {{$p1->pilotoEquipe->equipe->des_cor}} 0%, #000 140%)">
-            <div class="pos-number">{{$p1->chegada}}</div>
+            <div class="pos-number" style="color: {{ PilotoEquipe::getContrastColor($p1->pilotoEquipe->equipe->des_cor) }}">{{$p1->chegada}}</div>
             <img src="{{asset('images/'.$p1->pilotoEquipe->piloto->imagem)}}" class="driver-photo-main" alt="Driver">
             <div class="driver-info">
                 <div class="points-badge"><b>{{$p1->pontuacao}}</b><span>PTS</span></div>
@@ -552,13 +553,13 @@
     @if(isset($posicoes[3]))
         @php $p3 = $posicoes[3]; @endphp
         <div class="driver-card p3" style="background: linear-gradient(180deg, {{$p3->pilotoEquipe->equipe->des_cor}} 0%, #000 140%)">
-            <div class="pos-number">{{$p3->chegada}}</div>
+            <div class="pos-number" style="color: {{ PilotoEquipe::getContrastColor($p3->pilotoEquipe->equipe->des_cor) }}">{{$p3->chegada}}</div>
             <img src="{{asset('images/'.$p3->pilotoEquipe->piloto->imagem)}}" class="driver-photo-main" alt="Driver">
             <div class="driver-info">
                 <div class="points-badge"><b>{{$p3->pontuacao}}</b><span>PTS</span></div>
                 <div class="name-container" style="background-color: {{$p3->pilotoEquipe->equipe->des_cor}}">
                     <img src="{{asset('images/'.$p3->pilotoEquipe->piloto->pais->imagem)}}" class="flag-img" alt="Flag">
-                    <span class="driver-name-dynamic" style="color: #000;">{{$p3->pilotoEquipe->piloto->sobrenome}}</span>
+                    <span class="driver-name-dynamic" style="color: {{ PilotoEquipe::getContrastColor($p3->pilotoEquipe->equipe->des_cor) }}">{{$p3->pilotoEquipe->piloto->sobrenome}}</span>
                     <img src="{{asset('images/'.$p3->pilotoEquipe->equipe->imagem)}}" class="team-logo-img" alt="Logo">
                 </div>
             </div>
@@ -591,8 +592,8 @@
                 <div class="grid-item" style="border-left-color: {{$item->pilotoEquipe->equipe->des_cor}};">
                     <div class="grid-pos">{{$item->largada}}</div>
                     <div class="grid-driver-content">
-                        <img src="{{asset('images/'.$item->pilotoEquipe->equipe->imagem)}}" class="team-logo-img">
-                        <img src="{{asset('images/'.$item->pilotoEquipe->piloto->imagem)}}" class="grid-mini-face-img">
+                        <img src="{{asset('images/'.$item->pilotoEquipe->equipe->imagem)}}" class="team-logo-img" title="{{$item->pilotoEquipe->equipe->nome}}">
+                        <img src="{{asset('images/'.$item->pilotoEquipe->piloto->imagem)}}" class="grid-mini-face-img" title="{{$item->pilotoEquipe->piloto->sobrenome}}">
                         <span class="row-driver-name">{{$item->pilotoEquipe->piloto->nome}} <b>{{$item->pilotoEquipe->piloto->sobrenome}}</b></span>
                     </div>
                 </div>
