@@ -479,6 +479,138 @@
             position: relative;
             /* Para a linha ::after funcionar */
         }
+
+        /* Nova estrutura de grid com 7 colunas (incluindo o trend) */
+        .row-trend-grid {
+            display: grid;
+            /* Adicionada coluna de 25px para o ícone de tendência */
+            grid-template-columns: 45px 25px 40px 1.2fr 40px 1fr 90px;
+            align-items: center;
+            background: var(--row-bg);
+            padding: 15px 20px;
+            border-radius: 4px;
+            gap: 12px;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        /* Base do ícone de tendência */
+        .trend-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem; /* Um pouco menor que o row-pos (1.3rem) */
+            font-weight: 900;
+        }
+
+        /* Classes de estado */
+        .trend-up {
+            color: #00ff00; /* Verde F1 para ganho de posição */
+        }
+
+        .trend-down {
+            color: var(--f1-red); /* Vermelho para perda de posição */
+        }
+
+        .trend-neutral {
+            color: var(--text-gray); /* Cinza para mesma posição */
+            font-weight: 400;
+        }
+
+        /* Ajuste Responsivo para a nova coluna */
+        @media (max-width: 600px) {
+            .row-trend-grid {
+                grid-template-columns: 35px 20px 30px 1fr 30px 80px;
+                font-size: 0.85rem;
+                padding: 12px;
+            }
+        }
+
+        /* Container que une a posição e o ícone */
+        .pos-container {
+            display: flex;
+            align-items: center;
+            gap: 6px; /* Ajuste este valor para aproximar ou afastar a seta do número */
+            min-width: 70px; /* Garante que o conjunto tenha um espaço consistente */
+        }
+
+        /* Ajustamos a grid para 6 colunas novamente, pois o grupo conta como uma */
+        .row-trend-grid {
+            display: grid;
+            grid-template-columns: 80px 40px 1.2fr 40px 1fr 90px; 
+            align-items: center;
+            background: var(--row-bg);
+            padding: 15px 20px;
+            border-radius: 4px;
+            gap: 12px; /* Gap entre as outras colunas (bandeira, nome, etc) */
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        /* Mantemos as classes de cor que já criamos */
+        .trend-indicator {
+            font-size: 0.8rem;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        /* Ajuste Responsivo */
+        @media (max-width: 600px) {
+            .row-trend-grid {
+                grid-template-columns: 65px 30px 1fr 30px 80px;
+                padding: 12px;
+            }
+            .pos-container { gap: 4px; min-width: 55px; }
+        }
+
+        .pos-separator {
+            color: #a09e9e; /* Cinza escuro para ser discreto */
+            font-size: 1.1rem;
+            font-weight: 300;
+            margin: 0 2px; /* Ajuste fino do respiro entre o número e a seta */
+            user-select: none;
+            opacity: 0.6;
+        }
+
+        /* Ajuste no container para garantir o alinhamento perfeito */
+        .pos-container {
+            display: flex;
+            align-items: center;
+            gap: 4px; /* Reduzi o gap original para o pipe controlar a distância */
+            min-width: 85px; /* Aumentado levemente para caber o novo elemento */
+        }
+
+        /* Container no Pódio */
+        .podium-pos-group {
+            display: flex;
+            align-items: center; /* Centraliza verticalmente o número, o pipe e a seta */
+            /* gap: 8px; */
+        }
+
+        /* O Pipe no pódio */
+        .podium-separator {
+            font-size: 2rem; /* Menor que o número (5.5rem), mas visível */
+            opacity: 0.4;
+            font-weight: 300;
+        }
+
+        /* O Ícone de tendência no pódio */
+        .podium-trend-value {
+            font-size: 1.1rem; /* Tamanho coerente para leitura rápida */
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Ajuste na classe original para não forçar o topo */
+        .pos-number {
+            display: flex;
+            align-items: center;
+            position: absolute;
+            top: 15px;
+            left: 10px;
+            z-index: 2;
+        }
     </style>
     <div class="div bodyDark">
     <nav class="tabs-nav">
@@ -517,9 +649,26 @@
 
     {{-- Renderiza o 2º LUGAR (Esquerda) --}}
     @if(isset($posicoes[2]))
-        @php $p2 = $posicoes[2]; @endphp
+        @php $p2 = $posicoes[2];
+            $diffPodio = $p2->largada - $p2->chegada;
+            $absDiff = abs($diffPodio);
+        @endphp
         <div class="driver-card p2" style="background: linear-gradient(180deg, {{$p2->pilotoEquipe->equipe->des_cor}} 0%, #000 140%)">
-            <div class="pos-number" style="color: {{ PilotoEquipe::getContrastColor($p2->pilotoEquipe->equipe->des_cor) }}">{{$p2->chegada}}</div>
+            <div class="pos-number" style="color: {{ PilotoEquipe::getContrastColor($p2->pilotoEquipe->equipe->des_cor) }}">
+                <div class="podium-pos-group">
+                    <span>{{ $p2->chegada }}</span>
+                    
+                    @if($diffPodio != 0)
+                        <span class="podium-separator">|</span>
+                        <span class="podium-trend-value">
+                            {{ $diffPodio > 0 ? '▲' : '▼' }}{{ $absDiff }}
+                        </span>
+                    @else
+                        <span class="podium-separator">|</span>
+                        <span class="podium-trend-value">—</span>
+                    @endif
+                </div>
+            </div>
             <img src="{{asset('images/'.$p2->pilotoEquipe->piloto->imagem)}}" class="driver-photo-main" alt="Driver">
             <div class="driver-info">
                 <div class="points-badge"><b>{{$p2->pontuacao}}</b><span>PTS</span></div>
@@ -534,9 +683,26 @@
 
     {{-- Renderiza o 1º LUGAR (Centro) --}}
    @if(isset($posicoes[1]))
-        @php $p1 = $posicoes[1]; @endphp
+        @php $p1 = $posicoes[1]; 
+            $diffPodio = $p1->largada - $p1->chegada;
+            $absDiff = abs($diffPodio);
+        @endphp
         <div class="driver-card p1" style="background: linear-gradient(180deg, {{$p1->pilotoEquipe->equipe->des_cor}} 0%, #000 140%)">
-            <div class="pos-number" style="color: {{ PilotoEquipe::getContrastColor($p1->pilotoEquipe->equipe->des_cor) }}">{{$p1->chegada}}</div>
+            <div class="pos-number" style="color: {{ PilotoEquipe::getContrastColor($p1->pilotoEquipe->equipe->des_cor) }}">
+                <div class="podium-pos-group">
+                    <span>{{ $p1->chegada }}</span>
+                    
+                    @if($diffPodio != 0)
+                        <span class="podium-separator">|</span>
+                        <span class="podium-trend-value">
+                            {{ $diffPodio > 0 ? '▲' : '▼' }}{{ $absDiff }}
+                        </span>
+                    @else
+                        <span class="podium-separator">|</span>
+                        <span class="podium-trend-value">—</span>
+                    @endif
+                </div>
+            </div>
             <img src="{{asset('images/'.$p1->pilotoEquipe->piloto->imagem)}}" class="driver-photo-main" alt="Driver">
             <div class="driver-info">
                 <div class="points-badge"><b>{{$p1->pontuacao}}</b><span>PTS</span></div>
@@ -551,9 +717,26 @@
 
     {{-- Renderiza o 3º LUGAR (Direita) --}}
     @if(isset($posicoes[3]))
-        @php $p3 = $posicoes[3]; @endphp
+        @php $p3 = $posicoes[3];
+            $diffPodio = $p3->largada - $p3->chegada;
+            $absDiff = abs($diffPodio);
+        @endphp
         <div class="driver-card p3" style="background: linear-gradient(180deg, {{$p3->pilotoEquipe->equipe->des_cor}} 0%, #000 140%)">
-            <div class="pos-number" style="color: {{ PilotoEquipe::getContrastColor($p3->pilotoEquipe->equipe->des_cor) }}">{{$p3->chegada}}</div>
+            <div class="pos-number" style="color: {{ PilotoEquipe::getContrastColor($p3->pilotoEquipe->equipe->des_cor) }}">
+                <div class="podium-pos-group">
+                    <span>{{ $p3->chegada }}</span>
+                    
+                    @if($diffPodio != 0)
+                        <span class="podium-separator">|</span>
+                        <span class="podium-trend-value">
+                            {{ $diffPodio > 0 ? '▲' : '▼' }}{{ $absDiff }}
+                        </span>
+                    @else
+                        <span class="podium-separator">|</span>
+                        <span class="podium-trend-value">—</span>
+                    @endif
+                </div>
+            </div>
             <img src="{{asset('images/'.$p3->pilotoEquipe->piloto->imagem)}}" class="driver-photo-main" alt="Driver">
             <div class="driver-info">
                 <div class="points-badge"><b>{{$p3->pontuacao}}</b><span>PTS</span></div>
@@ -565,11 +748,30 @@
             </div>
         </div>
     @endif
-</div>
+</div>  
         <div class="results-list">
             @foreach ($model->where('chegada', '>=', 4)->sortBy('chegada') as $item)
-                <div class="result-row">
-                    <span class="row-pos" @if($item->flg_abandono == 'S') style="color: var(--f1-red)" @endif>{{ $item->chegada }}</span>
+                @php
+                    $diff = $item->largada - $item->chegada;
+                    $variacao = abs($diff);
+                @endphp
+                <div class="row-trend-grid">
+                    <div class="pos-container">
+                        <span class="row-pos">{{ $item->chegada }}</span>
+                        
+                        @if($diff > 0)
+                            <span class="pos-separator">|</span>
+                            <span class="trend-indicator trend-up">▲{{ $variacao }}</span>
+                            
+                        @elseif($diff < 0)
+                            <span class="pos-separator">|</span>
+                            <span class="trend-indicator trend-down">▼{{ $variacao }}</span>
+                            
+                        @else
+                            <span class="pos-separator">|</span>
+                            <span class="trend-indicator trend-neutral">—</span>
+                        @endif
+                    </div>
                     <img src="{{asset('images/'.$item->pilotoEquipe->piloto->pais->imagem)}}" class="flag-img">
                     <span class="row-driver-name">{{ $item->pilotoEquipe->piloto->nome }}<b> {{ $item->pilotoEquipe->piloto->sobrenome }}</b></span>
                     <img src="{{asset('images/'.$item->pilotoEquipe->equipe->imagem)}}" class="team-logo-img">
@@ -577,7 +779,8 @@
                     <span class="row-points">{{ $item->pontuacao }} PTS</span>
                 </div>
             @endforeach
-        </div> </div>
+        </div> 
+    </div>
 </div>
 
 @php 
