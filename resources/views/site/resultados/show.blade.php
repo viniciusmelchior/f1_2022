@@ -204,6 +204,13 @@
             font-style: italic;
         }
 
+        .row-pos-non-complete {
+            font-size: 1.1rem;
+            font-weight: 900;
+            font-style: italic;
+            color: rgb(209, 30, 30);
+        }
+
         .row-driver-name {
             font-size: 1rem;
             font-weight: 400;
@@ -757,7 +764,7 @@
                 @endphp
                 <div class="row-trend-grid">
                     <div class="pos-container">
-                        <span class="row-pos">{{ $item->chegada }}</span>
+                        <span class="row-pos {{$item->flg_abandono == 'S' ? 'row-pos-non-complete' : ''}}">{{ $item->chegada }}</span>
                         
                         @if($diff > 0)
                             <span class="pos-separator">|</span>
