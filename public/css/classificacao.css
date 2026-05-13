@@ -4,7 +4,7 @@
   --text:#fff; --muted:#9aa0b4;
   --red:#e10600;
 }
-main{
+.main-custom{
   background: radial-gradient(1200px 600px at 80% -10%, #1a1330 0%, var(--bg) 60%) fixed;
   color:var(--text); font-family:"Titillium Web",sans-serif; min-height:100vh;
   overflow-x: hidden;
@@ -124,7 +124,7 @@ main{
     .pts-value {text-align: right;}
 }
 
-@media(max-width: 600px) {
+/* @media(max-width: 600px) {
     .topbar { padding: 10px 15px; flex-wrap: wrap; gap: 10px; justify-content: center; }
     .season-badge { display: none; }
     .container { margin: 15px auto; }
@@ -139,4 +139,76 @@ main{
     .entry-team {display: none;}
     .row {width: 100%;}
     .pts-value{ text-align: right;}
+} */
+
+/* Ajuste Geral para Celulares (abaixo de 600px) */
+@media (max-width: 600px) {
+    /* 1. Definimos larguras fixas e rígidas para as colunas laterais */
+    /* POS (35px) | NOME (flexível) | PTS (50px) | DIF (45px) */
+    .table-head, .row {
+        grid-template-columns: 35px 1fr 50px 45px !important;
+        gap: 8px !important;
+        padding: 10px !important;
+        align-items: center;
+    }
+
+    /* 2. Alinhamento do Título 'PTS' com o Número */
+    /* Forçamos o 3º item do grid (PTS) a alinhar à direita em ambos */
+    .table-head span:nth-child(3), 
+    .pts-value {
+        text-align: right !important;
+        width: 100%;
+        display: block;
+        padding-right: 5px; /* Pequeno respiro para não colidir com o DIF */
+    }
+
+    /* 3. Alinhamento do Título 'PILOTO' com o texto do nome */
+    /* Largura da logo (30px) + Gap (8px) = 38px */
+    .table-head span:nth-child(2) {
+        margin-left: 38px !important;
+    }
+
+    /* 4. Garantindo que o nome não empurre nada para fora */
+    .entry-name {
+        font-size: 13px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis; /* Adiciona '...' se o nome for gigante */
+        max-width: 100%;
+        text-wrap: inherit;
+    }
+
+    /* 5. Redução de elementos para caber na linha */
+    .logo-container {
+        width: 30px !important;
+        height: 30px !important;
+        flex-shrink: 0;
+    }
+
+    .points-bar, .entry-team, .circuit-icon, .season-badge {
+        display: none !important;
+    }
+
+    .pos { font-size: 16px; }
+    .pts-value { font-size: 16px; font-weight: 800; }
+    .diff { font-size: 11px; text-align: center; }
+    
+    .page-title { font-size: 18px; }
+}
+
+/* Ajuste Extremo (Telas abaixo de 360px - Ex: iPhone SE) */
+@media (max-width: 360px) {
+    .table-head, .row {
+        grid-template-columns: 30px 1fr 45px 40px !important;
+        gap: 5px !important;
+        padding: 8px 5px !important;
+    }
+    
+    .table-head span:nth-child(2) {
+        margin-left: 35px !important; /* Ajuste proporcional à logo menor */
+    }
+
+    .pts-value { font-size: 14px; }
+    .entry-name { font-size: 12px; }
+    .entry-name { font-size: 13px; text-wrap: inherit;}
 }

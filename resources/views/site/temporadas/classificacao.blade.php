@@ -23,7 +23,7 @@
         </div>
     </header>
     <div class="container-escuro">
-        <main class="container">
+        <main class="container main-custom">
             <div class="race-nav">
                 <button id="prev-race" class="nav-btn"><span class="nav-text">← Anterior</span><span class="nav-icon">←</span></button>
                 <div class="location-header" id="location-data">
