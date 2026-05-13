@@ -88,7 +88,8 @@ class TemporadaController extends Controller
         return view('site.temporadas.form', compact('model','anos'));
     }
 
-    public function classificacao($id){
+    public function classificacao_20260513($id){
+       
         $usuario = Auth::user()->id; 
         $temporada = Temporada::where('user_id', Auth::user()->id)->where('id', $id)->first();
 
@@ -127,6 +128,63 @@ class TemporadaController extends Controller
         return view('site.temporadas.classificacao', compact('corridaAtual','totalCorridas','temporada', 'resultadosPilotos','resultadosEquipes','resultadosPilotosClassico','resultadosEquipesClassico','resultadosPilotosInvertida','resultadosEquipesInvertida','resultadosPilotosAlternativa','resultadosEquipesAlternativa'));
     } 
 
+    public function classificacao($id){
+        $usuario = Auth::user()->id; 
+        $temporada = Temporada::where('user_id', Auth::user()->id)->where('id', $id)->first();
+
+        $corridaAtual = Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                    ->join('eventos', 'corridas.evento_id', '=', 'eventos.id')
+                                    ->where('resultados.user_id', Auth::user()->id)
+                                    ->where('corridas.temporada_id', $id)
+                                    ->where('resultados.chegada', '<>', null)
+                                    ->orderBy('corrida_id', 'desc')
+                                    ->first();
+
+        $totalCorridas = Corrida::where('user_id', Auth::user()->id)->where('temporada_id', $temporada->id)->where('flg_sprint', 'N')->count();
+
+         $initialData = [
+            "location" => $corridaAtual->corrida->pista->nome,
+            "gp_name" => $corridaAtual->evento->des_nome,
+            "stage" => $corridaAtual->ordem." de ".$totalCorridas,
+            "flag" => $corridaAtual->corrida->pista->pais->imagem,
+            "drivers" => [
+                // ["name" => "Max Verstappen", "team" => "Red Bull", "short" => "rbr", "color" => "#3671C6", "points" => 393],
+                // ["name" => "Lando Norris", "team" => "McLaren", "short" => "mcl", "color" => "#FF8000", "points" => 374],
+                // ["name" => "Charles Leclerc", "team" => "Ferrari", "short" => "fer", "color" => "#E80020", "points" => 356]
+            ],
+            "teams" => [
+                // ["name" => "McLaren", "short" => "mcl", "color" => "#FF8000", "points" => 666],
+                // ["name" => "Ferrari", "short" => "fer", "color" => "#E80020", "points" => 652],
+                // ["name" => "Red Bull", "short" => "rbr", "color" => "#3671C6", "points" => 589]
+            ]
+        ];
+
+        $retorno = $this->montaClassificacao($usuario, $temporada);
+
+        //Monta os dados dos pilotos
+        foreach($retorno['resultadoPilotos'] as $resultadoPiloto){
+            $initialData['drivers'][] = [
+                'name' => $resultadoPiloto->nome.' '. $resultadoPiloto->sobrenome,
+                'team' => $resultadoPiloto->equipe,
+                'short' => $resultadoPiloto->imagem,
+                'color' => $resultadoPiloto->cor,
+                'points' => $resultadoPiloto->total
+            ];
+        }
+
+        //Monta os dados das equipes
+        foreach($retorno['resultadoEquipes'] as $equipe){
+            $initialData['teams'][] = [
+                'name' => $equipe->nome,
+                'short' => $equipe->imagem,
+                'color' => $equipe->cor,
+                'points' => $equipe->total
+            ];
+        }
+
+        return view('site.temporadas.classificacao', compact('initialData', 'temporada'));
+    }
+
     public function montaClassificacao($usuario, $temporada){
 
             
@@ -157,6 +215,7 @@ class TemporadaController extends Controller
                             pilotos.sobrenome,
                             equipes.nome AS equipe,
                             equipes.imagem,
+                            equipes.des_cor as cor,
                             SUM(pontuacao) AS total,
                             '.$queryCountChegadaPilotos.'
                             FROM resultados
@@ -181,7 +240,7 @@ class TemporadaController extends Controller
 
         // dd($queryCountChegadaEquipes);
 
-        $resultadosEquipes = DB::select('select equipe_id, equipes.nome as nome, equipes.imagem, sum(pontuacao) as total,'.$queryCountChegadaEquipes.' from resultados
+        $resultadosEquipes = DB::select('select equipe_id, equipes.des_cor as cor, equipes.nome as nome, equipes.imagem, sum(pontuacao) as total,'.$queryCountChegadaEquipes.' from resultados
                                         join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
                                         join equipes on equipes.id = piloto_equipes.equipe_id
                                         join corridas on corridas.id = resultados.corrida_id

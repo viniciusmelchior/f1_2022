@@ -57,4 +57,8 @@ class Resultado extends Model
         return $chegada;
     }
 
+    public function evento(){
+         return $this->belongsTo(Evento::class);
+    }
+
 }
