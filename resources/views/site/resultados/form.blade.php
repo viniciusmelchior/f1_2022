@@ -10,7 +10,7 @@
         $route = route('resultados.update', [$corrida->id]);
         $method = method_field('POST');
     }
-    Artisan::call('view:clear');
+    Artisan::call('view:clear'); //teste
 @endphp
 
 <style>
