@@ -193,7 +193,7 @@
 }
 
 /* Ajuste Extremo (Telas abaixo de 360px - Ex: iPhone SE) */
-@media (max-width: 360px) {
+@media (max-width: 400px) {
     .table-head, .row {
         grid-template-columns: 30px 1fr 45px 40px !important;
         gap: 5px !important;
@@ -204,7 +204,25 @@
         margin-left: 35px !important; /* Ajuste proporcional à logo menor */
     }
 
-    .pts-value { font-size: 14px; }
-    .entry-name { font-size: 12px; }
-    .entry-name { font-size: 13px; text-wrap: inherit;}
+    .pts-value { font-size: 12px; }
+    .entry-name { font-size: 11px; text-wrap: inherit; max-width: fit-content;}
+    .entry { display: block; width: 100px;}
+    .row {max-width: 100%; padding-right: 0; padding-left: 0;}
+    .points {text-align: left!important; margin-left: 0; padding-left:0;}
+    .table-head {display: none;}
+    .pts-value{text-align: left;}
+    .entry {margin: 0;}
+    .pos{font-size: 14px;}
+
+    .race-nav{
+        display: block;
+    }
+
+    .page-title{
+        margin-top: 20px;
+    }
+
+    .gp-details{
+        display: block;
+    }
 }
