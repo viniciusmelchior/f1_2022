@@ -378,7 +378,7 @@
 </script>
 
 <script>
-    const ID_CORRIDA_INICIAL = 11; 
+    const ID_CORRIDA_INICIAL = null; 
 
     // MOCK ATUALIZADO: Sem classes CSS, agora com corFundo e corTexto puras
     const dbMock = {
@@ -430,6 +430,8 @@
         //     if(dadosMockados) renderizarDados(dadosMockados);
         // }, 120); 
 
+        // console.log(idCorrida)
+
         const url = document.getElementById('post.temporadas.classificacao').value
         const id = document.getElementById('id').value
         const token = document.querySelector('meta[name="csrf-token"]').content
@@ -440,7 +442,8 @@
                     'x-csrf-token' : token
                 },
                 body: JSON.stringify({
-                    id: id
+                    id: id,
+                    idCorrida:idCorrida //até qual corrida estou buscando no backend
                 })
             })
 
@@ -451,6 +454,8 @@
 
         }
 
+        dados.ordem = res.dados.ordem
+        dados.total_corridas = res.dados.total_corridas
         dados.ano = res.dados.ano
         dados.des_temporada = res.dados.des_temporada
         dados.evento = res.dados.evento
@@ -465,13 +470,11 @@
         ],
 
        dados.pilotos = res.dados.pilotos.map((piloto, index) => {
-            // 1. Trata as fotos vazias gerando o caminho padrão pelo sobrenome (ex: perez.jpg)
             const sobrenomeMinusculo = piloto.sobrenome.toLowerCase().replace("'", ""); // Trata nomes como O'Ward
             const fotoTratada = piloto.foto 
                 ? piloto.foto 
                 : `imagens/pilotos/${sobrenomeMinusculo}.jpg`;
 
-            // 2. Faz o mesmo para o logo da equipe (você pode ajustar a lógica se tiver a coluna da equipe)
             const logoTratado = piloto.logoEquipe 
                 ? piloto.logoEquipe 
                 : `imagens/equipes/default.png`;
@@ -483,10 +486,6 @@
                 pontos: piloto.pontos,
                 foto: fotoTratada,
                 logoEquipe: logoTratado,
-                
-                // Alerta de Dev: Notei que no seu JSON o 'corFundo' veio todo como #ff8700 (McLaren)
-                // mas o campo 'color' traz a cor real da equipe (ex: Perez #0741a6). 
-                // Inverti aqui para usar a cor real da equipe no fundo. Se preferir a outra, basta mudar.
                 corFundo: piloto.color, 
                 corTexto: piloto.color === "#ffffff" ? "#000000" : "#ffffff" // Garante contraste para o seu próprio card!
             };
@@ -503,11 +502,33 @@
             };
         }) : []
 
+        dados.temAnterior = false
+        dados.temProximo = false
+        dados.idAnterior = null
+        dados.idProximo = null
+        
+        if (res.dados.ordem < res.dados.total_corridas) {
+            dados.temProximo = true
+            dados.temAnterior = true
+            dados.idAnterior = parseInt(dados.ordem)-1
+            dados.idProximo = parseInt(dados.ordem) +1
+        }
+
+        if (res.dados.ordem == res.dados.total_corridas) {
+            dados.temAnterior = true
+            dados.idAnterior = parseInt(dados.ordem)-1
+        }
+
+        if (res.dados.ordem == 1){
+            dados.temAnterior = false
+        }
+
         console.log(dados)
         renderizarDados(dados)
     }
 
     function renderizarDados(dados) {
+        console.log('renderizando dados', dados)
         document.getElementById("txt-temporada").innerText = `${dados.des_temporada} • ${dados.ano}`;
         document.getElementById("img-bandeira").src = `${window.Laravel.baseUrl}images/${dados.url_bandeira}`;
         document.getElementById("txt-nome-corrida").innerText = dados.evento;
@@ -567,6 +588,7 @@
     function alterarCorrida(direcao) {
         const idAlvo = document.getElementById(`btn-${direcao}`).getAttribute('data-id');
         if (idAlvo) {
+            console.log('buscando corrida com ordem', idAlvo)
             atualizarPainel(idAlvo);
         }
     }

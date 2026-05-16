@@ -137,20 +137,29 @@ class TemporadaController extends Controller
     public function postClassificacao(Request $request)
     {
         $id = $request->id;
+        
         $usuario = Auth::user()->id;
         $temporada = Temporada::where('user_id', Auth::user()->id)->where('id', $id)->first();
+        $totalCorridas = Corrida::where('user_id', Auth::user()->id)->where('temporada_id', $temporada->id)->where('flg_sprint', 'N')->count();
+        $corrida_ordem = $totalCorridas;
+
+        if ($request->idCorrida != null){
+            $corrida_ordem = $request->idCorrida;
+        }
 
         $corridaAtual = Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
             ->join('eventos', 'corridas.evento_id', '=', 'eventos.id')
             ->where('resultados.user_id', Auth::user()->id)
             ->where('corridas.temporada_id', $id)
             ->where('resultados.chegada', '<>', null)
+            ->where('corridas.ordem','=', $corrida_ordem)
             ->orderBy('corrida_id', 'desc')
             ->first();
 
-        $totalCorridas = Corrida::where('user_id', Auth::user()->id)->where('temporada_id', $temporada->id)->where('flg_sprint', 'N')->count();
 
         $dados = [
+            "ordem" => $corridaAtual->ordem,
+            "total_corridas" => $totalCorridas,
             "des_temporada" => $temporada->des_temporada,
             "ano" => $temporada->referencia,
             "circuito" => $corridaAtual->corrida->pista->nome,
@@ -169,7 +178,7 @@ class TemporadaController extends Controller
             ]
         ];
 
-        $retorno = $this->montaClassificacao($usuario, $temporada);
+        $retorno = $this->montaClassificacao($usuario, $temporada, $corrida_ordem);
 
         //Monta os dados dos pilotos
         foreach ($retorno['resultadoPilotos'] as $resultadoPiloto) {
@@ -203,7 +212,7 @@ class TemporadaController extends Controller
         ]);
     }
 
-    public function montaClassificacao($usuario, $temporada)
+    public function montaClassificacao($usuario, $temporada, $corrida_ordem)
     {
 
 
@@ -246,6 +255,7 @@ class TemporadaController extends Controller
                             JOIN temporadas ON temporadas.id = corridas.temporada_id
                             WHERE temporadas.id =  ' . $temporada->id . '
                             AND resultados.user_id =  ' . $usuario . '
+                            and corridas.ordem <= ' . $corrida_ordem . '
                             GROUP BY pilotos.id
                             ORDER BY total DESC ' . $queryCountOrderByPilotos . ';    
         ');
@@ -267,6 +277,7 @@ class TemporadaController extends Controller
                                         join temporadas on temporadas.id = corridas.temporada_id
                                         where temporadas.id = ' . $temporada->id . '
                                         and resultados.user_id = ' . $usuario . '
+                                        and corridas.ordem <= ' . $corrida_ordem . '
                                         group by piloto_equipes.equipe_id
                                         order by total desc ' . $queryCountOrderByEquipes);
 
