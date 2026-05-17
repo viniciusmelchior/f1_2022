@@ -74,6 +74,8 @@ route::get('/pilotos/index', [PilotoController::class, 'index'])->name('pilotos.
 route::get('/pilotos/edit/{id}', [PilotoController::class, 'edit'])->name('pilotos.edit')->middleware('auth');
 route::get('/pilotos/show/{id}', [PilotoController::class, 'show'])->name('pilotos.show')->middleware('auth');
 route::get('/pilotos/comparativo', [PilotoController::class, 'comparativo'])->name('pilotos.comparativo')->middleware('auth');
+route::get('/pilotos/performance-por-pista', [PilotoController::class, 'PerformancePorPista'])->name('pilotos.performancePorPista')->middleware('auth');
+route::post('/pilotos/busca-performance-por-pista', [PilotoController::class, 'buscaPerformancePorPista'])->name('buscaPerformancePorPista')->middleware('auth');
 route::put('/pilotos/update/{id}', [PilotoController::class, 'update'])->name('pilotos.update')->middleware('auth');
 route::get('/pilotos/delete', [PilotoController::class, 'destroy'])->name('pilotos.delete')->middleware('auth');
 route::get('/pilotos/relacaoForcas/index', [PilotoController::class, 'relacaoForcasIndex'])->name('pilotos.relacaoForcas.index')->middleware('auth');

@@ -614,4 +614,70 @@ class PilotoController extends Controller
                
         return redirect()->back()->with('status', 'Salvo com sucesso');
     }
+
+    public function performancePorPista(){
+
+        $userId = Auth::user()->id;
+        $sqlPilotos = "select * from pilotos where user_id = :user_id order by nome ASC";
+
+        $pilotos = DB::select($sqlPilotos, [
+            'user_id' => $userId,
+        ]);
+
+        $sqlPistas = "select * from pistas where user_id = :user_id order by nome ASC";
+
+        $pistas = DB::select($sqlPistas, [
+            'user_id' => $userId,
+        ]);
+
+        return view('site.pilotos.performancePorPista', compact ('pilotos', 'pistas'));
+    }
+
+    public function buscaPerformancePorPista(Request $request){
+
+        $idPiloto = $request->idPiloto;
+        $idPista = $request->idPista;
+        $userId = Auth::user()->id;
+
+        $sql = "select 
+                    temporadas.des_temporada,
+                    temporadas.referencia,
+                    resultados.largada,
+                    resultados.chegada,
+                    corridas.id as link
+                from resultados 
+                join corridas on (corridas.id = resultados.corrida_id)
+                join piloto_equipes on (piloto_equipes.id = resultados.pilotoEquipe_id)
+                join pilotos on (pilotos.id = piloto_equipes.piloto_id)
+                join pistas on (pistas.id = corridas.pista_id)
+                join temporadas on (temporadas.id = corridas.temporada_id)
+                where resultados.user_id = :userId
+                and pilotos.id = :idPiloto
+                and corridas.flg_sprint = 'N'
+                and corridas.pista_id = :idPista
+                order by temporadas.id ASC";
+
+        $dados = DB::select($sql, [
+            'userId' => $userId,
+            'idPiloto' => $idPiloto,
+            'idPista' => $idPista
+        ]);
+
+        $colecaoCorridas = collect($dados);
+
+        // 2. O PHP faz a contagem em memória instantaneamente
+        $poles    = $colecaoCorridas->where('largada', 1)->count();
+        $vitorias = $colecaoCorridas->where('chegada', 1)->count();
+        $totalCorridas = $colecaoCorridas->count(); // Lembra do contador
+
+
+        return response()->json([
+            'message' => 'OK',
+            'dados' => $dados,
+            'poles' =>$poles,
+            'vitorias' =>$vitorias,
+            'totalCorridas' =>$totalCorridas
+        ]);
+        
+    }
 }

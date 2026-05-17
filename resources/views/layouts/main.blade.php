@@ -96,6 +96,7 @@
               <li><a href="{{route('pilotos.create')}}">Cadastrar</a></li>
               <li><a href="{{route('pilotos.relacaoForcas.index')}}">Relação de Forças</a></li>
               <li><a href="{{route('pilotos.comparativo')}}">Comparativos</a></li>
+              <li><a href="{{route('pilotos.performancePorPista')}}">Performance por pista</a></li>
             </ul>
           </li>
           <li>
@@ -244,7 +245,7 @@
           </li>
         </ul>
     </div>
-      <section class="home-section">
+    <section class="home-section">
         <div class="home-content">
           <i class='bx bx-menu'></i>
         </div>
