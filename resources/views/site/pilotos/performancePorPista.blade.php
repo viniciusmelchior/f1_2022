@@ -20,6 +20,7 @@
             padding: 15px;
             background-color: #fff;
             box-sizing: border-box;
+            height: auto;
         }
 
         /* Cabeçalho Estilizado F1 */

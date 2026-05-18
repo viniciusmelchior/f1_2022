@@ -147,25 +147,31 @@ class TemporadaController extends Controller
             $corrida_ordem = $request->idCorrida;
         }
 
-        $corridaAtual = Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
-            ->join('eventos', 'corridas.evento_id', '=', 'eventos.id')
-            ->where('resultados.user_id', Auth::user()->id)
-            ->where('corridas.temporada_id', $id)
-            ->where('resultados.chegada', '<>', null)
-            ->where('corridas.ordem','=', $corrida_ordem)
-            ->orderBy('corrida_id', 'desc')
-            ->first();
+        // $corridaAtual = Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+        //     ->join('eventos', 'corridas.evento_id', '=', 'eventos.id')
+        //     ->where('resultados.user_id', Auth::user()->id)
+        //     ->where('corridas.temporada_id', $id)
+        //     ->where('resultados.chegada', '<>', null)
+        //     ->where('corridas.ordem','=', $corrida_ordem)
+        //     ->orderBy('corrida_id', 'desc')
+        //     ->first();
 
+        //ajustado para evitar bug da corrida atual
+        $corridaAtual = Corrida::where('user_id', Auth::user()->id)
+            ->where('corridas.ordem', '=', $corrida_ordem)
+            ->orderBy('id', 'desc')
+            ->first();
 
         $dados = [
             "ordem" => $corridaAtual->ordem,
             "total_corridas" => $totalCorridas,
             "des_temporada" => $temporada->des_temporada,
             "ano" => $temporada->referencia,
-            "circuito" => $corridaAtual->corrida->pista->nome,
+            // "circuito" => $corridaAtual->corrida->pista->nome,
+            "circuito" => $corridaAtual->pista->nome,
             "evento" => $corridaAtual->evento->des_nome,
             "contagem_corrida" => $corridaAtual->ordem . " de " . $totalCorridas,
-            "url_bandeira" => $corridaAtual->corrida->pista->pais->imagem,
+            "url_bandeira" => $corridaAtual->pista->pais->imagem,
             "pilotos" => [
                 // ["name" => "Max Verstappen", "team" => "Red Bull", "short" => "rbr", "color" => "#3671C6", "points" => 393],
                 // ["name" => "Lando Norris", "team" => "McLaren", "short" => "mcl", "color" => "#FF8000", "points" => 374],
