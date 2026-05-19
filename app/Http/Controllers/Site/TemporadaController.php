@@ -600,9 +600,12 @@ class TemporadaController extends Controller
         $usuario = Auth::user()->id;
         $temporada = Temporada::where('user_id', Auth::user()->id)->where('id', $id)->first();
 
-        $retorno = $this->montaClassificacao($usuario, $temporada);
-        $resultadosPilotos = $retorno['resultadoPilotos'];
+        $totalCorridas = Corrida::where('user_id', Auth::user()->id)->where('temporada_id', $temporada->id)->where('flg_sprint', 'N')->count();
+        $corrida_ordem = $totalCorridas;
 
+        $retorno = $this->montaClassificacao($usuario, $temporada, $corrida_ordem);
+        $resultadosPilotos = $retorno['resultadoPilotos'];
+        
         $corridas = Corrida::where('temporada_id', $id)
             ->where('user_id', $usuario)
             // ->where('flg_sprint', 'N')
