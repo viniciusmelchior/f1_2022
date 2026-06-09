@@ -137,13 +137,13 @@ class TemporadaController extends Controller
     public function postClassificacao(Request $request)
     {
         $id = $request->id;
-        
+
         $usuario = Auth::user()->id;
         $temporada = Temporada::where('user_id', Auth::user()->id)->where('id', $id)->first();
         $totalCorridas = Corrida::where('user_id', Auth::user()->id)->where('temporada_id', $temporada->id)->where('flg_sprint', 'N')->count();
         $corrida_ordem = $totalCorridas;
 
-        if ($request->idCorrida != null){
+        if ($request->idCorrida != null) {
             $corrida_ordem = $request->idCorrida;
         }
 
@@ -159,8 +159,11 @@ class TemporadaController extends Controller
         //ajustado para evitar bug da corrida atual
         $corridaAtual = Corrida::where('user_id', Auth::user()->id)
             ->where('corridas.ordem', '=', $corrida_ordem)
+            ->where('temporada_id', $id)
             ->orderBy('id', 'desc')
             ->first();
+
+            // dd($corridaAtual);
 
         $dados = [
             "ordem" => $corridaAtual->ordem,
@@ -212,7 +215,7 @@ class TemporadaController extends Controller
             ];
         }
 
-         return response()->json([
+        return response()->json([
             'message' => 'OK',
             'dados' => $dados
         ]);
@@ -605,7 +608,7 @@ class TemporadaController extends Controller
 
         $retorno = $this->montaClassificacao($usuario, $temporada, $corrida_ordem);
         $resultadosPilotos = $retorno['resultadoPilotos'];
-        
+
         $corridas = Corrida::where('temporada_id', $id)
             ->where('user_id', $usuario)
             // ->where('flg_sprint', 'N')
