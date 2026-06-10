@@ -221,9 +221,8 @@ class TemporadaController extends Controller
         ]);
     }
 
-    public function montaClassificacao($usuario, $temporada, $corrida_ordem)
+    public function montaClassificacao($usuario, $temporada, $corrida_ordem = 1000)
     {
-
 
         $cont = 1;
         $queryCountChegadaPilotos = '';
