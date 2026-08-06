@@ -152,11 +152,12 @@ class HomeController extends Controller
 
     public function chegada_pilotos(Request $request){
         try {
-
             $inicio = $request->inicio;
             $fim = $request->fim;
             $pais_id = $request->pais_id;
             $temporada_id = $request->temporada_id;
+            $anoInicioChegadaPilotos = $request->anoInicioChegadaPilotos;
+            $anoFimChegadaPilotos = $request->anoFimChegadaPilotos;
 
             $operadorConsultaTemporada = '=';
 
@@ -165,23 +166,35 @@ class HomeController extends Controller
                 $temporada_id = 0;
             }
            
-            $totalVitoriasPorPiloto = DB::table('resultados')
-                                        ->join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
-                                        ->join('pistas', 'pistas.id', '=', 'corridas.pista_id')
-                                        ->join('piloto_equipes', 'resultados.pilotoEquipe_id', '=', 'piloto_equipes.id')
-                                        ->join('pilotos', 'pilotos.id', '=', 'piloto_equipes.piloto_id')
-                                        ->join('equipes', 'equipes.id', '=', 'piloto_equipes.equipe_id')
-                                        ->where('resultados.user_id',  Auth::user()->id)
-                                        ->where('resultados.chegada', '>=', $inicio)
-                                        ->where('resultados.chegada', '<=', $fim)
-                                        ->where('corridas.flg_sprint', 'N')
-                                        ->where('corridas.temporada_id', $operadorConsultaTemporada, $temporada_id)
-                                        ->select('pilotos.id as piloto_id',
-                                                    DB::raw("CONCAT(pilotos.nome, ' ', pilotos.sobrenome) as piloto_nome_completo"),
-                                                    DB::raw('COUNT(resultados.id) as chegadas'))
-                                        ->groupBy('pilotos.id', 'pilotos.nome')
-                                        ->orderByDesc('chegadas')
-                                        ->get();
+           $totalVitoriasPorPiloto = DB::table('resultados')
+                                ->join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                ->join('pistas', 'pistas.id', '=', 'corridas.pista_id')
+                                ->join('piloto_equipes', 'resultados.pilotoEquipe_id', '=', 'piloto_equipes.id')
+                                ->join('pilotos', 'pilotos.id', '=', 'piloto_equipes.piloto_id')
+                                ->join('equipes', 'equipes.id', '=', 'piloto_equipes.equipe_id')
+                                ->join('temporadas', 'temporadas.id', '=', 'corridas.temporada_id')
+                                ->where('resultados.user_id', Auth::user()->id)
+                                ->where('resultados.chegada', '>=', $inicio)
+                                ->where('resultados.chegada', '<=', $fim)
+                                ->where('corridas.flg_sprint', 'N')
+                                ->where('corridas.temporada_id', $operadorConsultaTemporada, $temporada_id)
+                                
+                                ->when($anoInicioChegadaPilotos, function ($query, $anoInicio) {
+                                    return $query->where('temporadas.referencia', '>=', $anoInicio);
+                                })
+                                ->when($anoFimChegadaPilotos, function ($query, $anoFim) {
+                                    return $query->where('temporadas.referencia', '<=', $anoFim);
+                                })
+                                
+                                ->select(
+                                    'pilotos.id as piloto_id',
+                                    DB::raw("CONCAT(pilotos.nome, ' ', pilotos.sobrenome) as piloto_nome_completo"),
+                                    DB::raw('COUNT(resultados.id) as chegadas')
+                                )
+                                
+                                ->groupBy('pilotos.id', 'pilotos.nome', 'pilotos.sobrenome')
+                                ->orderByDesc('chegadas')
+                                ->get();
 
             return response()->json([
                 'message' => 'OK',
@@ -197,10 +210,11 @@ class HomeController extends Controller
 
     public function chegada_equipes(Request $request){
         try {
-
             $inicio = $request->inicio;
             $fim = $request->fim;
             $pais_id = $request->pais_id;
+            $anoInicioChegadaEquipes = $request->anoInicioChegadaEquipes;
+            $anoFimChegadaEquipes = $request->anoFimChegadaEquipes;
 
             $temporada_id = $request->temporada_id;
 
@@ -217,11 +231,18 @@ class HomeController extends Controller
                                     ->join('piloto_equipes', 'resultados.pilotoEquipe_id', '=', 'piloto_equipes.id')
                                     ->join('pilotos', 'pilotos.id', '=', 'piloto_equipes.piloto_id')
                                     ->join('equipes', 'equipes.id', '=', 'piloto_equipes.equipe_id')
+                                    ->join('temporadas', 'temporadas.id', '=', 'corridas.temporada_id')
                                     ->where('resultados.user_id',  Auth::user()->id)
                                     ->where('resultados.chegada', '>=', $inicio)
                                     ->where('resultados.chegada', '<=', $fim)
                                     ->where('corridas.flg_sprint', 'N')
                                     ->where('corridas.temporada_id', $operadorConsultaTemporada, $temporada_id)
+                                    ->when($anoInicioChegadaEquipes, function ($query, $anoInicio) {
+                                        return $query->where('temporadas.referencia', '>=', $anoInicio);
+                                    })
+                                    ->when($anoFimChegadaEquipes, function ($query, $anoFim) {
+                                        return $query->where('temporadas.referencia', '<=', $anoFim);
+                                    })
                                     ->select('equipes.id as equipe_id',
                                                 'equipes.nome as equipe_nome',
                                                 DB::raw('COUNT(resultados.id) as chegadas'))
@@ -247,6 +268,8 @@ class HomeController extends Controller
             $inicio = $request->inicio;
             $fim = $request->fim;
             $pais_id = $request->pais_id;
+            $anoInicioLargadaPilotos = $request->anoInicioLargadaPilotos;
+            $anoFimLargadaPilotos = $request->anoFimLargadaPilotos;
 
             $temporada_id = $request->temporada_id;
 
@@ -263,11 +286,18 @@ class HomeController extends Controller
                                         ->join('piloto_equipes', 'resultados.pilotoEquipe_id', '=', 'piloto_equipes.id')
                                         ->join('pilotos', 'pilotos.id', '=', 'piloto_equipes.piloto_id')
                                         ->join('equipes', 'equipes.id', '=', 'piloto_equipes.equipe_id')
+                                        ->join('temporadas', 'temporadas.id', '=', 'corridas.temporada_id')
                                         ->where('resultados.user_id',  Auth::user()->id)
                                         ->where('resultados.largada', '>=', $inicio)
                                         ->where('resultados.largada', '<=', $fim)
                                         ->where('corridas.flg_sprint', 'N')
                                         ->where('corridas.temporada_id', $operadorConsultaTemporada, $temporada_id)
+                                        ->when($anoInicioLargadaPilotos, function ($query, $anoInicio) {
+                                            return $query->where('temporadas.referencia', '>=', $anoInicio);
+                                        })
+                                        ->when($anoFimLargadaPilotos, function ($query, $anoFim) {
+                                            return $query->where('temporadas.referencia', '<=', $anoFim);
+                                        })
                                         ->select('pilotos.id as piloto_id',
                                                     DB::raw("CONCAT(pilotos.nome, ' ', pilotos.sobrenome) as piloto_nome_completo"),
                                                     DB::raw('COUNT(resultados.id) as largadas'))
@@ -295,6 +325,8 @@ class HomeController extends Controller
             $inicio = $request->inicio;
             $fim = $request->fim;
             $pais_id = $request->pais_id;
+            $anoInicioLargadaEquipes = $request->anoInicioLargadaEquipes;
+            $anoFimLargadaEquipes = $request->anoFimLargadaEquipes;
 
             $temporada_id = $request->temporada_id;
 
@@ -311,11 +343,18 @@ class HomeController extends Controller
                                         ->join('piloto_equipes', 'resultados.pilotoEquipe_id', '=', 'piloto_equipes.id')
                                         ->join('pilotos', 'pilotos.id', '=', 'piloto_equipes.piloto_id')
                                         ->join('equipes', 'equipes.id', '=', 'piloto_equipes.equipe_id')
+                                        ->join('temporadas', 'temporadas.id', '=', 'corridas.temporada_id')
                                         ->where('resultados.user_id',  Auth::user()->id)
                                         ->where('resultados.largada', '>=', $inicio)
                                         ->where('resultados.largada', '<=', $fim)
                                         ->where('corridas.flg_sprint', 'N')
                                         ->where('corridas.temporada_id', $operadorConsultaTemporada, $temporada_id)
+                                        ->when($anoInicioLargadaEquipes, function ($query, $anoInicio) {
+                                            return $query->where('temporadas.referencia', '>=', $anoInicio);
+                                        })
+                                        ->when($anoFimLargadaEquipes, function ($query, $anoFim) {
+                                            return $query->where('temporadas.referencia', '<=', $anoFim);
+                                        })
                                         ->select('equipes.id as equipe_id',
                                                     'equipes.nome',
                                                     DB::raw('COUNT(resultados.id) as largadas'))
