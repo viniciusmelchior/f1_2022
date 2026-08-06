@@ -353,12 +353,12 @@
                     </tr>
                     <tr>
                         <td id="piloto1Chegada"></td>
-                        <td class="desc_comparativo">Corridas Disputadas</td>
+                        <td class="desc_comparativo">Corridas</td>
                         <td id="piloto2Chegada"></td>
                     </tr>
                     <tr>
                         <td id="piloto1Largada"></td>
-                        <td class="desc_comparativo">Sessões de Treino</td>
+                        <td class="desc_comparativo">Classificação</td>
                         <td id="piloto2Largada"></td>
                     </tr>
                     <tr>
