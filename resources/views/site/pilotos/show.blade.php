@@ -7,682 +7,781 @@
 
 @section('section')
 <style>
+    /* Variáveis de Cores Estilo F1 */
+    :root {
+        --f1-red: #e10600;
+        --f1-dark: #15151e;
+        --f1-darker: #11101d;
+        --f1-gray: #38383f;
+        --f1-light: #f4f4f4;
+        --f1-text: #ffffff;
+    }
 
-    .footer-show-pilotos{
-        position: fixed;
-        bottom: 0;
-        left: 0;
+    /* === 1. CARD DE PERFIL (HERO CARD) === */
+    .driver-profile-card {
+        background-color: var(--f1-dark);
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        margin-top: 30px;
+        margin-bottom: 40px;
+        overflow: hidden;
+    }
+
+    .profile-header {
+        background-color: var(--f1-darker);
+        padding: 20px 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+        border-bottom: 4px solid var(--f1-red);
+    }
+
+    .profile-title {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .profile-title h2 {
+        color: white;
+        margin: 0;
+        font-weight: 900;
+        text-transform: uppercase;
+        font-size: 2rem;
+        letter-spacing: -1px;
+    }
+
+    .badge-f1 {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .badge-country { background: rgba(255,255,255,0.1); color: white; }
+    .badge-active { background: rgba(40, 167, 69, 0.15); color: #28a745; }
+    .badge-retired { background: rgba(220, 53, 69, 0.15); color: #dc3545; }
+
+    .season-selector {
+        flex-grow: 1;
+        max-width: 350px;
+        min-width: 250px;
+    }
+
+    .f1-select {
         width: 100%;
-        background-color:#11101d;
-        border-top: 1px solid #ccc;
-        padding: 15px 20px;
-        text-align: center;
+        background-color: var(--f1-dark);
+        color: white;
+        border: 2px solid var(--f1-gray);
+        border-radius: 6px;
+        padding: 10px 15px;
+        font-weight: bold;
+        text-transform: uppercase;
+        transition: 0.3s;
+        cursor: pointer;
+    }
+
+    .f1-select:focus {
+        outline: none;
+        border-color: var(--f1-red);
+        box-shadow: 0 0 0 3px rgba(225, 6, 0, 0.2);
+    }
+
+    .profile-body {
         display: flex;
-        justify-content: space-around; /* distribui os links horizontalmente */
-        align-items: center; /* alinha verticalmente */
-        box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
-        z-index: 0;
+        padding: 30px;
+        gap: 30px;
     }
 
-    td{
-        white-space: nowrap;
-    }
-
-    th{
-        white-space: nowrap;
-    }
-
-    h1{
-    text-align: center;
-    }
-    
-    table {
-        border-collapse: collapse;
-        margin: auto;
-    }
-
-    tr:hover{
-        background-color: #dce6eb;
-    }
-    
-    #driver-container{
-        /* border: 1px solid black; */
-        margin-top: 5%;
+    .profile-image-container {
+        flex: 0 0 300px;
         display: flex;
+        flex-direction: column;
+        gap: 15px;
     }
 
-    #driver-details{
-        /* background-color: #73b2959c; */
-        width: 35%;
-        padding: 2%;
-        display: flex;
-        border: 1px solid white;
+    .profile-image-container img {
+        width: 100%;
+        border-radius: 8px;
+        border: 2px solid var(--f1-gray);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.5);
     }
 
-    #driver-details h4{
-        font-size: 16px;
-        font-weight: lighter;
-        margin-bottom: 0;
-    }
-
-    #driver-details p{
-        font-size: 24px;
-        font-weight: bolder;
-    }
-
-    .image-wrapper{
-        max-width: 200px;
-        margin: auto;
-    }
-
-    #driver-item-details{
-        display: flex;
-    }
-
-    .image-wrapper img{
-        max-width: 100%;
-        border-radius: 2%;
-    }
-
-    #driver-stats{
-        /* background-color: #ebc83aaf; */
-        width: 65%;
-        padding: 2%;
+    .profile-stats-grid {
+        flex: 1;
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        grid-template-rows: repeat(2, 1fr);
-        grid-column-gap: 0px;
-        grid-row-gap: 0px;
-        /* text-align: center; */
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 15px;
+        align-content: start;
     }
 
-    #driver-stats div{
-        width: 150px;
-        height: 100px;
-        margin-right: 25px;
-        margin-bottom: 25px;
+    .stat-box {
+        background: rgba(255,255,255,0.03);
+        border-radius: 8px;
+        padding: 15px;
+        border-left: 4px solid var(--f1-red);
+        transition: transform 0.2s, background 0.2s;
     }
 
-    #driver-stats h4{
-        font-size: 18px;
-        margin-bottom: 0;
-        font-weight: lighter;
+    .stat-box:hover {
+        transform: translateY(-3px);
+        background: rgba(255,255,255,0.08);
+    }
+
+    .stat-box span {
+        display: block;
+        font-size: 11px;
+        color: #999;
         text-transform: uppercase;
+        margin-bottom: 5px;
+        font-weight: 600;
     }
 
-    #driver-stats p{
-        font-size: 26px;
-        font-weight: bolder;
+    .stat-box strong {
+        display: block;
+        font-size: 24px;
+        color: white;
+        font-weight: 900;
+        line-height: 1;
+    }
+
+    .other-stats { display: none; }
+    
+    #show-other-stats {
+        width: 100%;
+        background: transparent;
+        border: 2px solid var(--f1-red);
+        color: white;
         text-transform: uppercase;
-        margin-bottom: 0;
+        font-weight: bold;
+        border-radius: 6px;
+        padding: 10px;
+        transition: 0.3s;
+    }
+    
+    #show-other-stats:hover {
+        background: var(--f1-red);
     }
 
-    .other-stats{
+    @media (max-width: 992px) {
+        .profile-body { flex-direction: column; align-items: center; }
+        .profile-image-container { width: 100%; max-width: 400px; }
+        .profile-header { justify-content: center; }
+    }
+
+    /* === 2. ACCORDIONS DAS TABELAS === */
+    details.f1-accordion {
+        background: white;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        border: 1px solid #eee;
+        overflow: hidden;
+    }
+
+    details.f1-accordion summary {
+        background: var(--f1-darker);
+        color: white;
+        padding: 18px 25px;
+        font-size: 1.1rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        cursor: pointer;
+        list-style: none;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-left: 6px solid var(--f1-red);
+        transition: background 0.3s;
+    }
+    
+    details.f1-accordion summary::-webkit-details-marker {
         display: none;
     }
 
-    .resultados-por-corrida{
-        margin-top: 35px;
+    details.f1-accordion summary:hover {
+        background: var(--f1-dark);
     }
 
-    .resultados-por-corrida h1 {
-        text-transform: uppercase;
+    details.f1-accordion summary .toggle-icon {
+        transition: transform 0.3s ease;
+        font-size: 1.2rem;
     }
 
-    .tabela-historico-equipes {
-        border-collapse: collapse;
-        width: 30%;
+    details[open].f1-accordion summary .toggle-icon {
+        transform: rotate(180deg);
+        color: var(--f1-red);
     }
 
-    .tabela-historico-equipes td, th {
-        text-align: center;
+    .accordion-body {
+        padding: 20px;
+        background: #fafafa;
     }
 
-    .tabela-resultados {
-        border-collapse: collapse;
-        width: 60%;
-    }
-
-    .tabela-resultados th, td{
-        padding: 8px;
-        text-align: left;
-        border-bottom: 1px solid #ddd;
-    }
-
-    .tabela-resultados tr:hover {
-        background-color: #73b2959c;
-    }
-
-    .tabela-resultados th{
-        text-transform: uppercase;
-    }
+    /* === 3. TABELAS === */
+    .table-responsive { width: 100%; overflow-x: auto; }
+    .f1-table { width: 100%; border-collapse: collapse; white-space: nowrap; }
     
-</style>
-   <div class="container">
-    <select name="ajaxGetStatsPilotoPorTemporada" id="ajaxGetStatsPilotoPorTemporada" class="form-select mt-3" style="width: 25%; margin:0 auto;">
-        <option value="" selected id="selectGetStatsPilotoPorTemporada">Selecione uma Temporada</option>
-        @foreach($temporadas as $temporada)
-            <option value="{{$temporada->id}}">{{$temporada->des_temporada}}</option>
-        @endforeach
-    </select>
+    .f1-table th { 
+        background: #eaeaea; 
+        color: var(--f1-darker); 
+        text-transform: uppercase; 
+        font-size: 12px; 
+        padding: 12px 15px; 
+        text-align: left;
+        cursor: pointer;
+        user-select: none;
+    }
 
-    <div id="driver-container">
-        <div id="driver-details" class="bg-dark text-light">
-            <div>
-                <div>
-                    <div>
-                        <h4>Nome do Piloto</h4>
-                        <p>{{ $modelPiloto->nomeCompleto() }}</p>
-                    </div>
-                    <div>
-                        <h4>País/Região</h4>
-                        <p>{{ $modelPiloto->pais->des_nome }}</p>
-                    </div>
-                    <div>
-                        <h4>Status</h4>
-                        @if($modelPiloto->flg_ativo == 'S')
-                            <p>Em Atividade</p>
-                        @else 
-                            <p>Aposentado</p>
-                        @endif
-                    </div>
-                    <div>
-                        <h4>Corridas Disputadas</h4>
-                        <p id="tot-corridas">{{ $totCorridas }}</p>
-                    </div>
-                    <div>
-                        <button id="show-other-stats" class="btn btn-light text-dark">Exibir Mais Estatisticas</button>
-                    </div>
+    .f1-table th .sort-icon {
+        font-size: 11px;
+        opacity: 0.4;
+        transition: opacity 0.2s, color 0.2s;
+        margin-left: 4px;
+    }
+
+    .f1-table th:hover .sort-icon {
+        opacity: 1;
+        color: var(--f1-red);
+    }
+
+    .f1-table td { padding: 15px; border-bottom: 1px solid #e0e0e0; vertical-align: middle; color: var(--f1-darker); }
+    .f1-table tr:hover { background-color: white; }
+    .f1-table a { color: var(--f1-darker); font-size: 1.2rem; transition: 0.2s; }
+    .f1-table a:hover { color: var(--f1-red); }
+
+    /* Estilo para Bandeiras */
+    .flag-img {
+        width: 22px;
+        height: 15px;
+        object-fit: cover;
+        border-radius: 2px;
+        margin-right: 6px;
+        vertical-align: middle;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    /* Footer Fixo Estilo F1 */
+    .footer-show-pilotos {
+        position: fixed;
+        bottom: 0; left: 0; width: 100%;
+        background-color: var(--f1-darker);
+        border-top: 3px solid var(--f1-red);
+        padding: 15px 10px;
+        display: flex; flex-wrap: wrap; justify-content: center; gap: 15px;
+        z-index: 1000;
+        box-shadow: 0 -5px 15px rgba(0,0,0,0.3);
+    }
+
+    .footer-show-pilotos a {
+        color: white; text-decoration: none; font-size: 13px; text-transform: uppercase;
+        font-weight: 600; padding: 5px 15px; border-radius: 20px;
+        background: rgba(255, 255, 255, 0.1); transition: 0.3s; white-space: nowrap;
+    }
+
+    .footer-show-pilotos a:hover { background: var(--f1-red); color: white; }
+    .main-content-padding { padding-bottom: 100px; }
+    @media (max-width: 768px) { .main-content-padding { padding-bottom: 140px; } }
+</style>
+
+<div class="container main-content-padding">
+    
+    <!-- CARD DE PERFIL MODERNO -->
+    <div class="driver-profile-card">
+        <div class="profile-header">
+            <div class="profile-title">
+                <h2>{{ $modelPiloto->nomeCompleto() }}</h2>
+                <span class="badge-f1 badge-country">
+                    @if(isset($modelPiloto->pais->imagem) && $modelPiloto->pais->imagem != '')
+                        <img src="{{ asset('images/' . $modelPiloto->pais->imagem) }}" class="flag-img" alt="{{ $modelPiloto->pais->des_nome }}">
+                    @else
+                        <i class="bi bi-globe"></i>
+                    @endif
+                    {{ $modelPiloto->pais->des_nome }}
+                </span>
+                @if($modelPiloto->flg_ativo == 'S')
+                    <span class="badge-f1 badge-active"><i class="bi bi-circle-fill" style="font-size:8px;"></i> Em Atividade</span>
+                @else 
+                    <span class="badge-f1 badge-retired"><i class="bi bi-circle-fill" style="font-size:8px;"></i> Aposentado</span>
+                @endif
+            </div>
+
+            <div class="season-selector">
+                <select name="ajaxGetStatsPilotoPorTemporada" id="ajaxGetStatsPilotoPorTemporada" class="f1-select">
+                    <option value="" selected id="selectGetStatsPilotoPorTemporada">Todas as Temporadas (Geral)</option>
+                    @foreach($temporadas as $temporada)
+                        <option value="{{$temporada->id}}">{{$temporada->des_temporada}} ({{$temporada->referencia}})</option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+
+        <div class="profile-body">
+            <div class="profile-image-container">
+                <img src="{{ $modelPiloto->imagem != '' ? asset('images/'.$modelPiloto->imagem) : 'https://icon-library.com/images/person-png-icon/person-png-icon-29.jpg' }}" alt="Foto do Piloto">
+                <button id="show-other-stats">Exibir Mais Estatísticas</button>
+            </div>
+
+            <div class="profile-stats-grid">
+                <div class="stat-box">
+                    <span>Corridas</span>
+                    <strong id="tot-corridas">{{ $totCorridas }}</strong>
+                </div>
+                <div class="stat-box">
+                    <span>Campeonatos</span>
+                    <strong>{{ $totTitulos }}</strong>
+                </div>
+                <div class="stat-box">
+                    <span>Vitórias</span>
+                    <strong id="piloto-tot-vitorias">{{ $totVitorias }}</strong>
+                </div>
+                <div class="stat-box">
+                    <span>Poles</span>
+                    <strong id="piloto-tot-poles">{{ $totPoles }}</strong>
+                </div>
+                <div class="stat-box">
+                    <span>Pódios</span>
+                    <strong id="piloto-tot-podios">{{ $totPodios }}</strong>
+                </div>
+                <div class="stat-box">
+                    <span>Pontos</span>
+                    <strong id="piloto-tot-pontos">{{ $totPontos }}</strong>
+                </div>
+                <div class="stat-box">
+                    <span>Voltas Rápidas</span>
+                    <strong id="piloto-tot-voltas-rapidas">{{ $totVoltasRapidas }}</strong>
+                </div>
+                
+                <div class="stat-box other-stats">
+                    <span>Top 10</span>
+                    <strong id="piloto-tot-top-ten">{{ $totTopTen }}</strong>
+                </div>
+                <div class="stat-box other-stats">
+                    <span>Melhor Largada</span>
+                    <strong id="piloto-melhor-largada">{{ $melhorPosicaoLargada }}º</strong>
+                </div>
+                <div class="stat-box other-stats">
+                    <span>Pior Largada</span>
+                    <strong id="piloto-pior-largada">{{ $piorPosicaoLargada }}º</strong>
+                </div>
+                <div class="stat-box other-stats">
+                    <span>Melhor Chegada</span>
+                    <strong id="piloto-melhor-chegada">{{ $melhorPosicaoChegada }}º</strong>
+                </div>
+                <div class="stat-box other-stats">
+                    <span>Pior Chegada</span>
+                    <strong id="piloto-pior-chegada">{{ $piorPosicaoChegada }}º</strong>
+                </div>
+                <div class="stat-box other-stats">
+                    <span>Abandonos</span>
+                    <strong id="piloto-totAbandonos">{{ $totAbandonos }}</strong>
+                </div>
+                <div class="stat-box other-stats">
+                    <span>Grid Médio</span>
+                    <strong id="piloto-gridMedio">{{$gridMedio}}</strong>
+                </div>
+                <div class="stat-box other-stats">
+                    <span>Média Chegada</span>
+                    <strong id="piloto-mediaChegada">{{$mediaChegada}}</strong>
                 </div>
             </div>
-            <div class="image-wrapper mt-3">
-                {{-- <img src="{{ $modelPiloto->imagem != '' ? asset('images/'.$modelPiloto->imagem) : asset('images/piloto_placeholder.jpg') }}" alt=""> --}}
-                <img src="{{ $modelPiloto->imagem != '' ? asset('images/'.$modelPiloto->imagem) : 'https://icon-library.com/images/person-png-icon/person-png-icon-29.jpg' }}" alt="">
-            </div>
-        </div>
-        <div id="driver-stats" class="bg-dark text-light">
-           <div>
-                <h4>Campeonato de Pilotos</h4>
-                <p>{{ $totTitulos }}</p>
-           </div>
-            <div>
-                <h4>Vitórias</h4>
-                <p id="piloto-tot-vitorias">{{ $totVitorias }}</p>
-           </div>
-            <div>
-                <h4>Pole Positions</h4>
-                <p id="piloto-tot-poles">{{ $totPoles }}</p>
-           </div>
-            <div>
-                <h4>Subidas ao Pódio</h4>
-                <p id="piloto-tot-podios">{{ $totPodios }}</p>
-           </div>
-            <div>
-                <h4>Total de Pontos</h4>
-                <p id="piloto-tot-pontos">{{ $totPontos }}</p>
-           </div>
-            <div>
-                <h4>Voltas mais rapidas</h4>
-                <p id="piloto-tot-voltas-rapidas">{{ $totVoltasRapidas }}</p>
-           </div>
-            <div class="other-stats">
-                <h4>Chegadas no top 10</h4>
-                <p id="piloto-tot-top-ten">{{ $totTopTen }}</p>
-           </div>
-            <div class="other-stats">
-                <h4>Melhor largada</h4>
-                <p id="piloto-melhor-largada">{{ $melhorPosicaoLargada }}º</p>
-           </div>
-            <div class="other-stats">
-                <h4>Pior Largada</h4>
-                <p id="piloto-pior-largada">{{ $piorPosicaoLargada }}º</p>
-           </div>
-            <div class="other-stats">
-                <h4>Melhor Chegada</h4>
-                <p id="piloto-melhor-chegada">{{ $melhorPosicaoChegada }}º</p>
-           </div>
-            <div class="other-stats">
-                <h4>pior Chegada</h4>
-                <p id="piloto-pior-chegada">{{ $piorPosicaoChegada }}º</p>
-           </div>
-            <div class="other-stats">
-                <h4>Abandonos</h4>
-                <p id="piloto-totAbandonos">{{ $totAbandonos }}</p>
-           </div>
-            <div class="other-stats">
-                <h4>Grid Médio</h4>
-                <p id="piloto-gridMedio">{{$gridMedio}}</p>
-           </div>
-            <div class="other-stats">
-                <h4>Média Chegada</h4>
-                <p id="piloto-mediaChegada">{{$mediaChegada}}</p>
-           </div>
         </div>
     </div>
+    
     <input type="hidden" id="piloto_id" name="piloto_id" value="{{$modelPiloto->id}}">
 
-        @php 
-            
-        @endphp
+    <!-- ACORDEÕES DE TABELAS -->
 
-        <section class="resultados-por-corrida">
-            <h1>Histórico de Equipes</h1>
-            <table class="mt-5 mb-5 tabela-historico-equipes">
-                <tr>
-                    <th>Temporada</th>
-                    <th>Equipe</th>
-                </tr>
-                @foreach($equipes as $equipe)
-                    <tr>
-                        <td>{{$equipe->ano->ano}}</td>
-                        <td style="vertical-align: middle;">
-                            <img src="{{asset('images/'.$equipe->equipe->imagem)}}" style="width:25px; height:25px;">
-                            <span style="display: inline-block; vertical-align: middle;">{{$equipe->equipe->nome}}</span>
-                        </td>
-                    </tr>
-                @endforeach
-            </table>
-        </section>
-
-        <hr>
-
-        <section class="resultados-por-corrida">
-            <h1>Corridas por equipe</h1>
-            <table class="mt-5 mb-5 tabela-historico-equipes" style="width: 40%!important">
-                <tr>
-                    <th>Equipe</th>
-                    <th>Corridas</th>
-                    <th>Vitórias</th>
-                    <th>Poles</th>
-                    <th>Podios</th>
-                    <th>Top 10</th>
-                </tr>
-                @foreach($corridasPorEquipe as $corridaPorEquipe)
-                    <tr>
-                        <td style="vertical-align: middle;">
-                            <img src="{{asset('images/'.$corridaPorEquipe->imagem)}}" style="width:25px; height:25px;">
-                            <span style="display: inline-block; vertical-align: middle;">{{$corridaPorEquipe->nome}}</span>
-                        </td>
-                        <td>{{$corridaPorEquipe->quantidade}}</td>
-                        <td>{{Piloto::getInfoPorEquipe($modelPiloto->id, $corridaPorEquipe->equipe_id, 1, 1, 1, 1000)}}</td>
-                        <td>{{Piloto::getInfoPorEquipe($modelPiloto->id, $corridaPorEquipe->equipe_id, 1, 1000, 1,1)}}</td>
-                        <td>{{Piloto::getInfoPorEquipe($modelPiloto->id, $corridaPorEquipe->equipe_id, 1, 3, 1, 1000)}}</td>
-                        <td>{{Piloto::getInfoPorEquipe($modelPiloto->id, $corridaPorEquipe->equipe_id, 1, 10, 1, 1000)}}</td>
-                    </tr>
-                @endforeach
-            </table>
-        </section>
-
-        <hr>
-
-        {{-- <section class="" style="height: 400px;">
-            <h1 class="mb-3" style="text-transform:uppercase;">Histórico de Pontuação</h1>
-            <div style="width: 550px; height: 550px; margin: 0 auto;">
-                <canvas id="historicoPontuacao"></canvas>
+    <details class="f1-accordion">
+        <summary>Histórico de Equipes <i class="bi bi-chevron-down toggle-icon"></i></summary>
+        <div class="accordion-body">
+            <div class="table-responsive">
+                <table class="f1-table">
+                    <thead>
+                        <tr>
+                            <th>Temporada <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                            <th>Equipe <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($equipes as $equipe)
+                            <tr>
+                                <td>{{$equipe->ano->ano}}</td>
+                                <td>
+                                    <img src="{{asset('images/'.$equipe->equipe->imagem)}}" style="width:25px; height:25px; border-radius:3px; margin-right: 10px;">
+                                    <span class="fw-bold">{{$equipe->equipe->nome}}</span>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
-        </section> --}}
-       
-        {{-- <hr> --}}
+        </div>
+    </details>
 
-        <section class="" style="height: auto;">
-            <h1 class="mb-3" style="text-transform:uppercase;">Histórico de posição nos campeonatos</h1>
-            <table class="mt-5 mb-5 tabela-historico-equipes">
-                <th>Temporada</th>
-                <th>Posição</th>
-                <th>Pontos</th>
-                <th>Ações</th>
-                @foreach ($temporadas as $temporada )
-                    <tr>
-                        {{-- <td>{{$temporada->ano->ano}}</td> --}}
-                        <td> {{ substr($temporada->des_temporada, 0, strpos($temporada->des_temporada, ' ')) }}</td>
-                        <td>
-                            {{Piloto::getInfoCampeonato($temporada->id, $modelPiloto->id)['posicaoPiloto']}}
-                        </td>
-                        <td>
-                            {{Piloto::getInfoCampeonato($temporada->id, $modelPiloto->id)['totalPontos']}}
-                        </td>
-                        <td>
-                            <a data-toggle="tooltip" data-placement="top" title="Classificação" href="{{route('temporadas.classificacao', [$temporada->id])}}"><i class="bi bi-table"></i></a>
-                        </td>
-                    </tr>
-                @endforeach
-            </table>  
-        </section>   
-
-        <hr>
-
-        <section class="" style="height: auto;" id="historico-vitorias">
-            <h1 class="mb-3" style="text-transform:uppercase;">Histórico de Vitórias</h1>
-            <p class="text-center">Corridas seguidas sem vitória: {{$corridaSeguidasSemVencer}}</p>
-            {{-- <span>Corridas seguidas sem pole position: {{$corridaSeguidasSemVencer}}</span>
-            <span>Ultima Vitória Barcelona</span>
-            <span>Ultima Pole Position Barcelona </span> --}}
-                <table class="mt-5 mb-5 tabela-historico-equipes">
-                    <tr>
-                        <th>Temporada</th>
-                        <th>Evento</th>
-                        <th>Pista</th>
-                        <th class="text-nowrap">Equipe</th>
-                        <th>Ações</th>
-                    </tr>
-                    @if (count($listagemVitorias) > 0)
-                        @foreach ($listagemVitorias as $vitoria)
+    <details class="f1-accordion">
+        <summary>Corridas por equipe <i class="bi bi-chevron-down toggle-icon"></i></summary>
+        <div class="accordion-body">
+            <div class="table-responsive">
+                <table class="f1-table">
+                    <thead>
+                        <tr>
+                            <th>Equipe <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                            <th>Corridas <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                            <th>Vitórias <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                            <th>Poles <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                            <th>Pódios <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                            <th>Top 10 <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($corridasPorEquipe as $corridaPorEquipe)
                             <tr>
-                                {{-- <td>{{$vitoria->corrida->temporada->ano->ano}}</td> --}}
-                                <td> {{ substr($vitoria->corrida->temporada->des_temporada, 0, strpos($vitoria->corrida->temporada->des_temporada, ' ')) }}</td>
                                 <td>
-                                    @if (isset($vitoria->corrida->evento->des_nome))
-                                        {{$vitoria->corrida->evento->des_nome}}
-                                    @else
-                                        -
-                                    @endif
+                                    <img src="{{asset('images/'.$corridaPorEquipe->imagem)}}" style="width:25px; height:25px; border-radius:3px; margin-right: 10px;">
+                                    <span class="fw-bold">{{$corridaPorEquipe->nome}}</span>
                                 </td>
-                                <td>{{$vitoria->corrida->pista->nome}}</td>
-                                <td class="text-nowrap">{{ $vitoria->pilotoEquipe->equipe->nome }}</td>
-                                <td><a data-toggle="tooltip" data-placement="top" title="Visualizar corrida" class="" href="{{route('resultados.show', [$vitoria->corrida->id])}}"><i class="bi bi-eye-fill"></i></a></td>
+                                <td><span class="badge bg-secondary">{{$corridaPorEquipe->quantidade}}</span></td>
+                                <td class="text-success fw-bold">{{Piloto::getInfoPorEquipe($modelPiloto->id, $corridaPorEquipe->equipe_id, 1, 1, 1, 1000)}}</td>
+                                <td class="fw-bold">{{Piloto::getInfoPorEquipe($modelPiloto->id, $corridaPorEquipe->equipe_id, 1, 1000, 1,1)}}</td>
+                                <td class="text-primary fw-bold">{{Piloto::getInfoPorEquipe($modelPiloto->id, $corridaPorEquipe->equipe_id, 1, 3, 1, 1000)}}</td>
+                                <td>{{Piloto::getInfoPorEquipe($modelPiloto->id, $corridaPorEquipe->equipe_id, 1, 10, 1, 1000)}}</td>
                             </tr>
                         @endforeach
-                    @else 
-                        <tr>
-                            <td colspan="5" style="font-style: italic;">Piloto não tem vitórias</td>    
-                        </tr> 
-                    @endif
+                    </tbody>
                 </table>
-        </section>
+            </div>
+        </div>
+    </details>
 
-        <hr>
-
-        @if(count($vitoriasPorPista) > 0)
-            <section class="resultados-por-corrida" id="vitorias-pista">
-                <h1>Vitórias por Pista</h1>
-                <table class="mt-5 mb-5 tabela-historico-equipes">
-                    <tr>
-                        <th>Pista</th>
-                        <th>Quantidade</th>
-                    </tr>
-                    @foreach($vitoriasPorPista as $key => $vitoriaPorPista)
+    <details class="f1-accordion">
+        <summary>Histórico nos campeonatos <i class="bi bi-chevron-down toggle-icon"></i></summary>
+        <div class="accordion-body">
+            <div class="table-responsive">
+                <table class="f1-table">
+                    <thead>
                         <tr>
-                            <td style="vertical-align: middle;">
-                                <span style="display: inline-block; vertical-align: middle;">{{$key}}</span>
-                            </td>
-                            <td>{{$vitoriaPorPista}}</td>
+                            <th>Temporada <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                            <th>Posição Final <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                            <th>Pontos <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                            <th>Ações</th>
                         </tr>
-                    @endforeach
-                </table>
-            </section>
-            <hr>
-        @endif
-        
-        @if(count($listagemVitorias) > 0)
-            <section class="resultados-por-corrida" id="pistas-sem-vitoria">
-                <h1>Pistas em que o piloto não venceu</h1>
-                <table class="mt-5 mb-5 tabela-historico-equipes">
-                    <tr>
-                        <th>
-                            Pista
-                        </th>
-                        <th>
-                            Corridas Disputadas
-                        </th>
-                    </tr>
-                    @foreach($pistasEmQueOPilotoNaoVenceu as $key => $pistaEmQueOPilotoNaoVenceu)
-                        <tr>
-                            <td>{{$key}}</td>
-                            <td>{{$pistaEmQueOPilotoNaoVenceu}}</td>
-                        </tr>
-                    @endforeach
-                </table>
-            </section>
-            <hr>
-        @endif
-
-        <section class="" style="height: auto;" id="historico-poles">
-            <h1 class="mb-3" style="text-transform:uppercase;">Histórico de Pole Positions</h1>
-            <p class="text-center">Corridas seguidas sem pole position: {{$corridaSeguidasSemPolePosition}}</p>
-                <table class="mt-5 mb-5 tabela-historico-equipes">
-                    <tr>
-                        <th>Temporada</th>
-                        <th>Evento</th>
-                        <th>Pista</th>
-                        <th class="text-nowrap">Equipe</th>
-                        <th>Ações</th>
-                    </tr>
-                    @if (count($listagemPolePositions) > 0)
-                        @foreach ($listagemPolePositions as $polePosition)
+                    </thead>
+                    <tbody>
+                        @foreach ($temporadas as $temporada)
                             <tr>
-                                {{-- <td>{{$polePosition->corrida->temporada->ano->ano}}</td> --}}
-                                <td> {{ substr($polePosition->corrida->temporada->des_temporada, 0, strpos($polePosition->corrida->temporada->des_temporada, ' ')) }}</td>
+                                <td class="fw-bold">{{ substr($temporada->des_temporada, 0, strpos($temporada->des_temporada, ' ')) }}</td>
+                                <td><span class="badge bg-dark rounded-pill px-3 py-2">{{Piloto::getInfoCampeonato($temporada->id, $modelPiloto->id)['posicaoPiloto']}}º</span></td>
+                                <td class="fw-bold fs-5 text-danger">{{Piloto::getInfoCampeonato($temporada->id, $modelPiloto->id)['totalPontos']}}</td>
                                 <td>
-                                    @if (isset($polePosition->corrida->evento->des_nome))
-                                        {{$polePosition->corrida->evento->des_nome}}
-                                    @else
-                                        -
-                                    @endif
+                                    <a data-toggle="tooltip" data-placement="top" title="Ver Classificação Completa" href="{{route('temporadas.classificacao', [$temporada->id])}}">
+                                        <i class="bi bi-list-ol"></i>
+                                    </a>
                                 </td>
-                                <td>{{$polePosition->corrida->pista->nome}}</td>
-                                <td class="text-nowrap">{{ $polePosition->pilotoEquipe->equipe->nome }}</td>
-                                <td><a data-toggle="tooltip" data-placement="top" title="Visualizar corrida" class="" href="{{route('resultados.show', [$polePosition->corrida->id])}}"><i class="bi bi-eye-fill"></i></a></td>
                             </tr>
                         @endforeach
-                    @else 
-                        <tr>
-                            <td colspan="5" style="font-style: italic;">Piloto não tem pole positions</td>    
-                        </tr> 
-                    @endif
+                    </tbody>
                 </table>
-        </section>
+            </div>
+        </div>
+    </details> 
 
-        <hr>
-
-        @if(count($polesPorPista) > 0)
-            <section class="resultados-por-corrida" id="poles-pista">
-                <h1>Pole Positions por Pista</h1>
-                <table class="mt-5 mb-5 tabela-historico-equipes">
-                    <tr>
-                        <th>Pista</th>
-                        <th>Quantidade</th>
-                    </tr>
-                    @foreach($polesPorPista as $key => $polePorPista)
+    <details class="f1-accordion" id="historico-vitorias">
+        <summary>Histórico de Vitórias <i class="bi bi-chevron-down toggle-icon"></i></summary>
+        <div class="accordion-body">
+            <div class="alert alert-dark text-center mb-4" role="alert">
+                <i class="bi bi-info-circle-fill me-2 text-danger"></i> Corridas seguidas sem vitória atualmente: <strong>{{$corridaSeguidasSemVencer}}</strong>
+            </div>
+            <div class="table-responsive">
+                <table class="f1-table">
+                    <thead>
                         <tr>
-                            <td style="vertical-align: middle;">
-                                <span style="display: inline-block; vertical-align: middle;">{{$key}}</span>
-                            </td>
-                            <td>{{$polePorPista}}</td>
+                            <th>Temporada <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                            <th>Evento <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                            <th>Pista <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                            <th>Equipe <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                            <th>Ações</th>
                         </tr>
-                    @endforeach
-                </table>
-            </section>
-            <hr>
-        @endif
-        
-        @if (count($listagemPolePositions) > 0)
-            <section class="resultados-por-corrida" id="pistas-sem-pole">
-                <h1>Pistas em que o piloto não foi Pole Position</h1>
-                <table class="mt-5 mb-5 tabela-historico-equipes">
-                    <tr>
-                        <th>
-                            Pista
-                        </th>
-                        <th>
-                            Corridas Disputadas
-                        </th>
-                    </tr>
-                    @foreach($pistasEmQueOPilotoNaoFoiPolePosition as $key => $pistaEmQueOPilotoNaoFoiPolePosition)
-                        <tr>
-                            <td>{{$key}}</td>
-                            <td>{{$pistaEmQueOPilotoNaoFoiPolePosition}}</td>
-                        </tr>
-                    @endforeach
-                </table>
-            </section>
-            <hr>
-        @endif
-
-        {{--Tabela de Largada e chegada--}}
-        <!--<section class="resultados-por-corrida">
-            <h1>Resultados por Corrida</h1>
-            <table class="mt-5 mb-5 tabela-resultados">
-                <tr>
-                    <th style="text-align: center;">Temporada</th>
-                    <th style="text-align: center;">Evento</th>
-                    <th>Pista</th>
-                    <th>Largada</th>
-                    <th>Chegada</th>
-                    <th>Variação</th>
-                </tr>
-                @foreach($resultadosPorCorrida as $resultado)
-                    <tr @if($resultado->corrida->flg_sprint == 'S') style="font-style:italic; color:red;" @endif>
-                        @if($resultado->pilotoEquipe->piloto->id == $modelPiloto->id)
-                            {{-- <td> {{$resultado->corrida->temporada->ano->ano}} </td> --}}
-                            <td style="text-align: center;"> {{ substr($resultado->corrida->temporada->des_temporada, 0, strpos($resultado->corrida->temporada->des_temporada, ' ')) }}</td>
-                            <td style="text-align: center;">
-                                @if (isset($resultado->corrida->evento->des_nome))
-                                    {{$resultado->corrida->evento->des_nome}}
-                                @else
-                                    -
-                                @endif
-                            </td>
-                            <td>{{$resultado->corrida->pista->nome}} @if($resultado->corrida->flg_sprint == 'S') - Sprint @endif</td>
-                            <td>{{$resultado->largada}}</td>
-                            <td>{{$resultado->chegada}} <?= $resultado->flg_abandono == 'S' ? ' - Abandonou' : '' ?></td>
-                            <td>{{$resultado->largada-$resultado->chegada}}</td>
+                    </thead>
+                    <tbody>
+                        @if (count($listagemVitorias) > 0)
+                            @foreach ($listagemVitorias as $vitoria)
+                                <tr>
+                                    <td class="fw-bold">{{ substr($vitoria->corrida->temporada->des_temporada, 0, strpos($vitoria->corrida->temporada->des_temporada, ' ')) }}</td>
+                                    <td>{{ isset($vitoria->corrida->evento->des_nome) ? $vitoria->corrida->evento->des_nome : '-' }}</td>
+                                    <td>
+                                        @if(isset($vitoria->corrida->pista->pais->imagem))
+                                            <img src="{{ asset('images/' . $vitoria->corrida->pista->pais->imagem) }}" class="flag-img" alt="Bandeira">
+                                        @endif
+                                        {{$vitoria->corrida->pista->nome}}
+                                    </td>
+                                    <td><span class="badge bg-dark">{{ $vitoria->pilotoEquipe->equipe->nome }}</span></td>
+                                    <td>
+                                        <a data-toggle="tooltip" data-placement="top" title="Visualizar corrida" href="{{route('resultados.show', [$vitoria->corrida->id])}}">
+                                            <i class="bi bi-play-circle-fill"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @else 
+                            <tr><td colspan="5" class="text-center text-muted" style="font-style: italic;">Nenhuma vitória registrada.</td></tr> 
                         @endif
-                    </tr>
-                @endforeach
-            </table>
-            <div class="d-flex justify-content-center">
-                {{ $resultadosPorCorrida->links() }}
+                    </tbody>
+                </table>
             </div>
-        </section> 
+        </div>
+    </details>
 
-    -->
-       
-        {{-- <div>
-            <canvas id="myChart"></canvas>
-        </div> --}}
-
-        <div class="mb-5">
-            <div class="d-flex" style="justify-content: space-around;">
-                <div class="">
-                    <a href="{{route('pilotos.index')}}" class="btn btn-primary">Voltar</a>
-                </div>
-                <div>
-                    <a href="{{route('pilotos.export', [$modelPiloto->id])}}" class="btn btn-secondary">Gerar Excel</a>
+    @if(count($vitoriasPorPista) > 0)
+        <details class="f1-accordion" id="vitorias-pista">
+            <summary>Vitórias por Pista <i class="bi bi-chevron-down toggle-icon"></i></summary>
+            <div class="accordion-body">
+                <div class="table-responsive">
+                    <table class="f1-table">
+                        <thead>
+                            <tr>
+                                <th>Pista <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                                <th>Quantidade de Vitórias <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($vitoriasPorPista as $key => $vitoriaPorPista)
+                                <tr>
+                                    <td class="fw-bold">
+                                        {{$key}}
+                                    </td>
+                                    <td><span class="badge bg-success rounded-pill px-3 py-2 fs-6">{{$vitoriaPorPista}} <i class="bi bi-trophy-fill ms-1"></i></span></td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
             </div>
-        </div>   
-   </div>
+        </details>
+    @endif
+        
+    @if(count($listagemVitorias) > 0)
+        <details class="f1-accordion" id="pistas-sem-vitoria">
+            <summary>Pistas sem vitória <i class="bi bi-chevron-down toggle-icon"></i></summary>
+            <div class="accordion-body">
+                <div class="table-responsive">
+                    <table class="f1-table">
+                        <thead>
+                            <tr>
+                                <th>Pista <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                                <th>Corridas Disputadas <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($pistasEmQueOPilotoNaoVenceu as $key => $pistaEmQueOPilotoNaoVenceu)
+                                <tr>
+                                    <td class="fw-bold">
+                                        {{$key}}
+                                    </td>
+                                    <td>{{$pistaEmQueOPilotoNaoVenceu}} corrida(s)</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </details>
+    @endif
 
-    <div class="text-light footer-show-pilotos">
-        <a href="#ajaxGetStatsPilotoPorTemporada" style="text-decoration:none;" class="text-light">Início</a>
-        <a href="#historico-vitorias" style="text-decoration:none;" class="text-light">Histórico de Vitórias</a>
-        <a href="#vitorias-pista" style="text-decoration:none;" class="text-light">Vitórias por Pista</a>
-        <a href="#pistas-sem-vitoria" style="text-decoration:none;" class="text-light">Pistas sem vitórias</a>
-        <a href="#historico-poles" style="text-decoration:none;" class="text-light">Histórico de Pole Positions</a>
-        <a href="#poles-pista" style="text-decoration:none;" class="text-light">Pole Positions por Pista</a>
-        <a href="#pistas-sem-pole" style="text-decoration:none;" class="text-light">Pistas sem Pole Position</a>
-    </div>
+    <details class="f1-accordion" id="historico-poles">
+        <summary>Histórico de Pole Positions <i class="bi bi-chevron-down toggle-icon"></i></summary>
+        <div class="accordion-body">
+            <div class="alert alert-dark text-center mb-4" role="alert">
+                <i class="bi bi-stopwatch-fill me-2 text-danger"></i> Corridas seguidas sem pole position atualmente: <strong>{{$corridaSeguidasSemPolePosition}}</strong>
+            </div>
+            <div class="table-responsive">
+                <table class="f1-table">
+                    <thead>
+                        <tr>
+                            <th>Temporada <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                            <th>Evento <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                            <th>Pista <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                            <th>Equipe <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (count($listagemPolePositions) > 0)
+                            @foreach ($listagemPolePositions as $polePosition)
+                                <tr>
+                                    <td class="fw-bold">{{ substr($polePosition->corrida->temporada->des_temporada, 0, strpos($polePosition->corrida->temporada->des_temporada, ' ')) }}</td>
+                                    <td>{{ isset($polePosition->corrida->evento->des_nome) ? $polePosition->corrida->evento->des_nome : '-' }}</td>
+                                    <td>
+                                        @if(isset($polePosition->corrida->pista->pais->imagem))
+                                            <img src="{{ asset('images/' . $polePosition->corrida->pista->pais->imagem) }}" class="flag-img" alt="Bandeira">
+                                        @endif
+                                        {{$polePosition->corrida->pista->nome}}
+                                    </td>
+                                    <td><span class="badge bg-dark">{{ $polePosition->pilotoEquipe->equipe->nome }}</span></td>
+                                    <td>
+                                        <a data-toggle="tooltip" data-placement="top" title="Visualizar corrida" href="{{route('resultados.show', [$polePosition->corrida->id])}}">
+                                            <i class="bi bi-play-circle-fill"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @else 
+                            <tr><td colspan="5" class="text-center text-muted" style="font-style: italic;">Nenhuma pole position registrada.</td></tr> 
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </details>
 
-   <script>
-    ajaxGetStatsPilotoPorTemporada = "<?=route('ajax.ajaxGetStatsPilotoPorTemporada')?>"
-   </script>
+    @if(count($polesPorPista) > 0)
+        <details class="f1-accordion" id="poles-pista">
+            <summary>Pole Positions por Pista <i class="bi bi-chevron-down toggle-icon"></i></summary>
+            <div class="accordion-body">
+                <div class="table-responsive">
+                    <table class="f1-table">
+                        <thead>
+                            <tr>
+                                <th>Pista <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                                <th>Quantidade de Poles <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($polesPorPista as $key => $polePorPista)
+                                <tr>
+                                    <td class="fw-bold">
+                                        {{$key}}
+                                    </td>
+                                    <td><span class="badge bg-primary rounded-pill px-3 py-2 fs-6">{{$polePorPista}} <i class="bi bi-stopwatch ms-1"></i></span></td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </details>
+    @endif
+        
+    @if (count($listagemPolePositions) > 0)
+        <details class="f1-accordion" id="pistas-sem-pole">
+            <summary>Pistas sem Pole Position <i class="bi bi-chevron-down toggle-icon"></i></summary>
+            <div class="accordion-body">
+                <div class="table-responsive">
+                    <table class="f1-table">
+                        <thead>
+                            <tr>
+                                <th>Pista <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                                <th>Corridas Disputadas <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($pistasEmQueOPilotoNaoFoiPolePosition as $key => $pistaEmQueOPilotoNaoFoiPolePosition)
+                                <tr>
+                                    <td class="fw-bold">
+                                        {{$key}}
+                                    </td>
+                                    <td>{{$pistaEmQueOPilotoNaoFoiPolePosition}} corrida(s)</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </details>
+    @endif
 
-   @php 
+    <div class="d-flex justify-content-center gap-4 mb-5">
+        <a href="{{route('pilotos.index')}}" class="btn btn-outline-dark fw-bold px-4 py-2 text-uppercase"><i class="bi bi-arrow-left"></i> Voltar</a>
+        <a href="{{route('pilotos.export', [$modelPiloto->id])}}" class="btn btn-success fw-bold px-4 py-2 text-uppercase"><i class="bi bi-file-earmark-excel"></i> Gerar Excel</a>
+    </div>   
+</div>
 
-    $chegada = [];
-    $labels = [];
+<div class="footer-show-pilotos shadow">
+    <a href="#ajaxGetStatsPilotoPorTemporada"><i class="bi bi-house-door"></i> Início</a>
+    <a href="#historico-vitorias"><i class="bi bi-trophy"></i> Histórico de Vitórias</a>
+    <a href="#vitorias-pista"><i class="bi bi-geo-alt"></i> Vitórias por Pista</a>
+    <a href="#pistas-sem-vitoria"><i class="bi bi-x-circle"></i> Pistas sem vitórias</a>
+    <a href="#historico-poles"><i class="bi bi-stopwatch"></i> Histórico de Poles</a>
+    <a href="#poles-pista"><i class="bi bi-geo-alt-fill"></i> Poles por Pista</a>
+    <a href="#pistas-sem-pole"><i class="bi bi-x-circle-fill"></i> Pistas sem Pole</a>
+</div>
 
-   @endphp
-   
-   <script>
-    const ctx = document.getElementById('myChart');
+<script>
+ ajaxGetStatsPilotoPorTemporada = "<?=route('ajax.ajaxGetStatsPilotoPorTemporada')?>"
+</script>
 
-    temporadasDisputadas = <?php echo json_encode($temporadasDisputadas); ?>;
-    pontuacaoPorTemporada = <?php echo json_encode($pontuacaoPorTemporada); ?>;
-      
-    /*Gráfico de Histórico de Pontos dos pilotos*/
-    const historioPontuacao = document.getElementById('historicoPontuacao');
+@php 
+ $chegada = [];
+ $labels = [];
+@endphp
 
-    new Chart(historioPontuacao, {
-    type: 'bar',
-    data: {
-        labels: temporadasDisputadas,
-        datasets: [{
-        barThickness: 60,
-        label: 'Pontuação',
-        backgroundColor:
-        [
-            'rgba(194, 26, 26, 0.993)'
-        ],
-        data: pontuacaoPorTemporada,
-        borderWidth: 1
-        }]
-    },
-    options: {
-        scales: {
-        y: {
-            beginAtZero: true,
-            min: 0,
+<script>
+    $('#show-other-stats').click(function (e) { 
+        e.preventDefault();
+        if( this.innerHTML === 'Exibir Mais Estatísticas'){
+            this.innerHTML = 'Ocultar Estatísticas';
+        }else{
+            this.innerHTML = 'Exibir Mais Estatísticas'
         }
-        }
-    }
+        $('.other-stats').fadeToggle(300);
     });
 
-  $('#show-other-stats').click(function (e) { 
-    e.preventDefault();
-    if( this.innerHTML === 'Exibir Mais Estatisticas'){
-        this.innerHTML = 'Esconder Estatisticas';
-    }else{
-        this.innerHTML = 'Exibir Mais Estatisticas'
-    }
-
-    $('.other-stats').toggle();
-  });
-
-  $('#ajaxGetStatsPilotoPorTemporada').change(function (e) { 
-    e.preventDefault();
-
-    temporada_id = $('#ajaxGetStatsPilotoPorTemporada').val();
-    piloto_id = $('#piloto_id').val();
-    
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+    $('.footer-show-pilotos a').click(function() {
+        let targetId = $(this).attr('href');
+        if (targetId !== '#ajaxGetStatsPilotoPorTemporada') {
+            $(targetId).attr('open', true);
         }
     });
 
-    if(temporada_id != ''){
-        selectTemporadaPolesPiloto = $('#selectGetStatsPilotoPorTemporada').text('Geral');
-    }
+    $('#ajaxGetStatsPilotoPorTemporada').change(function (e) { 
+        e.preventDefault();
 
-    $.ajax({
-        type: "POST",
-        url: ajaxGetStatsPilotoPorTemporada,
-        data: {temporada_id: temporada_id, piloto_id: piloto_id},
-        contentType: "application/x-www-form-urlencoded;charset=UTF-8",
-        success: function (response) {
-           $('#piloto-tot-vitorias').text(response.totVitorias)
-           $('#piloto-tot-poles').text(response.totPoles)
-           $('#piloto-tot-podios').text(response.totPodios)
-           $('#piloto-tot-pontos').text(response.totPontos)
-           $('#piloto-tot-voltas-rapidas').text(response.totVoltasRapidas)
-           $('#piloto-tot-top-ten').text(response.totTopTen)
-           $('#piloto-melhor-largada').text(response.melhorPosicaoLargada)
-           $('#piloto-pior-largada').text(response.piorPosicaoLargada)
-           $('#piloto-melhor-chegada').text(response.melhorPosicaoChegada)
-           $('#piloto-pior-chegada').text(response.piorPosicaoChegada)
-           $('#tot-corridas').text(response.totCorridas)
-           $('#piloto-totAbandonos').text(response.totAbandonos)
-           $('#piloto-gridMedio').text(response.gridMedio)
-           $('#piloto-mediaChegada').text(response.mediaChegada)
-        },
-        error:function(){
-            alert("Piloto não participou da temporada selecionada")
+        temporada_id = $('#ajaxGetStatsPilotoPorTemporada').val();
+        piloto_id = $('#piloto_id').val();
+        
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
+        if(temporada_id != ''){
+            selectTemporadaPolesPiloto = $('#selectGetStatsPilotoPorTemporada').text('Geral');
         }
-    });
-      
-});
 
-  </script>
+        $.ajax({
+            type: "POST",
+            url: ajaxGetStatsPilotoPorTemporada,
+            data: {temporada_id: temporada_id, piloto_id: piloto_id},
+            contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+            success: function (response) {
+               $('#piloto-tot-vitorias').text(response.totVitorias)
+               $('#piloto-tot-poles').text(response.totPoles)
+               $('#piloto-tot-podios').text(response.totPodios)
+               $('#piloto-tot-pontos').text(response.totPontos)
+               $('#piloto-tot-voltas-rapidas').text(response.totVoltasRapidas)
+               $('#piloto-tot-top-ten').text(response.totTopTen)
+               $('#piloto-melhor-largada').text(response.melhorPosicaoLargada + 'º')
+               $('#piloto-pior-largada').text(response.piorPosicaoLargada + 'º')
+               $('#piloto-melhor-chegada').text(response.melhorPosicaoChegada + 'º')
+               $('#piloto-pior-chegada').text(response.piorPosicaoChegada + 'º')
+               $('#tot-corridas').text(response.totCorridas)
+               $('#piloto-totAbandonos').text(response.totAbandonos)
+               $('#piloto-gridMedio').text(response.gridMedio)
+               $('#piloto-mediaChegada').text(response.mediaChegada)
+            },
+            error:function(){
+                alert("O Piloto não participou da temporada selecionada.")
+            }
+        });
+    });
+</script>
 @endsection
-
