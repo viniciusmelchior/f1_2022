@@ -67,9 +67,20 @@
                         </td> --}}
                         {{-- <td>{{$corrida->dificuldade_ia}}</td> --}}
                         {{-- {{dd(Corrida::getInfoCorrida($corrida->id))}} --}}
-                        <td class="text-nowrap"><a href="{{route('pilotos.show', [Corrida::getInfoCorrida($corrida->id)['polePositionId']])}}" style="color: inherit; text-decoration: inherit;">{{Corrida::getInfoCorrida($corrida->id)['polePositionNome']}}</a></td>
-                        <td class="text-nowrap"><a href="{{route('pilotos.show', [Corrida::getInfoCorrida($corrida->id)['vencedorId']])}}" style="color: inherit; text-decoration: inherit;">{{Corrida::getInfoCorrida($corrida->id)['vencedorNome']}}</a></td>
-                        <td class="text-nowrap">{{Corrida::getInfoCorrida($corrida->id)['totAbandonos']}}</td>
+                        @php $infoCorrida = Corrida::getInfoCorrida($corrida->id); @endphp
+                        <td class="text-nowrap">
+                            @if($infoCorrida['polePositionEquipeImagem'])
+                                <img src="{{asset('images/'.$infoCorrida['polePositionEquipeImagem'])}}" alt="" style="width: 29px; height:29px; padding: 2px; background-color: #adb5bd; border-radius: 4px;">
+                            @endif
+                            <a href="{{route('pilotos.show', [$infoCorrida['polePositionId']])}}" style="color: inherit; text-decoration: inherit;">{{$infoCorrida['polePositionNome']}}</a>
+                        </td>
+                        <td class="text-nowrap">
+                            @if($infoCorrida['vencedorEquipeImagem'])
+                                <img src="{{asset('images/'.$infoCorrida['vencedorEquipeImagem'])}}" alt="" style="width: 29px; height:29px; padding: 2px; background-color: #adb5bd; border-radius: 4px;">
+                            @endif
+                            <a href="{{route('pilotos.show', [$infoCorrida['vencedorId']])}}" style="color: inherit; text-decoration: inherit;">{{$infoCorrida['vencedorNome']}}</a>
+                        </td>
+                        <td class="text-nowrap">{{$infoCorrida['totAbandonos']}}</td>
                         <td class="text-nowrap">
                             @if (isset($corrida->updated_at))
                                 {{-- {{date('d/m/Y', strtotime($corrida->updated_at))}} às {{date('H:m:s', strtotime($corrida->updated_at))}} --}}

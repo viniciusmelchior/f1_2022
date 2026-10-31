@@ -53,10 +53,12 @@ class Corrida extends Model
             $polePosition = $resultado->where('largada', 1)->first(); 
             $polePositionNome = isset($polePosition) ? $polePosition->pilotoEquipe->piloto->nomeCompleto() : '-';
             $polePositionId = isset($polePosition) ? $polePosition->pilotoEquipe->piloto->id : '-';
+            $polePositionEquipeImagem = isset($polePosition) ? $polePosition->pilotoEquipe->equipe->imagem : null;
 
-            $vencedor = $resultado->where('chegada', 1)->first(); 
+            $vencedor = $resultado->where('chegada', 1)->first();
             $vencedorNome = isset($vencedor) ? $vencedor->pilotoEquipe->piloto->nomeCompleto() : '-';
             $vencedorId = isset($vencedor) ? $vencedor->pilotoEquipe->piloto->id : '-';
+            $vencedorEquipeImagem = isset($vencedor) ? $vencedor->pilotoEquipe->equipe->imagem : null;
 
             $totAbandonos = $resultado->where('flg_abandono', 'S')->count();
         }
@@ -68,8 +70,10 @@ class Corrida extends Model
         return [
             'polePositionNome' => $polePositionNome,
             'polePositionId' => $polePositionId,
+            'polePositionEquipeImagem' => $polePositionEquipeImagem,
             'vencedorNome' => $vencedorNome,
             'vencedorId' => $vencedorId,
+            'vencedorEquipeImagem' => $vencedorEquipeImagem,
             'totAbandonos' => $totAbandonos
         ];
     }
