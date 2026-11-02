@@ -31,39 +31,53 @@ class HomeController extends Controller
        $chegadasTop10Pilotos = [];
        $chegadasTop10Equipes = [];
 
-        $resultados = $vitoriaEquipes = Resultado::join('piloto_equipes', 'pilotoEquipe_id', 'piloto_equipes.id')
-                                                // ->join('pilotos', 'piloto_equipes.piloto_id', 'pilotos.id')
-                                                // ->join('equipes', 'piloto_equipes.equipe_id', 'equipes.id')
+        // One flat row per result: hydrating a model and lazy-loading piloto and
+        // equipe for every row runs past memory_limit on accounts with tens of
+        // thousands of results. toBase() keeps the rows as plain objects.
+        $resultados = Resultado::join('piloto_equipes', 'pilotoEquipe_id', 'piloto_equipes.id')
+                                                ->join('pilotos', 'piloto_equipes.piloto_id', 'pilotos.id')
+                                                ->join('equipes', 'piloto_equipes.equipe_id', 'equipes.id')
                                                 ->join('corridas', 'resultados.corrida_id', 'corridas.id')
                                                 ->where('resultados.user_id', Auth::user()->id)
                                                 ->where('corridas.flg_sprint', 'N')
-                                                // ->where('corridas.temporada_id', 3)
-                                                ->get();
+                                                ->select(
+                                                    'resultados.chegada',
+                                                    'resultados.largada',
+                                                    'resultados.flg_abandono',
+                                                    'pilotos.nome as piloto_nome',
+                                                    'pilotos.sobrenome as piloto_sobrenome',
+                                                    'equipes.nome as equipe_nome'
+                                                )
+                                                ->toBase()
+                                                ->cursor();
 
         foreach($resultados as $resultado){
+            $piloto = $resultado->piloto_nome.' '.$resultado->piloto_sobrenome;
+            $equipe = $resultado->equipe_nome;
+
             if($resultado->chegada > 0 && $resultado->chegada <=1){
-                $vitoriasDosPilotos[] = $resultado->pilotoEquipe->piloto->nomeCompleto();
-                $vitoriasDasEquipes[] = $resultado->pilotoEquipe->equipe->nome;
+                $vitoriasDosPilotos[] = $piloto;
+                $vitoriasDasEquipes[] = $equipe;
             }
 
             if($resultado->largada > 0 && $resultado->largada <=1){
-                $polePositionDosPilotos[] = $resultado->pilotoEquipe->piloto->nomeCompleto();
-                $polePositionDasEquipes[] = $resultado->pilotoEquipe->equipe->nome;
+                $polePositionDosPilotos[] = $piloto;
+                $polePositionDasEquipes[] = $equipe;
             }
 
             if($resultado->chegada >= 1 && $resultado->chegada <=3){
-                $podiosDosPilotos[] = $resultado->pilotoEquipe->piloto->nomeCompleto();
-                $podiosDasEquipes[] = $resultado->pilotoEquipe->equipe->nome;
+                $podiosDosPilotos[] = $piloto;
+                $podiosDasEquipes[] = $equipe;
             }
 
             if($resultado->flg_abandono == 'S'){
-                $abandonosDosPilotos[] = $resultado->pilotoEquipe->piloto->nomeCompleto();
-                $abandonosDasEquipes[] = $resultado->pilotoEquipe->equipe->nome;
+                $abandonosDosPilotos[] = $piloto;
+                $abandonosDasEquipes[] = $equipe;
             }
 
             if($resultado->chegada > 0 && $resultado->chegada <= 10){
-                $chegadasTop10Pilotos[] = $resultado->pilotoEquipe->piloto->nomeCompleto();
-                $chegadasTop10Equipes[] = $resultado->pilotoEquipe->equipe->nome;
+                $chegadasTop10Pilotos[] = $piloto;
+                $chegadasTop10Equipes[] = $equipe;
             }
         }
 
@@ -417,26 +431,15 @@ class HomeController extends Controller
         }
         
         //primeiro encontra as corridas
-        $corridas = Corrida::where('user_id', Auth::user()->id)
+        $corridas = Corrida::with(['pista.pais', 'temporada'])
+                            ->where('user_id', Auth::user()->id)
                             ->where('flg_sprint', $request->flg_sprint)
                             ->where('exibir_resultado',1)
                             ->where('temporada_id', $operadorConsulta, $condicao)
                             ->get();
 
-        foreach ($corridas as $corrida) {
+        foreach ($this->corridasComResultados($corridas) as [$corrida, $resultados, $voltasRapidas]) {
 
-            $resultados = Resultado::where(function($query) use ($corrida){
-                    $query->where('user_id', 3)
-                        ->where('corrida_id', $corrida->id)
-                        ->where('largada', 1);
-                    })
-                    ->orWhere(function($query) use ($corrida) {
-                        $query->where('user_id', Auth::user()->id)
-                            ->where('corrida_id', $corrida->id)
-                            ->where('chegada', '<=', Auth::user()->id);
-                    })
-                    ->get();
-                    
                 $resultadosCorrida['polePosition'] = '';
                 $resultadosCorrida['equipePolePosition'] = '';
                 $resultadosCorrida['primeiro'] = '';
@@ -451,15 +454,14 @@ class HomeController extends Controller
                 $resultadosCorrida['temporada_id'] = $corrida->temporada->id;
                 $resultadosCorrida['pista'] = $corrida->pista->nome;
                 $resultadosCorrida['temporada'] = substr($corrida->temporada->des_temporada, 0, strpos($corrida->temporada->des_temporada, ' '));
-                $resultadosCorrida['voltaRapida'] = '';
-                $resultadosCorrida['equipeVoltaRapida'] = '';
+
+                $voltaRapida = $voltasRapidas->get($corrida->volta_rapida);
+                $resultadosCorrida['voltaRapida'] = isset($voltaRapida) ? $voltaRapida->piloto->nomeCompleto() : '';
+                $resultadosCorrida['equipeVoltaRapida'] = isset($voltaRapida) ? $voltaRapida->equipe->imagem : '';
 
             foreach($resultados as $resultado){
                 
-                $voltaRapida = PilotoEquipe::find($resultado->corrida->volta_rapida);
-                $resultadosCorrida['voltaRapida'] = isset($voltaRapida) ? $voltaRapida->piloto->nomeCompleto() : '';
-                $resultadosCorrida['equipeVoltaRapida'] = isset($voltaRapida) ? $voltaRapida->equipe->imagem : '';
-                $resultadosCorrida['temporada'] = substr($resultado->corrida->temporada->des_temporada, 0, strpos($resultado->corrida->temporada->des_temporada, ' '));
+                $resultadosCorrida['temporada'] = substr($corrida->temporada->des_temporada, 0, strpos($corrida->temporada->des_temporada, ' '));
 
                 if($resultado->largada == 1){
                     $resultadosCorrida['polePosition'] = $resultado->pilotoEquipe->piloto->nomeCompleto();
@@ -526,6 +528,43 @@ class HomeController extends Controller
             'resultadosCorrida' => $resultadosCorrida
         ]);
 
+    }
+
+    /**
+     * Yields each race with its results and the fastest-lap drivers of its batch.
+     *
+     * One query per race and per result exceeds the 60s FastCGI timeout on accounts
+     * with thousands of races. Only the rows the statistics table shows are selected
+     * (pole and the top three finishers), and races are loaded in batches so that
+     * memory stays below the 128M memory_limit as an account grows.
+     */
+    private function corridasComResultados($corridas){
+
+        foreach ($corridas->chunk(500) as $lote) {
+
+            // A later row overwrites an earlier one with the same position, so the order is fixed.
+            $resultadosPorCorrida = Resultado::with(['pilotoEquipe.piloto', 'pilotoEquipe.equipe'])
+                        ->whereIn('corrida_id', $lote->pluck('id'))
+                        ->where(function($query) {
+                            $query->where('largada', 1)
+                                ->orWhereBetween('chegada', [1, 3]);
+                        })
+                        ->orderBy('id')
+                        ->get()
+                        // Checked here because the same condition in SQL makes MySQL scan the account's
+                        // whole user_id index once per batch instead of reading only the batch's races.
+                        ->where('user_id', Auth::user()->id)
+                        ->groupBy('corrida_id');
+
+            $voltasRapidas = PilotoEquipe::with(['piloto', 'equipe'])
+                        ->whereIn('id', $lote->pluck('volta_rapida')->filter()->unique())
+                        ->get()
+                        ->keyBy('id');
+
+            foreach ($lote as $corrida) {
+                yield [$corrida, $resultadosPorCorrida->get($corrida->id, []), $voltasRapidas];
+            }
+        }
     }
 
     public function ajaxGetVitoriasPilotoPorTemporada(Request $request){

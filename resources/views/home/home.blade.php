@@ -538,7 +538,7 @@ margin: 0;
                         {{ substr($resultadoCorrida->temporada->des_temporada, 0, strpos($resultadoCorrida->temporada->des_temporada, ' ')) }}
                     </td>
                     <td style="text-align: left;" class="text-nowrap">
-                         <img src="{{asset('images/'.$resultadoCorrida->pista->pais->imagem)}}" alt="" style="width: 25px; height:20px;">
+                         <img src="{{\App\Support\ImageUrl::for($resultadoCorrida->pista->pais->imagem)}}" alt="" style="width: 25px; height:20px;">
                         {{-- <a href="{{route('resultados.show',[$resultadoCorrida->id])}}" style="text-decoration: none; color:black;">{{$resultadoCorrida->pista->nome}}</a> --}}
                         <a href="{{route('resultados.show',[$resultadoCorrida->id])}}" style="text-decoration: none; color:black;" title="{{ $resultadoCorrida->pista->nome }}">
                             @if (isset($resultadoCorrida->evento->des_nome))
@@ -557,7 +557,7 @@ margin: 0;
                     <td style="text-align: left;" class="text-nowrap">
                         @if(isset($polePosition))
                         <span {{-- style="color:{{$polePosition->pilotoEquipe->equipe->des_cor}};" --}}>
-                            <img src="{{asset('images/'.$polePosition->pilotoEquipe->equipe->imagem)}}" alt="" style="width: 25px; height:25px;">
+                            <img src="{{\App\Support\ImageUrl::for($polePosition->pilotoEquipe->equipe->imagem)}}" alt="" style="width: 25px; height:25px;">
                             {{$polePosition->pilotoEquipe->piloto->nomeCompleto()}}
                         </span>
                         @else
@@ -567,7 +567,7 @@ margin: 0;
                     <td style="text-align: left;" class="text-nowrap">
                         @if(isset($primeiro))
                         <span {{-- style="color:{{$primeiro->pilotoEquipe->equipe->des_cor}};" --}}>
-                            <img src="{{asset('images/'.$primeiro->pilotoEquipe->equipe->imagem)}}" alt="" style="width: 25px; height:25px;">
+                            <img src="{{\App\Support\ImageUrl::for($primeiro->pilotoEquipe->equipe->imagem)}}" alt="" style="width: 25px; height:25px;">
                             {{$primeiro->pilotoEquipe->piloto->nomeCompleto()}} 
                         </span>
                         @else
@@ -577,7 +577,7 @@ margin: 0;
                     <td style="text-align: left;" class="text-nowrap">
                         @if(isset($segundo))
                         <span {{-- style="color:{{$segundo->pilotoEquipe->equipe->des_cor}};" --}}>
-                            <img src="{{asset('images/'.$segundo->pilotoEquipe->equipe->imagem)}}" alt="" style="width: 25px; height:25px;">
+                            <img src="{{\App\Support\ImageUrl::for($segundo->pilotoEquipe->equipe->imagem)}}" alt="" style="width: 25px; height:25px;">
                             {{$segundo->pilotoEquipe->piloto->nomeCompleto()}}
                         </span>
                         @else
@@ -587,7 +587,7 @@ margin: 0;
                     <td style="text-align: left;" class="text-nowrap">
                         @if(isset($terceiro))
                         <span {{-- style="color:{{$terceiro->pilotoEquipe->equipe->des_cor}};" --}}>
-                            <img src="{{asset('images/'.$terceiro->pilotoEquipe->equipe->imagem)}}" alt="" style="width: 25px; height:25px;">
+                            <img src="{{\App\Support\ImageUrl::for($terceiro->pilotoEquipe->equipe->imagem)}}" alt="" style="width: 25px; height:25px;">
                             {{$terceiro->pilotoEquipe->piloto->nomeCompleto()}}
                         </span>
                         @else
@@ -597,7 +597,7 @@ margin: 0;
                     <td style="text-align: left;" class="text-nowrap">
                         @if(isset($voltaRapida))
                             <span {{-- style="color:{{$voltaRapida->equipe->des_cor}};" --}}>
-                                <img src="{{asset('images/'.$voltaRapida->equipe->imagem)}}" alt="" style="width: 25px; height:25px;">
+                                <img src="{{\App\Support\ImageUrl::for($voltaRapida->equipe->imagem)}}" alt="" style="width: 25px; height:25px;">
                                 {{$voltaRapida->piloto->nomeCompleto()}}
                             </span>
                         @else

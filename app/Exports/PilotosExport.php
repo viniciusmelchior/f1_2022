@@ -11,6 +11,8 @@ use Maatwebsite\Excel\Concerns\FromView;
 
 class PilotosExport implements FromView
 {
+    private $id;
+
     //construtor
     public function __construct($id)
     {
