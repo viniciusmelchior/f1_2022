@@ -54,11 +54,13 @@ class Corrida extends Model
             $polePositionNome = isset($polePosition) ? $polePosition->pilotoEquipe->piloto->nomeCompleto() : '-';
             $polePositionId = isset($polePosition) ? $polePosition->pilotoEquipe->piloto->id : '-';
             $polePositionEquipeImagem = isset($polePosition) ? $polePosition->pilotoEquipe->equipe->imagem : null;
+            $polePositionEquipeCor = isset($polePosition) ? Equipe::corFundoIcone($polePosition->pilotoEquipe->equipe->des_cor, $polePositionEquipeImagem) : null;
 
             $vencedor = $resultado->where('chegada', 1)->first();
             $vencedorNome = isset($vencedor) ? $vencedor->pilotoEquipe->piloto->nomeCompleto() : '-';
             $vencedorId = isset($vencedor) ? $vencedor->pilotoEquipe->piloto->id : '-';
             $vencedorEquipeImagem = isset($vencedor) ? $vencedor->pilotoEquipe->equipe->imagem : null;
+            $vencedorEquipeCor = isset($vencedor) ? Equipe::corFundoIcone($vencedor->pilotoEquipe->equipe->des_cor, $vencedorEquipeImagem) : null;
 
             $totAbandonos = $resultado->where('flg_abandono', 'S')->count();
         }
@@ -71,9 +73,11 @@ class Corrida extends Model
             'polePositionNome' => $polePositionNome,
             'polePositionId' => $polePositionId,
             'polePositionEquipeImagem' => $polePositionEquipeImagem,
+            'polePositionEquipeCor' => $polePositionEquipeCor,
             'vencedorNome' => $vencedorNome,
             'vencedorId' => $vencedorId,
             'vencedorEquipeImagem' => $vencedorEquipeImagem,
+            'vencedorEquipeCor' => $vencedorEquipeCor,
             'totAbandonos' => $totAbandonos
         ];
     }

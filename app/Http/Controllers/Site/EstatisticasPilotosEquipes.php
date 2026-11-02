@@ -224,9 +224,10 @@ class EstatisticasPilotosEquipes extends Controller
             }
         }
 
-        // Passo 3: Remover chaves numéricas dos pilotos
+        // Passo 3: Remover chaves numéricas dos pilotos e ordenar os pilotos da equipe pela quantidade (decrescente)
         foreach ($quantidadePorEquipe as &$equipe) {
             $equipe['pilotos'] = array_values($equipe['pilotos']);
+            usort($equipe['pilotos'], $ordenarPorQuantidade);
         }
 
         // Ordena pelo campo "quantidade_equipe" de forma decrescente

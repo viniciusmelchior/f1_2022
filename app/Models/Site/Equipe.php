@@ -5,6 +5,7 @@ namespace App\Models\Site;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class Equipe extends Model
@@ -118,5 +119,99 @@ class Equipe extends Model
             'posicaoEquipe' => $posicaoEquipe,
             'totalPontos' => $posicaoEquipe != '-' ? $totalPontos : '-'
         ];
+    }
+
+    /**
+     * Cor de fundo do ícone da equipe: usa o des_cor e, se a maior parte do logo se confundir com ela
+     * (mesma cor), clareia ou escurece o fundo até o logo aparecer
+     */
+    public static function corFundoIcone($desCor, $imagem){
+
+        $fundo = self::hexParaRgb($desCor);
+        if(!$fundo){
+            return '#adb5bd';
+        }
+
+        $pixels = self::pixelsLogo($imagem);
+        if(!$pixels || self::percentualConfundido($pixels, $fundo) < 0.5){
+            return $desCor;
+        }
+
+        //logo mais claro que o fundo escurece o fundo, logo mais escuro clareia o fundo
+        $luminanciaLogo = array_sum(array_map([self::class, 'luminancia'], $pixels)) / count($pixels);
+        $alvo = $luminanciaLogo > self::luminancia($fundo) ? [0, 0, 0] : [255, 255, 255];
+        for($mistura = 0.1; $mistura <= 1; $mistura += 0.1){
+            $cor = [];
+            foreach($fundo as $i => $canal){
+                $cor[$i] = (int) round($canal + ($alvo[$i] - $canal) * $mistura);
+            }
+            if(self::percentualConfundido($pixels, $cor) < 0.5){
+                break;
+            }
+        }
+
+        return sprintf('#%02x%02x%02x', $cor[0], $cor[1], $cor[2]);
+    }
+
+    //pixels visíveis do logo reduzido para 32x32, guardados em cache pelo nome do arquivo (cada upload gera um nome novo)
+    private static function pixelsLogo($imagem){
+
+        $caminho = public_path('images/'.$imagem);
+        if(!$imagem || !is_file($caminho)){
+            return null;
+        }
+
+        return Cache::rememberForever('pixels_logo_'.$imagem, function() use ($caminho){
+            $original = @imagecreatefromstring(file_get_contents($caminho));
+            if(!$original){
+                return null;
+            }
+
+            $img = imagescale($original, 32, 32);
+            $pixels = [];
+            for($x = 0; $x < 32; $x++){
+                for($y = 0; $y < 32; $y++){
+                    $pixel = imagecolorsforindex($img, imagecolorat($img, $x, $y));
+                    if($pixel['alpha'] < 64){
+                        $pixels[] = [$pixel['red'], $pixel['green'], $pixel['blue']];
+                    }
+                }
+            }
+
+            return $pixels ?: null;
+        });
+    }
+
+    //percentual dos pixels do logo com pouco contraste (menos de 2:1) com a cor de fundo
+    private static function percentualConfundido($pixels, $fundo){
+        $confundidos = 0;
+        foreach($pixels as $pixel){
+            if(self::contraste($pixel, $fundo) < 2){
+                $confundidos++;
+            }
+        }
+        return $confundidos / count($pixels);
+    }
+
+    private static function hexParaRgb($hex){
+        $hex = ltrim(trim((string) $hex), '#');
+        if(!preg_match('/^[0-9a-f]{6}$/i', $hex)){
+            return null;
+        }
+        return [hexdec(substr($hex, 0, 2)), hexdec(substr($hex, 2, 2)), hexdec(substr($hex, 4, 2))];
+    }
+
+    private static function luminancia($rgb){
+        $canais = array_map(function($canal){
+            $canal = $canal / 255;
+            return $canal <= 0.03928 ? $canal / 12.92 : pow(($canal + 0.055) / 1.055, 2.4);
+        }, $rgb);
+        return 0.2126 * $canais[0] + 0.7152 * $canais[1] + 0.0722 * $canais[2];
+    }
+
+    private static function contraste($cor1, $cor2){
+        $l1 = self::luminancia($cor1);
+        $l2 = self::luminancia($cor2);
+        return (max($l1, $l2) + 0.05) / (min($l1, $l2) + 0.05);
     }
 }
