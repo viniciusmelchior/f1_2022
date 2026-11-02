@@ -31,39 +31,53 @@ class HomeController extends Controller
        $chegadasTop10Pilotos = [];
        $chegadasTop10Equipes = [];
 
-        $resultados = $vitoriaEquipes = Resultado::join('piloto_equipes', 'pilotoEquipe_id', 'piloto_equipes.id')
-                                                // ->join('pilotos', 'piloto_equipes.piloto_id', 'pilotos.id')
-                                                // ->join('equipes', 'piloto_equipes.equipe_id', 'equipes.id')
+        // One flat row per result: hydrating a model and lazy-loading piloto and
+        // equipe for every row runs past memory_limit on accounts with tens of
+        // thousands of results. toBase() keeps the rows as plain objects.
+        $resultados = Resultado::join('piloto_equipes', 'pilotoEquipe_id', 'piloto_equipes.id')
+                                                ->join('pilotos', 'piloto_equipes.piloto_id', 'pilotos.id')
+                                                ->join('equipes', 'piloto_equipes.equipe_id', 'equipes.id')
                                                 ->join('corridas', 'resultados.corrida_id', 'corridas.id')
                                                 ->where('resultados.user_id', Auth::user()->id)
                                                 ->where('corridas.flg_sprint', 'N')
-                                                // ->where('corridas.temporada_id', 3)
-                                                ->get();
+                                                ->select(
+                                                    'resultados.chegada',
+                                                    'resultados.largada',
+                                                    'resultados.flg_abandono',
+                                                    'pilotos.nome as piloto_nome',
+                                                    'pilotos.sobrenome as piloto_sobrenome',
+                                                    'equipes.nome as equipe_nome'
+                                                )
+                                                ->toBase()
+                                                ->cursor();
 
         foreach($resultados as $resultado){
+            $piloto = $resultado->piloto_nome.' '.$resultado->piloto_sobrenome;
+            $equipe = $resultado->equipe_nome;
+
             if($resultado->chegada > 0 && $resultado->chegada <=1){
-                $vitoriasDosPilotos[] = $resultado->pilotoEquipe->piloto->nomeCompleto();
-                $vitoriasDasEquipes[] = $resultado->pilotoEquipe->equipe->nome;
+                $vitoriasDosPilotos[] = $piloto;
+                $vitoriasDasEquipes[] = $equipe;
             }
 
             if($resultado->largada > 0 && $resultado->largada <=1){
-                $polePositionDosPilotos[] = $resultado->pilotoEquipe->piloto->nomeCompleto();
-                $polePositionDasEquipes[] = $resultado->pilotoEquipe->equipe->nome;
+                $polePositionDosPilotos[] = $piloto;
+                $polePositionDasEquipes[] = $equipe;
             }
 
             if($resultado->chegada >= 1 && $resultado->chegada <=3){
-                $podiosDosPilotos[] = $resultado->pilotoEquipe->piloto->nomeCompleto();
-                $podiosDasEquipes[] = $resultado->pilotoEquipe->equipe->nome;
+                $podiosDosPilotos[] = $piloto;
+                $podiosDasEquipes[] = $equipe;
             }
 
             if($resultado->flg_abandono == 'S'){
-                $abandonosDosPilotos[] = $resultado->pilotoEquipe->piloto->nomeCompleto();
-                $abandonosDasEquipes[] = $resultado->pilotoEquipe->equipe->nome;
+                $abandonosDosPilotos[] = $piloto;
+                $abandonosDasEquipes[] = $equipe;
             }
 
             if($resultado->chegada > 0 && $resultado->chegada <= 10){
-                $chegadasTop10Pilotos[] = $resultado->pilotoEquipe->piloto->nomeCompleto();
-                $chegadasTop10Equipes[] = $resultado->pilotoEquipe->equipe->nome;
+                $chegadasTop10Pilotos[] = $piloto;
+                $chegadasTop10Equipes[] = $equipe;
             }
         }
 
