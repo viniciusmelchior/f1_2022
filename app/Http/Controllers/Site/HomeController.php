@@ -431,26 +431,15 @@ class HomeController extends Controller
         }
         
         //primeiro encontra as corridas
-        $corridas = Corrida::where('user_id', Auth::user()->id)
+        $corridas = Corrida::with(['pista.pais', 'temporada'])
+                            ->where('user_id', Auth::user()->id)
                             ->where('flg_sprint', $request->flg_sprint)
                             ->where('exibir_resultado',1)
                             ->where('temporada_id', $operadorConsulta, $condicao)
                             ->get();
 
-        foreach ($corridas as $corrida) {
+        foreach ($this->corridasComResultados($corridas) as [$corrida, $resultados, $voltasRapidas]) {
 
-            $resultados = Resultado::where(function($query) use ($corrida){
-                    $query->where('user_id', 3)
-                        ->where('corrida_id', $corrida->id)
-                        ->where('largada', 1);
-                    })
-                    ->orWhere(function($query) use ($corrida) {
-                        $query->where('user_id', Auth::user()->id)
-                            ->where('corrida_id', $corrida->id)
-                            ->where('chegada', '<=', Auth::user()->id);
-                    })
-                    ->get();
-                    
                 $resultadosCorrida['polePosition'] = '';
                 $resultadosCorrida['equipePolePosition'] = '';
                 $resultadosCorrida['primeiro'] = '';
@@ -470,10 +459,10 @@ class HomeController extends Controller
 
             foreach($resultados as $resultado){
                 
-                $voltaRapida = PilotoEquipe::find($resultado->corrida->volta_rapida);
+                $voltaRapida = $voltasRapidas->get($corrida->volta_rapida);
                 $resultadosCorrida['voltaRapida'] = isset($voltaRapida) ? $voltaRapida->piloto->nomeCompleto() : '';
                 $resultadosCorrida['equipeVoltaRapida'] = isset($voltaRapida) ? $voltaRapida->equipe->imagem : '';
-                $resultadosCorrida['temporada'] = substr($resultado->corrida->temporada->des_temporada, 0, strpos($resultado->corrida->temporada->des_temporada, ' '));
+                $resultadosCorrida['temporada'] = substr($corrida->temporada->des_temporada, 0, strpos($corrida->temporada->des_temporada, ' '));
 
                 if($resultado->largada == 1){
                     $resultadosCorrida['polePosition'] = $resultado->pilotoEquipe->piloto->nomeCompleto();
@@ -540,6 +529,46 @@ class HomeController extends Controller
             'resultadosCorrida' => $resultadosCorrida
         ]);
 
+    }
+
+    /**
+     * Yields each race with its results and the fastest-lap drivers of its batch.
+     *
+     * One query per race and per result exceeds the 60s FastCGI timeout on accounts
+     * with thousands of races. Loading every race at once would approach the 128M
+     * memory_limit instead, because the position filter can select all of a race's
+     * results, so races are loaded in batches and each batch is released in turn.
+     */
+    private function corridasComResultados($corridas){
+
+        foreach ($corridas->chunk(500) as $lote) {
+
+            // A later row overwrites an earlier one with the same position, so the order is fixed.
+            $resultadosPorCorrida = Resultado::with(['pilotoEquipe.piloto', 'pilotoEquipe.equipe'])
+                        ->whereIn('corrida_id', $lote->pluck('id'))
+                        ->where(function($query) {
+                            $query->where(function($query) {
+                                $query->where('user_id', 3)
+                                    ->where('largada', 1);
+                            })
+                            ->orWhere(function($query) {
+                                $query->where('user_id', Auth::user()->id)
+                                    ->where('chegada', '<=', Auth::user()->id);
+                            });
+                        })
+                        ->orderBy('id')
+                        ->get()
+                        ->groupBy('corrida_id');
+
+            $voltasRapidas = PilotoEquipe::with(['piloto', 'equipe'])
+                        ->whereIn('id', $lote->pluck('volta_rapida')->filter()->unique())
+                        ->get()
+                        ->keyBy('id');
+
+            foreach ($lote as $corrida) {
+                yield [$corrida, $resultadosPorCorrida->get($corrida->id, []), $voltasRapidas];
+            }
+        }
     }
 
     public function ajaxGetVitoriasPilotoPorTemporada(Request $request){
