@@ -726,6 +726,8 @@
         //se for dev usa uma url, se for produção usa outra
         // const urlImagens = 'http://127.0.0.1:8000/images/';
         const urlImagens = 'https://f1.vitorvasconcellos.com.br/images/';
+        const imagemPadrao = @js(\App\Support\ImageUrl::PLACEHOLDER);
+        const srcImagem = (imagem) => imagem ? `${urlImagens}${imagem}` : imagemPadrao;
 
         //reseta o tbody toda vez que faz uma busca
         tbody.innerHTML = '';
@@ -737,27 +739,27 @@
                                     <td>${element.temporada}</td>
                                     <td style="text-align: left;" class="text-nowrap">
                                         <span>
-                                            <img src="${urlImagens}${element.imagemPaisCorrida}" style="width: 25px; height:20px;">
+                                            <img src="${srcImagem(element.imagemPaisCorrida)}" style="width: 25px; height:20px;">
                                         </span>${element.pista}
                                     </td>
                                     <td style="text-align: left;" class="text-nowrap">
                                         <span>
-                                            <img src="${urlImagens}${element.equipePolePosition}" style="width: 25px; height:25px;">
+                                            <img src="${srcImagem(element.equipePolePosition)}" style="width: 25px; height:25px;">
                                         </span>${element.polePosition}
                                     </td>
                                    <td style="text-align: left;" class="text-nowrap">
                                         <span>
-                                            <img src="${urlImagens}${element.equipePrimeiro}" style="width: 25px; height:25px;">
+                                            <img src="${srcImagem(element.equipePrimeiro)}" style="width: 25px; height:25px;">
                                         </span>${element.primeiro}
                                     </td>
                                     <td style="text-align: left;" class="text-nowrap">
                                         <span>
-                                            <img src="${urlImagens}${element.equipeSegundo}" style="width: 25px; height:25px;">
+                                            <img src="${srcImagem(element.equipeSegundo)}" style="width: 25px; height:25px;">
                                         </span>${element.segundo}
                                     </td>
                                     <td style="text-align: left;" class="text-nowrap">
                                         <span>
-                                            <img src="${urlImagens}${element.equipeTerceiro}" style="width: 25px; height:25px;">
+                                            <img src="${srcImagem(element.equipeTerceiro)}" style="width: 25px; height:25px;">
                                         </span>${element.terceiro}
                                     </td>
                                 </tr>`
