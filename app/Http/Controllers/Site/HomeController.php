@@ -454,14 +454,13 @@ class HomeController extends Controller
                 $resultadosCorrida['temporada_id'] = $corrida->temporada->id;
                 $resultadosCorrida['pista'] = $corrida->pista->nome;
                 $resultadosCorrida['temporada'] = substr($corrida->temporada->des_temporada, 0, strpos($corrida->temporada->des_temporada, ' '));
-                $resultadosCorrida['voltaRapida'] = '';
-                $resultadosCorrida['equipeVoltaRapida'] = '';
 
-            foreach($resultados as $resultado){
-                
                 $voltaRapida = $voltasRapidas->get($corrida->volta_rapida);
                 $resultadosCorrida['voltaRapida'] = isset($voltaRapida) ? $voltaRapida->piloto->nomeCompleto() : '';
                 $resultadosCorrida['equipeVoltaRapida'] = isset($voltaRapida) ? $voltaRapida->equipe->imagem : '';
+
+            foreach($resultados as $resultado){
+                
                 $resultadosCorrida['temporada'] = substr($corrida->temporada->des_temporada, 0, strpos($corrida->temporada->des_temporada, ' '));
 
                 if($resultado->largada == 1){
@@ -535,9 +534,9 @@ class HomeController extends Controller
      * Yields each race with its results and the fastest-lap drivers of its batch.
      *
      * One query per race and per result exceeds the 60s FastCGI timeout on accounts
-     * with thousands of races. Loading every race at once would approach the 128M
-     * memory_limit instead, because the position filter can select all of a race's
-     * results, so races are loaded in batches and each batch is released in turn.
+     * with thousands of races. Only the rows the statistics table shows are selected
+     * (pole and the top three finishers), and races are loaded in batches so that
+     * memory stays below the 128M memory_limit as an account grows.
      */
     private function corridasComResultados($corridas){
 
@@ -547,17 +546,14 @@ class HomeController extends Controller
             $resultadosPorCorrida = Resultado::with(['pilotoEquipe.piloto', 'pilotoEquipe.equipe'])
                         ->whereIn('corrida_id', $lote->pluck('id'))
                         ->where(function($query) {
-                            $query->where(function($query) {
-                                $query->where('user_id', 3)
-                                    ->where('largada', 1);
-                            })
-                            ->orWhere(function($query) {
-                                $query->where('user_id', Auth::user()->id)
-                                    ->where('chegada', '<=', Auth::user()->id);
-                            });
+                            $query->where('largada', 1)
+                                ->orWhereBetween('chegada', [1, 3]);
                         })
                         ->orderBy('id')
                         ->get()
+                        // Checked here because the same condition in SQL makes MySQL scan the account's
+                        // whole user_id index once per batch instead of reading only the batch's races.
+                        ->where('user_id', Auth::user()->id)
                         ->groupBy('corrida_id');
 
             $voltasRapidas = PilotoEquipe::with(['piloto', 'equipe'])
