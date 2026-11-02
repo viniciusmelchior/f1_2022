@@ -38,6 +38,16 @@
     />
     
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <script>
+        // Error events do not bubble, so images that fail to load are caught in the capture phase.
+        document.addEventListener('error', function (event) {
+            const imagem = event.target;
+            if (imagem.tagName === 'IMG' && !imagem.dataset.imagemPadrao) {
+                imagem.dataset.imagemPadrao = '1';
+                imagem.src = @js(\App\Support\ImageUrl::PLACEHOLDER);
+            }
+        }, true);
+    </script>
 </head>
 <body>
     <div class="sidebar close">
@@ -227,7 +237,7 @@
           <li>
             <div class="profile-details">
               <div class="profile-content">
-                <img src="{{asset('images/profile.jpg')}}" alt="profileImg">
+                <img src="{{ \App\Support\ImageUrl::PLACEHOLDER }}" alt="profileImg">
               </div>
               <div class="name-job">
                 <div class="profile_name">Usuário</div>
