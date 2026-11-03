@@ -135,6 +135,7 @@ route::get('/pilotoEquipe/index', [PilotoEquipeController::class, 'index'])->nam
 route::get('/pilotoEquipe/edit/{id}', [PilotoEquipeController::class, 'edit'])->name('pilotoEquipe.edit')->middleware('auth');
 route::put('/pilotoEquipe/update/{id}', [PilotoEquipeController::class, 'update'])->name('pilotoEquipe.update')->middleware('auth');
 route::get('/pilotoEquipe/delete/{id}', [PilotoEquipeController::class, 'destroy'])->name('pilotoEquipe.delete')->middleware('auth');
+route::post('/pilotoEquipe/deleteSelecionados', [PilotoEquipeController::class, 'destroySelecionados'])->name('pilotoEquipe.deleteSelecionados')->middleware('auth');
 
 /**Condições Climáticas */
 route::get('/condicaoClimatica/create', [CondicaoClimaticaController::class, 'create'])->name('condicaoClimatica.create')->middleware('auth');
