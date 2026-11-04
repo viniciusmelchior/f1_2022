@@ -395,6 +395,15 @@ class ResultadoController extends Controller
             }
         }
 
+        /** MELHORIA 20261103: grava os JSONs das sessões e os dados extraídos (tabelas novas).
+         *  Isolado: qualquer falha aqui não interfere no salvamento de largada/chegada/pontuação acima. */
+        try {
+            app(\App\Services\SessaoCorridaService::class)->salvarDoRequest($request, $corrida, Auth::user()->id);
+        } catch (\Throwable $e) {
+            report($e);
+            session()->flash('erro_sessoes_json', 'Resultado salvo, mas não foi possível gravar os dados dos arquivos JSON: ' . $e->getMessage());
+        }
+
         if($request->gerarGridLargada == 'S'){
 
         //pega as posições de largada dos pilotos
