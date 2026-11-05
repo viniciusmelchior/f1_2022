@@ -81,250 +81,174 @@ class EquipeController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+    /**
+     * MELHORIA 20261105: perfil da equipe no padrão da tela de pilotos.
+     * Antes eram milhares de consultas (N+1, ~7s); agora são poucas consultas agrupadas e a tela
+     * monta as estatísticas no navegador, inclusive ao trocar a temporada (sem AJAX).
+     * A versão anterior está em EquipeController.php_20261105.
+     */
     public function show($id)
-    {   
-         //Dados do Piloto 
-         $modelEquipe = Equipe::where('id', $id)
+    {
+        $userId = Auth::user()->id;
+
+        $modelEquipe = Equipe::with('pais')
                                 // ->where('user_id', Auth::user()->id)
                                 ->where('user_id', 3)
-                                ->first();
+                                ->where('id', $id)
+                                ->firstOrFail();
 
-        //total de corridas
-        $resultados = Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
-                                ->join('piloto_equipes', 'piloto_equipes.id', '=', 'resultados.pilotoEquipe_id')
-                                ->join('temporadas', 'temporadas.id', '=', 'corridas.temporada_id')
-                                // ->join('pilotos', 'piloto_equipes.piloto_id', 'pilotos.id')
-                                ->where('resultados.user_id', Auth::user()->id)
-                                // ->where('corridas.flg_sprint', 'N')
-                                ->where('piloto_equipes.equipe_id', $modelEquipe->id)
-                                 ->orderBy('temporadas.id', 'DESC')
-                                ->orderBy('resultados.id', 'DESC')
-                                ->get();
-   
-        $totCorridas = 0;
-        $totVitorias = 0;
-        $totPoles = 0;
-        $totPodios = 0;
-        $totTopTen = 0;
-        $melhorPosicaoLargada = 22;
-        $piorPosicaoLargada = 0;
-        $melhorPosicaoChegada = 22;
-        $piorPosicaoChegada = 0;
-        $totTitulos = 0;
-        $totAbandonos = 0;
-        $gridMedio = 0;
-        $mediaChegada = 0;
-        $totDobradinhas = 0;
-        $listagemVitorias = [];
-        $listagemPolePositions = [];
-        $totPontos = 0;
+        //todos os resultados da equipe (GP e sprint) em uma única consulta, já em ordem cronológica
+        $linhas = DB::table('resultados')
+                    ->join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                    ->join('piloto_equipes', 'piloto_equipes.id', '=', 'resultados.pilotoEquipe_id')
+                    ->where('resultados.user_id', $userId)
+                    ->where('piloto_equipes.equipe_id', $modelEquipe->id)
+                    ->orderBy('corridas.temporada_id')
+                    ->orderBy('corridas.ordem')
+                    ->orderBy('corridas.id')
+                    ->orderBy('resultados.id')
+                    ->get([
+                        'resultados.corrida_id', 'resultados.pilotoEquipe_id', 'resultados.largada', 'resultados.chegada',
+                        'resultados.pontuacao', 'resultados.flg_abandono',
+                        'piloto_equipes.piloto_id',
+                        'corridas.temporada_id', 'corridas.ordem', 'corridas.flg_sprint', 'corridas.pista_id',
+                        'corridas.evento_id', 'corridas.volta_rapida',
+                    ]);
 
-        $totVoltasRapidas = 0;
-
-        $possiveisDobradinhas = [];
-
-        //Consideramos apenas o id da equipe pois levamos em consideração a junção do resultado da dupla de pilotos
-
-        foreach($resultados as $resultado){
-            if($resultado->corrida->flg_sprint == 'N'){
-
-                if($resultado->chegada == 2){
-                    if($resultado->pilotoEquipe->equipe->id == $id){
-                        $possiveisDobradinhas[] = $resultado;
-                    }
-                }
-
-                //total de largadas
-                if($resultado->pilotoEquipe->equipe->id == $id){
-                    $totCorridas++;
-                }
-
-                //calculo do total de vitórias
-                if($resultado->chegada == 1){
-                    if($resultado->pilotoEquipe->equipe->id == $id){
-                        $possiveisDobradinhas[] = $resultado;
-                        $totVitorias++;
-                        $listagemVitorias[] = $resultado;
-                    }
-                }
-
-                //calculo do total de pole positions
-                if($resultado->largada == 1){
-                    if($resultado->pilotoEquipe->equipe->id == $id){
-                        $totPoles++;
-                        $listagemPolePositions[] = $resultado;
-                    }
-                }
-
-                //calculo de podios
-                if(Resultado::podio($resultado->chegada) == true){
-                    if($resultado->pilotoEquipe->equipe->id == $id){
-                        $totPodios++;
-                    }
-                }
-
-                //calculo de chegadas no top 10
-                if(Resultado::topTen($resultado->chegada) == true){
-                    if($resultado->pilotoEquipe->equipe->id == $id){
-                        $totTopTen++;
-                    }
-                }
-
-                //calculo de total de abandonos
-                if($resultado->flg_abandono == 'S'){
-                    if($resultado->pilotoEquipe->equipe->id == $id){
-                        $totAbandonos++;
-                    }
-                }
-
-                //calculo da Média de Largada
-                if($resultado->pilotoEquipe->equipe->id == $id){
-                    $gridMedio += $resultado->largada;
-                    // $gridMedio = $gridMedio/$totCorridas;
-                }
-
-                //calculo da Média de Chegada
-                if($resultado->pilotoEquipe->equipe->id == $id){
-                    $mediaChegada += $resultado->chegada;
-                    // $mediaChegada = $mediaChegada/$totCorridas;
-                }
-
-                //calculo de melhor posição de largada
-                if($resultado->pilotoEquipe->equipe->id == $id){
-                    if($resultado->largada <= $melhorPosicaoLargada){
-                        $melhorPosicaoLargada = $resultado->largada;
-                    }    
-                }
-
-                //calculo pior posição de largada
-                if($resultado->pilotoEquipe->equipe->id == $id){
-                    if($resultado->largada > $piorPosicaoLargada){
-                        $piorPosicaoLargada = $resultado->largada;
-                    }    
-                }
-
-                //calculo melhor posição de chegada
-                if($resultado->pilotoEquipe->equipe->id == $id && Resultado::chegadaValida($resultado->chegada) == true){
-                    if($resultado->chegada <= $melhorPosicaoChegada){
-                        $melhorPosicaoChegada = $resultado->chegada;
-                    }    
-                }
-
-                //calculo pior posição de chegada 
-                if($resultado->pilotoEquipe->equipe->id == $id  && Resultado::chegadaValida($resultado->chegada) == true){
-                    if($resultado->chegada > $piorPosicaoChegada){
-                        $piorPosicaoChegada = $resultado->chegada;
-                    }    
-                }
-            }
-
-            if($resultado->pilotoEquipe->equipe->id == $id){
-                $totPontos += $resultado->pontuacao;
-            }
+        //corridas: [temporada_id, ordem, sprint, pista_id, evento_id]
+        //resultados: [corrida_id, piloto_id, largada, chegada, pontos, abandono, volta_rapida]
+        $corridas = [];
+        $resultados = [];
+        foreach($linhas as $l){
+            $corridas[$l->corrida_id] = [(int) $l->temporada_id, (int) $l->ordem, $l->flg_sprint == 'S' ? 1 : 0, (int) $l->pista_id, $l->evento_id ? (int) $l->evento_id : null];
+            $resultados[] = [
+                (int) $l->corrida_id,
+                (int) $l->piloto_id,
+                $l->largada ? (int) $l->largada : null,
+                $l->chegada ? (int) $l->chegada : null,
+                (float) $l->pontuacao,
+                $l->flg_abandono == 'S' ? 1 : 0,
+                $l->volta_rapida && $l->volta_rapida == $l->pilotoEquipe_id ? 1 : 0,
+            ];
         }
 
-        $idCorridasPossiveisDobradinhas = [];
+        //duplas da equipe por ano (inclui temporadas ainda sem resultados)
+        $duplas = DB::table('piloto_equipes')
+                    ->where('user_id', $userId)
+                    ->where('equipe_id', $modelEquipe->id)
+                    ->orderBy('id')
+                    ->get(['piloto_id', 'ano_id']);
 
-        foreach($possiveisDobradinhas as $possivelDobradinha){
-            if(!in_array($possivelDobradinha->corrida_id,$idCorridasPossiveisDobradinhas)){
-                $idCorridasPossiveisDobradinhas[] = $possivelDobradinha->corrida_id;
-            }
+        $temporadasIds = collect($corridas)->pluck(0)->unique()->values();
+        $temporadas = DB::table('temporadas')
+                        ->where('user_id', $userId)
+                        ->where(fn ($q) => $q->whereIn('id', $temporadasIds)->orWhereIn('ano_id', $duplas->pluck('ano_id')->unique()->values()))
+                        ->orderBy('id')
+                        ->get(['id', 'des_temporada', 'referencia', 'ano_id']);
+
+        //títulos: construtores (titulos.equipe_id) e de pilotos (campeão correndo pela equipe)
+        $titulosConstrutores = DB::table('titulos')
+                                ->where('user_id', $userId)
+                                ->where('equipe_id', $modelEquipe->id)
+                                ->pluck('temporada_id')->map(fn ($t) => (int) $t)->values();
+
+        $titulosPilotos = DB::table('titulos')
+                            ->join('piloto_equipes', 'piloto_equipes.id', '=', 'titulos.pilotoEquipe_id')
+                            ->where('titulos.user_id', $userId)
+                            ->where('piloto_equipes.equipe_id', $modelEquipe->id)
+                            ->get(['titulos.temporada_id', 'piloto_equipes.piloto_id'])
+                            ->map(fn ($t) => [(int) $t->temporada_id, (int) $t->piloto_id])->values();
+
+        //pilotos, pistas e eventos em dicionários para deixar o JSON enxuto
+        $pilotosIds = collect($resultados)->pluck(1)->merge($duplas->pluck('piloto_id'))->unique()->values();
+        $pilotos = DB::table('pilotos')
+                    ->leftJoin('paises', 'paises.id', '=', 'pilotos.pais_id')
+                    ->whereIn('pilotos.id', $pilotosIds)
+                    ->get(['pilotos.id', 'pilotos.nome', 'pilotos.sobrenome', 'pilotos.imagem', 'paises.imagem as bandeira'])
+                    ->mapWithKeys(fn ($p) => [$p->id => [
+                        'nome' => trim($p->nome.' '.$p->sobrenome),
+                        'img' => $p->imagem ? asset('images/'.$p->imagem) : null,
+                        'bandeira' => $p->bandeira ? asset('images/'.$p->bandeira) : null,
+                        'link' => route('pilotos.show', [$p->id]),
+                    ]]);
+
+        $pistas = DB::table('pistas')
+                    ->leftJoin('paises', 'paises.id', '=', 'pistas.pais_id')
+                    ->whereIn('pistas.id', collect($corridas)->pluck(3)->unique()->values())
+                    ->get(['pistas.id', 'pistas.nome', 'paises.imagem as bandeira'])
+                    ->mapWithKeys(fn ($p) => [$p->id => [
+                        'nome' => $p->nome,
+                        'bandeira' => $p->bandeira ? asset('images/'.$p->bandeira) : null,
+                    ]]);
+
+        $eventos = DB::table('eventos')
+                    ->whereIn('id', collect($corridas)->pluck(4)->filter()->unique()->values())
+                    ->pluck('des_nome', 'id');
+
+        //posição no campeonato de construtores: mesma regra da tela de classificação, uma única vez por temporada disputada
+        $dadosTemporadas = $temporadas->map(function ($t) use ($modelEquipe, $duplas, $temporadasIds) {
+            $campeonato = $temporadasIds->contains($t->id)
+                            ? $this->posicaoCampeonatoConstrutores($t->id, $modelEquipe->id)
+                            : ['posicaoEquipe' => '-', 'totalPontos' => '-'];
+            $nome = strpos($t->des_temporada, ' ') !== false ? substr($t->des_temporada, 0, strpos($t->des_temporada, ' ')) : $t->des_temporada;
+            return [
+                'id' => (int) $t->id,
+                'nome' => $nome,
+                'completo' => $t->des_temporada.($t->referencia ? ' ('.$t->referencia.')' : ''),
+                'ano' => $t->referencia,
+                'posicao' => $campeonato['posicaoEquipe'],
+                'pontos' => $campeonato['totalPontos'],
+                'pilotos' => $duplas->where('ano_id', $t->ano_id)->pluck('piloto_id')->map(fn ($p) => (int) $p)->unique()->values(),
+                'classificacao' => route('temporadas.classificacao', [$t->id]),
+            ];
+        })->values();
+
+        $dadosEquipe = [
+            'temporadas' => $dadosTemporadas,
+            'pilotos' => $pilotos,
+            'pistas' => $pistas,
+            'eventos' => $eventos,
+            'corridas' => (object) $corridas,
+            'resultados' => $resultados,
+            'titulosConstrutores' => $titulosConstrutores,
+            'titulosPilotos' => $titulosPilotos,
+            'linkCorrida' => route('resultados.show', ['__ID__']),
+        ];
+
+        return view('site.equipes.show', compact('modelEquipe', 'dadosEquipe', 'dadosTemporadas'));
+    }
+
+    /**
+     * MELHORIA 20261105: posição/pontos da equipe no campeonato de construtores.
+     * Mesmo SQL e mesma ordenação (pontos + desempate por chegadas) de Temporada::getClassificacao()['resultadoEquipes'],
+     * usado por Equipe::getInfoCampeonato, mas sem montar a classificação de pilotos (que dobrava o tempo da tela).
+     */
+    private function posicaoCampeonatoConstrutores($temporadaId, $equipeId)
+    {
+        $colunas = [];
+        $ordenacao = '';
+        for($cont = 1; $cont <= 43; $cont++){
+            $colunas[] = '(SELECT COUNT(*) FROM resultados AS r2 join corridas on (corridas.id = r2.corrida_id) WHERE r2.pilotoEquipe_id = piloto_equipes.id AND r2.chegada = '.$cont.' and corridas.flg_sprint = "N") AS posicao_'.$cont;
+            $ordenacao .= ', posicao_'.$cont.' desc';
         }
 
-    
-        foreach($idCorridasPossiveisDobradinhas as $item){
-            $newCorrida = Corrida::find($item);
-            // $resultado = Resultado::where('corrida_id', $newCorrida->id)->where('chegada', '<=', 2 )->get();
+        $classificacao = DB::select('select equipe_id, sum(pontuacao) as total,'.implode(',', $colunas).' from resultados
+                                        join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
+                                        join equipes on equipes.id = piloto_equipes.equipe_id
+                                        join corridas on corridas.id = resultados.corrida_id
+                                        join temporadas on temporadas.id = corridas.temporada_id
+                                        where temporadas.id = ?
+                                        and resultados.user_id = ?
+                                        group by piloto_equipes.equipe_id
+                                        order by total desc '.$ordenacao, [(int) $temporadaId, Auth::user()->id]);
 
-            $primeiro = Resultado::where('corrida_id', $newCorrida->id)
-                                    ->where('chegada', 1 )
-                                    ->where('user_id', Auth::user()->id)
-                                    ->first();
-
-            $segundo = Resultado::where('corrida_id', $newCorrida->id)
-                                    ->where('chegada', 2)
-                                    ->where('user_id', Auth::user()->id)
-                                    ->first();
-
-            //compara os equipe id, se for igual soma
-            if($primeiro->pilotoEquipe->equipe->id == $segundo->pilotoEquipe->equipe->id){
-                if($primeiro->pilotoEquipe->equipe->id == $id){
-                    $totDobradinhas++;
-                }
+        foreach($classificacao as $key => $item){
+            if($item->equipe_id == $equipeId){
+                return ['posicaoEquipe' => $key + 1, 'totalPontos' => $item->total];
             }
         }
 
-        //calculo de titulo de construtores
-        $totTitulos = count(Titulo::where('equipe_id', $id)->where('user_id', Auth::user()->id)->get());
-
-        //calculo do titulo de pilotos
-        $totTitulosPilotos = count(Titulo::join('piloto_equipes', 'piloto_equipes.id', '=', 'titulos.pilotoEquipe_id')
-                                            ->where('titulos.user_id', Auth::user()->id)
-                                            ->where('piloto_equipes.equipe_id', $id)
-                                            ->get());
-
-        $pilotoEquipe = PilotoEquipe::where('equipe_id', $id)
-                                    ->where('user_id', Auth::user()->id)
-                                    ->get();
-
-        //lista os pilotos que fizeram/fazem parte da equipe
-        $ids = [];
-        foreach($pilotoEquipe as $equipeId){
-            array_push($ids, $equipeId->id);
-        }
-
-        $totVoltasRapidas = Corrida::where('user_id', Auth::user()->id)
-                                    ->where('flg_sprint', 'N')
-                                    ->where('volta_rapida', '!=', null)
-                                    ->whereIn('volta_rapida', $ids)
-                                    ->count();
-
-         //devolve os anos em que o piloto esteve inscrito para correr - Dinamicamente com base nos registros da tabela piloto_equipes
-         $temporadasDisputadas = [];
-         //calculo da pontuação por temporada disputada
-         $pontuacaoPorTemporada = [];
-
-        //temporadas em que a equipes está inscrita 
-        $temporadasEquipe = PilotoEquipe::where('equipe_id', $id)->groupBy('ano_id')->get();
-        $temporadas = Temporada::where('user_id', Auth::user()->id)->get();
-        
-        foreach($temporadasEquipe as $equipeTemporada){
-            $retorno =  DB::select('select
-                                    sum(pontuacao) as totPontos, temporadas.ano_id
-                                    from resultados
-                                    join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
-                                    join equipes on equipes.id = piloto_equipes.equipe_id
-                                    join corridas on corridas.id = resultados.corrida_id
-                                    join pilotos on piloto_equipes.piloto_id = pilotos.id
-                                    join temporadas on temporadas.id = corridas.temporada_id
-                                    where temporadas.ano_id = '.$equipeTemporada->ano_id.'
-                                    and resultados.user_id = '. Auth::user()->id.'
-                                    and equipe_id = '.$equipeTemporada->equipe_id.'');
-                                
-                                    array_push($pontuacaoPorTemporada, $retorno[0]->totPontos);
-                                    array_push($temporadasDisputadas, $equipeTemporada->ano->ano);
-        }
-
-        if($totCorridas > 0){
-            $gridMedio = round($gridMedio/$totCorridas);
-            $mediaChegada = round($mediaChegada/$totCorridas);
-        }
-
-        $corridasPorPiloto = Resultado::join('corridas', 'resultados.corrida_id', '=', 'corridas.id')
-                                        ->join('piloto_equipes', 'resultados.pilotoEquipe_id', '=', 'piloto_equipes.id')
-                                        ->join('pilotos', 'pilotos.id', 'piloto_equipes.piloto_id')
-                                        ->where('resultados.user_id', Auth::user()->id)
-                                        ->where('piloto_equipes.equipe_id', $modelEquipe->id)
-                                        ->where('corridas.flg_sprint', '<>', 'S')
-                                        ->groupBy('piloto_equipes.piloto_id')
-                                        ->select('piloto_equipes.piloto_id', 'pilotos.nome', 'pilotos.sobrenome', 'pilotos.imagem', DB::raw('COUNT(*) as quantidade'))
-                                        ->orderBy('quantidade', 'DESC')
-                                        ->get();
-
-                                        // dd($corridasPorPiloto);
-
-
-        return view('site.equipes.show', compact('modelEquipe','totTitulos', 'totCorridas','totTitulosPilotos', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas','temporadasDisputadas','pontuacaoPorTemporada','temporadas','totAbandonos','gridMedio','mediaChegada','totDobradinhas','listagemVitorias', 'listagemPolePositions','corridasPorPiloto'));
+        return ['posicaoEquipe' => '-', 'totalPontos' => '-'];
     }
 
     /**

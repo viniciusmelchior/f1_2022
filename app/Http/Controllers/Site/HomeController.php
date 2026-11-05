@@ -164,6 +164,18 @@ class HomeController extends Controller
         ));
     }
 
+    /**
+     * MELHORIA 20261105: filtro "Tipo" de chegadas/largadas.
+     * S = sprint, N = comum, ambos = sem filtro; sem valor mantém o comportamento antigo (só comum).
+     */
+    private function filtrarTipoCorrida($query, $tipo)
+    {
+        if ($tipo === 'ambos') {
+            return $query;
+        }
+        return $query->where('corridas.flg_sprint', $tipo === 'S' ? 'S' : 'N');
+    }
+
     public function chegada_pilotos(Request $request){
         try {
             $inicio = $request->inicio;
@@ -190,7 +202,7 @@ class HomeController extends Controller
                                 ->where('resultados.user_id', Auth::user()->id)
                                 ->where('resultados.chegada', '>=', $inicio)
                                 ->where('resultados.chegada', '<=', $fim)
-                                ->where('corridas.flg_sprint', 'N')
+                                ->tap(fn ($q) => $this->filtrarTipoCorrida($q, $request->tipo)) // MELHORIA 20261105: Ambos / Sprint / Comum
                                 ->where('corridas.temporada_id', $operadorConsultaTemporada, $temporada_id)
                                 
                                 ->when($anoInicioChegadaPilotos, function ($query, $anoInicio) {
@@ -249,7 +261,7 @@ class HomeController extends Controller
                                     ->where('resultados.user_id',  Auth::user()->id)
                                     ->where('resultados.chegada', '>=', $inicio)
                                     ->where('resultados.chegada', '<=', $fim)
-                                    ->where('corridas.flg_sprint', 'N')
+                                    ->tap(fn ($q) => $this->filtrarTipoCorrida($q, $request->tipo)) // MELHORIA 20261105: Ambos / Sprint / Comum
                                     ->where('corridas.temporada_id', $operadorConsultaTemporada, $temporada_id)
                                     ->when($anoInicioChegadaEquipes, function ($query, $anoInicio) {
                                         return $query->where('temporadas.referencia', '>=', $anoInicio);
@@ -304,7 +316,7 @@ class HomeController extends Controller
                                         ->where('resultados.user_id',  Auth::user()->id)
                                         ->where('resultados.largada', '>=', $inicio)
                                         ->where('resultados.largada', '<=', $fim)
-                                        ->where('corridas.flg_sprint', 'N')
+                                        ->tap(fn ($q) => $this->filtrarTipoCorrida($q, $request->tipo)) // MELHORIA 20261105: Ambos / Sprint / Comum
                                         ->where('corridas.temporada_id', $operadorConsultaTemporada, $temporada_id)
                                         ->when($anoInicioLargadaPilotos, function ($query, $anoInicio) {
                                             return $query->where('temporadas.referencia', '>=', $anoInicio);
@@ -361,7 +373,7 @@ class HomeController extends Controller
                                         ->where('resultados.user_id',  Auth::user()->id)
                                         ->where('resultados.largada', '>=', $inicio)
                                         ->where('resultados.largada', '<=', $fim)
-                                        ->where('corridas.flg_sprint', 'N')
+                                        ->tap(fn ($q) => $this->filtrarTipoCorrida($q, $request->tipo)) // MELHORIA 20261105: Ambos / Sprint / Comum
                                         ->where('corridas.temporada_id', $operadorConsultaTemporada, $temporada_id)
                                         ->when($anoInicioLargadaEquipes, function ($query, $anoInicio) {
                                             return $query->where('temporadas.referencia', '>=', $anoInicio);
@@ -433,7 +445,8 @@ class HomeController extends Controller
         //primeiro encontra as corridas
         $corridas = Corrida::with(['pista.pais', 'temporada'])
                             ->where('user_id', Auth::user()->id)
-                            ->where('flg_sprint', $request->flg_sprint)
+                            // MELHORIA 20261105: "ambos" (ou vazio) traz corridas e sprints juntas
+                            ->when(in_array($request->flg_sprint, ['S', 'N']), fn ($q) => $q->where('flg_sprint', $request->flg_sprint))
                             ->where('exibir_resultado',1)
                             ->where('temporada_id', $operadorConsulta, $condicao)
                             ->get();
@@ -450,6 +463,7 @@ class HomeController extends Controller
                 $resultadosCorrida['equipeTerceiro'] = '';
 
                 $resultadosCorrida['ordem'] = $corrida->ordem;
+                $resultadosCorrida['sprint'] = $corrida->flg_sprint == 'S'; // MELHORIA 20261105
                 $resultadosCorrida['imagemPaisCorrida'] = $corrida->pista->pais->imagem;
                 $resultadosCorrida['temporada_id'] = $corrida->temporada->id;
                 $resultadosCorrida['pista'] = $corrida->pista->nome;
@@ -500,7 +514,8 @@ class HomeController extends Controller
                     || Str::contains($item['primeiro'], $busca) 
                     || Str::contains($item['segundo'], $busca)
                     || Str::contains($item['terceiro'], $busca)
-                    || Str::contains($item['voltaRapida'], $busca);
+                    || Str::contains($item['voltaRapida'], $busca)
+                    || ($item['sprint'] && Str::contains('sprint', Str::lower($busca))); // MELHORIA 20261105
             });
         }
 
@@ -508,6 +523,7 @@ class HomeController extends Controller
         $resultadoCorridas = $resultadoCorridas->sortBy([
             ['temporada_id', 'DESC'],
             ['ordem', 'DESC'],
+            ['sprint', 'asc'], // MELHORIA 20261105 ('asc' minúsculo: o sortBy do Laravel trata 'ASC' como descendente): mesma etapa -> corrida principal acima da sprint
         ]);
 
         $perPage = $request->qtdResultados == 'todos' ? $resultadoCorridas->count(): $request->qtdResultados;

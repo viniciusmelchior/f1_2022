@@ -291,6 +291,49 @@
         width: 120px; /* <-- Aumente de 80px para 120px */
         text-align: center;
     }
+    /* === MELHORIA 20261105: filtros dos cards de chegadas/largadas em grade === */
+    .f1-filtros-grade {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px 14px;
+        align-items: end;
+    }
+    .f1-campo { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+    .f1-campo label {
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        color: #555;
+    }
+    .f1-campo input,
+    .f1-campo select {
+        width: 100% !important;
+        height: 38px;
+        padding: 6px 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-family: inherit;
+        font-size: 0.95rem;
+        background: #fff;
+        outline: none;
+        box-sizing: border-box;
+    }
+    .f1-campo input[type="number"] { text-align: center; }
+    .f1-campo input:focus, .f1-campo select:focus { border-color: #e10600; }
+    .f1-campo-temporada { grid-column: span 3; }
+    .f1-campo-tipo { grid-column: span 1; }
+    /* select2 (aplicado pelo layout) ocupando o campo inteiro e com a mesma altura dos inputs */
+    .f1-campo .select2-container { width: 100% !important; }
+    .f1-campo .select2-container .select2-selection--single { height: 38px; display: flex; align-items: center; }
+    .f1-campo .select2-container .select2-selection--single .select2-selection__rendered { line-height: 36px; padding-right: 26px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .f1-campo .select2-container .select2-selection--single .select2-selection__arrow { height: 36px; }
+    /* card estreito (as duas tabelas lado a lado em telas médias) */
+    @media (max-width: 1200px) and (min-width: 993px), (max-width: 576px) {
+        .f1-filtros-grade { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .f1-campo-temporada { grid-column: span 2; }
+        .f1-campo-tipo { grid-column: span 2; }
+    }
 </style>
 
 
@@ -310,29 +353,39 @@
             <div class="f1-card">
                 <h1 class="descricao-tabela">Pilotos</h1>
                 
-                <div class="f1-filters">
-                    <div class="f1-filter-group">
+                <div class="f1-filters f1-filtros-grade">
+                    {{-- MELHORIA 20261105: filtros em grade (rótulo acima do campo) - mesmos ids e eventos --}}
+                    <div class="f1-campo">
                         <label for="inicioChegadaPilotos">Pos. Início</label>
                         <input type="number" name="inicioPosicaoChegadasPilotos" id="inicioChegadaPilotos" value="1" onchange="buscaChegadasPilotos()">
-                        
+                    </div>
+                    <div class="f1-campo">
                         <label for="fimChegadaPilotos">Pos. Fim</label>
                         <input type="number" name="fimPosicaoChegadasPilotos" id="fimChegadaPilotos" value="1" onchange="buscaChegadasPilotos()">
                     </div>
-                    
-                    <div class="f1-filter-group">
+                    <div class="f1-campo">
                         <label for="anoInicioChegadaPilotos">Ano Início</label>
                         <input type="number" id="anoInicioChegadaPilotos" placeholder="Ex: 2020" onchange="sincronizarEValidarAnos('anoInicioChegadaPilotos', 'anoFimChegadaPilotos'); buscaChegadasPilotos()">
-
+                    </div>
+                    <div class="f1-campo">
                         <label for="anoFimChegadaPilotos">Ano Fim</label>
                         <input type="number" id="anoFimChegadaPilotos" placeholder="Ex: 2026" onchange="sincronizarEValidarAnos('anoInicioChegadaPilotos', 'anoFimChegadaPilotos'); buscaChegadasPilotos()">
                     </div>
-
-                    <div class="f1-filter-group">
-                        <select name="vitoriasPilotosPorTemporada" id="vitoriasPilotosPorTemporada" onchange="travarAnos('vitoriasPilotosPorTemporada', 'anoInicioChegadaPilotos', 'anoFimChegadaPilotos'); buscaChegadasPilotos()">
+                    <div class="f1-campo f1-campo-temporada">
+                        <label for="vitoriasPilotosPorTemporada">Temporada</label>
+                        <select style="width:100%" name="vitoriasPilotosPorTemporada" id="vitoriasPilotosPorTemporada" onchange="travarAnos('vitoriasPilotosPorTemporada', 'anoInicioChegadaPilotos', 'anoFimChegadaPilotos'); buscaChegadasPilotos()">
                             <option value="" selected id="selectTemporadaVitoriasPiloto">Todas as Temporadas</option>
                             @foreach($temporadas as $temporada)
                                 <option value="{{$temporada->id}}">{{$temporada->des_temporada}} ({{$temporada->referencia}})</option>
                             @endforeach
+                        </select>
+                    </div>
+                    <div class="f1-campo f1-campo-tipo">
+                        <label for="tipoChegadaPilotos">Tipo</label>
+                        <select style="width:100%" id="tipoChegadaPilotos" onchange="buscaChegadasPilotos()">
+                            <option value="ambos">Ambos</option>
+                            <option value="S">Sprint</option>
+                            <option value="N" selected>Comum</option>
                         </select>
                     </div>
                 </div>
@@ -355,29 +408,39 @@
             <div class="f1-card">
                 <h1 class="descricao-tabela">Equipes</h1>
                 
-                <div class="f1-filters">
-                    <div class="f1-filter-group">
+                <div class="f1-filters f1-filtros-grade">
+                    {{-- MELHORIA 20261105: filtros em grade (rótulo acima do campo) - mesmos ids e eventos --}}
+                    <div class="f1-campo">
                         <label for="inicioChegadaEquipes">Pos. Início</label>
                         <input type="number" name="inicioPosicaoChegadasEquipes" id="inicioChegadaEquipes" value="1" onchange="buscaChegadasEquipes()">
-                        
+                    </div>
+                    <div class="f1-campo">
                         <label for="fimChegadaEquipes">Pos. Fim</label>
                         <input type="number" name="fimPosicaoChegadasEquipes" id="fimChegadaEquipes" value="1" onchange="buscaChegadasEquipes()">
                     </div>
-
-                    <div class="f1-filter-group">
+                    <div class="f1-campo">
                         <label for="anoInicioChegadaEquipes">Ano Início</label>
                         <input type="number" id="anoInicioChegadaEquipes" placeholder="Ex: 2020" onchange="sincronizarEValidarAnos('anoInicioChegadaEquipes', 'anoFimChegadaEquipes'); buscaChegadasEquipes()">
-
+                    </div>
+                    <div class="f1-campo">
                         <label for="anoFimChegadaEquipes">Ano Fim</label>
                         <input type="number" id="anoFimChegadaEquipes" placeholder="Ex: 2026" onchange="sincronizarEValidarAnos('anoInicioChegadaEquipes', 'anoFimChegadaEquipes'); buscaChegadasEquipes()">
                     </div>
-
-                    <div class="f1-filter-group">
-                        <select name="vitoriasEquipesPorTemporada" id="vitoriasEquipesPorTemporada" onchange="travarAnos('vitoriasEquipesPorTemporada', 'anoInicioChegadaEquipes', 'anoFimChegadaEquipes'); buscaChegadasEquipes()">
+                    <div class="f1-campo f1-campo-temporada">
+                        <label for="vitoriasEquipesPorTemporada">Temporada</label>
+                        <select style="width:100%" name="vitoriasEquipesPorTemporada" id="vitoriasEquipesPorTemporada" onchange="travarAnos('vitoriasEquipesPorTemporada', 'anoInicioChegadaEquipes', 'anoFimChegadaEquipes'); buscaChegadasEquipes()">
                             <option value="" selected id="selectTemporadaVitoriasEquipe">Todas as Temporadas</option>
                             @foreach($temporadas as $temporada)
                                 <option value="{{$temporada->id}}">{{$temporada->des_temporada}} ({{$temporada->referencia}})</option>
                             @endforeach
+                        </select>
+                    </div>
+                    <div class="f1-campo f1-campo-tipo">
+                        <label for="tipoChegadaEquipes">Tipo</label>
+                        <select style="width:100%" id="tipoChegadaEquipes" onchange="buscaChegadasEquipes()">
+                            <option value="ambos">Ambos</option>
+                            <option value="S">Sprint</option>
+                            <option value="N" selected>Comum</option>
                         </select>
                     </div>
                 </div>
@@ -408,29 +471,39 @@
             <div class="f1-card">
                 <h1 class="descricao-tabela">Pilotos</h1>
                 
-                <div class="f1-filters">
-                    <div class="f1-filter-group">
+                <div class="f1-filters f1-filtros-grade">
+                    {{-- MELHORIA 20261105: filtros em grade (rótulo acima do campo) - mesmos ids e eventos --}}
+                    <div class="f1-campo">
                         <label for="inicioLargadaPilotos">Pos. Início</label>
                         <input type="number" name="inicioPosicaoLargadasPilotos" id="inicioLargadaPilotos" value="1" onchange="buscaLargadasPilotos()">
-                        
+                    </div>
+                    <div class="f1-campo">
                         <label for="fimLargadaPilotos">Pos. Fim</label>
                         <input type="number" name="fimPosicaoLargadasPilotos" id="fimLargadaPilotos" value="1" onchange="buscaLargadasPilotos()">
                     </div>
-
-                    <div class="f1-filter-group">
+                    <div class="f1-campo">
                         <label for="anoInicioLargadaPilotos">Ano Início</label>
                         <input type="number" id="anoInicioLargadaPilotos" placeholder="Ex: 2020" onchange="sincronizarEValidarAnos('anoInicioLargadaPilotos', 'anoFimLargadaPilotos'); buscaLargadasPilotos()">
-
+                    </div>
+                    <div class="f1-campo">
                         <label for="anoFimLargadaPilotos">Ano Fim</label>
                         <input type="number" id="anoFimLargadaPilotos" placeholder="Ex: 2026" onchange="sincronizarEValidarAnos('anoInicioLargadaPilotos', 'anoFimLargadaPilotos'); buscaLargadasPilotos()">
                     </div>
-
-                    <div class="f1-filter-group">
-                        <select name="largadasPilotosPorTemporada" id="largadasPilotosPorTemporada" onchange="travarAnos('largadasPilotosPorTemporada', 'anoInicioLargadaPilotos', 'anoFimLargadaPilotos'); buscaLargadasPilotos()">
+                    <div class="f1-campo f1-campo-temporada">
+                        <label for="largadasPilotosPorTemporada">Temporada</label>
+                        <select style="width:100%" name="largadasPilotosPorTemporada" id="largadasPilotosPorTemporada" onchange="travarAnos('largadasPilotosPorTemporada', 'anoInicioLargadaPilotos', 'anoFimLargadaPilotos'); buscaLargadasPilotos()">
                             <option value="" selected id="selectLargadasPilotosPorTemporada">Todas as Temporadas</option>
                             @foreach($temporadas as $temporada)
                                 <option value="{{$temporada->id}}">{{$temporada->des_temporada}} ({{$temporada->referencia}})</option>
                             @endforeach
+                        </select>
+                    </div>
+                    <div class="f1-campo f1-campo-tipo">
+                        <label for="tipoLargadaPilotos">Tipo</label>
+                        <select style="width:100%" id="tipoLargadaPilotos" onchange="buscaLargadasPilotos()">
+                            <option value="ambos">Ambos</option>
+                            <option value="S">Sprint</option>
+                            <option value="N" selected>Comum</option>
                         </select>
                     </div>
                 </div>
@@ -453,29 +526,39 @@
             <div class="f1-card">
                 <h1 class="descricao-tabela">Equipes</h1>
                 
-                <div class="f1-filters">
-                    <div class="f1-filter-group">
+                <div class="f1-filters f1-filtros-grade">
+                    {{-- MELHORIA 20261105: filtros em grade (rótulo acima do campo) - mesmos ids e eventos --}}
+                    <div class="f1-campo">
                         <label for="inicioLargadaEquipes">Pos. Início</label>
                         <input type="number" name="inicioPosicaoLargadasEquipes" id="inicioLargadaEquipes" value="1" onchange="buscaLargadasEquipes()">
-                        
+                    </div>
+                    <div class="f1-campo">
                         <label for="fimLargadaEquipes">Pos. Fim</label>
                         <input type="number" name="fimPosicaoLargadasEquipes" id="fimLargadaEquipes" value="1" onchange="buscaLargadasEquipes()">
                     </div>
-
-                    <div class="f1-filter-group">
+                    <div class="f1-campo">
                         <label for="anoInicioLargadaEquipes">Ano Início</label>
                         <input type="number" id="anoInicioLargadaEquipes" placeholder="Ex: 2020" onchange="sincronizarEValidarAnos('anoInicioLargadaEquipes', 'anoFimLargadaEquipes'); buscaLargadasEquipes()">
-
+                    </div>
+                    <div class="f1-campo">
                         <label for="anoFimLargadaEquipes">Ano Fim</label>
                         <input type="number" id="anoFimLargadaEquipes" placeholder="Ex: 2026" onchange="sincronizarEValidarAnos('anoInicioLargadaEquipes', 'anoFimLargadaEquipes'); buscaLargadasEquipes()">
                     </div>
-
-                    <div class="f1-filter-group">
-                        <select name="largadasEquipesPorTemporada" id="largadasEquipesPorTemporada" onchange="travarAnos('largadasEquipesPorTemporada', 'anoInicioLargadaEquipes', 'anoFimLargadaEquipes'); buscaLargadasEquipes()">
+                    <div class="f1-campo f1-campo-temporada">
+                        <label for="largadasEquipesPorTemporada">Temporada</label>
+                        <select style="width:100%" name="largadasEquipesPorTemporada" id="largadasEquipesPorTemporada" onchange="travarAnos('largadasEquipesPorTemporada', 'anoInicioLargadaEquipes', 'anoFimLargadaEquipes'); buscaLargadasEquipes()">
                             <option value="" selected id="selectLargadasEquipesPorTemporada">Todas as Temporadas</option>
                             @foreach($temporadas as $temporada)
                                 <option value="{{$temporada->id}}">{{$temporada->des_temporada}} ({{$temporada->referencia}})</option>
                             @endforeach
+                        </select>
+                    </div>
+                    <div class="f1-campo f1-campo-tipo">
+                        <label for="tipoLargadaEquipes">Tipo</label>
+                        <select style="width:100%" id="tipoLargadaEquipes" onchange="buscaLargadasEquipes()">
+                            <option value="ambos">Ambos</option>
+                            <option value="S">Sprint</option>
+                            <option value="N" selected>Comum</option>
                         </select>
                     </div>
                 </div>
@@ -591,10 +674,12 @@
             </div>
             
             <div class="f1-filter-group">
-                <label for="flg_sprint">Sprint</label>
+                <label for="flg_sprint">Tipo</label>
                 <select id="flg_sprint" onchange="buscaResultadosCorrida()">
-                    <option value="N">Não</option>
-                    <option value="S">Sim</option>
+                    {{-- MELHORIA 20261105: Ambos traz corridas comuns e sprints juntas --}}
+                    <option value="ambos" selected>Ambos</option>
+                    <option value="S">Sprint</option>
+                    <option value="N">Comum</option>
                 </select>
             </div>
         </div>
@@ -740,7 +825,7 @@
                                     <td style="text-align: left;" class="text-nowrap">
                                         <span>
                                             <img src="${srcImagem(element.imagemPaisCorrida)}" style="width: 25px; height:20px;">
-                                        </span>${element.pista}
+                                        </span>${element.pista}${element.sprint ? ' <span style="display:inline-block; margin-left:6px; padding:1px 6px; border-radius:4px; background:#e10600; color:#fff; font-size:0.7em; font-weight:700; letter-spacing:0.5px; vertical-align:middle;">SPRINT</span>' : ''}
                                     </td>
                                     <td style="text-align: left;" class="text-nowrap">
                                         <span>
@@ -792,7 +877,8 @@
                 fim:fim,
                 temporada_id:temporada_id,
                 anoInicioChegadaPilotos:anoInicioChegadaPilotos,
-                anoFimChegadaPilotos:anoFimChegadaPilotos
+                anoFimChegadaPilotos:anoFimChegadaPilotos,
+                tipo:document.getElementById('tipoChegadaPilotos').value // MELHORIA 20261105
 
             })
         })
@@ -842,7 +928,8 @@
                 fim:fim,
                 temporada_id:temporada_id,
                 anoInicioChegadaEquipes:anoInicioChegadaEquipes,
-                anoFimChegadaEquipes:anoFimChegadaEquipes
+                anoFimChegadaEquipes:anoFimChegadaEquipes,
+                tipo:document.getElementById('tipoChegadaEquipes').value // MELHORIA 20261105
             })
         })
 
@@ -888,7 +975,8 @@
                 fim:fim,
                 temporada_id:temporada_id,
                 anoInicioLargadaEquipes:anoInicioLargadaEquipes,
-                anoFimLargadaEquipes:anoFimLargadaEquipes
+                anoFimLargadaEquipes:anoFimLargadaEquipes,
+                tipo:document.getElementById('tipoLargadaEquipes').value // MELHORIA 20261105
             })
         })
 
@@ -934,7 +1022,8 @@
                 fim:fim,
                 temporada_id:temporada_id,
                 anoInicioLargadaPilotos:anoInicioLargadaPilotos,
-                anoFimLargadaPilotos:anoFimLargadaPilotos
+                anoFimLargadaPilotos:anoFimLargadaPilotos,
+                tipo:document.getElementById('tipoLargadaPilotos').value // MELHORIA 20261105
             })
         })
 

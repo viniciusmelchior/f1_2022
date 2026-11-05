@@ -141,6 +141,9 @@ class TemporadaController extends Controller
         $usuario = Auth::user()->id;
         $temporada = Temporada::where('user_id', Auth::user()->id)->where('id', $id)->first();
         $totalCorridas = Corrida::where('user_id', Auth::user()->id)->where('temporada_id', $temporada->id)->where('flg_sprint', 'N')->count();
+        // MELHORIA 20261105: a sprint tem a ordem da corrida principal do fim de semana; se a principal ainda
+        // não foi cadastrada (ex.: 1N, 2S) a contagem acima fica 1 e o filtro "ordem <= 1" deixava a sprint de fora
+        $totalCorridas = max($totalCorridas, (int) Corrida::where('user_id', Auth::user()->id)->where('temporada_id', $temporada->id)->max('ordem'));
         $corrida_ordem = $totalCorridas;
 
         if ($request->idCorrida != null) {
@@ -194,9 +197,9 @@ class TemporadaController extends Controller
             $dados['pilotos'][] = [
                 'nome' => $resultadoPiloto->nome,
                 'sobrenome' => $resultadoPiloto->sobrenome,
-                'logoEquipe' => $resultadoPiloto->equipe_imagem,
+                'logoEquipe' => $resultadoPiloto->equipe_ultima_imagem, // MELHORIA 20261105: equipe da última corrida
                 'foto' => $resultadoPiloto->piloto_imagem,
-                'color' => $resultadoPiloto->cor,
+                'color' => $resultadoPiloto->equipe_ultima_cor,
                 'pontos' => $resultadoPiloto->total,
                 'corFundo' => "#ff8700",
                 'corTexto' => "#000000"
@@ -243,6 +246,28 @@ class TemporadaController extends Controller
             $cont++;
         }
 
+        // MELHORIA 20261105: desempate pelas SPRINTS, aplicado DEPOIS de todos os critérios das corridas comuns
+        // (pontos -> 1ºs, 2ºs ... 43ºs em corridas comuns -> 1ºs, 2ºs ... 43ºs em sprints).
+        // Só decide quem continua empatado: nenhuma ordem que já era definida muda.
+        // Conta as sprints da temporada até a corrida consultada, somando todos os vínculos do piloto (troca de equipe).
+        $colunasSprint = [];
+        $selectSprint = [];
+        $orderBySprint = '';
+        for ($pos = 1; $pos <= 43; $pos++) {
+            $colunasSprint[] = 'SUM(r_sp.chegada = ' . $pos . ') AS sprint_posicao_' . $pos;
+            $selectSprint[] = 'COALESCE(MAX(sp.sprint_posicao_' . $pos . '), 0) AS sprint_posicao_' . $pos;
+            $orderBySprint .= ', sprint_posicao_' . $pos . ' desc';
+        }
+        $filtroSprint = 'FROM resultados r_sp
+                            JOIN corridas c_sp ON c_sp.id = r_sp.corrida_id
+                            JOIN piloto_equipes pe_sp ON pe_sp.id = r_sp.pilotoEquipe_id
+                            WHERE c_sp.temporada_id = ' . (int) $temporada->id . '
+                            AND r_sp.user_id = ' . (int) $usuario . '
+                            AND c_sp.ordem <= ' . (int) $corrida_ordem . '
+                            AND c_sp.flg_sprint = "S"';
+        $joinSprintPilotos = 'LEFT JOIN (SELECT pe_sp.piloto_id AS sp_piloto_id, ' . implode(', ', $colunasSprint) . ' ' . $filtroSprint . ' GROUP BY pe_sp.piloto_id) sp ON sp.sp_piloto_id = pilotos.id';
+        $joinSprintEquipes = 'LEFT JOIN (SELECT pe_sp.equipe_id AS sp_equipe_id, ' . implode(', ', $colunasSprint) . ' ' . $filtroSprint . ' GROUP BY pe_sp.equipe_id) sp ON sp.sp_equipe_id = equipes.id';
+
         $resultadosPilotos = DB::select('
                             SELECT
                             piloto_id,
@@ -254,18 +279,20 @@ class TemporadaController extends Controller
                             pilotos.imagem as piloto_imagem,
                             equipes.des_cor as cor,
                             SUM(pontuacao) AS total,
-                            ' . $queryCountChegadaPilotos . '
+                            ' . $queryCountChegadaPilotos . ',
+                            ' . implode(', ', $selectSprint) . '
                             FROM resultados
                             JOIN piloto_equipes ON piloto_equipes.id = resultados.pilotoEquipe_id
                             JOIN pilotos ON pilotos.id = piloto_equipes.piloto_id
                             JOIN equipes ON equipes.id = piloto_equipes.equipe_id
                             JOIN corridas ON corridas.id = resultados.corrida_id
                             JOIN temporadas ON temporadas.id = corridas.temporada_id
+                            ' . $joinSprintPilotos . '
                             WHERE temporadas.id =  ' . $temporada->id . '
                             AND resultados.user_id =  ' . $usuario . '
                             and corridas.ordem <= ' . $corrida_ordem . '
                             GROUP BY pilotos.id
-                            ORDER BY total DESC ' . $queryCountOrderByPilotos . ';    
+                            ORDER BY total DESC ' . $queryCountOrderByPilotos . $orderBySprint . ';    
         ');
 
         //backup da ordenação 
@@ -278,17 +305,28 @@ class TemporadaController extends Controller
 
         // dd($queryCountChegadaEquipes);
 
-        $resultadosEquipes = DB::select('select equipe_id, equipes.des_cor as cor, equipes.nome as nome, equipes.imagem, sum(pontuacao) as total,' . $queryCountChegadaEquipes . ' from resultados
+        $resultadosEquipes = DB::select('select equipe_id, equipes.des_cor as cor, equipes.nome as nome, equipes.imagem, sum(pontuacao) as total,' . $queryCountChegadaEquipes . ', ' . implode(', ', $selectSprint) . ' from resultados
                                         join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
                                         join equipes on equipes.id = piloto_equipes.equipe_id
                                         join corridas on corridas.id = resultados.corrida_id
                                         join temporadas on temporadas.id = corridas.temporada_id
+                                        ' . $joinSprintEquipes . '
                                         where temporadas.id = ' . $temporada->id . '
                                         and resultados.user_id = ' . $usuario . '
                                         and corridas.ordem <= ' . $corrida_ordem . '
                                         group by piloto_equipes.equipe_id
-                                        order by total desc ' . $queryCountOrderByEquipes);
+                                        order by total desc ' . $queryCountOrderByEquipes . $orderBySprint);
 
+        // MELHORIA 20261105: equipe da última corrida disputada (até a ordem consultada) de cada piloto.
+        // Piloto que trocou de equipe no ano tem dois vínculos e o GROUP BY acima devolve qualquer um deles.
+        $ultimasEquipes = $this->equipesDaUltimaCorrida($usuario, $temporada->id, $corrida_ordem);
+        foreach ($resultadosPilotos as $resultadoPiloto) {
+            $ultima = $ultimasEquipes[$resultadoPiloto->piloto_id] ?? null;
+            $resultadoPiloto->pilotoEquipe_ultima_id = $ultima->pilotoEquipe_id ?? $resultadoPiloto->pilotoEquipe_id;
+            $resultadoPiloto->equipe_ultima = $ultima->equipe ?? $resultadoPiloto->equipe;
+            $resultadoPiloto->equipe_ultima_imagem = $ultima->imagem ?? $resultadoPiloto->equipe_imagem;
+            $resultadoPiloto->equipe_ultima_cor = $ultima->cor ?? $resultadoPiloto->cor;
+        }
 
         return [
             'resultadoPilotos' => $resultadosPilotos,
@@ -297,6 +335,35 @@ class TemporadaController extends Controller
             'equipe_campea' => $resultadosEquipes
         ];
     }
+    /**
+     * MELHORIA 20261105: [piloto_id => equipe do último resultado com chegada na temporada]
+     * Ordem: maior "ordem"; no mesmo fim de semana a principal (N) vem depois da sprint (S).
+     */
+    private function equipesDaUltimaCorrida($usuario, $temporadaId, $corrida_ordem = 1000)
+    {
+        $linhas = DB::table('resultados')
+            ->join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+            ->join('piloto_equipes', 'piloto_equipes.id', '=', 'resultados.pilotoEquipe_id')
+            ->join('equipes', 'equipes.id', '=', 'piloto_equipes.equipe_id')
+            ->where('corridas.temporada_id', $temporadaId)
+            ->where('resultados.user_id', $usuario)
+            ->where('corridas.ordem', '<=', $corrida_ordem)
+            ->whereNotNull('resultados.chegada')
+            ->orderBy('corridas.ordem', 'desc')
+            ->orderBy('corridas.flg_sprint', 'asc')
+            ->orderBy('corridas.id', 'desc')
+            ->select('piloto_equipes.piloto_id', 'piloto_equipes.id as pilotoEquipe_id', 'equipes.nome as equipe', 'equipes.imagem', 'equipes.des_cor as cor')
+            ->get();
+
+        $porPiloto = [];
+        foreach ($linhas as $linha) {
+            if (!isset($porPiloto[$linha->piloto_id])) {
+                $porPiloto[$linha->piloto_id] = $linha;
+            }
+        }
+        return $porPiloto;
+    }
+
     public function montaClassificacaoClassica($usuario, $temporada)
     {
         $resultadosPilotosClassico = DB::select('select piloto_id,piloto_equipes.id as pilotoEquipe_id,pilotos.nome,pilotos.sobrenome,equipes.imagem, equipes.nome as equipe, sum(pontuacao_classica) as total from resultados
@@ -603,6 +670,9 @@ class TemporadaController extends Controller
         $temporada = Temporada::where('user_id', Auth::user()->id)->where('id', $id)->first();
 
         $totalCorridas = Corrida::where('user_id', Auth::user()->id)->where('temporada_id', $temporada->id)->where('flg_sprint', 'N')->count();
+        // MELHORIA 20261105: a sprint tem a ordem da corrida principal do fim de semana; se a principal ainda
+        // não foi cadastrada (ex.: 1N, 2S) a contagem acima fica 1 e o filtro "ordem <= 1" deixava a sprint de fora
+        $totalCorridas = max($totalCorridas, (int) Corrida::where('user_id', Auth::user()->id)->where('temporada_id', $temporada->id)->max('ordem'));
         $corrida_ordem = $totalCorridas;
 
         $retorno = $this->montaClassificacao($usuario, $temporada, $corrida_ordem);

@@ -20,7 +20,8 @@
     $sessoesSalvas = CorridaSessao::where('corrida_id', $corrida->id)->where('user_id', Auth::user()->id)->get()->keyBy('tipo');
     // MELHORIA 20261103 (etapa 3): equipe, logo, cor e foto de cada piloto do grid
     $infoPilotos = $model->map(fn ($pe) => [
-        'nome' => $pe->piloto->nome . ' ' . $pe->piloto->sobrenome,
+        'id' => $pe->id, // MELHORIA 20261105: piloto que trocou de equipe tem mais de um vínculo
+        'nome' =>$pe->piloto->nome . ' ' . $pe->piloto->sobrenome,
         'equipe' => $pe->equipe->nome ?? null,
         'logo' => isset($pe->equipe->imagem) ? asset('images/' . $pe->equipe->imagem) : null,
         'cor' => $pe->equipe->des_cor ?? null,
@@ -385,6 +386,109 @@
                 </div>
             </div>
 
+            {{-- ===================== MELHORIA 20261105: CONTINGÊNCIA - grid pelo print =====================
+                 Mecanismo extra para quando o jogo não gera o JSON da classificação.
+                 Tudo roda no navegador: só preenche a coluna Largada (salva no Salvar normal) e baixa o .CMPRESET.
+                 Não altera nenhuma lógica existente. --}}
+            @php
+                $cgOrdem = ($corrida->ordem > 0 && $corrida->ordem < 10) ? '0' . $corrida->ordem : $corrida->ordem;
+                // mesmo padrão do gerador antigo, mas sem acentos e em maiúsculo (ex.: 02_NURBURGRING.CMPRESET)
+                $cgNomeArquivo = strtoupper(\Illuminate\Support\Str::ascii(
+                    $cgOrdem . '_' . ($corrida->flg_sprint != 'N' ? 'Sprint_' : '') . preg_replace('/[\\\\\/:*?"<>|]/', '', $corrida->pista->nome)
+                )) . '.CMPRESET';
+            @endphp
+            <style>
+                .cg > summary { cursor: pointer; list-style: none; }
+                .cg > summary::-webkit-details-marker { display: none; }
+                .cg > summary .cg-seta { transition: transform .15s; color: var(--rc-tinta-3); }
+                .cg[open] > summary .cg-seta { transform: rotate(90deg); }
+                .cg:not([open]) > summary { border-bottom: 0; }
+                .cg-grade { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(300px, 1fr); gap: 20px; align-items: start; }
+                @media (max-width: 1199px) { .cg-grade { grid-template-columns: minmax(0, 1fr); } }
+                .cg-grade-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+                @media (max-width: 899px) { .cg-grade-2 { grid-template-columns: minmax(0, 1fr); } }
+                .cg-print-wrap { position: relative; border: 1px solid var(--rc-eixo); border-radius: 10px; overflow: hidden; background: #000; user-select: none; cursor: crosshair; }
+                .cg-print-wrap img { display: block; width: 100%; height: auto; pointer-events: none; }
+                .cg-selecao { position: absolute; border: 2px solid var(--rc-destaque); background: rgba(225,6,0,.12); pointer-events: none; }
+                .cg-dica { font-size: .76rem; color: var(--rc-tinta-3); margin-top: 6px; }
+                .cg-slots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 10px; }
+                .cg-slot { display: flex; align-items: center; gap: 6px; padding: 3px 4px 3px 0; border-radius: 6px; border: 1px solid transparent; min-height: 32px; }
+                .cg-slot.alvo { border-color: var(--rc-destaque); background: rgba(225,6,0,.08); }
+                .cg-slot.arrastando-sobre { border-color: var(--rc-tinta-3); }
+                .cg-pos { width: 30px; text-align: right; font-weight: 900; color: var(--rc-tinta-3); font-variant-numeric: tabular-nums; flex: 0 0 auto; }
+                .cg-vazio { flex: 1; height: 26px; border: 1px dashed var(--rc-eixo); border-radius: 6px; cursor: pointer; font-size: .72rem; color: var(--rc-tinta-3); display: flex; align-items: center; padding-left: 8px; }
+                .cg-chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px; border-radius: 6px; background: var(--rc-superficie-2); border: 1px solid var(--rc-eixo); color: var(--rc-tinta); font-size: .8rem; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+                .cg-chip b { font-weight: 900; letter-spacing: .04em; }
+                .cg-chip small { color: var(--rc-tinta-3); overflow: hidden; text-overflow: ellipsis; }
+                .cg-chip.jogador { border-color: var(--rc-destaque); }
+                .cg-chip.duvida { border-color: var(--rc-alerta); }
+                .cg-slot .cg-chip { flex: 1; min-width: 0; cursor: grab; }
+                .cg-slot .cg-x { border: 0; background: transparent; color: var(--rc-tinta-3); padding: 0 4px; }
+                .cg-slot .cg-x:hover { color: var(--rc-critico); }
+                .cg-pool { display: flex; flex-wrap: wrap; gap: 6px; }
+                .cg-pool .cg-chip:hover { border-color: var(--rc-tinta-3); }
+            </style>
+            <details class="rc-card cg" id="cardContingencia">
+                <summary class="rc-card-cabecalho">
+                    <h5 class="rc-card-titulo"><i class="bi bi-chevron-right cg-seta"></i><i class="bi bi-camera"></i> Contingência: grid pelo print</h5>
+                    <span class="rc-card-subtitulo">O jogo não gerou o JSON da classificação? Monte o grid pelo print &rarr; preenche a Largada e baixa o arquivo para o Content Manager</span>
+                </summary>
+                <div class="rc-card-corpo">
+                    <div class="cg-grade-2">
+                        <div>
+                            <label class="rc-upload" id="cgTileBase">
+                                <input type="file" id="cgInputBase" accept=".json,application/json">
+                                <div class="rc-upload-icone"><i class="bi bi-filetype-json"></i></div>
+                                <div class="rc-upload-titulo">1. JSON base (de outra sessão)</div>
+                                <div class="rc-upload-status">Qualquer JSON do Content Manager com os mesmos pilotos &rarr; fornece carros, skins, ballast, restrictor e agressividade</div>
+                            </label>
+                        </div>
+                        <div>
+                            <label class="rc-upload" id="cgTilePrint">
+                                <input type="file" id="cgInputPrint" accept="image/*">
+                                <div class="rc-upload-icone"><i class="bi bi-image"></i></div>
+                                <div class="rc-upload-titulo">2. Print da classificação</div>
+                                <div class="rc-upload-status">Escolha a imagem ou cole com Ctrl+V (com este card aberto)</div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="cg-grade mt-3 d-none" id="cgArea">
+                        <div>
+                            <div class="rc-rotulo">Print</div>
+                            <div id="cgPrintVazio" class="rc-vazio" style="padding: 24px 10px;"><i class="bi bi-image"></i>Carregue ou cole o print para ler as posições automaticamente.<br>Sem o print, monte a ordem clicando nos pilotos ao lado.</div>
+                            <div class="cg-print-wrap d-none" id="cgPrintWrap">
+                                <img id="cgPrintImg" alt="Print da classificação">
+                                <div class="cg-selecao d-none" id="cgSelecao"></div>
+                            </div>
+                            <div class="d-flex flex-wrap gap-2 mt-2 d-none" id="cgAcoesPrint">
+                                <button type="button" class="btn btn-rc-mini" id="cgBtnLer"><i class="bi bi-magic"></i> Ler posições do print</button>
+                                <button type="button" class="btn btn-rc-mini" id="cgBtnLimparSelecao"><i class="bi bi-bounding-box"></i> Usar imagem inteira</button>
+                            </div>
+                            <div class="cg-dica" id="cgDicaSelecao">Dica: arraste sobre a imagem para selecionar só a tabela de posições. A leitura fica mais rápida e precisa.</div>
+                            <div class="cg-dica" id="cgStatusOcr"></div>
+                        </div>
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="rc-rotulo mb-0">Grid de largada</span>
+                                <button type="button" class="btn btn-rc-mini" id="cgBtnLimpar"><i class="bi bi-eraser"></i> Limpar</button>
+                            </div>
+                            <div class="cg-slots" id="cgSlots"></div>
+                            <div class="rc-rotulo mt-3">Pilotos sem posição</div>
+                            <div class="cg-dica mt-0 mb-2">Clique num piloto para colocá-lo na posição marcada (ou na primeira livre). Arraste entre posições para trocar.</div>
+                            <div class="cg-pool" id="cgPool"></div>
+                        </div>
+                    </div>
+
+                    <div id="cgAvisos" class="mt-3"></div>
+                    <div class="d-flex flex-wrap gap-2 mt-1 d-none" id="cgAcoes">
+                        <button type="button" class="btn btn-rc-sec" id="cgBtnAplicar"><i class="bi bi-flag"></i> Aplicar na coluna Largada</button>
+                        <button type="button" class="btn btn-rc" id="cgBtnBaixar"><i class="bi bi-download"></i> Baixar {{ $cgNomeArquivo }}</button>
+                    </div>
+                </div>
+            </details>
+            <script>window.CG_NOME_ARQUIVO = @json($cgNomeArquivo);</script>
+
             {{-- ===================== KPIs (preenchidos pelo JSON de chegada) ===================== --}}
             <div class="rc-kpis d-none" id="kpisCorrida"></div>
 
@@ -423,7 +527,7 @@
                                         $abandonou = isset($infoPiloto->flg_abandono) && $infoPiloto->flg_abandono == 'S';
                                     @endphp
                                         {{-- cells[1] precisa conter apenas o nome do piloto (usado na leitura dos JSONs) --}}
-                                        <tr class="linha_resultados {{$pilotoEquipe->flg_super_corrida == 'S' ? 'd-none': ''}} {{ $abandonou ? 'linha-abandono' : '' }}" data-piloto-equipe-id="{{$pilotoEquipe->id}}" data-ordem-original="{{ $loop->index }}">
+                                        <tr class="linha_resultados {{$pilotoEquipe->flg_super_corrida == 'S' ? 'd-none': ''}} {{ $abandonou ? 'linha-abandono' : '' }}" data-piloto-equipe-id="{{$pilotoEquipe->id}}" data-equipe="{{ $pilotoEquipe->equipe->nome }}" data-ordem-original="{{ $loop->index }}">
                                             <td class="rc-col-equipe" title="{{ $pilotoEquipe->equipe->nome }}"><img src="{{asset('images/'.$pilotoEquipe->equipe->imagem)}}" alt="{{ $pilotoEquipe->equipe->nome }}"></td>
                                             <td class="rc-col-piloto">{{$pilotoEquipe->piloto->nome}} {{$pilotoEquipe->piloto->sobrenome}}</td>
                                             <td>
@@ -496,9 +600,9 @@
                                 </select>
                                 <div class="rc-volta-rapida-info" id="infoVoltaRapida"></div>
                             </div>
-                            <div class="form-check mb-0 d-none">
+                            <div class="form-check mb-0">
                                 <input type="checkbox" class="form-check-input" id="gerarGridLargada" name="gerarGridLargada" value="S">
-                                <label class="form-check-label" for="gerarGridLargada">Gerar grid de largada</label>
+                                <label class="form-check-label" for="gerarGridLargada"><i class="bi bi-filetype-json"></i> Gerar grid de largada (.CMPRESET para o Content Manager)</label>
                             </div>
                         </div>
                     </div>
@@ -1039,7 +1143,8 @@ document.getElementById('inputFileLargada').addEventListener('change', function(
         });
         return mapa;
     })();
-    function infoPiloto(nomeNormalizado) { return MAPA_PILOTOS[nomeNormalizado] || null; }
+    const EQUIPE_RESOLVIDA = {}; // MELHORIA 20261105: piloto que trocou de equipe -> vínculo identificado pelo JSON
+    function infoPiloto(nomeNormalizado) { return EQUIPE_RESOLVIDA[nomeNormalizado] || MAPA_PILOTOS[nomeNormalizado] || null; }
     function corDaEquipe(info) {
         const cor = info ? String(info.cor || '').trim() : '';
         return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(cor) ? cor : '#5a5a57';
@@ -1088,6 +1193,97 @@ document.getElementById('inputFileLargada').addEventListener('change', function(
     function linhasFormulario() {
         return Array.from(document.getElementById('tabela').rows);
     }
+
+    /* ============ MELHORIA 20261105: PILOTO QUE TROCOU DE EQUIPE NO ANO ============
+     * O mesmo piloto pode ter duas linhas visíveis (uma por equipe). Pelo JSON decide qual é a da corrida:
+     *   1) carro do arquivo (ex.: gp_2026_rb22) x equipe dos outros pilotos que usam o mesmo carro;
+     *   2) nome da equipe escrito no carro ou na skin (ex.: skin "redbull_lawson");
+     *   3) sem pista nenhuma: vínculo mais recente (maior id), com aviso.
+     * Retorna { NOME_NORMALIZADO: { linha, outras, equipe, motivo, alerta } } só para os pilotos repetidos. */
+    function compactarTexto(t) { return normalizarNome(t).toLowerCase().replace(/[^a-z0-9]/g, ''); }
+
+    function resolverEquipesDoJson(json) {
+        const jogadores = (json && json['players']) || [];
+        const porNome = {};
+        linhasFormulario().filter(l => !l.classList.contains('d-none')).forEach(l => {
+            const n = normalizarNome(l.cells[1].textContent);
+            (porNome[n] = porNome[n] || []).push(l);
+        });
+        // carro -> { equipe: votos } a partir dos pilotos que só têm uma linha
+        const votos = {};
+        jogadores.forEach(j => {
+            const linhas = porNome[normalizarNome(j['name'])];
+            if (!linhas || linhas.length !== 1 || !j['car']) return;
+            const eq = linhas[0].dataset.equipe || '';
+            votos[j['car']] = votos[j['car']] || {};
+            votos[j['car']][eq] = (votos[j['car']][eq] || 0) + 1;
+        });
+        const resolvidos = {};
+        jogadores.forEach(j => {
+            const nome = normalizarNome(j['name']);
+            const linhas = porNome[nome];
+            if (!linhas || linhas.length < 2 || resolvidos[nome]) return;
+            let linha = null, motivo = '', alerta = false;
+            const v = votos[j['car']] || {};
+            const peloCarro = linhas.filter(l => v[l.dataset.equipe]).sort((a, b) => v[b.dataset.equipe] - v[a.dataset.equipe]);
+            if (peloCarro.length && (peloCarro.length === 1 || v[peloCarro[0].dataset.equipe] > v[peloCarro[1].dataset.equipe])) {
+                linha = peloCarro[0];
+                motivo = 'mesmo carro (' + j['car'] + ') dos companheiros';
+            }
+            if (!linha) {
+                const texto = compactarTexto((j['car'] || '') + ' ' + (j['skin'] || ''));
+                const peloNome = linhas.filter(l => { const e = compactarTexto(l.dataset.equipe); return e && texto.includes(e); })
+                    .sort((a, b) => compactarTexto(b.dataset.equipe).length - compactarTexto(a.dataset.equipe).length);
+                if (peloNome.length) { linha = peloNome[0]; motivo = 'nome da equipe no carro/skin (' + (j['skin'] || j['car']) + ')'; }
+            }
+            if (!linha) {
+                linha = linhas.slice().sort((a, b) => b.dataset.pilotoEquipeId - a.dataset.pilotoEquipeId)[0];
+                motivo = 'carro/skin não identificaram a equipe: usado o vínculo mais recente';
+                alerta = true;
+            }
+            resolvidos[nome] = { linha: linha, outras: linhas.filter(l => l !== linha), equipe: linha.dataset.equipe, motivo: motivo, alerta: alerta, nome: j['name'] };
+        });
+        // logo/cor da análise passam a usar a equipe identificada
+        Object.keys(resolvidos).forEach(n => {
+            const info = (window.INFO_PILOTOS || []).find(p => String(p.id) === String(resolvidos[n].linha.dataset.pilotoEquipeId));
+            if (info) EQUIPE_RESOLVIDA[n] = info;
+        });
+        return resolvidos;
+    }
+
+    // a linha pertence a um vínculo do piloto que NÃO correu por esta equipe nesta corrida?
+    function linhaDeOutraEquipe(linha, resolvidos) {
+        const r = resolvidos[normalizarNome(linha.cells[1].textContent)];
+        return !!r && r.outras.includes(linha);
+    }
+
+    // limpa a posição que a linha errada tenha recebido antes (evita resultado duplicado ao salvar)
+    function limparLinhaDeOutraEquipe(linha, celula) {
+        const input = linha.cells[celula].querySelector('input[type="number"]');
+        if (input) input.value = '';
+        if (celula === 3) {
+            linha.cells[4].querySelector('input[type="checkbox"]').checked = false;
+            linha.classList.remove('linha-preenchida', 'linha-volta-rapida');
+        }
+    }
+
+    function htmlAvisoTrocaEquipe(resolvidos) {
+        const itens = Object.values(resolvidos);
+        if (!itens.length) return null;
+        return [itens.some(r => r.alerta) ? 'alerta' : 'info',
+            '<strong>Piloto(s) com mais de uma equipe no ano</strong>' +
+            '<span class="rc-aviso-detalhe">Preenchida apenas a linha da equipe identificada; a outra linha ficou em branco.</span>' +
+            '<div class="rc-aviso-lista">' + itens.map(r => '<span class="rc-aviso-chip" title="' + escaparHtml(r.motivo) + '"><b>' + escaparHtml(r.nome) + '</b> &rarr; ' + escaparHtml(r.equipe) + ' <small>(' + escaparHtml(r.motivo) + ')</small></span>').join('') + '</div>'];
+    }
+
+    function avisarTrocaEquipeNoTile(idTile, resolvidos) {
+        const itens = Object.values(resolvidos);
+        if (!itens.length) return;
+        const status = document.getElementById(idTile).querySelector('.rc-upload-status');
+        status.insertAdjacentHTML('beforeend', '<br><small><i class="bi bi-arrow-left-right"></i> ' +
+            itens.map(r => escaparHtml(r.nome) + ' &rarr; ' + escaparHtml(r.equipe) + (r.alerta ? ' (confira)' : '')).join(' · ') + '</small>');
+    }
+    window.resolverEquipesDoJson = resolverEquipesDoJson; // usado também pela contingência (outro script)
 
     // grid de largada informado no formulario (nome normalizado -> posicao)
     function gridDoFormulario() {
@@ -1170,11 +1366,17 @@ document.getElementById('inputFileLargada').addEventListener('change', function(
         dados.classificacao.forEach(c => { porNome[c.nomeNormalizado] = c; });
         const encontrados = new Set();
         const semCorrespondencia = [];
+        const trocaEquipe = resolverEquipesDoJson(resultados); // MELHORIA 20261105
 
         linhasFormulario().forEach(linha => {
             const nomeTabela = linha.cells[1].textContent.trim();
             const piloto = porNome[normalizarNome(nomeTabela)];
             linha.classList.remove('linha-preenchida', 'linha-volta-rapida');
+            if (piloto && linhaDeOutraEquipe(linha, trocaEquipe)) {
+                if (aplicarNoFormulario) limparLinhaDeOutraEquipe(linha, 3);
+                linha.cells[7].innerHTML = '<span class="text-secondary"><i class="bi bi-arrow-left-right"></i> correu pela ' + escaparHtml(trocaEquipe[piloto.nomeNormalizado].equipe) + '</span>';
+                return;
+            }
             if (!piloto) {
                 if (!linha.classList.contains('d-none')) semCorrespondencia.push(nomeTabela);
                 linha.cells[7].innerHTML = '<span class="text-secondary">não está no arquivo</span>';
@@ -1202,7 +1404,10 @@ document.getElementById('inputFileLargada').addEventListener('change', function(
         const avisos = [];
         let escolhido = null;
         for (const c of candidatos) {
-            const opcao = opcoes.find(o => normalizarNome(o.textContent) === c.nomeNormalizado);
+            const resolvido = trocaEquipe[c.nomeNormalizado]; // MELHORIA 20261105: vínculo da equipe certa
+            const opcao = resolvido
+                ? opcoes.find(o => String(o.value) === String(resolvido.linha.dataset.pilotoEquipeId))
+                : opcoes.find(o => normalizarNome(o.textContent) === c.nomeNormalizado);
             if (opcao) {
                 if (aplicarNoFormulario) selectVoltaRapida.value = opcao.value;
                 escolhido = c;
@@ -1240,6 +1445,8 @@ document.getElementById('inputFileLargada').addEventListener('change', function(
                 '<span class="rc-aviso-detalhe">Os valores dele(s) foram mantidos como estavam.</span>' +
                 '<div class="rc-aviso-lista">' + semCorrespondencia.map(n => '<span class="rc-aviso-chip">' + escaparHtml(n) + '</span>').join('') + '</div>']);
         }
+        const avisoTroca = htmlAvisoTrocaEquipe(trocaEquipe);
+        if (avisoTroca) avisos.push(avisoTroca);
         document.getElementById('avisosChegada').innerHTML = avisos.map(a =>
             '<div class="rc-aviso ' + a[0] + '"><i class="bi ' + (a[0] === 'alerta' ? 'bi-exclamation-triangle-fill' : 'bi-info-circle') + '"></i><div>' + a[1] + '</div></div>').join('');
 
@@ -1704,6 +1911,7 @@ document.getElementById('inputFileLargada').addEventListener('change', function(
 
     // mantem o nome antigo: chamado no upload (largada / grid invertido / chegada) e ao abrir a tela
     function renderizarClassificacaoQualy(json, origem) {
+        resolverEquipesDoJson(json); // MELHORIA 20261105: só ajusta logo/cor de quem trocou de equipe
         const sessoes = sessoesDeTreino(json);
         const card = document.getElementById('cardClassificacao');
         if (!sessoes.length) { card.classList.add('d-none'); return false; }
@@ -2007,6 +2215,8 @@ document.getElementById('inputFileLargada').addEventListener('change', function(
 
     function gerarResultadoGridInvertido(resultados){
         var resultados = resultados;
+        const trocaEquipe = resolverEquipesDoJson(resultados); // MELHORIA 20261105
+        setTimeout(() => avisarTrocaEquipeNoTile('tileGridInvertido', trocaEquipe), 0);
         let sessoesDisponiveis = resultados['sessions'];
         var pilotos = resultados['players'];
 
@@ -2036,6 +2246,9 @@ document.getElementById('inputFileLargada').addEventListener('change', function(
                     let nomePiloto = linha.cells[1].innerHTML.toUpperCase().trim() //limpa os espaços do inicio e fim da string
                     nomePiloto = nomePiloto.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); ///retira os ascentos
                     let valorLargada = parseInt(ordemLargada.indexOf(nomePiloto))+1
+
+                    // MELHORIA 20261105: piloto que trocou de equipe - só a linha da equipe identificada recebe a largada
+                    if(valorLargada > 0 && linhaDeOutraEquipe(linha, trocaEquipe)){ limparLinhaDeOutraEquipe(linha, 2); return; }
 
                     if(valorLargada > 0){
 
@@ -2082,6 +2295,8 @@ document.getElementById('inputFileLargada').addEventListener('change', function(
 
     function gerarResultadoLargada(resultados){
         var resultados = resultados;
+        const trocaEquipe = resolverEquipesDoJson(resultados); // MELHORIA 20261105
+        setTimeout(() => avisarTrocaEquipeNoTile('tileLargada', trocaEquipe), 0);
         let sessoesDisponiveis = resultados['sessions'];
         var pilotos = resultados['players'];
 
@@ -2111,6 +2326,9 @@ document.getElementById('inputFileLargada').addEventListener('change', function(
                     let nomePiloto = linha.cells[1].innerHTML.toUpperCase().trim() //limpa os espaços do inicio e fim da string
                     // nomePiloto = nomePiloto.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); ///retira os ascentos
                     const valorLargada = parseInt(ordemLargada.indexOf(nomePiloto))+1
+
+                    // MELHORIA 20261105: piloto que trocou de equipe - só a linha da equipe identificada recebe a largada
+                    if(valorLargada > 0 && linhaDeOutraEquipe(linha, trocaEquipe)){ limparLinhaDeOutraEquipe(linha, 2); return; }
 
                     if(valorLargada > 0){
                         linha.cells[2].querySelector('input[type="number"]').value = valorLargada
@@ -2146,4 +2364,455 @@ document.getElementById('inputFileLargada').addEventListener('change', function(
             prevEl: '.swiper-button-prev',
         },
     });
+</script>
+
+{{-- MELHORIA 20261105: CONTINGÊNCIA - grid pelo print (script independente; não usa nem altera as funções acima) --}}
+<script type="module">
+(function () {
+    const $ = id => document.getElementById(id);
+    const card = $('cardContingencia');
+    if (!card) return;
+
+    const CHAVE_LS = 'rc_contingencia_json_base';
+    const TESSERACT_URL = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+    const est = { pilotos: [], grade: null, nomeBase: '', slots: [], alvo: null, selecao: null };
+
+    /* ---------- utilitários ---------- */
+    const ENTIDADES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ENTIDADES[c]);
+    const norm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim().toUpperCase();
+    const ultimoNome = s => { const p = norm(s).split(' '); return p[p.length - 1] || ''; };
+    const sigla = s => ultimoNome(s).replace(/[^A-Z]/g, '').slice(0, 3);
+
+    function lerIni(texto) {
+        const ini = {}; let secao = null;
+        String(texto || '').split(/\r?\n/).forEach(l => {
+            l = l.trim();
+            if (!l || l.startsWith(';')) return;
+            const m = l.match(/^\[(.+)\]$/);
+            if (m) { secao = m[1]; ini[secao] = ini[secao] || {}; return; }
+            const p = l.indexOf('=');
+            if (secao && p > -1) ini[secao][l.substring(0, p).trim()] = l.substring(p + 1).trim();
+        });
+        return ini;
+    }
+
+    function marcarTile(id, ok, html) {
+        const t = $(id);
+        t.classList.remove('carregado', 'erro');
+        t.classList.add(ok ? 'carregado' : 'erro');
+        t.querySelector('.rc-upload-status').innerHTML = html;
+    }
+
+    /* ---------- 1. JSON base ---------- */
+    function carregarBase(texto, nomeArquivo, salvar) {
+        let json;
+        try { json = JSON.parse(texto); } catch (e) { json = null; }
+        if (!json || !Array.isArray(json.players) || !json.players.length) {
+            marcarTile('cgTileBase', false, '<i class="bi bi-x-circle"></i> Arquivo inválido: não tem a lista de pilotos (players)');
+            return false;
+        }
+        const ini = lerIni(json.__raceIni);
+        let grade = null;
+        try { grade = JSON.parse(JSON.parse(JSON.parse(json.__quickDrive).ModeData).RaceGridSerialized); } catch (e) { grade = null; }
+
+        est.pilotos = json.players.map((p, i) => {
+            const c = ini['CAR_' + i] || {};
+            return {
+                indice: i,
+                nome: String(p.name || c.DRIVER_NAME || ('Carro ' + i)).replace(/\s+/g, ' ').trim(),
+                sigla: sigla(p.name || c.DRIVER_NAME),
+                car: p.car || (c.MODEL && c.MODEL !== '-' ? c.MODEL : ''),
+                skin: p.skin || c.SKIN || '',
+                ballast: c.BALLAST, restrictor: c.RESTRICTOR,
+                aiLevel: c.AI_LEVEL, aiAggression: c.AI_AGGRESSION,
+                jogador: i === 0, // no Content Manager o CAR_0 é sempre o jogador
+            };
+        });
+        const contagem = {};
+        est.pilotos.forEach(p => { contagem[p.sigla] = (contagem[p.sigla] || 0) + 1; });
+        est.pilotos.forEach(p => { p.siglaRepetida = contagem[p.sigla] > 1; });
+        est.grade = grade;
+        est.nomeBase = nomeArquivo;
+        est.slots = new Array(est.pilotos.length).fill(null);
+        est.alvo = 0;
+
+        if (salvar) { try { localStorage.setItem(CHAVE_LS, JSON.stringify({ nome: nomeArquivo, texto: texto })); } catch (e) { /* sem espaço: segue sem lembrar */ } }
+        marcarTile('cgTileBase', true, '<i class="bi bi-check-circle"></i> ' + esc(nomeArquivo) + ' &middot; ' + est.pilotos.length + ' pilotos'
+            + (grade ? '' : ' <span class="rc-banco-pendente">(sem configuração de grid: usando padrão)</span>'));
+        $('cgArea').classList.remove('d-none');
+        $('cgAcoes').classList.remove('d-none');
+        renderizar();
+        return true;
+    }
+
+    $('cgInputBase').addEventListener('change', e => {
+        const arq = e.target.files[0];
+        if (!arq) return;
+        const r = new FileReader();
+        r.onload = ev => carregarBase(ev.target.result, arq.name, true);
+        r.readAsText(arq);
+    });
+
+    /* ---------- grid (posições) ---------- */
+    function chip(p) {
+        const classes = 'cg-chip' + (p.jogador ? ' jogador' : '') + (p.siglaRepetida ? ' duvida' : '');
+        const titulo = p.nome + (p.siglaRepetida ? ' (sigla repetida: confira)' : '');
+        return '<span class="' + classes + '" title="' + esc(titulo) + '"><b>' + esc(p.sigla) + '</b><small>' + esc(p.nome) + (p.jogador ? ' (você)' : '') + '</small></span>';
+    }
+
+    function renderizar() {
+        $('cgSlots').innerHTML = est.slots.map((idx, i) => {
+            const p = idx === null ? null : est.pilotos[idx];
+            return '<div class="cg-slot' + (est.alvo === i ? ' alvo' : '') + '" data-slot="' + i + '"' + (p ? ' draggable="true"' : '') + '>'
+                + '<span class="cg-pos">' + (i + 1) + '</span>'
+                + (p ? chip(p) + '<button type="button" class="cg-x" data-remover="' + i + '" title="Tirar desta posição"><i class="bi bi-x-lg"></i></button>'
+                     : '<span class="cg-vazio" data-marcar="' + i + '">' + (est.alvo === i ? 'escolha o piloto abaixo' : 'vazio') + '</span>')
+                + '</div>';
+        }).join('');
+
+        const usados = new Set(est.slots.filter(v => v !== null));
+        const livres = est.pilotos.filter(p => !usados.has(p.indice));
+        $('cgPool').innerHTML = livres.length
+            ? livres.map(p => '<span data-pool="' + p.indice + '" draggable="true">' + chip(p) + '</span>').join('')
+            : '<span class="cg-dica mt-0"><i class="bi bi-check2-all"></i> Todos os pilotos posicionados.</span>';
+        renderizarAvisos();
+    }
+
+    // compacta eventuais posições vazias no meio
+    function ordemFinal() {
+        return est.slots.filter(v => v !== null).map(idx => est.pilotos[idx]);
+    }
+
+    $('cgSlots').addEventListener('click', e => {
+        const rem = e.target.closest('[data-remover]');
+        if (rem) { est.slots[+rem.dataset.remover] = null; est.alvo = +rem.dataset.remover; renderizar(); return; }
+        const mar = e.target.closest('[data-marcar]');
+        if (mar) { const i = +mar.dataset.marcar; est.alvo = est.alvo === i ? null : i; renderizar(); }
+    });
+
+    $('cgPool').addEventListener('click', e => {
+        const el = e.target.closest('[data-pool]');
+        if (!el) return;
+        const i = (est.alvo !== null && est.slots[est.alvo] === null) ? est.alvo : est.slots.indexOf(null);
+        if (i < 0) return;
+        est.slots[i] = +el.dataset.pool;
+        const proximo = est.slots.indexOf(null, i + 1);
+        est.alvo = proximo >= 0 ? proximo : (est.slots.indexOf(null) >= 0 ? est.slots.indexOf(null) : null);
+        renderizar();
+    });
+
+    // arrastar = inserir na posição de destino, empurrando os demais (de uma posição ou da lista de pilotos sem posição)
+    let arraste = null; // { slot: i } ou { pool: indicePiloto }
+    function inserirNaPosicao(destino) {
+        const arr = est.slots.slice();
+        if (arraste.slot !== undefined) {
+            const item = arr.splice(arraste.slot, 1)[0];
+            arr.splice(destino, 0, item);
+        } else {
+            arr.splice(destino, 0, arraste.pool);
+            // absorve uma posição vazia: a primeira depois do destino; se não houver, a última antes dele
+            let vazio = arr.indexOf(null, destino + 1);
+            if (vazio < 0) vazio = arr.lastIndexOf(null, destino - 1);
+            if (vazio < 0) return;
+            arr.splice(vazio, 1);
+        }
+        est.slots = arr;
+        est.alvo = arr.indexOf(null) >= 0 ? arr.indexOf(null) : null;
+        renderizar();
+    }
+    $('cgSlots').addEventListener('dragstart', e => { const s = e.target.closest('[data-slot]'); if (s) { arraste = { slot: +s.dataset.slot }; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', ''); } });
+    $('cgPool').addEventListener('dragstart', e => { const p = e.target.closest('[data-pool]'); if (p) { arraste = { pool: +p.dataset.pool }; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', ''); } });
+    $('cgSlots').addEventListener('dragover', e => { const s = e.target.closest('[data-slot]'); if (s && arraste) { e.preventDefault(); s.classList.add('arrastando-sobre'); } });
+    $('cgSlots').addEventListener('dragleave', e => { const s = e.target.closest('[data-slot]'); if (s) s.classList.remove('arrastando-sobre'); });
+    $('cgSlots').addEventListener('drop', e => {
+        e.preventDefault();
+        const s = e.target.closest('[data-slot]');
+        if (s && arraste) inserirNaPosicao(+s.dataset.slot);
+        arraste = null;
+    });
+    document.addEventListener('dragend', () => { arraste = null; });
+
+    $('cgBtnLimpar').addEventListener('click', () => { est.slots = est.slots.map(() => null); est.alvo = 0; renderizar(); });
+
+    /* ---------- ligação com a tabela de resultados ---------- */
+    function linhasDaTabela() {
+        return Array.from(document.querySelectorAll('#tabela tr.linha_resultados')).filter(l => !l.classList.contains('d-none'))
+            .map(l => ({ linha: l, nome: norm(l.cells[1].textContent), sobrenome: ultimoNome(l.cells[1].textContent) }));
+    }
+
+    function acharLinha(p, linhas) {
+        const nome = norm(p.nome);
+        let achadas = linhas.filter(l => l.nome === nome);
+        if (!achadas.length) achadas = linhas.filter(l => l.sobrenome === ultimoNome(p.nome)); // ex.: "Alex Albon" x "Alexander Albon"
+        if (achadas.length > 1) { // MELHORIA 20261105: piloto que trocou de equipe -> linha da equipe pelo carro/skin
+            const r = trocaEquipeBase()[nome];
+            return r ? (achadas.find(l => l.linha === r.linha) || null) : null;
+        }
+        return achadas.length === 1 ? achadas[0] : null;
+    }
+
+    // MELHORIA 20261105: mesma regra da importação dos JSONs, aplicada ao JSON base
+    function trocaEquipeBase() {
+        if (typeof window.resolverEquipesDoJson !== 'function') return {};
+        return window.resolverEquipesDoJson({ players: est.pilotos.map(x => ({ name: x.nome, car: x.car, skin: x.skin })) });
+    }
+
+    function renderizarAvisos() {
+        const avisos = [];
+        const ordem = ordemFinal();
+        const linhas = linhasDaTabela();
+        const faltam = est.pilotos.length - ordem.length;
+        if (faltam > 0) avisos.push(['alerta', 'Faltam ' + faltam + ' piloto(s) no grid', est.pilotos.filter(p => !est.slots.includes(p.indice)).map(p => p.sigla + ' ' + p.nome)]);
+        if (est.pilotos[0] && !ordem.some(p => p.jogador)) avisos.push(['alerta', 'Você (' + est.pilotos[0].nome + ') ainda não está no grid: é necessário para gerar o arquivo', []]);
+        const repetidas = est.pilotos.filter(p => p.siglaRepetida);
+        if (repetidas.length) avisos.push(['info', 'Siglas repetidas: confira estes pilotos no print', repetidas.map(p => p.sigla + ' ' + p.nome)]);
+        const semLinha = est.pilotos.filter(p => !acharLinha(p, linhas));
+        if (semLinha.length) avisos.push(['info', 'Não encontrados na tabela desta corrida (entram no arquivo, mas a Largada deles não é preenchida)', semLinha.map(p => p.nome)]);
+        const linhasDoJson = est.pilotos.map(p => acharLinha(p, linhas)).filter(Boolean).map(l => l.linha);
+        const foraDoJson = linhas.filter(l => !linhasDoJson.includes(l.linha));
+        if (foraDoJson.length) avisos.push(['info', 'Pilotos da tabela que não estão no JSON base (a Largada deles fica como está)', foraDoJson.map(l => l.linha.cells[1].textContent.trim())]);
+
+        $('cgAvisos').innerHTML = avisos.map(([tipo, titulo, itens]) =>
+            '<div class="rc-aviso ' + tipo + '"><i class="bi bi-' + (tipo === 'alerta' ? 'exclamation-triangle-fill' : 'info-circle') + '"></i><div><strong>' + esc(titulo) + '</strong>'
+            + (itens.length ? '<div class="rc-aviso-lista">' + itens.map(t => '<span class="rc-aviso-chip">' + esc(t) + '</span>').join('') + '</div>' : '') + '</div></div>').join('');
+    }
+
+    $('cgBtnAplicar').addEventListener('click', () => {
+        const ordem = ordemFinal();
+        if (!ordem.length) { alert('Monte o grid antes de aplicar.'); return; }
+        const linhas = linhasDaTabela();
+        let preenchidos = 0, ultimoInput = null;
+        ordem.forEach((p, i) => {
+            const l = acharLinha(p, linhas);
+            if (!l) return;
+            const input = l.linha.querySelector('input.largada');
+            input.value = i + 1;
+            ultimoInput = input;
+            preenchidos++;
+        });
+        // MELHORIA 20261105: a linha da outra equipe do mesmo piloto fica sem largada
+        Object.values(trocaEquipeBase()).forEach(r => r.outras.forEach(l => { const inp = l.querySelector('input.largada'); if (inp) inp.value = ''; }));
+        // dispara o mesmo evento da digitação manual (atualiza +/- e análise)
+        if (ultimoInput) ultimoInput.dispatchEvent(new Event('input', { bubbles: true }));
+        $('cgStatusOcr').innerHTML = '<span class="rc-verde"><i class="bi bi-check2"></i> Largada preenchida para ' + preenchidos + ' piloto(s). Confira a tabela e clique em Salvar.</span>';
+    });
+
+    /* ---------- gerar o .CMPRESET (mesmo formato do grid do Content Manager) ---------- */
+    const GRADE_PADRAO = { ModeId: 'custom', FilterValue: '', ShuffleCandidates: true, VarietyLimitation: 0, AiLevel: 100.0, AiLevelMin: 99.0, AiLevelArrangeRandom: 0.1, AiLevelArrangeReverse: false, AiLevelArrangePowerRatio: false, AiAggression: 59.6, AiAggressionMin: 18.6, AiAggressionArrangeRandom: 0.1, AiAggressionArrangeReverse: false };
+
+    $('cgBtnBaixar').addEventListener('click', () => {
+        const ordem = ordemFinal();
+        const posJogador = ordem.findIndex(p => p.jogador) + 1;
+        if (!posJogador) { alert('Coloque você (' + (est.pilotos[0] ? est.pilotos[0].nome : 'jogador') + ') no grid para gerar o arquivo.'); return; }
+        const faltam = est.pilotos.length - ordem.length;
+        if (faltam > 0 && !confirm('Ainda faltam ' + faltam + ' piloto(s) no grid. Gerar o arquivo só com os ' + ordem.length + ' posicionados?')) return;
+
+        const adv = ordem.filter(p => !p.jogador);
+        const jogador = est.pilotos[0];
+        const grade = Object.assign({}, GRADE_PADRAO, est.grade || {});
+        Object.assign(grade, {
+            ModeId: 'custom',
+            CarIds: adv.map(p => p.car),
+            AiLevels: adv.map(p => String(p.aiLevel ?? Math.round(grade.AiLevel))),
+            Ballasts: adv.map(p => String(p.ballast ?? 0)),
+            Restrictors: adv.map(p => String(p.restrictor ?? 0)),
+            SkinIds: adv.map(p => p.skin),
+            OpponentsNumber: adv.length,
+            StartingPosition: posJogador,
+        });
+        if (adv.every(p => p.aiAggression !== undefined)) grade.AiAggressions = adv.map(p => String(p.aiAggression)); else delete grade.AiAggressions;
+        if (jogador.ballast !== undefined) grade.PlayerBallast = Number(jogador.ballast);
+        if (jogador.restrictor !== undefined) grade.PlayerRestrictor = Number(jogador.restrictor);
+
+        const blob = new Blob([JSON.stringify(grade)], { type: 'text/plain' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = window.CG_NOME_ARQUIVO || 'grid.CMPRESET';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+        $('cgStatusOcr').innerHTML = '<span class="rc-verde"><i class="bi bi-download"></i> Arquivo gerado: ' + adv.length + ' adversários, você larga em P' + posJogador + '.</span>';
+    });
+
+    /* ---------- 2. print ---------- */
+    function carregarPrint(arquivo) {
+        if (!arquivo || !/^image\//.test(arquivo.type)) return;
+        const r = new FileReader();
+        r.onload = ev => {
+            $('cgPrintImg').src = ev.target.result;
+            $('cgPrintWrap').classList.remove('d-none');
+            $('cgAcoesPrint').classList.remove('d-none');
+            $('cgPrintVazio').classList.add('d-none');
+            $('cgArea').classList.remove('d-none');
+            est.selecao = null;
+            $('cgSelecao').classList.add('d-none');
+            marcarTile('cgTilePrint', true, '<i class="bi bi-check-circle"></i> ' + esc(arquivo.name || 'imagem colada'));
+            if (!est.pilotos.length) $('cgStatusOcr').innerHTML = '<span class="rc-banco-pendente">Carregue o JSON base (passo 1) para montar o grid.</span>';
+        };
+        r.readAsDataURL(arquivo);
+    }
+    $('cgInputPrint').addEventListener('change', e => carregarPrint(e.target.files[0]));
+    document.addEventListener('paste', e => {
+        if (!card.open) return;
+        const item = Array.from(e.clipboardData ? e.clipboardData.items : []).find(i => i.type.startsWith('image/'));
+        if (item) { e.preventDefault(); carregarPrint(item.getAsFile()); }
+    });
+
+    // seleção da área da tabela de posições (arrastar sobre a imagem)
+    (function () {
+        const wrap = $('cgPrintWrap'), caixa = $('cgSelecao');
+        let inicio = null;
+        const ponto = e => { const r = wrap.getBoundingClientRect(); return { x: Math.max(0, Math.min(r.width, e.clientX - r.left)), y: Math.max(0, Math.min(r.height, e.clientY - r.top)) }; };
+        wrap.addEventListener('mousedown', e => { inicio = ponto(e); e.preventDefault(); });
+        window.addEventListener('mousemove', e => {
+            if (!inicio) return;
+            const p = ponto(e);
+            Object.assign(caixa.style, { left: Math.min(p.x, inicio.x) + 'px', top: Math.min(p.y, inicio.y) + 'px', width: Math.abs(p.x - inicio.x) + 'px', height: Math.abs(p.y - inicio.y) + 'px' });
+            caixa.classList.remove('d-none');
+        });
+        window.addEventListener('mouseup', e => {
+            if (!inicio) return;
+            const p = ponto(e), img = $('cgPrintImg');
+            const w = Math.abs(p.x - inicio.x), h = Math.abs(p.y - inicio.y);
+            if (w < 15 || h < 15) { est.selecao = null; caixa.classList.add('d-none'); inicio = null; return; }
+            const escala = img.naturalWidth / wrap.clientWidth;
+            est.selecao = { x: Math.min(p.x, inicio.x) * escala, y: Math.min(p.y, inicio.y) * escala, w: w * escala, h: h * escala };
+            inicio = null;
+        });
+        $('cgBtnLimparSelecao').addEventListener('click', () => { est.selecao = null; caixa.classList.add('d-none'); });
+    })();
+
+    /* ---------- leitura automática (OCR no navegador, Tesseract.js) ---------- */
+    function carregarTesseract() {
+        if (window.Tesseract) return Promise.resolve();
+        return new Promise((ok, falha) => {
+            const s = document.createElement('script');
+            s.src = TESSERACT_URL;
+            s.onload = ok;
+            s.onerror = () => falha(new Error('não foi possível baixar o leitor de imagens (sem internet?)'));
+            document.head.appendChild(s);
+        });
+    }
+
+    // inverter = true: texto claro do jogo vira escuro; false: mantém (a linha do jogador é destacada com fundo claro e texto escuro)
+    function prepararImagem(inverter) {
+        const img = $('cgPrintImg');
+        const sel = est.selecao || { x: 0, y: 0, w: img.naturalWidth, h: img.naturalHeight };
+        const fator = Math.max(1, Math.min(3, 1600 / sel.h)); // amplia recortes pequenos
+        const c = document.createElement('canvas');
+        c.width = Math.round(sel.w * fator); c.height = Math.round(sel.h * fator);
+        const ctx = c.getContext('2d');
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, sel.x, sel.y, sel.w, sel.h, 0, 0, c.width, c.height);
+        // tons de cinza (invertidos ou não)
+        const d = ctx.getImageData(0, 0, c.width, c.height);
+        for (let i = 0; i < d.data.length; i += 4) {
+            const cinza = 0.299 * d.data[i] + 0.587 * d.data[i + 1] + 0.114 * d.data[i + 2];
+            const v = inverter ? 255 - cinza : cinza;
+            d.data[i] = d.data[i + 1] = d.data[i + 2] = v;
+        }
+        ctx.putImageData(d, 0, 0);
+        return c;
+    }
+
+    // corrige confusões comuns do OCR (0/O, 1/I...) e compara com as siglas conhecidas
+    function identificarSigla(texto) {
+        const t = texto.replace(/0/g, 'O').replace(/1/g, 'I').replace(/5/g, 'S').replace(/8/g, 'B').replace(/6/g, 'G').replace(/2/g, 'Z');
+        const siglas = [...new Set(est.pilotos.map(p => p.sigla))];
+        if (siglas.includes(t)) return t;
+        const proximas = siglas.filter(s => s.length === 3 && [0, 1, 2].filter(i => s[i] !== t[i]).length === 1);
+        return proximas.length === 1 ? proximas[0] : null;
+    }
+
+    function interpretarOcr(palavras) {
+        const ws = palavras.map(w => ({ txt: String(w.text || '').toUpperCase().replace(/[^A-Z0-9]/g, ''), b: w.bbox })).filter(w => w.txt);
+        const achados = [];
+        ws.forEach(w => {
+            const m = w.txt.match(/^(\d{0,2})([A-Z0-9]{3})$/);
+            if (!m) return;
+            const sg = identificarSigla(m[2]);
+            if (!sg) return;
+            const cy = (w.b.y0 + w.b.y1) / 2, h = w.b.y1 - w.b.y0;
+            let pos = m[1] ? parseInt(m[1], 10) : null;
+            if (!pos) {
+                // número da posição: palavra numérica na mesma linha, à esquerda da sigla
+                const nums = ws.filter(o => /^\d{1,2}$/.test(o.txt) && o.b.x1 <= w.b.x0 + 4 && Math.abs((o.b.y0 + o.b.y1) / 2 - cy) < h * 0.6)
+                    .sort((a, b) => b.b.x1 - a.b.x1);
+                if (nums.length) pos = parseInt(nums[0].txt, 10);
+            }
+            achados.push({ sigla: sg, y: cy, pos: pos });
+        });
+        achados.sort((a, b) => a.y - b.y);
+        return achados;
+    }
+
+    $('cgBtnLer').addEventListener('click', async () => {
+        if (!est.pilotos.length) { alert('Carregue primeiro o JSON base (passo 1).'); return; }
+        const status = $('cgStatusOcr');
+        const botao = $('cgBtnLer');
+        botao.disabled = true;
+        try {
+            status.innerHTML = '<i class="bi bi-hourglass-split"></i> Carregando o leitor de imagens (a primeira vez demora um pouco)...';
+            await carregarTesseract();
+            const worker = await Tesseract.createWorker('eng', 1, {
+                logger: m => { if (m.status === 'recognizing text') status.innerHTML = '<i class="bi bi-hourglass-split"></i> Lendo o print... ' + Math.round(m.progress * 100) + '%'; },
+            });
+            await worker.setParameters({ tessedit_pageseg_mode: '11' }); // texto esparso: acha palavras soltas pela imagem
+            const n = est.pilotos.length;
+            const siglasDistintas = new Set(est.pilotos.map(p => p.sigla)).size;
+
+            // 1ª leitura: imagem invertida (texto claro sobre fundo escuro, a maioria das linhas)
+            let achados = interpretarOcr((await worker.recognize(prepararImagem(true))).data.words || []);
+            // 2ª leitura, só se faltou alguém: imagem normal (pega a linha destacada do jogador, fundo claro)
+            if (new Set(achados.map(a => a.sigla)).size < siglasDistintas) {
+                status.innerHTML = '<i class="bi bi-hourglass-split"></i> Lendo de novo para achar quem faltou...';
+                const extras = interpretarOcr((await worker.recognize(prepararImagem(false))).data.words || []);
+                const jaLidas = new Set(achados.map(a => a.sigla));
+                achados = achados.concat(extras.filter(a => !jaLidas.has(a.sigla))).sort((a, b) => a.y - b.y);
+            }
+            await worker.terminate();
+
+            const slots = new Array(n).fill(null);
+            const usados = new Set();
+            let ultimo = -1, lidos = 0;
+            achados.forEach(a => {
+                const p = est.pilotos.find(x => x.sigla === a.sigla && !usados.has(x.indice));
+                if (!p) return;
+                // usa o número lido se ele for coerente (crescente e livre); senão, a próxima posição livre
+                const i = (a.pos && a.pos - 1 > ultimo && a.pos <= n && slots[a.pos - 1] === null) ? a.pos - 1 : slots.indexOf(null, ultimo + 1);
+                if (i < 0) return;
+                slots[i] = p.indice; usados.add(p.indice); ultimo = i; lidos++;
+            });
+            // sobrou exatamente 1 piloto e 1 posição vazia NO MEIO do grid (veio dos números lidos): só pode ser ali.
+            // Se a vaga ficou no fim, a ordem pode ter "subido" sem o número: deixa para o usuário arrastar.
+            const faltando = est.pilotos.filter(p => !usados.has(p.indice));
+            const vagas = slots.filter(v => v === null).length;
+            if (faltando.length === 1 && vagas === 1 && slots.indexOf(null) < n - 1) {
+                slots[slots.indexOf(null)] = faltando[0].indice; lidos++;
+            }
+            est.slots = slots;
+            est.alvo = slots.indexOf(null) >= 0 ? slots.indexOf(null) : null;
+            renderizar();
+            status.innerHTML = lidos === n
+                ? '<span class="rc-verde"><i class="bi bi-check2-all"></i> ' + lidos + ' de ' + n + ' pilotos lidos. Confira com o print antes de aplicar.</span>'
+                : '<span class="rc-banco-pendente"><i class="bi bi-exclamation-triangle"></i> ' + lidos + ' de ' + n + ' pilotos lidos. Complete as posições vazias clicando nos pilotos'
+                  + (est.selecao ? '' : ', ou selecione só a tabela no print e leia de novo') + '.</span>';
+        } catch (erro) {
+            console.error(erro);
+            status.innerHTML = '<span class="rc-banco-remover"><i class="bi bi-x-circle"></i> Falha na leitura: ' + esc(erro.message) + '. Monte o grid clicando nos pilotos.</span>';
+        } finally {
+            botao.disabled = false;
+        }
+    });
+
+    // lembra o último JSON base usado (só neste navegador)
+    try {
+        const salvo = JSON.parse(localStorage.getItem(CHAVE_LS) || 'null');
+        if (salvo && salvo.texto && carregarBase(salvo.texto, salvo.nome, false)) {
+            marcarTile('cgTileBase', true, '<i class="bi bi-clock-history"></i> Último usado: ' + esc(salvo.nome) + ' &middot; ' + est.pilotos.length + ' pilotos (clique para trocar)');
+        }
+    } catch (e) { /* ignora */ }
+})();
 </script>

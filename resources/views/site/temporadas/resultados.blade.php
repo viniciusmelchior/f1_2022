@@ -107,9 +107,10 @@
                                 <td style="" class="sticky-col">{{$key+1}}</td>
                                 <td style="vertical-align: middle; white-space: nowrap; overflow: hidden;" class="w-100 sticky-col">
                                     @php 
-                                        $equipeAtual = Piloto::equipeAtual($temporada->ano->id, $piloto->piloto_id);
-                                    @endphp 
-                                    <img src="{{ asset('images/' . $equipeAtual->imagem) }}" alt="" style="width: 25px; height: 25px;">
+                                        // MELHORIA 20261105: logo da equipe da última corrida do piloto (quem trocou de equipe no ano)
+                                        $logoEquipe = $piloto->equipe_ultima_imagem ?? optional(Piloto::equipeAtual($temporada->ano->id, $piloto->piloto_id))->imagem;
+                                    @endphp
+                                    <img src="{{ asset('images/' . $logoEquipe) }}" alt="" title="{{ $piloto->equipe_ultima ?? '' }}" style="width: 25px; height: 25px;">
                                     <span style="display: inline-block; vertical-align: middle;">{{ $piloto->nome }}</span>
                                     <span class="driver-surname" style="display: inline-block; vertical-align: middle;">{{ $piloto->sobrenome }}</span>
                                 </td>

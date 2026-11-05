@@ -6,291 +6,7 @@
 @extends('layouts.main')
 
 @section('section')
-<style>
-    /* Variáveis de Cores Estilo F1 */
-    :root {
-        --f1-red: #e10600;
-        --f1-dark: #15151e;
-        --f1-darker: #11101d;
-        --f1-gray: #38383f;
-        --f1-light: #f4f4f4;
-        --f1-text: #ffffff;
-    }
-
-    /* === 1. CARD DE PERFIL (HERO CARD) === */
-    .driver-profile-card {
-        background-color: var(--f1-dark);
-        border-radius: 12px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-        margin-top: 30px;
-        margin-bottom: 40px;
-        overflow: hidden;
-    }
-
-    .profile-header {
-        background-color: var(--f1-darker);
-        padding: 20px 30px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 20px;
-        border-bottom: 4px solid var(--f1-red);
-    }
-
-    .profile-title {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        flex-wrap: wrap;
-    }
-
-    .profile-title h2 {
-        color: white;
-        margin: 0;
-        font-weight: 900;
-        text-transform: uppercase;
-        font-size: 2rem;
-        letter-spacing: -1px;
-    }
-
-    .badge-f1 {
-        padding: 6px 12px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .badge-country { background: rgba(255,255,255,0.1); color: white; }
-    .badge-active { background: rgba(40, 167, 69, 0.15); color: #28a745; }
-    .badge-retired { background: rgba(220, 53, 69, 0.15); color: #dc3545; }
-
-    .season-selector {
-        flex-grow: 1;
-        max-width: 350px;
-        min-width: 250px;
-    }
-
-    .f1-select {
-        width: 100%;
-        background-color: var(--f1-dark);
-        color: white;
-        border: 2px solid var(--f1-gray);
-        border-radius: 6px;
-        padding: 10px 15px;
-        font-weight: bold;
-        text-transform: uppercase;
-        transition: 0.3s;
-        cursor: pointer;
-    }
-
-    .f1-select:focus {
-        outline: none;
-        border-color: var(--f1-red);
-        box-shadow: 0 0 0 3px rgba(225, 6, 0, 0.2);
-    }
-
-    .profile-body {
-        display: flex;
-        padding: 30px;
-        gap: 30px;
-    }
-
-    .profile-image-container {
-        flex: 0 0 300px;
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-    }
-
-    .profile-image-container img {
-        width: 100%;
-        border-radius: 8px;
-        border: 2px solid var(--f1-gray);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-    }
-
-    .profile-stats-grid {
-        flex: 1;
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-        gap: 15px;
-        align-content: start;
-    }
-
-    .stat-box {
-        background: rgba(255,255,255,0.03);
-        border-radius: 8px;
-        padding: 15px;
-        border-left: 4px solid var(--f1-red);
-        transition: transform 0.2s, background 0.2s;
-    }
-
-    .stat-box:hover {
-        transform: translateY(-3px);
-        background: rgba(255,255,255,0.08);
-    }
-
-    .stat-box span {
-        display: block;
-        font-size: 11px;
-        color: #999;
-        text-transform: uppercase;
-        margin-bottom: 5px;
-        font-weight: 600;
-    }
-
-    .stat-box strong {
-        display: block;
-        font-size: 24px;
-        color: white;
-        font-weight: 900;
-        line-height: 1;
-    }
-
-    .other-stats { display: none; }
-    
-    #show-other-stats {
-        width: 100%;
-        background: transparent;
-        border: 2px solid var(--f1-red);
-        color: white;
-        text-transform: uppercase;
-        font-weight: bold;
-        border-radius: 6px;
-        padding: 10px;
-        transition: 0.3s;
-    }
-    
-    #show-other-stats:hover {
-        background: var(--f1-red);
-    }
-
-    @media (max-width: 992px) {
-        .profile-body { flex-direction: column; align-items: center; }
-        .profile-image-container { width: 100%; max-width: 400px; }
-        .profile-header { justify-content: center; }
-    }
-
-    /* === 2. ACCORDIONS DAS TABELAS === */
-    details.f1-accordion {
-        background: white;
-        border-radius: 8px;
-        margin-bottom: 15px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-        border: 1px solid #eee;
-        overflow: hidden;
-    }
-
-    details.f1-accordion summary {
-        background: var(--f1-darker);
-        color: white;
-        padding: 18px 25px;
-        font-size: 1.1rem;
-        font-weight: 800;
-        text-transform: uppercase;
-        cursor: pointer;
-        list-style: none;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-left: 6px solid var(--f1-red);
-        transition: background 0.3s;
-    }
-    
-    details.f1-accordion summary::-webkit-details-marker {
-        display: none;
-    }
-
-    details.f1-accordion summary:hover {
-        background: var(--f1-dark);
-    }
-
-    details.f1-accordion summary .toggle-icon {
-        transition: transform 0.3s ease;
-        font-size: 1.2rem;
-    }
-
-    details[open].f1-accordion summary .toggle-icon {
-        transform: rotate(180deg);
-        color: var(--f1-red);
-    }
-
-    .accordion-body {
-        padding: 20px;
-        background: #fafafa;
-    }
-
-    /* === 3. TABELAS === */
-    .table-responsive { width: 100%; overflow-x: auto; }
-    .f1-table { width: 100%; border-collapse: collapse; white-space: nowrap; }
-    
-    .f1-table th { 
-        background: #eaeaea; 
-        color: var(--f1-darker); 
-        text-transform: uppercase; 
-        font-size: 12px; 
-        padding: 12px 15px; 
-        text-align: left;
-        cursor: pointer;
-        user-select: none;
-    }
-
-    .f1-table th .sort-icon {
-        font-size: 11px;
-        opacity: 0.4;
-        transition: opacity 0.2s, color 0.2s;
-        margin-left: 4px;
-    }
-
-    .f1-table th:hover .sort-icon {
-        opacity: 1;
-        color: var(--f1-red);
-    }
-
-    .f1-table td { padding: 15px; border-bottom: 1px solid #e0e0e0; vertical-align: middle; color: var(--f1-darker); }
-    .f1-table tr:hover { background-color: white; }
-    .f1-table a { color: var(--f1-darker); font-size: 1.2rem; transition: 0.2s; }
-    .f1-table a:hover { color: var(--f1-red); }
-
-    /* Estilo para Bandeiras */
-    .flag-img {
-        width: 22px;
-        height: 15px;
-        object-fit: cover;
-        border-radius: 2px;
-        margin-right: 6px;
-        vertical-align: middle;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-    }
-
-    /* Footer Fixo Estilo F1 */
-    .footer-show-pilotos {
-        position: fixed;
-        bottom: 0; left: 0; width: 100%;
-        background-color: var(--f1-darker);
-        border-top: 3px solid var(--f1-red);
-        padding: 15px 10px;
-        display: flex; flex-wrap: wrap; justify-content: center; gap: 15px;
-        z-index: 1000;
-        box-shadow: 0 -5px 15px rgba(0,0,0,0.3);
-    }
-
-    .footer-show-pilotos a {
-        color: white; text-decoration: none; font-size: 13px; text-transform: uppercase;
-        font-weight: 600; padding: 5px 15px; border-radius: 20px;
-        background: rgba(255, 255, 255, 0.1); transition: 0.3s; white-space: nowrap;
-    }
-
-    .footer-show-pilotos a:hover { background: var(--f1-red); color: white; }
-    .main-content-padding { padding-bottom: 100px; }
-    @media (max-width: 768px) { .main-content-padding { padding-bottom: 140px; } }
-</style>
+@include('site.partials.perfil-f1-estilos')
 
 <div class="container main-content-padding">
     
@@ -417,7 +133,7 @@
                                 <td>{{$equipe->ano->ano}}</td>
                                 <td>
                                     <img src="{{asset('images/'.$equipe->equipe->imagem)}}" style="width:25px; height:25px; border-radius:3px; margin-right: 10px;">
-                                    <span class="fw-bold">{{$equipe->equipe->nome}}</span>
+                                    <a class="link-perfil" href="{{ route('equipes.show', [$equipe->equipe->id]) }}" title="Ver perfil da equipe">{{$equipe->equipe->nome}}</a>
                                 </td>
                             </tr>
                         @endforeach
@@ -447,7 +163,7 @@
                             <tr>
                                 <td>
                                     <img src="{{asset('images/'.$corridaPorEquipe->imagem)}}" style="width:25px; height:25px; border-radius:3px; margin-right: 10px;">
-                                    <span class="fw-bold">{{$corridaPorEquipe->nome}}</span>
+                                    <a class="link-perfil" href="{{ route('equipes.show', [$corridaPorEquipe->equipe_id]) }}" title="Ver perfil da equipe">{{$corridaPorEquipe->nome}}</a>
                                 </td>
                                 <td><span class="badge bg-secondary">{{$corridaPorEquipe->quantidade}}</span></td>
                                 <td class="text-success fw-bold">{{Piloto::getInfoPorEquipe($modelPiloto->id, $corridaPorEquipe->equipe_id, 1, 1, 1, 1000)}}</td>
@@ -477,10 +193,11 @@
                     </thead>
                     <tbody>
                         @foreach ($temporadas as $temporada)
+                            @php $infoCampeonato = Piloto::getInfoCampeonato($temporada->id, $modelPiloto->id); /* MELHORIA 20261105: 1 chamada por temporada */ @endphp
                             <tr>
                                 <td class="fw-bold">{{ substr($temporada->des_temporada, 0, strpos($temporada->des_temporada, ' ')) }}</td>
-                                <td><span class="badge bg-dark rounded-pill px-3 py-2">{{Piloto::getInfoCampeonato($temporada->id, $modelPiloto->id)['posicaoPiloto']}}º</span></td>
-                                <td class="fw-bold fs-5 text-danger">{{Piloto::getInfoCampeonato($temporada->id, $modelPiloto->id)['totalPontos']}}</td>
+                                <td><span class="badge bg-dark rounded-pill px-3 py-2">{{ $infoCampeonato['posicaoPiloto'] }}º</span></td>
+                                <td class="fw-bold fs-5 text-danger">{{ $infoCampeonato['totalPontos'] }}</td>
                                 <td>
                                     <a data-toggle="tooltip" data-placement="top" title="Ver Classificação Completa" href="{{route('temporadas.classificacao', [$temporada->id])}}">
                                         <i class="bi bi-list-ol"></i>
@@ -493,6 +210,31 @@
             </div>
         </div>
     </details> 
+
+    {{-- ===================== MELHORIA 20261105: SPRINTS ===================== --}}
+    <details class="f1-accordion" id="sprints-piloto">
+        <summary><span>Sprints <span class="sprint-contador" id="sprintContador">{{ count($sprintsPiloto) }}</span></span> <i class="bi bi-chevron-down toggle-icon"></i></summary>
+        <div class="accordion-body">
+            <div class="sprint-filtro-info" id="sprintFiltroInfo"><i class="bi bi-funnel"></i> Todas as temporadas</div>
+
+            <div class="sprint-painel">
+                <div class="profile-stats-grid" id="sprintStats"></div>
+            </div>
+
+            <div class="sprint-subtitulo">Por temporada <small class="text-muted text-lowercase fw-normal">(clique na temporada para ver as sprints)</small></div>
+            <div class="table-responsive">
+                <table class="f1-table">
+                    <thead>
+                        <tr>
+                            <th>Temporada</th><th>Sprints</th><th>Vitórias</th><th>Poles</th><th>Pódios</th><th>Pontos</th><th>Média Chegada</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sprintPorTemporada"></tbody>
+                </table>
+            </div>
+        </div>
+    </details>
+    <script>window.SPRINTS_PILOTO = @json($sprintsPiloto);</script>
 
     <details class="f1-accordion" id="historico-vitorias">
         <summary>Histórico de Vitórias <i class="bi bi-chevron-down toggle-icon"></i></summary>
@@ -523,7 +265,7 @@
                                         @endif
                                         {{$vitoria->corrida->pista->nome}}
                                     </td>
-                                    <td><span class="badge bg-dark">{{ $vitoria->pilotoEquipe->equipe->nome }}</span></td>
+                                    <td><a href="{{ route('equipes.show', [$vitoria->pilotoEquipe->equipe->id]) }}" title="Ver perfil da equipe"><span class="badge bg-dark">{{ $vitoria->pilotoEquipe->equipe->nome }}</span></a></td>
                                     <td>
                                         <a data-toggle="tooltip" data-placement="top" title="Visualizar corrida" href="{{route('resultados.show', [$vitoria->corrida->id])}}">
                                             <i class="bi bi-play-circle-fill"></i>
@@ -625,7 +367,7 @@
                                         @endif
                                         {{$polePosition->corrida->pista->nome}}
                                     </td>
-                                    <td><span class="badge bg-dark">{{ $polePosition->pilotoEquipe->equipe->nome }}</span></td>
+                                    <td><a href="{{ route('equipes.show', [$polePosition->pilotoEquipe->equipe->id]) }}" title="Ver perfil da equipe"><span class="badge bg-dark">{{ $polePosition->pilotoEquipe->equipe->nome }}</span></a></td>
                                     <td>
                                         <a data-toggle="tooltip" data-placement="top" title="Visualizar corrida" href="{{route('resultados.show', [$polePosition->corrida->id])}}">
                                             <i class="bi bi-play-circle-fill"></i>
@@ -706,12 +448,13 @@
 
 <div class="footer-show-pilotos shadow">
     <a href="#ajaxGetStatsPilotoPorTemporada"><i class="bi bi-house-door"></i> Início</a>
+    <a href="#sprints-piloto"><i class="bi bi-lightning-charge"></i> Sprints</a>
     <a href="#historico-vitorias"><i class="bi bi-trophy"></i> Histórico de Vitórias</a>
-    <a href="#vitorias-pista"><i class="bi bi-geo-alt"></i> Vitórias por Pista</a>
-    <a href="#pistas-sem-vitoria"><i class="bi bi-x-circle"></i> Pistas sem vitórias</a>
+    @if(count($vitoriasPorPista) > 0)<a href="#vitorias-pista"><i class="bi bi-geo-alt"></i> Vitórias por Pista</a>@endif
+    @if(count($listagemVitorias) > 0)<a href="#pistas-sem-vitoria"><i class="bi bi-x-circle"></i> Pistas sem vitórias</a>@endif
     <a href="#historico-poles"><i class="bi bi-stopwatch"></i> Histórico de Poles</a>
-    <a href="#poles-pista"><i class="bi bi-geo-alt-fill"></i> Poles por Pista</a>
-    <a href="#pistas-sem-pole"><i class="bi bi-x-circle-fill"></i> Pistas sem Pole</a>
+    @if(count($polesPorPista) > 0)<a href="#poles-pista"><i class="bi bi-geo-alt-fill"></i> Poles por Pista</a>@endif
+    @if(count($listagemPolePositions) > 0)<a href="#pistas-sem-pole"><i class="bi bi-x-circle-fill"></i> Pistas sem Pole</a>@endif
 </div>
 
 <script>
@@ -783,5 +526,129 @@
             }
         });
     });
+</script>
+
+@include('site.partials.perfil-f1-ordenacao')
+
+{{-- MELHORIA 20261105: estatísticas das sprints (independente do script acima) --}}
+<script>
+(function () {
+    const sprints = window.SPRINTS_PILOTO || [];
+    const esc = t => String(t === null || t === undefined ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const media = v => v.length ? (v.reduce((a, b) => a + b, 0) / v.length).toFixed(1).replace('.', ',') : '-';
+    const num = v => Number.isInteger(v) ? v : String(v).replace('.', ',');
+
+    function resumo(lista) {
+        const chegadas = lista.filter(s => s.chegada > 0).map(s => s.chegada);
+        const largadas = lista.filter(s => s.largada > 0).map(s => s.largada);
+        return {
+            total: lista.length,
+            vitorias: lista.filter(s => s.chegada === 1).length,
+            poles: lista.filter(s => s.largada === 1).length,
+            podios: lista.filter(s => s.chegada >= 1 && s.chegada <= 3).length,
+            pontos: Math.round(lista.reduce((a, s) => a + s.pontos, 0) * 10) / 10,
+            abandonos: lista.filter(s => s.abandono).length,
+            melhorChegada: chegadas.length ? Math.min(...chegadas) + 'º' : '-',
+            melhorLargada: largadas.length ? Math.min(...largadas) + 'º' : '-',
+            gridMedio: media(largadas),
+            mediaChegada: media(chegadas),
+        };
+    }
+
+    function classePos(p, pontos) {
+        if (p === 1) return 'p1';
+        if (p === 2) return 'p2';
+        if (p === 3) return 'p3';
+        return pontos > 0 ? 'pontua' : '';
+    }
+
+    function linhaVazia(colunas, temporadaId) {
+        return '<tr><td colspan="' + colunas + '" class="sprint-vazio">Nenhuma sprint disputada' + (temporadaId ? ' nesta temporada' : '') + '.</td></tr>';
+    }
+
+    function renderizar(temporadaId, nomeTemporada) {
+        const lista = temporadaId ? sprints.filter(s => String(s.temporada_id) === String(temporadaId)) : sprints;
+        const r = resumo(lista);
+        document.getElementById('sprintContador').textContent = r.total;
+        document.getElementById('sprintFiltroInfo').innerHTML = '<i class="bi bi-funnel"></i> ' + esc(nomeTemporada || 'Todas as temporadas');
+
+        const tiles = [
+            ['Sprints', r.total], ['Vitórias', r.vitorias], ['Poles', r.poles], ['Pódios', r.podios],
+            ['Pontos', num(r.pontos)], ['Abandonos', r.abandonos],
+            ['Melhor Largada', r.melhorLargada], ['Melhor Chegada', r.melhorChegada], ['Grid Médio', r.gridMedio], ['Média Chegada', r.mediaChegada],
+        ];
+        document.getElementById('sprintStats').innerHTML = tiles.map(t => '<div class="stat-box"><span>' + t[0] + '</span><strong>' + esc(t[1]) + '</strong></div>').join('');
+
+        // por temporada (mantém a ordem: mais recente primeiro); clicar na linha expande as sprints da temporada
+        const grupos = [];
+        lista.forEach(s => {
+            let g = grupos.find(x => x.id === s.temporada_id);
+            if (!g) { g = { id: s.temporada_id, nome: s.temporada + (s.ano ? ' (' + s.ano + ')' : ''), itens: [] }; grupos.push(g); }
+            g.itens.push(s);
+        });
+        const abrirTodas = grupos.length === 1; // filtrando uma temporada: já mostra as sprints
+        document.getElementById('sprintPorTemporada').innerHTML = grupos.length ? grupos.map(g => {
+            const x = resumo(g.itens);
+            return '<tr class="sprint-temporada' + (abrirTodas ? ' aberta' : '') + '" data-temporada="' + esc(g.id) + '" title="Clique para ver as sprints">' +
+                '<td class="fw-bold"><i class="bi bi-chevron-right sprint-seta"></i>' + esc(g.nome) + '</td><td><span class="badge bg-secondary">' + x.total + '</span></td>' +
+                '<td class="text-success fw-bold">' + x.vitorias + '</td><td class="fw-bold">' + x.poles + '</td><td class="text-primary fw-bold">' + x.podios + '</td>' +
+                '<td class="fw-bold text-danger">' + num(x.pontos) + '</td><td>' + x.mediaChegada + '</td></tr>' +
+                '<tr class="sprint-detalhe' + (abrirTodas ? '' : ' oculto') + '" data-detalhe="' + esc(g.id) + '"><td colspan="7">' +
+                    '<div class="table-responsive"><table class="sprint-corridas"><thead><tr>' +
+                    '<th>Etapa</th><th>Evento / Pista</th><th>Equipe</th><th>Largada</th><th>Chegada</th><th>+/-</th><th>Pontos</th><th>Status</th><th></th>' +
+                    '</tr></thead><tbody>' + g.itens.map(linhaSprint).join('') + '</tbody></table></div>' +
+                '</td></tr>';
+        }).join('') : linhaVazia(7, temporadaId);
+    }
+
+    // uma sprint dentro da temporada expandida
+    function linhaSprint(s) {
+        let delta = '<span class="sprint-delta igual">&ndash;</span>';
+        if (s.largada > 0 && s.chegada > 0) {
+            const d = s.largada - s.chegada;
+            if (d > 0) delta = '<span class="sprint-delta sobe"><i class="bi bi-caret-up-fill"></i>' + d + '</span>';
+            else if (d < 0) delta = '<span class="sprint-delta desce"><i class="bi bi-caret-down-fill"></i>' + (-d) + '</span>';
+            else delta = '<span class="sprint-delta igual">=</span>';
+        }
+        const status = (s.abandono ? '<span class="sprint-tag dnf">DNF</span>' : '') + (s.volta_rapida ? '<span class="sprint-tag vmr">VMR</span>' : '');
+        const local = s.evento ? '<span class="fw-bold">' + esc(s.evento) + '</span><br><small class="text-muted">' + esc(s.pista) + '</small>' : esc(s.pista);
+        return '<tr>' +
+            '<td>' + esc(s.ordem) + 'ª</td>' +
+            '<td>' + (s.bandeira ? '<img src="' + esc(s.bandeira) + '" class="flag-img" alt=""> ' : '') + local + '</td>' +
+            '<td>' + (s.equipe_imagem ? '<img src="' + esc(s.equipe_imagem) + '" style="width:25px; height:25px; border-radius:3px; margin-right:8px;">' : '') + (s.equipe_link ? '<a class="link-perfil" href="' + esc(s.equipe_link) + '" title="Ver perfil da equipe">' + esc(s.equipe) + '</a>' : esc(s.equipe)) + '</td>' +
+            '<td>' + (s.largada ? s.largada + 'º' : '-') + '</td>' +
+            '<td>' + (s.chegada ? '<span class="sprint-pos ' + classePos(s.chegada, s.pontos) + '">' + s.chegada + 'º</span>' : '-') + '</td>' +
+            '<td>' + delta + '</td>' +
+            '<td class="fw-bold">' + num(s.pontos) + '</td>' +
+            '<td>' + (status || '-') + '</td>' +
+            '<td><a title="Visualizar corrida" href="' + esc(s.link) + '"><i class="bi bi-play-circle-fill"></i></a></td>' +
+            '</tr>';
+    }
+
+    // clicar na temporada abre/fecha as sprints dela
+    document.getElementById('sprintPorTemporada').addEventListener('click', e => {
+        const linha = e.target.closest('tr.sprint-temporada');
+        if (!linha) return;
+        const detalhe = document.querySelector('#sprintPorTemporada tr[data-detalhe="' + linha.dataset.temporada + '"]');
+        if (!detalhe) return;
+        const abrir = detalhe.classList.contains('oculto');
+        detalhe.classList.toggle('oculto', !abrir);
+        linha.classList.toggle('aberta', abrir);
+    });
+
+    renderizar('', '');
+
+    // acompanha o seletor de temporada do topo (o script original continua cuidando do card principal)
+    const seletor = document.getElementById('ajaxGetStatsPilotoPorTemporada');
+    if (seletor) {
+        const aoMudar = () => {
+            const opcao = seletor.options[seletor.selectedIndex];
+            renderizar(seletor.value, seletor.value ? opcao.textContent.trim() : '');
+        };
+        // com jQuery (select2 dispara o change por ele) o .on cobre os dois casos
+        if (window.jQuery) window.jQuery(seletor).on('change', aoMudar);
+        else seletor.addEventListener('change', aoMudar);
+    }
+})();
 </script>
 @endsection

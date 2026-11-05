@@ -82,6 +82,55 @@ class PilotoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+    /**
+     * MELHORIA 20261105: uma linha por sprint disputada (com largada ou chegada), da mais recente para a mais antiga.
+     */
+    private function sprintsDoPiloto($pilotoId)
+    {
+        $linhas = DB::table('resultados')
+            ->join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+            ->join('temporadas', 'temporadas.id', '=', 'corridas.temporada_id')
+            ->join('piloto_equipes', 'piloto_equipes.id', '=', 'resultados.pilotoEquipe_id')
+            ->join('equipes', 'equipes.id', '=', 'piloto_equipes.equipe_id')
+            ->join('pistas', 'pistas.id', '=', 'corridas.pista_id')
+            ->leftJoin('paises', 'paises.id', '=', 'pistas.pais_id')
+            ->leftJoin('eventos', 'eventos.id', '=', 'corridas.evento_id')
+            ->where('resultados.user_id', Auth::user()->id)
+            ->where('piloto_equipes.piloto_id', $pilotoId)
+            ->where('corridas.flg_sprint', 'S')
+            ->where(fn ($q) => $q->whereNotNull('resultados.chegada')->orWhereNotNull('resultados.largada'))
+            ->orderBy('temporadas.id', 'desc')
+            ->orderBy('corridas.ordem', 'desc')
+            ->select(
+                'corridas.id as corrida_id', 'corridas.ordem', 'corridas.volta_rapida',
+                'temporadas.id as temporada_id', 'temporadas.des_temporada', 'temporadas.referencia',
+                'eventos.des_nome as evento', 'pistas.nome as pista', 'paises.imagem as bandeira',
+                'equipes.id as equipe_id', 'equipes.nome as equipe', 'equipes.imagem as equipe_imagem',
+                'resultados.pilotoEquipe_id', 'resultados.largada', 'resultados.chegada', 'resultados.pontuacao', 'resultados.flg_abandono'
+            )
+            ->get();
+
+        return $linhas->map(fn ($l) => [
+            'corrida_id' => $l->corrida_id,
+            'temporada_id' => $l->temporada_id,
+            'temporada' => strpos($l->des_temporada, ' ') !== false ? substr($l->des_temporada, 0, strpos($l->des_temporada, ' ')) : $l->des_temporada,
+            'ano' => $l->referencia,
+            'ordem' => $l->ordem,
+            'evento' => $l->evento,
+            'pista' => $l->pista,
+            'bandeira' => $l->bandeira ? asset('images/' . $l->bandeira) : null,
+            'equipe' => $l->equipe,
+            'equipe_imagem' => $l->equipe_imagem ? asset('images/' . $l->equipe_imagem) : null,
+            'equipe_link' => route('equipes.show', [$l->equipe_id]),
+            'largada' => $l->largada ? (int) $l->largada : null,
+            'chegada' => $l->chegada ? (int) $l->chegada : null,
+            'pontos' => (float) $l->pontuacao,
+            'abandono' => $l->flg_abandono == 'S',
+            'volta_rapida' => $l->volta_rapida && $l->volta_rapida == $l->pilotoEquipe_id,
+            'link' => route('resultados.show', [$l->corrida_id]),
+        ])->values();
+    }
+
     public function show($id)
     {   
         //Dados do Piloto 
@@ -337,7 +386,10 @@ class PilotoController extends Controller
         $polesPorPista = array_count_values($pistasPoles);
         arsort($polesPorPista);
 
-        return view('site.pilotos.show', compact('modelPiloto','totTitulos','totAbandonos', 'totCorridas', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas', 'equipes','mediaChegada','gridMedio','temporadasDisputadas','pontuacaoPorTemporada','resultadosPorCorrida','temporadas','listagemVitorias', 'listagemPolePositions', 'corridasPorEquipe','vitoriasPorPista', 'polesPorPista','pistasEmQueOPilotoNaoVenceu','pistasEmQueOPilotoNaoFoiPolePosition', 'corridaSeguidasSemVencer', 'corridaSeguidasSemPolePosition'));
+        // MELHORIA 20261105: sprints disputadas pelo piloto (a seção monta as estatísticas no navegador)
+        $sprintsPiloto = $this->sprintsDoPiloto($modelPiloto->id);
+
+        return view('site.pilotos.show', compact('modelPiloto','totTitulos','totAbandonos', 'totCorridas', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas', 'equipes','mediaChegada','gridMedio','temporadasDisputadas','pontuacaoPorTemporada','resultadosPorCorrida','temporadas','listagemVitorias', 'listagemPolePositions', 'corridasPorEquipe','vitoriasPorPista', 'polesPorPista','pistasEmQueOPilotoNaoVenceu','pistasEmQueOPilotoNaoFoiPolePosition', 'corridaSeguidasSemVencer', 'corridaSeguidasSemPolePosition', 'sprintsPiloto'));
     }
 
     /**
