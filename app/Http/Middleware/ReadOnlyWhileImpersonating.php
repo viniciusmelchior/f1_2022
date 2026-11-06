@@ -6,6 +6,7 @@ use App\Http\Controllers\Site\PDFController;
 use App\Http\Controllers\Site\PistaController;
 use App\Support\Impersonation;
 use Closure;
+use Illuminate\Database\Connection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -71,6 +72,9 @@ class ReadOnlyWhileImpersonating
         'estatisticas.pilotos.equipes.buscar',
     ];
 
+    /** @var \WeakMap<Connection, \stdClass>|null */
+    private static ?\WeakMap $guards = null;
+
     public function handle(Request $request, Closure $next): Response
     {
         $impersonation = Impersonation::current($request);
@@ -120,24 +124,38 @@ class ReadOnlyWhileImpersonating
     }
 
     /**
-     * Runs the request with a database that refuses anything but reads. The session is saved after this middleware
-     * returns, so it is not affected.
+     * Runs the request with a database that refuses anything but `select`. The session is saved after this
+     * middleware returns, so it is not affected. The check is registered once per connection and switched on and
+     * off around the request.
      */
     private function withReadOnlyDatabase(Request $request, Closure $next): Response
     {
-        $active = true;
+        $connection = DB::connection();
 
-        DB::beforeExecuting(function (string $query) use (&$active): void {
-            if ($active && ! preg_match('/^\s*(select|with|show|explain)\b/i', $query)) {
-                throw new \LogicException('A read-only view tried to run a statement that is not a read.');
-            }
-        });
+        self::$guards ??= new \WeakMap();
+        $guard = self::$guards[$connection] ??= $this->registerGuard($connection);
+
+        $guard->active = true;
 
         try {
             return $next($request);
         } finally {
-            $active = false;
+            $guard->active = false;
         }
+    }
+
+    private function registerGuard(Connection $connection): \stdClass
+    {
+        $guard = new \stdClass();
+        $guard->active = false;
+
+        $connection->beforeExecuting(function (string $query) use ($guard): void {
+            if ($guard->active && ! preg_match('/^\s*select\b/i', $query)) {
+                throw new \LogicException('A read-only view tried to run a statement that is not a select.');
+            }
+        });
+
+        return $guard;
     }
 
     private function isReadOnlyRequest(Request $request): bool

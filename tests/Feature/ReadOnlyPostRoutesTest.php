@@ -45,10 +45,11 @@ class ReadOnlyPostRoutesTest extends TestCase
         $this->visit('POST', route('user.authenticate'), ['email' => 'admin@example.com', 'password' => self::PASSWORD])->assertRedirect();
         $this->visit('POST', route('usuarios.entrarComo', [$this->ana->id]))->assertRedirect(route('home'));
 
-        // Record every statement that is not a read, from here on.
-        DB::listen(function ($query) {
-            if (! preg_match('/^\s*(select|with|show|explain)\b/i', $query->sql)) {
-                $this->writes[] = $query->sql;
+        // Record every statement that is not a select, from here on. This runs before the guard of the middleware,
+        // which is registered later, so it sees a statement the guard is about to refuse as well as one that runs.
+        DB::beforeExecuting(function (string $query) {
+            if (! preg_match('/^\s*select\b/i', $query)) {
+                $this->writes[] = $query;
             }
         });
     }
@@ -183,9 +184,11 @@ class ReadOnlyPostRoutesTest extends TestCase
 
             $this->assertSame(200, $response->getStatusCode(), "$name answered ".$response->getStatusCode().' '.($response->exception?->getMessage() ?? ''));
             $response->assertSessionMissing('impersonation_blocked');
+            // Some actions answer 200 with an error message when anything fails, a refused write included.
+            $this->assertStringNotContainsString('Erro na requisição', $response->getContent(), "$name reported an error");
         }
 
-        $this->assertSame([], $this->writes, 'a listed route wrote to the database');
+        $this->assertSame([], $this->writes, 'a listed route tried to write to the database');
     }
 
     public function test_the_write_guard_stops_a_listed_route_that_starts_writing(): void
