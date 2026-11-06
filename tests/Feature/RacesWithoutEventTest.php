@@ -242,7 +242,7 @@ class RacesWithoutEventTest extends TestCase
         );
     }
 
-    public function test_races_of_a_season_without_an_event_list_a_dash(): void
+    public function test_races_of_a_season_without_an_event_render_without_an_event_link(): void
     {
         $this->seedSingleRaceSeasons();
 
@@ -251,6 +251,7 @@ class RacesWithoutEventTest extends TestCase
         $response->assertOk();
         $response->assertSee('Interlagos');
         $response->assertDontSee('GP do Brasil');
+        $response->assertDontSee(route('eventos.show', [1]), false);
     }
 
     public function test_races_of_a_season_with_an_event_are_unchanged(): void
@@ -264,7 +265,7 @@ class RacesWithoutEventTest extends TestCase
         $response->assertSee(route('eventos.show', [1]), false);
     }
 
-    public function test_track_page_lists_races_with_and_without_an_event(): void
+    public function test_track_page_renders_with_races_with_and_without_an_event(): void
     {
         $response = $this->actingAs($this->user)->get(route('pistas.show', [1]));
 

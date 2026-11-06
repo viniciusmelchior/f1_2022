@@ -191,7 +191,7 @@ class EstatisticasPilotosEquipes extends Controller
             $quantidadePorEquipe[$equipeId]['pilotos'][$pilotoId]['quantidade_por_pista'][$pista]['quantidade']++;
 
             // Agrupar vitórias por evento
-            $eventoId = $item['evento_id'];
+            $eventoId = $item['evento_id'] ?? ''; // races without an event share one group
             if (!isset($quantidadePorEquipe[$equipeId]['pilotos'][$pilotoId]['quantidade_por_evento'][$eventoId])) {
                 $quantidadePorEquipe[$equipeId]['pilotos'][$pilotoId]['quantidade_por_evento'][$eventoId] = [
                     'evento' => $item['evento'],
@@ -281,7 +281,7 @@ class EstatisticasPilotosEquipes extends Controller
             $vitoriasPorPiloto[$pilotoId]['paises'][$paisId]['quantidade']++;
         
             // Agrupar vitórias por evento
-            $eventoId = $item['evento_id'];
+            $eventoId = $item['evento_id'] ?? ''; // races without an event share one group
             if (!isset($vitoriasPorPiloto[$pilotoId]['eventos'][$eventoId])) {
                 $vitoriasPorPiloto[$pilotoId]['eventos'][$eventoId] = [
                     'evento' => $item['evento'],
