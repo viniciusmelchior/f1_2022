@@ -3,7 +3,9 @@
 namespace App\Support;
 
 use Illuminate\Http\Request;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 /**
  * State of an administrator who is viewing the site as another user.
@@ -45,5 +47,18 @@ final class Impersonation
         $session->forget(self::SESSION_KEY);
 
         return null;
+    }
+
+    /**
+     * Whether the administrator who started the view still exists and is still an administrator.
+     * When not, the view must end: the viewed user's session would otherwise outlive the administrator's rights.
+     *
+     * @param  array{admin_id: int, target_id: int}  $impersonation
+     */
+    public static function adminIsStillAdmin(array $impersonation): bool
+    {
+        $admin = User::find($impersonation['admin_id']);
+
+        return $admin !== null && Gate::forUser($admin)->allows('admin');
     }
 }

@@ -28,7 +28,7 @@ class AuthServiceProvider extends ServiceProvider
 
         // Administrators are the accounts whose email is listed in config('admin.emails').
         Gate::define('admin', function (User $user): bool {
-            return in_array(mb_strtolower(trim((string) $user->email)), config('admin.emails', []), true);
+            return in_array(strtolower(trim((string) $user->email)), config('admin.emails', []), true);
         });
     }
 }

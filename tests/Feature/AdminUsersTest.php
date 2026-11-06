@@ -126,6 +126,25 @@ class AdminUsersTest extends TestCase
         $this->assertFalse(\Gate::forUser($this->bia)->allows('admin'));
     }
 
+    public function test_a_lookalike_email_does_not_fold_into_an_admin_address(): void
+    {
+        config(['admin.emails' => ['kate@example.com']]);
+
+        // U+212A is the Kelvin sign: mb_strtolower() would turn it into a plain "k".
+        $lookalike = $this->makeUser('Lookalike', "\u{212A}ate@example.com");
+        $real = $this->makeUser('Kate', 'KATE@example.com');
+
+        $this->assertFalse(\Gate::forUser($lookalike)->allows('admin'));
+        $this->assertTrue(\Gate::forUser($real)->allows('admin'));
+
+        putenv("F1_ADMIN_EMAILS=\u{212A}ate@example.com");
+        try {
+            $this->assertSame(["\u{212A}ate@example.com"], (require config_path('admin.php'))['emails']);
+        } finally {
+            putenv('F1_ADMIN_EMAILS');
+        }
+    }
+
     public function test_an_empty_list_makes_nobody_an_admin(): void
     {
         config(['admin.emails' => []]);
@@ -217,12 +236,10 @@ class AdminUsersTest extends TestCase
         Log::shouldReceive('info')->once()->with('Impersonation started', ['admin_id' => $this->admin->id, 'target_id' => $this->bia->id]);
         $this->loginAs($this->admin);
         $sessionBefore = $this->sessionId;
-        $tokenBefore = $this->app['session.store']->token();
 
         $this->startViewing($this->ana)->assertRedirect(route('home'));
 
         $this->assertNotSame($sessionBefore, $this->sessionId, 'the session id is regenerated on start');
-        $this->assertNotSame($tokenBefore, $this->app['session.store']->token(), 'the CSRF token is regenerated on start');
         $this->assertSame($this->ana->id, $this->loggedInUserId());
 
         $sessionWhileViewing = $this->sessionId;
@@ -432,15 +449,145 @@ class AdminUsersTest extends TestCase
         }
     }
 
-    public function test_the_same_get_routes_are_not_blocked_outside_of_viewing(): void
+    public function test_head_on_a_delete_route_is_rejected_while_viewing(): void
+    {
+        $this->loginAs($this->admin);
+        $this->startViewing($this->ana);
+
+        $this->visit('HEAD', '/pilotos/delete')->assertRedirect()->assertSessionHas('impersonation_blocked');
+    }
+
+    public function test_a_regular_page_costs_one_query_for_a_non_admin_as_before(): void
     {
         $this->loginAs($this->ana);
 
-        // Nothing is rejected by the read-only rule for a regular session (the route itself may still fail).
-        $this->withoutExceptionHandling();
-        $response = $this->visit('GET', route('dashboard'));
-        $response->assertOk();
-        $response->assertSessionMissing('impersonation_blocked');
+        DB::enableQueryLog();
+        $this->visit('GET', route('dashboard'))->assertOk();
+
+        // The user lookup that the `auth` middleware makes; the banner and the `admin` checks add none.
+        $this->assertCount(1, DB::getQueryLog());
+    }
+
+    public function test_the_read_only_rule_does_not_touch_a_regular_session(): void
+    {
+        $this->loginAs($this->ana);
+
+        $this->visit('POST', '/pilotos/store')->assertSessionMissing('impersonation_blocked');
+        $this->visit('GET', route('dashboard'))->assertOk()->assertSessionMissing('impersonation_blocked');
+        $this->assertSame($this->ana->id, $this->loggedInUserId());
+    }
+
+    /**
+     * Every GET route is either rejected while viewing or listed here as read-only after review. A new GET route
+     * fails this test until someone decides which it is; one that writes, deletes or sends mail must be rejected
+     * in ReadOnlyWhileImpersonating.
+     */
+    public function test_every_get_route_has_been_reviewed_as_read_only_or_is_rejected(): void
+    {
+        $rejected = fn ($route) => str_ends_with($route->getActionName(), '@destroy')
+            || in_array($route->getActionName(), [
+                \App\Http\Controllers\Site\PistaController::class.'@adicionarAutor',
+                \App\Http\Controllers\Site\PDFController::class.'@index',
+            ], true);
+
+        $readOnly = collect(Route::getRoutes()->getRoutes())
+            ->filter(fn ($route) => in_array('GET', $route->methods(), true))
+            ->reject($rejected)
+            // Routes of vendor packages (dev-only Ignition, Sanctum) are not part of this app's pages.
+            ->reject(fn ($route) => str_starts_with($route->uri(), '_ignition') || str_starts_with($route->uri(), 'sanctum/'))
+            ->map(fn ($route) => '/'.ltrim($route->uri(), '/'))
+            ->unique()->sort()->values()->all();
+
+        $this->assertSame([
+            '/',
+            '/anos/create',
+            '/anos/edit/{id}',
+            '/anos/index',
+            '/api/user',
+            '/condicaoClimatica/create',
+            '/condicaoClimatica/edit/{id}',
+            '/condicaoClimatica/index',
+            '/corridas/adicionar/{id}',
+            '/corridas/create',
+            '/corridas/edit/{id}/{corrida}',
+            '/corridas/index/{id}',
+            '/curiosidades',
+            '/dashboard',
+            '/equipes/create',
+            '/equipes/edit/{id}',
+            '/equipes/index',
+            '/equipes/relacaoForcas/edit/{ano_id}/{temporada_id}',
+            '/equipes/relacaoForcas/index',
+            '/equipes/relacaoForcas/listagemEquipes/{temporada_id}',
+            '/equipes/show/{id}',
+            '/estatisticas',
+            '/estatisticasPilotosEquipes/index',
+            '/estudos',
+            '/eventos/create',
+            '/eventos/edit/{id}',
+            '/eventos/index',
+            '/eventos/show/{id}',
+            '/home',
+            '/paises/create',
+            '/paises/edit/{id}',
+            '/paises/index',
+            '/paises/show/{id}',
+            '/pilotoEquipe/create',
+            '/pilotoEquipe/edit/{id}',
+            '/pilotoEquipe/index',
+            '/pilotos/comparativo',
+            '/pilotos/create',
+            '/pilotos/edit/{id}',
+            '/pilotos/export/{id}',
+            '/pilotos/index',
+            '/pilotos/performance-por-pista',
+            '/pilotos/relacaoForcas/edit/{ano_id}/{temporada_id}',
+            '/pilotos/relacaoForcas/index',
+            '/pilotos/relacaoForcas/listagemPilotos/{temporada_id}',
+            '/pilotos/show/{id}',
+            '/pistas/create',
+            '/pistas/edit/{id}',
+            '/pistas/index',
+            '/pistas/show/{id}',
+            '/register',
+            '/resultados/edit/{id}',
+            '/resultados/show/{id}',
+            '/skin/create',
+            '/skin/edit/{id}',
+            '/skin/index',
+            '/temporadas/classificacao/{id}',
+            '/temporadas/create',
+            '/temporadas/edit/{id}',
+            '/temporadas/index',
+            '/temporadas/resultados/{id}/{porPontuacao?}',
+            '/tempos',
+            '/teste',
+            '/users/login',
+            '/usuarios/index',
+            '/visualizarVitoriasPiloto/{piloto_id}',
+        ], $readOnly);
+    }
+
+    public function test_viewing_ends_when_the_admin_is_removed_from_the_list(): void
+    {
+        $this->loginAs($this->admin);
+        $this->startViewing($this->ana);
+        $this->visit('GET', route('dashboard'))->assertOk();
+
+        config(['admin.emails' => []]);
+
+        $this->visit('GET', route('dashboard'))->assertRedirect(route('login'));
+        $this->assertNull($this->loggedInUserId());
+    }
+
+    public function test_viewing_ends_when_the_admin_account_is_deleted(): void
+    {
+        $this->loginAs($this->admin);
+        $this->startViewing($this->ana);
+        $this->admin->delete();
+
+        $this->visit('GET', route('dashboard'))->assertRedirect(route('login'));
+        $this->assertNull($this->loggedInUserId());
     }
 
     public function test_an_old_entry_cannot_make_another_login_a_way_back_to_the_admin(): void

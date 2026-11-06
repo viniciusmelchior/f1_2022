@@ -53,8 +53,8 @@ class UsuarioController extends Controller
         ]);
 
         Auth::login($target);
+        // New session id (and CSRF token): nothing from before the identity change is reusable.
         $request->session()->regenerate();
-        $request->session()->regenerateToken();
 
         return redirect()->route('home');
     }
@@ -85,8 +85,8 @@ class UsuarioController extends Controller
         Log::info('Impersonation ended', ['admin_id' => $admin->id, 'target_id' => $impersonation['target_id']]);
 
         Auth::login($admin);
+        // New session id (and CSRF token): nothing from before the identity change is reusable.
         $request->session()->regenerate();
-        $request->session()->regenerateToken();
 
         return Gate::forUser($admin)->allows('admin')
             ? redirect()->route('usuarios.index')

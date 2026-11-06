@@ -7,6 +7,8 @@ use App\Http\Controllers\Site\PistaController;
 use App\Support\Impersonation;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -26,7 +28,26 @@ class ReadOnlyWhileImpersonating
 
     public function handle(Request $request, Closure $next): Response
     {
-        if (Impersonation::current($request) === null || $request->routeIs(Impersonation::LEAVE_ROUTE)) {
+        $impersonation = Impersonation::current($request);
+
+        if ($impersonation === null) {
+            return $next($request);
+        }
+
+        if (! Impersonation::adminIsStillAdmin($impersonation)) {
+            Log::warning('Impersonation ended: the administrator is gone or no longer an administrator', [
+                'admin_id' => $impersonation['admin_id'],
+                'target_id' => $impersonation['target_id'],
+            ]);
+
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login');
+        }
+
+        if ($request->routeIs(Impersonation::LEAVE_ROUTE)) {
             return $next($request);
         }
 
