@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Support\LoginThrottle;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\MessageBag;
 use Illuminate\Validation\Rule;
@@ -110,7 +112,18 @@ class UserController extends Controller
             'password' => 'required'
         ]);
 
+        $throttle = LoginThrottle::for($request, $formFields['email']);
+
+        if (($seconds = $throttle->attempt()) > 0) {
+            Log::warning('Login throttled', ['retry_after' => $seconds]);
+
+            return response()
+                ->view('login.login', ['throttleSeconds' => $seconds], 429)
+                ->header('Retry-After', $seconds);
+        }
+
         if (auth()->attempt($formFields)) {
+            $throttle->clear();
             $request->session()->regenerate();
         }else{
             // return redirect()->back()->with('message', 'your message,here');   
