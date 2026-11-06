@@ -124,6 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    document.getElementById('prev-race').addEventListener('click', () => fetchRaceData('prev'));
-    document.getElementById('next-race').addEventListener('click', () => fetchRaceData('next'));
+    // The race navigation exists only on pages that render it; this script is included on every page.
+    document.getElementById('prev-race')?.addEventListener('click', () => fetchRaceData('prev'));
+    document.getElementById('next-race')?.addEventListener('click', () => fetchRaceData('next'));
 });

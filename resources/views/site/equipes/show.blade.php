@@ -263,7 +263,7 @@
 <script>
 (function () {
     const D = window.DADOS_EQUIPE;
-    // o layout carrega um segundo jQuery no fim da página; guarda o atual (o mesmo do select2)
+    // o layout carrega um único jQuery, no <head>, com o select2 e o DataTables
     const $j = window.jQuery;
     const esc = t => String(t === null || t === undefined ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     const num = v => Number.isInteger(v) ? v : String(Math.round(v * 10) / 10).replace('.', ',');
