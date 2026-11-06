@@ -241,8 +241,8 @@ route::post('/buscaResultadosCorrida', [HomeController::class, 'buscaResultadosC
 // route::post('/getAllDrivers', [PilotoController::class, 'getAllDrivers'])->name('getAllDrivers');
 
 /** 19/02/2025 - tela de estatisticas de pilotos e equipes */
-route::get('/estatisticasPilotosEquipes/index', [EstatisticasPilotosEquipes::class, 'index'])->name('estatisticas.pilotos.equipes.index');
-route::post('/estatisticasPilotosEquipes/buscar', [EstatisticasPilotosEquipes::class, 'buscar'])->name('estatisticas.pilotos.equipes.buscar');
+route::get('/estatisticasPilotosEquipes/index', [EstatisticasPilotosEquipes::class, 'index'])->name('estatisticas.pilotos.equipes.index')->middleware('auth');
+route::post('/estatisticasPilotosEquipes/buscar', [EstatisticasPilotosEquipes::class, 'buscar'])->name('estatisticas.pilotos.equipes.buscar')->middleware('auth');
 
 /** 05/11/2026 - curiosidades e recordes (somente GPs, sem sprints) */
 route::get('/curiosidades', [\App\Http\Controllers\Site\CuriosidadesController::class, 'index'])->name('curiosidades.index')->middleware('auth');
