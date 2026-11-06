@@ -775,8 +775,7 @@
 <input type="hidden" name="url_busca" id="url_busca" value="{{route('estatisticas.pilotos.equipes.buscar')}}">
 
 <script>
-    // O layout carrega o Select2 junto do jQuery do <head>; o jQuery carregado no fim da página não tem o plugin,
-    // por isso guardo a referência que existe neste ponto
+    // O Select2 está no jQuery carregado no <head>; guardo a referência a ele
     const jq = window.jQuery;
 
     const idiomaSelect2 = {
