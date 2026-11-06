@@ -10,8 +10,10 @@ use Tests\TestCase;
 
 /**
  * Request values never reach a query as SQL text. Every parameter that used to be pasted into a
- * statement is sent a UNION payload that would read another account's data, then a normal value
- * that must give the same rows as before.
+ * statement (or is now checked before it reaches one) is sent a UNION payload and other malformed
+ * values, which must be refused with 422; a normal value must give the same rows as before.
+ * The payload cases check the refusal. One case uses a payload with the column count of the query
+ * it used to reach, which read every account's email before the fix.
  */
 class SqlInjectionTest extends TestCase
 {
