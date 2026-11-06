@@ -116,7 +116,7 @@ class HomeController extends Controller
         $titulosPorPilotos = [];
         $titulosPorEquipes = [];
 
-        $titulos = Titulo::where('user_id', Auth::user()->id)->get();
+        $titulos = Titulo::where('user_id', Auth::user()->id)->with(['pilotoEquipe.piloto', 'equipe'])->get();
 
         foreach($titulos as $item){
             array_push($titulosPorPilotos, $item->pilotoEquipe->piloto->nomeCompleto());

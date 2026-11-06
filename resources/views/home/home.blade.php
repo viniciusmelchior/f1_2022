@@ -485,11 +485,25 @@ margin: 0;
     // })->get();
     $resultadoCorridas = Corrida::whereHas('resultado', function($query){
        $query->where('user_id', Auth::user()->id)->orderBy('temporada_id','DESC')->orderBy('ordem','DESC');
-    })->get();
+    })->with(['temporada', 'pista.pais', 'evento'])->get();
 
     $resultadoCorridas = $resultadoCorridas->where('flg_sprint', "<>", 'S');
     $resultadoCorridas = $resultadoCorridas->sortByDesc('ordem');
     $resultadoCorridas = $resultadoCorridas->sortByDesc('temporada_id');
+
+    // Pole/1o/2o/3o das corridas em uma consulta so, com piloto e equipe carregados
+    $resultadosPodio = Resultado::where('user_id', Auth::user()->id)
+        ->whereIn('corrida_id', $resultadoCorridas->pluck('id'))
+        ->where(function($q){ $q->whereIn('chegada', [1, 2, 3])->orWhere('largada', 1); })
+        ->with(['pilotoEquipe.piloto', 'pilotoEquipe.equipe'])
+        ->orderBy('id')
+        ->get()
+        ->groupBy('corrida_id');
+    $voltasRapidas = PilotoEquipe::where('user_id', Auth::user()->id)
+        ->whereIn('id', $resultadoCorridas->pluck('volta_rapida')->filter()->unique())
+        ->with(['piloto', 'equipe'])
+        ->get()
+        ->keyBy('id');
 
     @endphp
 
@@ -515,13 +529,13 @@ margin: 0;
             @foreach($resultadoCorridas as $key => $resultadoCorrida)
             @php 
     
-            $resultado = Resultado::where('user_id', Auth::user()->id)->where('corrida_id', $resultadoCorrida->id)->get();
+            $resultado = $resultadosPodio->get($resultadoCorrida->id, collect());
 
             $primeiro = $resultado->where('chegada', 1)->first();
             $polePosition = $resultado->where('largada', 1)->first();
             $segundo = $resultado->where('chegada', 2)->first();
             $terceiro = $resultado->where('chegada', 3)->first();
-            $voltaRapida = PilotoEquipe::where('user_id', Auth::user()->id)->where('id', $resultadoCorrida->volta_rapida)->first();
+            $voltaRapida = $voltasRapidas->get($resultadoCorrida->volta_rapida);
             
             @endphp
                 <tr @if($resultadoCorrida->flg_sprint == 'S') style="font-style:italic;" @endif>
