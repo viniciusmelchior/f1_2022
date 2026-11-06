@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 
 class AuthServiceProvider extends ServiceProvider
@@ -25,6 +26,9 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        //
+        // Administrators are the accounts whose email is listed in config('admin.emails').
+        Gate::define('admin', function (User $user): bool {
+            return in_array(strtolower(trim((string) $user->email)), config('admin.emails', []), true);
+        });
     }
 }

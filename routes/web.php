@@ -15,6 +15,7 @@ use App\Http\Controllers\Site\ResultadoController;
 use App\Http\Controllers\Site\TemporadaController;
 use App\Http\Controllers\Site\PDFController;
 use App\Http\Controllers\Site\SkinController;
+use App\Http\Controllers\Site\UsuarioController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Site\EstatisticasPilotosEquipes;
 use Illuminate\Support\Facades\Route;
@@ -247,3 +248,8 @@ route::post('/estatisticasPilotosEquipes/buscar', [EstatisticasPilotosEquipes::c
 route::get('/curiosidades', [\App\Http\Controllers\Site\CuriosidadesController::class, 'index'])->name('curiosidades.index')->middleware('auth');
 
 
+
+/** Usuários (somente administradores, ver config/admin.php) */
+route::get('/usuarios/index', [UsuarioController::class, 'index'])->name('usuarios.index')->middleware(['auth', 'can:admin']);
+route::post('/usuarios/entrarComo/{id}', [UsuarioController::class, 'entrarComo'])->name('usuarios.entrarComo')->middleware(['auth', 'can:admin']);
+route::post('/usuarios/voltar', [UsuarioController::class, 'voltar'])->name('usuarios.voltar')->middleware('auth');
