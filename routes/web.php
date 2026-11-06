@@ -200,10 +200,10 @@ route::post('/ajax/url_largada_pilotos', [HomeController::class, 'largada_piloto
 route::post('/ajax/url_largada_equipes', [HomeController::class, 'largada_equipes'])->name('url_largada_equipes')->middleware('auth');
 
 /**Rotas Excel */
-Route::get('pilotos/export/{id}', [PilotoController::class, 'export'])->name('pilotos.export');
+Route::get('pilotos/export/{id}', [PilotoController::class, 'export'])->name('pilotos.export')->middleware('auth');
 
 /**Disparo de Email */
-Route::get('send-email-pdf', [PDFController::class, 'index']);
+Route::get('send-email-pdf', [PDFController::class, 'index'])->middleware('auth');
 
 /**Anos */
 route::get('/anos/create', [AnoController::class, 'create'])->name('anos.create')->middleware('auth');
@@ -235,9 +235,9 @@ route::get('tempos', function(){
 
 /**ESTUDOS PAGINACAO */
 // route::get('/allDrivers', [PilotoController::class, 'listAllDrivers'])->name('allDrivers');
-route::get('/estatisticas', [HomeController::class, 'indexEstatisticas'])->name('estatisticas');
-route::get('/teste', [HomeController::class, 'teste'])->name('teste');
-route::post('/buscaResultadosCorrida', [HomeController::class, 'buscaResultadosCorrida'])->name('buscaResultadosCorrida');
+route::get('/estatisticas', [HomeController::class, 'indexEstatisticas'])->name('estatisticas')->middleware('auth');
+route::get('/teste', [HomeController::class, 'teste'])->name('teste')->middleware('auth');
+route::post('/buscaResultadosCorrida', [HomeController::class, 'buscaResultadosCorrida'])->name('buscaResultadosCorrida')->middleware('auth');
 // route::post('/getAllDrivers', [PilotoController::class, 'getAllDrivers'])->name('getAllDrivers');
 
 /** 19/02/2025 - tela de estatisticas de pilotos e equipes */
