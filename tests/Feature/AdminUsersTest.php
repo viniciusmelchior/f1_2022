@@ -412,7 +412,7 @@ class AdminUsersTest extends TestCase
         $this->loginAs($this->admin);
         $this->startViewing($this->ana);
 
-        $this->visit('POST', '/ajax/comparativos', [], json: true)
+        $this->visit('POST', '/pilotos/store', [], json: true)
             ->assertForbidden()
             ->assertJsonStructure(['message']);
     }
