@@ -608,7 +608,7 @@ class TemporadaController extends Controller
 
         $corrida = Corrida::find($corrida->corrida_id);
         $ordemCorrida = $corrida->ordem;
-        $corridaAtual = $corrida->evento->des_nome;
+        $corridaAtual = $corrida->evento?->des_nome ?? '-';
 
         // dd($resultadosPilotos);
 

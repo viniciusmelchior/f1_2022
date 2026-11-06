@@ -122,8 +122,8 @@ class EstatisticasPilotosEquipes extends Controller
                     'corrida' => $resultado->corrida->pista->nome,
                     'pais' => $resultado->corrida->pista->pais->des_nome,
                     'pais_id' => $resultado->corrida->pista->pais->id,
-                    'evento' => $resultado->corrida->evento->des_nome,
-                    'evento_id' => $resultado->corrida->evento->id,
+                    'evento' => $resultado->corrida->evento?->des_nome ?? '-',
+                    'evento_id' => $resultado->corrida->evento?->id,
                     'pista_id' =>$resultado->corrida->pista->id   
                 ];
 
@@ -136,8 +136,8 @@ class EstatisticasPilotosEquipes extends Controller
                     'corrida' => $resultado->corrida->pista->nome,
                     'pais' => $resultado->corrida->pista->pais->des_nome,
                     'pais_id' => $resultado->corrida->pista->pais->id,
-                    'evento' => $resultado->corrida->evento->des_nome,
-                    'evento_id' => $resultado->corrida->evento->id,
+                    'evento' => $resultado->corrida->evento?->des_nome ?? '-',
+                    'evento_id' => $resultado->corrida->evento?->id,
                     'pista_id' =>$resultado->corrida->pista->id
                 ];
             }
@@ -191,7 +191,7 @@ class EstatisticasPilotosEquipes extends Controller
             $quantidadePorEquipe[$equipeId]['pilotos'][$pilotoId]['quantidade_por_pista'][$pista]['quantidade']++;
 
             // Agrupar vitórias por evento
-            $eventoId = $item['evento_id'];
+            $eventoId = $item['evento_id'] ?? ''; // races without an event share one group
             if (!isset($quantidadePorEquipe[$equipeId]['pilotos'][$pilotoId]['quantidade_por_evento'][$eventoId])) {
                 $quantidadePorEquipe[$equipeId]['pilotos'][$pilotoId]['quantidade_por_evento'][$eventoId] = [
                     'evento' => $item['evento'],
@@ -281,7 +281,7 @@ class EstatisticasPilotosEquipes extends Controller
             $vitoriasPorPiloto[$pilotoId]['paises'][$paisId]['quantidade']++;
         
             // Agrupar vitórias por evento
-            $eventoId = $item['evento_id'];
+            $eventoId = $item['evento_id'] ?? ''; // races without an event share one group
             if (!isset($vitoriasPorPiloto[$pilotoId]['eventos'][$eventoId])) {
                 $vitoriasPorPiloto[$pilotoId]['eventos'][$eventoId] = [
                     'evento' => $item['evento'],
