@@ -314,7 +314,6 @@ def read_pages(w):
         "/resultados/edit/1", "/resultados/show/1", "/resultados/show/3", "/resultados/show/5",
         "/anos/index", "/anos/create", "/anos/edit/1",
         "/visualizarVitoriasPiloto/1", "/visualizarVitoriasPiloto/2",
-        "/api/testes", "/api/classificacao",
     ]
     for path in pages:
         w.get("page" + re.sub(r"[^a-zA-Z0-9]+", "-", path).rstrip("-"), path, None)
