@@ -243,4 +243,7 @@ route::post('/buscaResultadosCorrida', [HomeController::class, 'buscaResultadosC
 route::get('/estatisticasPilotosEquipes/index', [EstatisticasPilotosEquipes::class, 'index'])->name('estatisticas.pilotos.equipes.index');
 route::post('/estatisticasPilotosEquipes/buscar', [EstatisticasPilotosEquipes::class, 'buscar'])->name('estatisticas.pilotos.equipes.buscar');
 
+/** 05/11/2026 - curiosidades e recordes (somente GPs, sem sprints) */
+route::get('/curiosidades', [\App\Http\Controllers\Site\CuriosidadesController::class, 'index'])->name('curiosidades.index')->middleware('auth');
+
 

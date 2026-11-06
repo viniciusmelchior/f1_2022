@@ -76,6 +76,17 @@
               <li><a class="link_name" href="{{route('estatisticas')}}">Estatisticas</a></li>
               <li><a class="link_name" href="{{route('tempos')}}">Análises de Voltas</a></li>
               <li><a class="link_name" href="{{route('estatisticas.pilotos.equipes.index')}}">Dados pilotos/equipes</a></li>
+              <li><a class="link_name" href="{{route('curiosidades.index')}}">Curiosidades e Recordes</a></li>
+            </ul>
+          </li>
+          {{-- MELHORIA 20261105: atalho direto para a tela de curiosidades --}}
+          <li>
+            <a href="{{route('curiosidades.index')}}">
+              <i class='bx bx-trophy'></i>
+              <span class="link_name">Curiosidades</span>
+            </a>
+            <ul class="sub-menu blank">
+              <li><a class="link_name" href="{{route('curiosidades.index')}}">Curiosidades e Recordes</a></li>
             </ul>
           </li>
           <li>
