@@ -248,6 +248,12 @@ a {
              <!--  <a href="#" class="forgot_pw">Forgot password?</a> -->
             </div>
 
+            @isset($throttleSeconds)
+              <p role="alert" style="margin-top: 20px; color: #c0392b; font-size: 14px; text-align: center;">
+                Muitas tentativas de login. Tente novamente em {{ $throttleSeconds }} {{ $throttleSeconds === 1 ? 'segundo' : 'segundos' }}.
+              </p>
+            @endisset
+
             <button class="button" type="submit">Entrar</button>
 
            <!--  <div class="login_signup">Don't have an account? <a href="#" id="signup">Signup</a></div> -->

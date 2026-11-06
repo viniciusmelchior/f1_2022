@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Support\LoginThrottle;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\MessageBag;
@@ -110,9 +111,20 @@ class UserController extends Controller
             'password' => 'required'
         ]);
 
+        $throttle = LoginThrottle::for($request);
+
+        if (($seconds = $throttle->availableIn()) > 0) {
+            return response()
+                ->view('login.login', ['throttleSeconds' => $seconds], 429)
+                ->header('Retry-After', $seconds);
+        }
+
         if (auth()->attempt($formFields)) {
+            $throttle->clear();
             $request->session()->regenerate();
         }else{
+            $throttle->hit();
+
             // return redirect()->back()->with('message', 'your message,here');   
             $errors = new MessageBag(['erro' => ['Usuário e/ou senha inválidos']]); // if Auth::attempt fails (wrong credentials) create a new message bag instance.
 
