@@ -9,6 +9,7 @@ use App\Models\Site\Piloto;
 use App\Models\Site\Equipe;
 use App\Models\Site\Resultado;
 use App\Models\Site\Corrida;
+use App\Support\SqlInput;
 use Illuminate\Support\Facades\Auth;
 
 class EstatisticasPilotosEquipes extends Controller
@@ -29,8 +30,8 @@ class EstatisticasPilotosEquipes extends Controller
     public function buscar(Request $request){
 
         //A função será reaproveitada e para isso vou decidir algumas configurações que serão usadas no select
-        $limite = $request->limite; //define se é vitórias/poles, pódios, top10, top5 etc
-        $tipoConsulta = $request->tipo; //define se busco por posição de chegada ou largada
+        $limite = SqlInput::id($request->limite); //define se é vitórias/poles, pódios, top10, top5 etc
+        $tipoConsulta = SqlInput::oneOf($request->tipo, ['chegada', 'largada']); //define se busco por posição de chegada ou largada
         $pilotosParaIgnorar = $request->pilotos_ignorados;
         $equipesParaIgnorar = $request->equipes_ignoradas;
         
@@ -97,7 +98,7 @@ class EstatisticasPilotosEquipes extends Controller
             ->join('equipes', 'equipes.id', '=', 'piloto_equipes.equipe_id')
             ->whereNotIn('pilotos.id', $pilotosParaIgnorar)//fixado temporariamente. É o meu piloto
             ->whereNotIn('equipes.id', $equipesParaIgnorar)//fixado temporariamente. É a minha equipe
-            ->orderBy('resultados.'.$tipoConsulta.'', 'ASC')
+            ->orderBy('resultados.'.$tipoConsulta, 'ASC')
             ->limit($limite) //selecionar o top numero para decidir até qual lugar pesquisar
             ->get(
                 [

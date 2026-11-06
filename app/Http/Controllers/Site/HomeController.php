@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Site\Resultado;
 use App\Models\Site\Temporada;
 use App\Models\Site\Titulo;
+use App\Support\SqlInput;
 use App\Models\Site\Corrida;
 use Illuminate\Http\Request;
 use App\Models\Site\PilotoEquipe;
@@ -585,11 +586,11 @@ class HomeController extends Controller
 
     public function ajaxGetVitoriasPilotoPorTemporada(Request $request){
 
-        $temporada_id = $request->post('vitoriasPilotosTemporadaId');
+        $temporada_id = SqlInput::optionalId($request->post('vitoriasPilotosTemporadaId'));
         $operadorConsulta = '=';
         $condicao = $temporada_id;
         
-        if($temporada_id == null){
+        if($temporada_id === null){
             $operadorConsulta = '>';
             $condicao = 0; 
         }
@@ -600,12 +601,12 @@ class HomeController extends Controller
                                     join corridas on (corridas.id = resultados.corrida_id)
                                     join piloto_equipes on (resultados.pilotoEquipe_id = piloto_equipes.id)
                                     join pilotos on (piloto_equipes.piloto_id = pilotos.id)
-                                    where corridas.temporada_id '.$operadorConsulta.' '.$condicao.'
+                                    where corridas.temporada_id '.$operadorConsulta.' ?
                                     and resultados.chegada = 1
                                     and corridas.flg_sprint = "N"
-                                    and corridas.user_id = '.Auth::user()->id.'
+                                    and corridas.user_id = ?
                                     group by pilotos.id 
-                                    order by vitorias desc');
+                                    order by vitorias desc', [$condicao, Auth::user()->id]);
 
         return response()->json([
             'message' => 'ajaxGetVitoriasPilotoPorTemporada',
@@ -614,11 +615,11 @@ class HomeController extends Controller
     }
 
     public function ajaxGetVitoriasEquipesPorTemporada(Request $request){
-        $temporada_id = $request->post('vitoriasEquipesTemporadaId');
+        $temporada_id = SqlInput::optionalId($request->post('vitoriasEquipesTemporadaId'));
         $operadorConsulta = '=';
         $condicao = $temporada_id;
         
-        if($temporada_id == null){
+        if($temporada_id === null){
             $operadorConsulta = '>';
             $condicao = 0; 
         }
@@ -648,11 +649,11 @@ class HomeController extends Controller
     }
 
     public function ajaxGetPolesEquipesPorTemporada(Request $request){
-        $temporada_id = $request->post('polesEquipesTemporadaId');
+        $temporada_id = SqlInput::optionalId($request->post('polesEquipesTemporadaId'));
         $operadorConsulta = '=';
         $condicao = $temporada_id;
         
-        if($temporada_id == null){
+        if($temporada_id === null){
             $operadorConsulta = '>';
             $condicao = 0; 
         }
@@ -682,11 +683,11 @@ class HomeController extends Controller
     }
 
     public function ajaxGetPolesPilotosPorTemporada(Request $request){
-        $temporada_id = $request->post('polesPilotosTemporadaId');
+        $temporada_id = SqlInput::optionalId($request->post('polesPilotosTemporadaId'));
         $operadorConsulta = '=';
         $condicao = $temporada_id;
         
-        if($temporada_id == null){
+        if($temporada_id === null){
             $operadorConsulta = '>';
             $condicao = 0; 
         }
@@ -715,11 +716,11 @@ class HomeController extends Controller
     }
 
     public function ajaxGetPodiosPilotosPorTemporada(Request $request){
-        $temporada_id = $request->post('podiosPilotosTemporadaId');
+        $temporada_id = SqlInput::optionalId($request->post('podiosPilotosTemporadaId'));
         $operadorConsulta = '=';
         $condicao = $temporada_id;
         
-        if($temporada_id == null){
+        if($temporada_id === null){
             $operadorConsulta = '>';
             $condicao = 0; 
         }
@@ -730,13 +731,13 @@ class HomeController extends Controller
                                     join corridas on (corridas.id = resultados.corrida_id)
                                     join piloto_equipes on (resultados.pilotoEquipe_id = piloto_equipes.id)
                                     join pilotos on (piloto_equipes.piloto_id = pilotos.id)
-                                    where corridas.temporada_id '.$operadorConsulta.' '.$condicao.'
+                                    where corridas.temporada_id '.$operadorConsulta.' ?
                                     and resultados.chegada >= 1
                                     and resultados.chegada <=3
                                     and corridas.flg_sprint = "N"
-                                    and corridas.user_id = '.Auth::user()->id.'
+                                    and corridas.user_id = ?
                                     group by pilotos.id 
-                                    order by podios desc');
+                                    order by podios desc', [$condicao, Auth::user()->id]);
 
         return response()->json([
             'message' => 'ajaxGetPodiosPilotoPorTemporada',
@@ -746,11 +747,11 @@ class HomeController extends Controller
 
     public function ajaxGetPodiosEquipesPorTemporada(Request $request){
         
-        $temporada_id = $request->post('podiosEquipesTemporadaId');
+        $temporada_id = SqlInput::optionalId($request->post('podiosEquipesTemporadaId'));
         $operadorConsulta = '=';
         $condicao = $temporada_id;
         
-        if($temporada_id == null){
+        if($temporada_id === null){
             $operadorConsulta = '>';
             $condicao = 0; 
         }
@@ -761,13 +762,13 @@ class HomeController extends Controller
                                     join corridas on (corridas.id = resultados.corrida_id)
                                     join piloto_equipes on (resultados.pilotoEquipe_id = piloto_equipes.id)
                                     join equipes on (piloto_equipes.equipe_id = equipes.id)
-                                    where corridas.temporada_id '.$operadorConsulta.' '.$condicao.'
+                                    where corridas.temporada_id '.$operadorConsulta.' ?
                                     and resultados.chegada > 0 
                                     and resultados.chegada <= 3
                                     and corridas.flg_sprint = "N"
-                                    and corridas.user_id = '.Auth::user()->id.'
+                                    and corridas.user_id = ?
                                     group by equipe_id 
-                                    order by podios desc;');
+                                    order by podios desc;', [$condicao, Auth::user()->id]);
 
         return response()->json([
             'message' => 'ajaxGetPodiosPilotoPorTemporada',
@@ -777,16 +778,18 @@ class HomeController extends Controller
 
     public function ajaxGetChegadasPilotosPorTemporada(Request $request){
 
-        $temporada_id = $request->post('temporada');
+        $temporada_id = SqlInput::optionalId($request->post('temporada'));
         $operadorConsulta = '=';
         $condicao = $temporada_id;
         $tipoCorrida = 'N';
+        $inicio = SqlInput::id($request->inicio);
+        $fim = SqlInput::id($request->fim);
 
         if($request->tipoCorrida == 'sprint'){
             $tipoCorrida = 'S';
         }
         
-        if($temporada_id == null){
+        if($temporada_id === null){
             $operadorConsulta = '>';
             $condicao = 0; 
         }
@@ -797,13 +800,13 @@ class HomeController extends Controller
                                     join corridas on (corridas.id = resultados.corrida_id)
                                     join piloto_equipes on (resultados.pilotoEquipe_id = piloto_equipes.id)
                                     join pilotos on (piloto_equipes.piloto_id = pilotos.id)
-                                    where corridas.temporada_id '.$operadorConsulta.' '.$condicao.'
-                                    and resultados.chegada >= '.$request->inicio.'
-                                    and resultados.chegada <= '.$request->fim.'
-                                    and corridas.flg_sprint = "'.$tipoCorrida.'"
-                                    and corridas.user_id = '.Auth::user()->id.'
+                                    where corridas.temporada_id '.$operadorConsulta.' ?
+                                    and resultados.chegada >= ?
+                                    and resultados.chegada <= ?
+                                    and corridas.flg_sprint = ?
+                                    and corridas.user_id = ?
                                     group by pilotos.id 
-                                    order by chegadas desc');
+                                    order by chegadas desc', [$condicao, $inicio, $fim, $tipoCorrida, Auth::user()->id]);
 
         return response()->json([
             'message' => 'ajaxGetChegadasPilotosPorTemporada',
@@ -813,11 +816,13 @@ class HomeController extends Controller
 
     public function ajaxGetChegadasEquipesPorTemporada(Request $request){
 
-        $temporada_id = $request->post('temporada');
+        $temporada_id = SqlInput::optionalId($request->post('temporada'));
         $operadorConsulta = '=';
         $condicao = $temporada_id;
+        $inicio = SqlInput::id($request->inicio);
+        $fim = SqlInput::id($request->fim);
         
-        if($temporada_id == null){
+        if($temporada_id === null){
             $operadorConsulta = '>';
             $condicao = 0; 
         }
@@ -828,13 +833,13 @@ class HomeController extends Controller
                                     join corridas on (corridas.id = resultados.corrida_id)
                                     join piloto_equipes on (resultados.pilotoEquipe_id = piloto_equipes.id)
                                     join equipes on (piloto_equipes.equipe_id = equipes.id)
-                                    where corridas.temporada_id '.$operadorConsulta.' '.$condicao.'
-                                    and resultados.chegada >= '.$request->inicio.'
-                                    and resultados.chegada <= '.$request->fim.'
+                                    where corridas.temporada_id '.$operadorConsulta.' ?
+                                    and resultados.chegada >= ?
+                                    and resultados.chegada <= ?
                                     and corridas.flg_sprint = "N"
-                                    and corridas.user_id = '.Auth::user()->id.'
+                                    and corridas.user_id = ?
                                     group by equipe_id 
-                                    order by chegadas desc;');
+                                    order by chegadas desc;', [$condicao, $inicio, $fim, Auth::user()->id]);
 
         return response()->json([
             'message' => 'ajaxGetChegadasEquipesPorTemporada',

@@ -316,9 +316,9 @@ class PilotoController extends Controller
             join corridas on corridas.id = resultados.corrida_id
             join pilotos on piloto_equipes.piloto_id = pilotos.id
             join temporadas on temporadas.id = corridas.temporada_id
-            where temporadas.ano_id = '.$pilotoTemporada->ano_id.'
-            and resultados.user_id = '. Auth::user()->id.'
-            and piloto_id = '.$pilotoTemporada->piloto_id.'');
+            where temporadas.ano_id = ?
+            and resultados.user_id = ?
+            and piloto_id = ?', [$pilotoTemporada->ano_id, Auth::user()->id, $pilotoTemporada->piloto_id]);
            
             array_push($pontuacaoPorTemporada, $retorno[0]->totPontos);
             array_push($temporadasDisputadas, $pilotoTemporada->ano->ano);
@@ -491,10 +491,10 @@ class PilotoController extends Controller
                                     join corridas on corridas.id = resultados.corrida_id
                                     join pilotos on piloto_equipes.piloto_id = pilotos.id
                                     join temporadas on temporadas.id = corridas.temporada_id
-                                    where temporadas.id = '.$temporada_id.'
-                                    and resultados.user_id = '.$usuario_id.'
+                                    where temporadas.id = ?
+                                    and resultados.user_id = ?
                                     and corridas.flg_sprint = "N"
-                                    and piloto_id = '.$piloto1_id.'');
+                                    and piloto_id = ?', [$temporada_id, $usuario_id, $piloto1_id]);
                                 
         $dadosPiloto2 =  DB::select('select 
                                     *
@@ -504,10 +504,10 @@ class PilotoController extends Controller
                                     join corridas on corridas.id = resultados.corrida_id
                                     join pilotos on piloto_equipes.piloto_id = pilotos.id
                                     join temporadas on temporadas.id = corridas.temporada_id
-                                    where temporadas.id = '.$temporada_id.'
-                                    and resultados.user_id = '.$usuario_id.'
+                                    where temporadas.id = ?
+                                    and resultados.user_id = ?
                                     and corridas.flg_sprint = "N"
-                                    and piloto_id = '.$piloto2_id.'');
+                                    and piloto_id = ?', [$temporada_id, $usuario_id, $piloto2_id]);
         
         //loop que faz os comparativos
         // dd($dadosPiloto1, $dadosPiloto2);
@@ -552,9 +552,9 @@ class PilotoController extends Controller
                                         join corridas on corridas.id = resultados.corrida_id
                                         join pilotos on piloto_equipes.piloto_id = pilotos.id
                                         join temporadas on temporadas.id = corridas.temporada_id
-                                        where temporadas.id = '.$temporada_id.'
-                                        and resultados.user_id = '.$usuario_id.'
-                                        and piloto_id = '.$piloto1_id.'');
+                                        where temporadas.id = ?
+                                        and resultados.user_id = ?
+                                        and piloto_id = ?', [$temporada_id, $usuario_id, $piloto1_id]);
 
         $piloto1TotPontos = $piloto1TotPontos[0]->totPontos;
 
@@ -566,9 +566,9 @@ class PilotoController extends Controller
                                         join corridas on corridas.id = resultados.corrida_id
                                         join pilotos on piloto_equipes.piloto_id = pilotos.id
                                         join temporadas on temporadas.id = corridas.temporada_id
-                                        where temporadas.id = '.$temporada_id.'
-                                        and resultados.user_id = '.$usuario_id.'
-                                        and piloto_id = '.$piloto2_id.'');
+                                        where temporadas.id = ?
+                                        and resultados.user_id = ?
+                                        and piloto_id = ?', [$temporada_id, $usuario_id, $piloto2_id]);
 
         $piloto2TotPontos = $piloto2TotPontos[0]->totPontos;
 
