@@ -10,7 +10,8 @@ use Tests\TestCase;
 
 /**
  * Races created before corridas.evento_id existed have no event. The race result page and the season
- * classification must answer for them like for any other race, with "-" where the event name goes.
+ * classification, the post-race standings, the drivers and teams statistics, the races of a season and the track page
+ * must answer for them like for any other race, with "-" where the event name goes.
  */
 class RacesWithoutEventTest extends TestCase
 {
@@ -72,12 +73,36 @@ class RacesWithoutEventTest extends TestCase
         foreach ([1 => 1, 2 => null] as $ordem => $eventoId) {
             $this->insert('corridas', $u + [
                 'id' => $ordem, 'evento_id' => $eventoId, 'temporada_id' => 1, 'pista_id' => 1,
-                'ordem' => $ordem, 'flg_sprint' => 'N', 'volta_rapida' => 1,
+                'ordem' => $ordem, 'flg_sprint' => 'N', 'volta_rapida' => 1, 'exibir_resultado' => 1,
             ]);
 
             foreach ([1, 2] as $pe) {
                 $this->insert('resultados', $u + [
                     'corrida_id' => $ordem, 'pilotoEquipe_id' => $pe, 'largada' => $pe, 'chegada' => $pe,
+                    'pontuacao' => $pe === 1 ? 25 : 18, 'flg_abandono' => 'N',
+                ]);
+            }
+        }
+    }
+
+    /**
+     * One season per race: season 2 holds race 3 with an event, season 3 holds race 4 without one, so a page or a search
+     * restricted to a single season sees only one kind of race. Both are on the same track as the races of season 1.
+     */
+    private function seedSingleRaceSeasons(): void
+    {
+        $u = ['user_id' => $this->user->id];
+
+        foreach ([2 => [3, 1], 3 => [4, null]] as $temporadaId => [$corridaId, $eventoId]) {
+            $this->insert('temporadas', $u + ['id' => $temporadaId, 'ano_id' => 1, 'des_temporada' => 'T'.$temporadaId, 'flg_finalizada' => 'N']);
+            $this->insert('corridas', $u + [
+                'id' => $corridaId, 'evento_id' => $eventoId, 'temporada_id' => $temporadaId, 'pista_id' => 1,
+                'ordem' => 1, 'flg_sprint' => 'N', 'volta_rapida' => 1, 'exibir_resultado' => 1,
+            ]);
+
+            foreach ([1, 2] as $pe) {
+                $this->insert('resultados', $u + [
+                    'corrida_id' => $corridaId, 'pilotoEquipe_id' => $pe, 'largada' => $pe, 'chegada' => $pe,
                     'pontuacao' => $pe === 1 ? 25 : 18, 'flg_abandono' => 'N',
                 ]);
             }
@@ -141,5 +166,109 @@ class RacesWithoutEventTest extends TestCase
         $response->assertJsonPath('dados.circuito', 'Interlagos');
         $response->assertJsonPath('dados.ordem', 1);
         $response->assertJsonPath('dados.contagem_corrida', '1 de 2');
+    }
+
+    public function test_standings_after_a_race_without_an_event_answer_with_a_dash(): void
+    {
+        $response = $this->actingAs($this->user)->postJson(route('fetch.getClassificacaoAposCorrida'), ['temporada_id' => 1, 'corrida_id' => 2]);
+
+        $response->assertOk();
+        $response->assertJsonPath('message', 'OK');
+        $response->assertJsonPath('corridaAtual', '-');
+        $response->assertJsonPath('ordemCorrida', 2);
+        $this->assertCount(2, $response->json('resultadosPilotos'));
+    }
+
+    public function test_standings_after_a_race_with_an_event_are_unchanged(): void
+    {
+        $response = $this->actingAs($this->user)->postJson(route('fetch.getClassificacaoAposCorrida'), ['temporada_id' => 1, 'corrida_id' => 1]);
+
+        $response->assertOk();
+        $response->assertJsonPath('corridaAtual', 'GP do Brasil');
+        $response->assertJsonPath('ordemCorrida', 1);
+        $this->assertCount(2, $response->json('resultadosPilotos'));
+    }
+
+    private function searchStatistics(int $temporadaId)
+    {
+        return $this->actingAs($this->user)->postJson(route('estatisticas.pilotos.equipes.buscar'), [
+            'temporada' => [(string) $temporadaId], 'tipo' => 'chegada', 'flg_sprint' => 'N', 'limite' => 1,
+            'pilotos_ignorados' => ['0'], 'equipes_ignoradas' => ['0'],
+        ]);
+    }
+
+    public function test_wins_statistics_of_a_season_without_an_event_list_a_dash(): void
+    {
+        $this->seedSingleRaceSeasons();
+
+        $response = $this->searchStatistics(3);
+
+        $response->assertOk();
+        $response->assertJsonPath('dadosPiloto.0.nome_piloto', 'Piloto Um');
+        $response->assertJsonPath('dadosPiloto.0.quantidade', 1);
+        $response->assertJsonPath('dadosPiloto.0.eventos.0.evento', '-');
+        $response->assertJsonPath('dadosPiloto.0.eventos.0.quantidade', 1);
+        $response->assertJsonPath('dadosPiloto.0.pistas.0.pista', 'Interlagos');
+        $this->assertSame(['-'], array_column($response->json('dadosEquipe.0.pilotos.0.quantidade_por_evento'), 'evento'));
+    }
+
+    public function test_wins_statistics_of_a_season_with_an_event_are_unchanged(): void
+    {
+        $this->seedSingleRaceSeasons();
+
+        $response = $this->searchStatistics(2);
+
+        $response->assertOk();
+        $response->assertJsonPath('dadosPiloto.0.nome_piloto', 'Piloto Um');
+        $response->assertJsonPath('dadosPiloto.0.quantidade', 1);
+        $response->assertJsonPath('dadosPiloto.0.eventos.0.evento', 'GP do Brasil');
+        $response->assertJsonPath('dadosPiloto.0.eventos.0.evento_id', 1);
+        $response->assertJsonPath('dadosPiloto.0.pistas.0.pista', 'Interlagos');
+        $this->assertSame(['GP do Brasil'], array_column($response->json('dadosEquipe.0.pilotos.0.quantidade_por_evento'), 'evento'));
+    }
+
+    public function test_wins_statistics_of_all_seasons_count_races_with_and_without_an_event(): void
+    {
+        $response = $this->actingAs($this->user)->postJson(route('estatisticas.pilotos.equipes.buscar'), [
+            'temporada' => [null], 'tipo' => 'chegada', 'flg_sprint' => 'N', 'limite' => 1,
+            'pilotos_ignorados' => ['0'], 'equipes_ignoradas' => ['0'],
+        ]);
+
+        $response->assertOk();
+        $response->assertJsonPath('dadosPiloto.0.quantidade', 2);
+        $this->assertEqualsCanonicalizing(
+            ['-', 'GP do Brasil'],
+            array_column($response->json('dadosPiloto.0.eventos'), 'evento'),
+        );
+    }
+
+    public function test_races_of_a_season_without_an_event_list_a_dash(): void
+    {
+        $this->seedSingleRaceSeasons();
+
+        $response = $this->actingAs($this->user)->get(route('corridas.index', [3]));
+
+        $response->assertOk();
+        $response->assertSee('Interlagos');
+        $response->assertDontSee('GP do Brasil');
+    }
+
+    public function test_races_of_a_season_with_an_event_are_unchanged(): void
+    {
+        $this->seedSingleRaceSeasons();
+
+        $response = $this->actingAs($this->user)->get(route('corridas.index', [2]));
+
+        $response->assertOk();
+        $response->assertSee('GP do Brasil');
+        $response->assertSee(route('eventos.show', [1]), false);
+    }
+
+    public function test_track_page_lists_races_with_and_without_an_event(): void
+    {
+        $response = $this->actingAs($this->user)->get(route('pistas.show', [1]));
+
+        $response->assertOk();
+        $response->assertSee('GP do Brasil');
     }
 }

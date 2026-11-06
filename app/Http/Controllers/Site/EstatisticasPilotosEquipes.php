@@ -122,8 +122,8 @@ class EstatisticasPilotosEquipes extends Controller
                     'corrida' => $resultado->corrida->pista->nome,
                     'pais' => $resultado->corrida->pista->pais->des_nome,
                     'pais_id' => $resultado->corrida->pista->pais->id,
-                    'evento' => $resultado->corrida->evento->des_nome,
-                    'evento_id' => $resultado->corrida->evento->id,
+                    'evento' => $resultado->corrida->evento?->des_nome ?? '-',
+                    'evento_id' => $resultado->corrida->evento?->id,
                     'pista_id' =>$resultado->corrida->pista->id   
                 ];
 
@@ -136,8 +136,8 @@ class EstatisticasPilotosEquipes extends Controller
                     'corrida' => $resultado->corrida->pista->nome,
                     'pais' => $resultado->corrida->pista->pais->des_nome,
                     'pais_id' => $resultado->corrida->pista->pais->id,
-                    'evento' => $resultado->corrida->evento->des_nome,
-                    'evento_id' => $resultado->corrida->evento->id,
+                    'evento' => $resultado->corrida->evento?->des_nome ?? '-',
+                    'evento_id' => $resultado->corrida->evento?->id,
                     'pista_id' =>$resultado->corrida->pista->id
                 ];
             }
