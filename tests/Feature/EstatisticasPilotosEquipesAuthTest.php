@@ -25,6 +25,13 @@ class EstatisticasPilotosEquipesAuthTest extends TestCase
             ->assertRedirect(route('login'));
     }
 
+    public function test_the_page_search_as_a_guest_is_unauthorized(): void
+    {
+        // The page sends the search with fetch and accept: application/json, which gets a 401 instead of a redirect.
+        $this->postJson('/estatisticasPilotosEquipes/buscar', ['limite' => '1', 'tipo' => 'chegada', 'flg_sprint' => 'N'])
+            ->assertUnauthorized();
+    }
+
     public function test_a_logged_in_user_still_gets_the_page(): void
     {
         $user = User::create(['name' => 'Ana', 'email' => 'ana@example.com', 'password' => 'x']);
