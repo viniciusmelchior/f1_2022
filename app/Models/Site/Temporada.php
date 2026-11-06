@@ -30,6 +30,9 @@ class Temporada extends Model
     }
 
     public function getClassificacao($usuario, $temporada){
+        // Values are concatenated into the SQL below: only integers get through.
+        $temporadaId = (int) $temporada->id;
+        $usuarioId = (int) $usuario;
         $cont = 1;
         $queryCountChegadaPilotos = '';
         $queryCountOrderByPilotos = '';
@@ -65,8 +68,8 @@ class Temporada extends Model
                             JOIN equipes ON equipes.id = piloto_equipes.equipe_id
                             JOIN corridas ON corridas.id = resultados.corrida_id
                             JOIN temporadas ON temporadas.id = corridas.temporada_id
-                            WHERE temporadas.id =  '.$temporada->id.'
-                            AND resultados.user_id =  '.$usuario.'
+                            WHERE temporadas.id =  '.$temporadaId.'
+                            AND resultados.user_id =  '.$usuarioId.'
                             GROUP BY piloto_equipes.piloto_id, piloto_equipes.id, pilotos.nome, pilotos.sobrenome, equipes.nome, equipes.imagem
                             ORDER BY total DESC '.$queryCountOrderByPilotos.';    
         ');
@@ -76,8 +79,8 @@ class Temporada extends Model
                                         join equipes on equipes.id = piloto_equipes.equipe_id
                                         join corridas on corridas.id = resultados.corrida_id
                                         join temporadas on temporadas.id = corridas.temporada_id
-                                        where temporadas.id = '.$temporada->id.'
-                                        and resultados.user_id = '.$usuario.'
+                                        where temporadas.id = '.$temporadaId.'
+                                        and resultados.user_id = '.$usuarioId.'
                                         group by piloto_equipes.equipe_id
                                         order by total desc '.$queryCountOrderByEquipes);
 

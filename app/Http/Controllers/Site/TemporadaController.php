@@ -8,6 +8,7 @@ use App\Models\Site\Corrida;
 use App\Models\Site\Resultado;
 use App\Models\Site\Temporada;
 use App\Models\Site\Titulo;
+use App\Support\SqlInput;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -146,8 +147,9 @@ class TemporadaController extends Controller
         $totalCorridas = max($totalCorridas, (int) Corrida::where('user_id', Auth::user()->id)->where('temporada_id', $temporada->id)->max('ordem'));
         $corrida_ordem = $totalCorridas;
 
-        if ($request->idCorrida != null) {
-            $corrida_ordem = $request->idCorrida;
+        $idCorrida = SqlInput::optionalId($request->idCorrida);
+        if ($idCorrida !== null) {
+            $corrida_ordem = $idCorrida;
         }
 
         // $corridaAtual = Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
@@ -226,6 +228,10 @@ class TemporadaController extends Controller
 
     public function montaClassificacao($usuario, $temporada, $corrida_ordem = 1000)
     {
+        // Values are concatenated into the SQL below: only integers get through.
+        $temporadaId = (int) $temporada->id;
+        $usuarioId = (int) $usuario;
+        $ordemLimite = (int) $corrida_ordem;
 
         $cont = 1;
         $queryCountChegadaPilotos = '';
@@ -261,9 +267,9 @@ class TemporadaController extends Controller
         $filtroSprint = 'FROM resultados r_sp
                             JOIN corridas c_sp ON c_sp.id = r_sp.corrida_id
                             JOIN piloto_equipes pe_sp ON pe_sp.id = r_sp.pilotoEquipe_id
-                            WHERE c_sp.temporada_id = ' . (int) $temporada->id . '
-                            AND r_sp.user_id = ' . (int) $usuario . '
-                            AND c_sp.ordem <= ' . (int) $corrida_ordem . '
+                            WHERE c_sp.temporada_id = ' . $temporadaId . '
+                            AND r_sp.user_id = ' . $usuarioId . '
+                            AND c_sp.ordem <= ' . $ordemLimite . '
                             AND c_sp.flg_sprint = "S"';
         $joinSprintPilotos = 'LEFT JOIN (SELECT pe_sp.piloto_id AS sp_piloto_id, ' . implode(', ', $colunasSprint) . ' ' . $filtroSprint . ' GROUP BY pe_sp.piloto_id) sp ON sp.sp_piloto_id = pilotos.id';
         $joinSprintEquipes = 'LEFT JOIN (SELECT pe_sp.equipe_id AS sp_equipe_id, ' . implode(', ', $colunasSprint) . ' ' . $filtroSprint . ' GROUP BY pe_sp.equipe_id) sp ON sp.sp_equipe_id = equipes.id';
@@ -288,9 +294,9 @@ class TemporadaController extends Controller
                             JOIN corridas ON corridas.id = resultados.corrida_id
                             JOIN temporadas ON temporadas.id = corridas.temporada_id
                             ' . $joinSprintPilotos . '
-                            WHERE temporadas.id =  ' . $temporada->id . '
-                            AND resultados.user_id =  ' . $usuario . '
-                            and corridas.ordem <= ' . $corrida_ordem . '
+                            WHERE temporadas.id =  ' . $temporadaId . '
+                            AND resultados.user_id =  ' . $usuarioId . '
+                            and corridas.ordem <= ' . $ordemLimite . '
                             GROUP BY pilotos.id
                             ORDER BY total DESC ' . $queryCountOrderByPilotos . $orderBySprint . ';    
         ');
@@ -311,9 +317,9 @@ class TemporadaController extends Controller
                                         join corridas on corridas.id = resultados.corrida_id
                                         join temporadas on temporadas.id = corridas.temporada_id
                                         ' . $joinSprintEquipes . '
-                                        where temporadas.id = ' . $temporada->id . '
-                                        and resultados.user_id = ' . $usuario . '
-                                        and corridas.ordem <= ' . $corrida_ordem . '
+                                        where temporadas.id = ' . $temporadaId . '
+                                        and resultados.user_id = ' . $usuarioId . '
+                                        and corridas.ordem <= ' . $ordemLimite . '
                                         group by piloto_equipes.equipe_id
                                         order by total desc ' . $queryCountOrderByEquipes . $orderBySprint);
 
@@ -366,14 +372,17 @@ class TemporadaController extends Controller
 
     public function montaClassificacaoClassica($usuario, $temporada)
     {
+        // Values are concatenated into the SQL below: only integers get through.
+        $temporadaId = (int) $temporada->id;
+        $usuarioId = (int) $usuario;
         $resultadosPilotosClassico = DB::select('select piloto_id,piloto_equipes.id as pilotoEquipe_id,pilotos.nome,pilotos.sobrenome,equipes.imagem, equipes.nome as equipe, sum(pontuacao_classica) as total from resultados
                 join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
                 join pilotos on pilotos.id = piloto_equipes.piloto_id
                 join equipes on equipes.id = piloto_equipes.equipe_id
                 join corridas on corridas.id = resultados.corrida_id
                 join temporadas on temporadas.id = corridas.temporada_id
-                where temporadas.id = ' . $temporada->id . '
-                and resultados.user_id = ' . $usuario . '
+                where temporadas.id = ' . $temporadaId . '
+                and resultados.user_id = ' . $usuarioId . '
                 group by piloto_equipes.piloto_id
                 order by total desc');
 
@@ -382,8 +391,8 @@ class TemporadaController extends Controller
                 join equipes on equipes.id = piloto_equipes.equipe_id
                 join corridas on corridas.id = resultados.corrida_id
                 join temporadas on temporadas.id = corridas.temporada_id
-                where temporadas.id = ' . $temporada->id . '
-                and resultados.user_id = ' . $usuario . '
+                where temporadas.id = ' . $temporadaId . '
+                and resultados.user_id = ' . $usuarioId . '
                 group by piloto_equipes.equipe_id
                 order by total desc');
 
@@ -395,14 +404,17 @@ class TemporadaController extends Controller
 
     public function montaClassificacaoInvertida($usuario, $temporada)
     {
+        // Values are concatenated into the SQL below: only integers get through.
+        $temporadaId = (int) $temporada->id;
+        $usuarioId = (int) $usuario;
         $resultadosPilotosInvertida = DB::select('select piloto_id,piloto_equipes.id as pilotoEquipe_id, pilotos.nome, pilotos.sobrenome,equipes.imagem, equipes.nome as equipe, sum(pontuacao_invertida) as total from resultados
                 join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
                 join pilotos on pilotos.id = piloto_equipes.piloto_id
                 join equipes on equipes.id = piloto_equipes.equipe_id
                 join corridas on corridas.id = resultados.corrida_id
                 join temporadas on temporadas.id = corridas.temporada_id
-                where temporadas.id = ' . $temporada->id . '
-                and resultados.user_id = ' . $usuario . '
+                where temporadas.id = ' . $temporadaId . '
+                and resultados.user_id = ' . $usuarioId . '
                 group by piloto_equipes.piloto_id
                 order by total desc');
 
@@ -411,8 +423,8 @@ class TemporadaController extends Controller
                 join equipes on equipes.id = piloto_equipes.equipe_id
                 join corridas on corridas.id = resultados.corrida_id
                 join temporadas on temporadas.id = corridas.temporada_id
-                where temporadas.id = ' . $temporada->id . '
-                and resultados.user_id = ' . $usuario . '
+                where temporadas.id = ' . $temporadaId . '
+                and resultados.user_id = ' . $usuarioId . '
                 group by piloto_equipes.equipe_id
                 order by total desc');
 
@@ -425,6 +437,9 @@ class TemporadaController extends Controller
     /**Utilizada para o calculo de pontuação das corridas sprint */
     public function montaClassificacaoAlternativa($usuario, $temporada)
     {
+        // Values are concatenated into the SQL below: only integers get through.
+        $temporadaId = (int) $temporada->id;
+        $usuarioId = (int) $usuario;
         // $resultadosPilotosAlternativa = DB::select('select piloto_id,piloto_equipes.id as pilotoEquipe_id, pilotos.nome, pilotos.sobrenome, equipes.imagem, equipes.nome as equipe, sum(pontuacao) as total from resultados
         // join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
         // join pilotos on pilotos.id = piloto_equipes.piloto_id
@@ -472,8 +487,8 @@ class TemporadaController extends Controller
                                     JOIN equipes ON equipes.id = piloto_equipes.equipe_id
                                     JOIN corridas ON corridas.id = resultados.corrida_id
                                     JOIN temporadas ON temporadas.id = corridas.temporada_id
-                                    WHERE temporadas.id =  ' . $temporada->id . '
-                                    AND resultados.user_id =  ' . $usuario . '
+                                    WHERE temporadas.id =  ' . $temporadaId . '
+                                    AND resultados.user_id =  ' . $usuarioId . '
                                     AND corridas.flg_sprint = "S"
                                     GROUP BY pilotos.id
                                     ORDER BY total DESC ' . $queryCountOrderByPilotos . ';    
@@ -495,8 +510,8 @@ class TemporadaController extends Controller
                                         join equipes on equipes.id = piloto_equipes.equipe_id
                                         join corridas on corridas.id = resultados.corrida_id
                                         join temporadas on temporadas.id = corridas.temporada_id
-                                        where temporadas.id = ' . $temporada->id . '
-                                        and resultados.user_id = ' . $usuario . '
+                                        where temporadas.id = ' . $temporadaId . '
+                                        and resultados.user_id = ' . $usuarioId . '
                                         AND corridas.flg_sprint = "S"
                                         group by piloto_equipes.equipe_id
                                         order by total desc ' . $queryCountOrderByEquipes);
@@ -578,7 +593,7 @@ class TemporadaController extends Controller
 
         $usuario = Auth::user()->id;
         $temporada = Temporada::where('user_id', Auth::user()->id)->where('id', $request->temporada_id)->first();
-        $ordem = $request->corrida_id;
+        $ordem = SqlInput::id($request->corrida_id);
 
         $retorno = $this->montaClassificacaoAposCorrida($usuario, $ordem, $temporada);
         $resultadosPilotos = $retorno['resultadoPilotos'];
@@ -607,6 +622,10 @@ class TemporadaController extends Controller
 
     public function montaClassificacaoAposCorrida($usuario, $ordem, $temporada)
     {
+        // Values are concatenated into the SQL below: only integers get through.
+        $temporadaId = (int) $temporada->id;
+        $usuarioId = (int) $usuario;
+        $ordemLimite = (int) $ordem;
 
         $cont = 1;
         $queryCountChegada = '';
@@ -638,9 +657,9 @@ class TemporadaController extends Controller
                                                         JOIN equipes ON equipes.id = piloto_equipes.equipe_id
                                                         JOIN corridas ON corridas.id = resultados.corrida_id
                                                         JOIN temporadas ON temporadas.id = corridas.temporada_id
-                                                        WHERE temporadas.id =  ' . $temporada->id . '
-                                                        AND resultados.user_id =  ' . $usuario . '
-                                                        and corridas.ordem <= ' . $ordem . '
+                                                        WHERE temporadas.id =  ' . $temporadaId . '
+                                                        AND resultados.user_id =  ' . $usuarioId . '
+                                                        and corridas.ordem <= ' . $ordemLimite . '
                                                         GROUP BY piloto_equipes.piloto_id, piloto_equipes.id, pilotos.nome, pilotos.sobrenome, equipes.nome, equipes.imagem
                                                         ORDER BY total DESC ' . $queryCountOrderBy . ';    
                                         ');
@@ -650,8 +669,8 @@ class TemporadaController extends Controller
                                         join equipes on equipes.id = piloto_equipes.equipe_id
                                         join corridas on corridas.id = resultados.corrida_id
                                         join temporadas on temporadas.id = corridas.temporada_id
-                                        where temporadas.id = ' . $temporada->id . '
-                                        and resultados.user_id = ' . $usuario . '
+                                        where temporadas.id = ' . $temporadaId . '
+                                        and resultados.user_id = ' . $usuarioId . '
                                         group by piloto_equipes.equipe_id
                                         order by total desc');
 

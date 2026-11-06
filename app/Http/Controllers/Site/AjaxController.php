@@ -11,6 +11,7 @@ use App\Models\Site\PilotoEquipe;
 use App\Models\Site\Resultado;
 use App\Models\Site\Temporada;
 use App\Models\Site\Titulo;
+use App\Support\SqlInput;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,7 +22,8 @@ class AjaxController extends Controller
     public function classificacaoPorTemporada(Request $request){
         
         $usuario = Auth::user()->id; 
-        $temporada = Temporada::where('user_id', Auth::user()->id)->where('id', $request->temporada_id)->first();
+        $temporadaId = SqlInput::id($request->temporada_id);
+        $temporada = Temporada::where('user_id', Auth::user()->id)->where('id', $temporadaId)->first();
 
         $resultadosPilotos = DB::select('select piloto_id, concat(pilotos.nome, " ", pilotos.sobrenome) as nome, equipes.nome as equipe, equipes.imagem, sum(pontuacao) as total from resultados
                                             join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
@@ -29,20 +31,20 @@ class AjaxController extends Controller
                                             join equipes on equipes.id = piloto_equipes.equipe_id
                                             join corridas on corridas.id = resultados.corrida_id
                                             join temporadas on temporadas.id = corridas.temporada_id
-                                            where temporadas.id = '.$request->temporada_id.'
-                                            and resultados.user_id = '.$usuario.'
+                                            where temporadas.id = ?
+                                            and resultados.user_id = ?
                                             group by piloto_equipes.piloto_id
-                                            order by total desc');
+                                            order by total desc', [$temporadaId, $usuario]);
             
         $resultadosEquipes = DB::select('select equipe_id, equipes.nome as nome, sum(pontuacao) as total from resultados
                             join piloto_equipes on piloto_equipes.id = resultados.pilotoEquipe_id
                             join equipes on equipes.id = piloto_equipes.equipe_id
                             join corridas on corridas.id = resultados.corrida_id
                             join temporadas on temporadas.id = corridas.temporada_id
-                            where temporadas.id = '.$request->temporada_id.'
-                            and resultados.user_id = '.$usuario.'
+                            where temporadas.id = ?
+                            and resultados.user_id = ?
                             group by piloto_equipes.equipe_id
-                            order by total desc');
+                            order by total desc', [$temporadaId, $usuario]);
 
 
         return response()->json([
@@ -65,17 +67,15 @@ class AjaxController extends Controller
         $request = $request->post();
         // dd($request, Auth::user()->id);
 
-        if($request['temporada_id'] == null){
-           //$temporada_id = [1,2,3,4,5,6,7,8,9,10];
-        }else{
-            $temporada_id = $request['temporada_id'];
-        }
+        $temporada_id = SqlInput::id($request['temporada_id'] ?? null);
         
         //dados base para montagem das pesquisas
         // $temporada_id = 1;
         $usuario_id = Auth::user()->id;
-        $piloto1_id = $request['pilotosId'][0]; //verstappen
-        $piloto2_id = $request['pilotosId'][1]; //perez
+        $pilotosId = $request['pilotosId'] ?? null;
+        abort_unless(is_array($pilotosId), 422, 'Parâmetro inválido.');
+        $piloto1_id = SqlInput::id($pilotosId[0] ?? null); //verstappen
+        $piloto2_id = SqlInput::id($pilotosId[1] ?? null); //perez
 
         //Variaveis com Resultados da Comparação
         $piloto1TotVitorias = 0;
@@ -120,10 +120,10 @@ class AjaxController extends Controller
                                     join corridas on corridas.id = resultados.corrida_id
                                     join pilotos on piloto_equipes.piloto_id = pilotos.id
                                     join temporadas on temporadas.id = corridas.temporada_id
-                                    where temporadas.id = '.$temporada_id.'
-                                    and resultados.user_id = '.$usuario_id.'
+                                    where temporadas.id = ?
+                                    and resultados.user_id = ?
                                     and corridas.flg_sprint = "N"
-                                    and piloto_id = '.$piloto1_id.'');
+                                    and piloto_id = ?', [$temporada_id, $usuario_id, $piloto1_id]);
    
         $dadosPiloto2 =  DB::select('select 
                                         *
@@ -133,10 +133,10 @@ class AjaxController extends Controller
                                     join corridas on corridas.id = resultados.corrida_id
                                     join pilotos on piloto_equipes.piloto_id = pilotos.id
                                     join temporadas on temporadas.id = corridas.temporada_id
-                                    where temporadas.id = '.$temporada_id.'
-                                    and resultados.user_id = '.$usuario_id.'
+                                    where temporadas.id = ?
+                                    and resultados.user_id = ?
                                     and corridas.flg_sprint = "N"
-                                    and piloto_id = '.$piloto2_id.'');
+                                    and piloto_id = ?', [$temporada_id, $usuario_id, $piloto2_id]);
         
                                      //calculo de pontuação é em outro loop pois utiliza dados da corrida sprint também
         $piloto1TotPontos = DB::select('select
@@ -147,9 +147,9 @@ class AjaxController extends Controller
                                         join corridas on corridas.id = resultados.corrida_id
                                         join pilotos on piloto_equipes.piloto_id = pilotos.id
                                         join temporadas on temporadas.id = corridas.temporada_id
-                                        where temporadas.id = '.$temporada_id.'
-                                        and resultados.user_id = '.$usuario_id.'
-                                        and piloto_id = '.$piloto1_id.'');
+                                        where temporadas.id = ?
+                                        and resultados.user_id = ?
+                                        and piloto_id = ?', [$temporada_id, $usuario_id, $piloto1_id]);
 
         $piloto1TotPontos = $piloto1TotPontos[0]->totPontos;
 
@@ -161,9 +161,9 @@ class AjaxController extends Controller
                                         join corridas on corridas.id = resultados.corrida_id
                                         join pilotos on piloto_equipes.piloto_id = pilotos.id
                                         join temporadas on temporadas.id = corridas.temporada_id
-                                        where temporadas.id = '.$temporada_id.'
-                                        and resultados.user_id = '.$usuario_id.'
-                                        and piloto_id = '.$piloto2_id.'');
+                                        where temporadas.id = ?
+                                        and resultados.user_id = ?
+                                        and piloto_id = ?', [$temporada_id, $usuario_id, $piloto2_id]);
 
         $piloto2TotPontos = $piloto2TotPontos[0]->totPontos;
 
@@ -569,9 +569,9 @@ class AjaxController extends Controller
             join corridas on corridas.id = resultados.corrida_id
             join pilotos on piloto_equipes.piloto_id = pilotos.id
             join temporadas on temporadas.id = corridas.temporada_id
-            where temporadas.ano_id = '.$equipeTemporada->ano_id.'
-            and resultados.user_id = '. Auth::user()->id.'
-            and equipe_id = '.$equipeTemporada->equipe_id.'');
+            where temporadas.ano_id = ?
+            and resultados.user_id = ?
+            and equipe_id = ?', [$equipeTemporada->ano_id, Auth::user()->id, $equipeTemporada->equipe_id]);
         
             array_push($pontuacaoPorTemporada, $retorno[0]->totPontos);
             array_push($temporadasDisputadas, $equipeTemporada->ano->ano);
@@ -782,9 +782,9 @@ class AjaxController extends Controller
             join corridas on corridas.id = resultados.corrida_id
             join pilotos on piloto_equipes.piloto_id = pilotos.id
             join temporadas on temporadas.id = corridas.temporada_id
-            where temporadas.ano_id = '.$pilotoTemporada->ano_id.'
-            and resultados.user_id = '. Auth::user()->id.'
-            and piloto_id = '.$pilotoTemporada->piloto_id.'');
+            where temporadas.ano_id = ?
+            and resultados.user_id = ?
+            and piloto_id = ?', [$pilotoTemporada->ano_id, Auth::user()->id, $pilotoTemporada->piloto_id]);
            
             array_push($pontuacaoPorTemporada, $retorno[0]->totPontos);
             array_push($temporadasDisputadas, $pilotoTemporada->ano->ano);
