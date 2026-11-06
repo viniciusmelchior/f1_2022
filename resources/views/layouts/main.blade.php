@@ -245,14 +245,27 @@
               <li><a class="link_name" href="#">Setting</a></li>
             </ul>
           </li> --}}
+@can('admin')
+          <li>
+            <a href="{{route('usuarios.index')}}">
+              <i class='bx bx-user'></i>
+              <span class="link_name">Usuários</span>
+            </a>
+            <ul class="sub-menu blank">
+              <li><a class="link_name" href="{{route('usuarios.index')}}">Usuários</a></li>
+            </ul>
+          </li>
+@endcan
           <li>
             <div class="profile-details">
               <div class="profile-content">
                 <img src="{{ \App\Support\ImageUrl::PLACEHOLDER }}" alt="profileImg">
               </div>
               <div class="name-job">
-                <div class="profile_name">Usuário</div>
+                <div class="profile_name">{{ auth()->user()?->name ?? 'Usuário' }}</div>
+@can('admin')
                 <div class="job">Admin</div>
+@endcan
               </div>
               <a href="{{ route('user.logout') }}"
               onclick="event.preventDefault();
@@ -266,7 +279,8 @@
           </li>
         </ul>
     </div>
-    <section class="home-section">
+    <section class="home-section">@include('site.partials.impersonation-banner')
+
         <div class="home-content">
           <i class='bx bx-menu'></i>
         </div>
