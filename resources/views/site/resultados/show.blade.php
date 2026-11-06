@@ -636,7 +636,7 @@
 
         <div class="header-main-row">
             <img src="{{asset('images/'.$corrida->pista->pais->imagem)}}" class="flag-img" style="width: 35px; height: 20px;" alt="Japão">
-            <h1>{{$corrida->evento->des_nome}}</h1>
+            <h1>{{$corrida->evento?->des_nome ?? '-'}}</h1>
         </div>
 
         <div class="track-badge">
