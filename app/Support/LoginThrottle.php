@@ -10,9 +10,10 @@ use Illuminate\Support\Str;
 /**
  * Limits login attempts per account and per account + client address.
  *
- * Each attempt is counted before the password is checked, so concurrent
- * requests cannot all pass a check made before any of them is recorded, and a
- * successful login clears the counters. Both counters key on the account the
+ * Each attempt is counted before the password is checked, so a burst of
+ * requests cannot all pass a check made before any of them is recorded (the
+ * file cache increments without a lock, so a burst can still lose a few
+ * counts), and a successful login clears the counters. Both counters key on the account the
  * database resolves the submitted email to, not on the submitted string, so
  * spellings the database treats as equal (case, accents, width) share one
  * count; an email that matches no account is keyed on its ASCII-folded form.
@@ -39,9 +40,8 @@ final class LoginThrottle
         $this->pairKey = 'login-throttle:pair:'.sha1($account.'|'.$ip);
     }
 
-    public static function for(Request $request): self
+    public static function for(Request $request, string $email): self
     {
-        $email = (string) $request->input('email');
         $userId = User::where('email', $email)->value('id');
 
         $account = $userId !== null

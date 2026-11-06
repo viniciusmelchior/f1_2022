@@ -158,8 +158,8 @@ class LoginThrottleTest extends TestCase
 
     public function test_there_is_no_limit_on_the_address_alone(): void
     {
-        foreach (['ana@example.com', 'bia@example.com', 'cris@example.com', 'dani@example.com', 'edu@example.com', 'fabi@example.com'] as $email) {
-            $this->attempt($email, 'wrong', '203.0.113.10')->assertRedirect();
+        for ($i = 0; $i <= LoginThrottle::USER_MAX_ATTEMPTS; $i++) {
+            $this->attempt('other'.$i.'@example.com', 'wrong', '203.0.113.10')->assertRedirect();
         }
 
         $this->attempt('bia@example.com', 'correct-password', '203.0.113.10')->assertRedirect(route('landingPage'));
