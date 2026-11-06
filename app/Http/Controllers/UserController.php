@@ -113,7 +113,7 @@ class UserController extends Controller
 
         $throttle = LoginThrottle::for($request);
 
-        if (($seconds = $throttle->availableIn()) > 0) {
+        if (($seconds = $throttle->attempt()) > 0) {
             return response()
                 ->view('login.login', ['throttleSeconds' => $seconds], 429)
                 ->header('Retry-After', $seconds);
@@ -123,8 +123,6 @@ class UserController extends Controller
             $throttle->clear();
             $request->session()->regenerate();
         }else{
-            $throttle->hit();
-
             // return redirect()->back()->with('message', 'your message,here');   
             $errors = new MessageBag(['erro' => ['Usuário e/ou senha inválidos']]); // if Auth::attempt fails (wrong credentials) create a new message bag instance.
 

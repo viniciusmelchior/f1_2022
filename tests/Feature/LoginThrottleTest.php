@@ -4,7 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use App\Support\LoginThrottle;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class LoginThrottleTest extends TestCase
@@ -13,7 +15,17 @@ class LoginThrottleTest extends TestCase
     {
         parent::setUp();
 
-        (require base_path('database/migrations/2014_10_12_000000_create_users_table.php'))->up();
+        // The production database compares emails case-insensitively; SQLite needs NOCASE for the same.
+        Schema::create('users', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('email')->unique()->collation('nocase');
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password');
+            $table->integer('xp')->default(0);
+            $table->rememberToken();
+            $table->timestamps();
+        });
 
         User::create(['name' => 'Ana', 'email' => 'ana@example.com', 'password' => Hash::make('correct-password')]);
         User::create(['name' => 'Bia', 'email' => 'bia@example.com', 'password' => Hash::make('correct-password')]);
@@ -75,6 +87,25 @@ class LoginThrottleTest extends TestCase
 
         $this->attempt('ANA@Example.com')->assertRedirect();
         $this->attempt('ana@example.com')->assertStatus(429);
+    }
+
+    public function test_spellings_of_an_unknown_email_share_one_counter(): void
+    {
+        $this->attempt('zed@example.com')->assertRedirect();
+        $this->attempt('ZED@example.com')->assertRedirect();
+        $this->attempt('zéd@example.com')->assertRedirect();
+        $this->attempt('zed@exämple.com')->assertRedirect();
+        $this->attempt('zed@example.com')->assertRedirect();
+
+        $this->attempt('zed@example.com')->assertStatus(429);
+    }
+
+    public function test_the_limit_is_counted_before_the_password_is_checked(): void
+    {
+        $this->failTimes(LoginThrottle::PAIR_MAX_ATTEMPTS - 1);
+
+        // The fifth attempt is still checked, and a correct password logs in.
+        $this->attempt('ana@example.com', 'correct-password')->assertRedirect(route('landingPage'));
     }
 
     public function test_the_pair_limit_clears_after_its_window(): void
