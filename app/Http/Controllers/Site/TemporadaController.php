@@ -176,10 +176,10 @@ class TemporadaController extends Controller
             "des_temporada" => $temporada->des_temporada,
             "ano" => $temporada->referencia,
             // "circuito" => $corridaAtual->corrida->pista->nome,
-            "circuito" => $corridaAtual->pista->nome,
-            "evento" => $corridaAtual->evento->des_nome,
+            "circuito" => $corridaAtual->pista?->nome ?? '-',
+            "evento" => $corridaAtual->evento?->des_nome ?? '-',
             "contagem_corrida" => $corridaAtual->ordem . " de " . $totalCorridas,
-            "url_bandeira" => $corridaAtual->pista->pais->imagem,
+            "url_bandeira" => $corridaAtual->pista?->pais?->imagem,
             "pilotos" => [
                 // ["name" => "Max Verstappen", "team" => "Red Bull", "short" => "rbr", "color" => "#3671C6", "points" => 393],
                 // ["name" => "Lando Norris", "team" => "McLaren", "short" => "mcl", "color" => "#FF8000", "points" => 374],
