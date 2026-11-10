@@ -337,6 +337,19 @@ class ResultadoController extends Controller
                     $model->pontuacao = $this->F1_todos_pontuam($model, $chegada);
                 }
 
+                // MELHORIA 20261110: categorias que só existiam no ramo de atualização (no 1º salvamento a pontuação ficava NULL)
+                if ($request->categoria == 'F1_todos_pontuam_incompleto') {
+                    $model->pontuacao = $this->f1_corrida_incompleta_todos_pontuam($model, $chegada);
+                }
+
+                if ($request->categoria == 'F1_12_pontuam') {
+                    $model->pontuacao = $this->F1_12_pontuam($model, $chegada);
+                }
+
+                if ($request->categoria == 'F1_12_pontuam_incompleto') {
+                    $model->pontuacao = $this->F1_12_pontuam_incompleto($model, $chegada);
+                }
+
                 if ($request->categoria == 'Stock1') {
                     //Regra de 3 pontos para o pole position da Corrida 1
                     if ($model->largada == 1) {

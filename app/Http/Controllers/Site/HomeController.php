@@ -424,7 +424,27 @@ class HomeController extends Controller
         $totalTitulosPorEquipe = array_count_values($titulosPorEquipes);
         arsort($totalTitulosPorEquipe);
 
-        return view('home.novaHome', compact('totalTitulosPorPiloto', 'totalTitulosPorEquipe', 'temporadas'));
+        // MELHORIA 20261110: títulos da classificação exclusiva das sprints
+        $titulosSprintPilotos = [];
+        $titulosSprintEquipes = [];
+        foreach (\App\Models\Site\TituloSprint::with(['pilotoEquipe.piloto', 'equipe'])->where('user_id', Auth::user()->id)->get() as $item) {
+            $titulosSprintPilotos[] = $item->pilotoEquipe->piloto->nomeCompleto();
+            $titulosSprintEquipes[] = $item->equipe->nome;
+        }
+        $totalTitulosSprintPorPiloto = array_count_values($titulosSprintPilotos);
+        arsort($totalTitulosSprintPorPiloto);
+        $totalTitulosSprintPorEquipe = array_count_values($titulosSprintEquipes);
+        arsort($totalTitulosSprintPorEquipe);
+
+        // MELHORIA 20261110 (playoff): campeões do mata-mata (só temporadas com playoff habilitado)
+        $titulosPlayoffPilotos = [];
+        foreach (\App\Models\Site\TituloPlayoff::with(['pilotoEquipe.piloto'])->where('user_id', Auth::user()->id)->get() as $item) {
+            $titulosPlayoffPilotos[] = $item->pilotoEquipe->piloto->nomeCompleto();
+        }
+        $totalTitulosPlayoffPorPiloto = array_count_values($titulosPlayoffPilotos);
+        arsort($totalTitulosPlayoffPorPiloto);
+
+        return view('home.novaHome', compact('totalTitulosPorPiloto', 'totalTitulosPorEquipe', 'temporadas', 'totalTitulosSprintPorPiloto', 'totalTitulosSprintPorEquipe', 'totalTitulosPlayoffPorPiloto'));
     }
 
     public function buscaResultadosCorrida(Request $request){

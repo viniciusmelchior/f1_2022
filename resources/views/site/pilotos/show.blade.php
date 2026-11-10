@@ -55,6 +55,11 @@
                     <span>Campeonatos</span>
                     <strong>{{ $totTitulos }}</strong>
                 </div>
+                {{-- MELHORIA 20261110 (playoff) --}}
+                <div class="stat-box">
+                    <span>Títulos Playoff</span>
+                    <strong>{{ $totTitulosPlayoff }}</strong>
+                </div>
                 <div class="stat-box">
                     <span>Vitórias</span>
                     <strong id="piloto-tot-vitorias">{{ $totVitorias }}</strong>
@@ -234,7 +239,7 @@
             </div>
         </div>
     </details>
-    <script>window.SPRINTS_PILOTO = @json($sprintsPiloto);</script>
+    <script>window.SPRINTS_PILOTO = @json($sprintsPiloto); window.TITULOS_SPRINT_PILOTO = @json($titulosSprint); /* MELHORIA 20261110 */</script>
 
     <details class="f1-accordion" id="historico-vitorias">
         <summary>Histórico de Vitórias <i class="bi bi-chevron-down toggle-icon"></i></summary>
@@ -572,7 +577,10 @@
         document.getElementById('sprintContador').textContent = r.total;
         document.getElementById('sprintFiltroInfo').innerHTML = '<i class="bi bi-funnel"></i> ' + esc(nomeTemporada || 'Todas as temporadas');
 
+        // MELHORIA 20261110: títulos da classificação só das sprints
+        const titulosSprint = (window.TITULOS_SPRINT_PILOTO || []).filter(t => !temporadaId || String(t) === String(temporadaId)).length;
         const tiles = [
+            ['Títulos Sprint', titulosSprint],
             ['Sprints', r.total], ['Vitórias', r.vitorias], ['Poles', r.poles], ['Pódios', r.podios],
             ['Pontos', num(r.pontos)], ['Abandonos', r.abandonos],
             ['Melhor Largada', r.melhorLargada], ['Melhor Chegada', r.melhorChegada], ['Grid Médio', r.gridMedio], ['Média Chegada', r.mediaChegada],
@@ -589,8 +597,9 @@
         const abrirTodas = grupos.length === 1; // filtrando uma temporada: já mostra as sprints
         document.getElementById('sprintPorTemporada').innerHTML = grupos.length ? grupos.map(g => {
             const x = resumo(g.itens);
+            const campeao = (window.TITULOS_SPRINT_PILOTO || []).some(t => String(t) === String(g.id)); // MELHORIA 20261110
             return '<tr class="sprint-temporada' + (abrirTodas ? ' aberta' : '') + '" data-temporada="' + esc(g.id) + '" title="Clique para ver as sprints">' +
-                '<td class="fw-bold"><i class="bi bi-chevron-right sprint-seta"></i>' + esc(g.nome) + '</td><td><span class="badge bg-secondary">' + x.total + '</span></td>' +
+                '<td class="fw-bold"><i class="bi bi-chevron-right sprint-seta"></i>' + esc(g.nome) + (campeao ? '<span class="tag-titulo"><i class="bi bi-trophy-fill"></i> Campeão Sprint</span>' : '') + '</td><td><span class="badge bg-secondary">' + x.total + '</span></td>' +
                 '<td class="text-success fw-bold">' + x.vitorias + '</td><td class="fw-bold">' + x.poles + '</td><td class="text-primary fw-bold">' + x.podios + '</td>' +
                 '<td class="fw-bold text-danger">' + num(x.pontos) + '</td><td>' + x.mediaChegada + '</td></tr>' +
                 '<tr class="sprint-detalhe' + (abrirTodas ? '' : ' oculto') + '" data-detalhe="' + esc(g.id) + '"><td colspan="7">' +

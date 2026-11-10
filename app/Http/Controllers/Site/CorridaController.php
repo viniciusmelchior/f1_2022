@@ -22,8 +22,29 @@ class CorridaController extends Controller
     {   
         $temporada = Temporada::where('id', $temporadaId)->first();
         $corridas = Corrida::where('user_id', Auth::user()->id)->where('temporada_id', $temporadaId)->orderBy('ordem')->orderBy('flg_sprint', 'DESC')->get();
-        
-        return view('site.corridas.index', compact('corridas', 'temporada'));
+
+        // MELHORIA 20261110 (playoff): fase de cada corrida principal (classificatória, oitavas, quartas, semi, final)
+        $fasesPlayoff = [];
+        if ($temporada && $temporada->temPlayoff()) {
+            $fasesPlayoff = \App\Services\PlayoffService::mapaFases(
+                $temporada,
+                \App\Services\PlayoffService::corridasPrincipais(Auth::user()->id, $temporada->id)
+            );
+        }
+
+        return view('site.corridas.index', compact('corridas', 'temporada', 'fasesPlayoff'));
+    }
+
+    /**
+     * MELHORIA 20261110 (resumo da corrida): manchetes, resultado comentado, impacto no campeonato,
+     * marcas históricas e curiosidades de uma corrida. Cálculo em CorridaResumoService.
+     */
+    public function resumo($id)
+    {
+        $corrida = Corrida::with(['evento', 'pista.pais', 'temporada.ano'])->where('user_id', Auth::user()->id)->where('id', $id)->firstOrFail();
+        $dados = (new \App\Services\CorridaResumoService())->gerar(Auth::user()->id, $corrida);
+
+        return view('site.corridas.resumo', compact('dados', 'corrida'));
     }
 
     public function adicionar($temporadaId){

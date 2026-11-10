@@ -159,6 +159,25 @@ class EquipeController extends Controller
                             ->get(['titulos.temporada_id', 'piloto_equipes.piloto_id'])
                             ->map(fn ($t) => [(int) $t->temporada_id, (int) $t->piloto_id])->values();
 
+        // MELHORIA 20261110: títulos da classificação exclusiva das sprints
+        $titulosSprintConstrutores = DB::table('titulos_sprint')
+                                ->where('user_id', $userId)
+                                ->where('equipe_id', $modelEquipe->id)
+                                ->pluck('temporada_id')->map(fn ($t) => (int) $t)->values();
+
+        $titulosSprintPilotos = DB::table('titulos_sprint')
+                            ->join('piloto_equipes', 'piloto_equipes.id', '=', 'titulos_sprint.pilotoEquipe_id')
+                            ->where('titulos_sprint.user_id', $userId)
+                            ->where('piloto_equipes.equipe_id', $modelEquipe->id)
+                            ->get(['titulos_sprint.temporada_id', 'piloto_equipes.piloto_id'])
+                            ->map(fn ($t) => [(int) $t->temporada_id, (int) $t->piloto_id])->values();
+
+        // MELHORIA 20261110 (playoff): títulos do mata-mata conquistados por pilotos da equipe
+        $titulosPlayoffPilotos = DB::table('titulos_playoff')
+                            ->where('user_id', $userId)
+                            ->where('equipe_id', $modelEquipe->id)
+                            ->pluck('temporada_id')->map(fn ($t) => (int) $t)->values();
+
         //pilotos, pistas e eventos em dicionários para deixar o JSON enxuto
         $pilotosIds = collect($resultados)->pluck(1)->merge($duplas->pluck('piloto_id'))->unique()->values();
         $pilotos = DB::table('pilotos')
@@ -212,6 +231,9 @@ class EquipeController extends Controller
             'resultados' => $resultados,
             'titulosConstrutores' => $titulosConstrutores,
             'titulosPilotos' => $titulosPilotos,
+            'titulosSprintConstrutores' => $titulosSprintConstrutores,
+            'titulosSprintPilotos' => $titulosSprintPilotos,
+            'titulosPlayoffPilotos' => $titulosPlayoffPilotos,
             'linkCorrida' => route('resultados.show', ['__ID__']),
         ];
 
@@ -239,6 +261,7 @@ class EquipeController extends Controller
                                         join temporadas on temporadas.id = corridas.temporada_id
                                         where temporadas.id = ?
                                         and resultados.user_id = ?
+                                        and (corridas.flg_sprint is null or corridas.flg_sprint <> "S")
                                         group by piloto_equipes.equipe_id
                                         order by total desc '.$ordenacao, [(int) $temporadaId, Auth::user()->id]);
 

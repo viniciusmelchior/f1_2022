@@ -146,8 +146,12 @@ class PilotosExport implements FromView
             }
         }
 
-        //Total de Pontos
-        $resultados =  Resultado::where('user_id', Auth::user()->id)->get();
+        //Total de Pontos (MELHORIA 20261110: sem as sprints)
+        $resultados =  Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+            ->where('resultados.user_id', Auth::user()->id)
+            ->where(fn ($q) => $q->whereNull('corridas.flg_sprint')->orWhere('corridas.flg_sprint', '<>', 'S'))
+            ->select('resultados.*')
+            ->get();
         $totPontos = 0;
         foreach ($resultados as $resultado) {
             if ($resultado->pilotoEquipe->piloto->id == $this->id) {

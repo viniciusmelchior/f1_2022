@@ -14,7 +14,34 @@ class Temporada extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['des_temporada', 'user_id', 'ano_id', 'flg_finalizada','observacoes', 'referencia'];
+    protected $fillable = ['des_temporada', 'user_id', 'ano_id', 'flg_finalizada','observacoes', 'referencia', 'flg_playoff', 'qtd_corridas', 'playoff_classificados'];
+
+    // MELHORIA 20261110 (playoff): 3 corridas por fase; 8 classificados (quartas, semi, final) ou 16 (+ oitavas)
+    public const PLAYOFF_CORRIDAS_POR_FASE = 3;
+
+    public static function playoffCorridasMataMataPara($classificados){
+        return ((int) $classificados === 16 ? 4 : 3) * self::PLAYOFF_CORRIDAS_POR_FASE;
+    }
+
+    public function playoffQtdClassificados(){
+        return (int) $this->playoff_classificados === 16 ? 16 : 8;
+    }
+
+    public function playoffCorridasMataMata(){
+        return self::playoffCorridasMataMataPara($this->playoffQtdClassificados());
+    }
+
+    public function playoffQtdClassificatorias(){
+        return (int) $this->qtd_corridas - $this->playoffCorridasMataMata();
+    }
+
+    public function temPlayoff(){
+        return $this->flg_playoff === 'S' && $this->playoffQtdClassificatorias() >= 1;
+    }
+
+    public function tituloPlayoff(){
+        return $this->hasOne(TituloPlayoff::class);
+    }
 
     /*relacionamentos */
     public function ano(){
@@ -70,6 +97,7 @@ class Temporada extends Model
                             JOIN temporadas ON temporadas.id = corridas.temporada_id
                             WHERE temporadas.id =  '.$temporadaId.'
                             AND resultados.user_id =  '.$usuarioId.'
+                            AND (corridas.flg_sprint IS NULL OR corridas.flg_sprint <> "S") -- MELHORIA 20261110: sprints não somam
                             GROUP BY piloto_equipes.piloto_id, piloto_equipes.id, pilotos.nome, pilotos.sobrenome, equipes.nome, equipes.imagem
                             ORDER BY total DESC '.$queryCountOrderByPilotos.';    
         ');
@@ -81,6 +109,7 @@ class Temporada extends Model
                                         join temporadas on temporadas.id = corridas.temporada_id
                                         where temporadas.id = '.$temporadaId.'
                                         and resultados.user_id = '.$usuarioId.'
+                                        and (corridas.flg_sprint is null or corridas.flg_sprint <> "S")
                                         group by piloto_equipes.equipe_id
                                         order by total desc '.$queryCountOrderByEquipes);
 

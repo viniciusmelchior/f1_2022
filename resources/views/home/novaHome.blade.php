@@ -634,6 +634,86 @@
                     </table>
                 </div>
             </div>
+
+            {{-- MELHORIA 20261110: campeões da classificação exclusiva das sprints --}}
+            <div class="f1-card">
+                <h1 class="descricao-tabela">Pilotos - Sprints</h1>
+                <div class="f1-table-wrapper mt-4">
+                    <table class="f1-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Piloto</th>
+                                <th>Títulos Sprint</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($totalTitulosSprintPorPiloto as $piloto_nome => $total)
+                            <tr>
+                                <td>#</td>
+                                <td>{{$piloto_nome}}</td>
+                                <td>{{$total}}</td>
+                            </tr>
+                            @empty
+                            <tr><td colspan="3">Nenhuma temporada finalizada com sprints.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="f1-card">
+                <h1 class="descricao-tabela">Equipes - Sprints</h1>
+                <div class="f1-table-wrapper mt-4">
+                    <table class="f1-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Equipe</th>
+                                <th>Títulos Sprint</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($totalTitulosSprintPorEquipe as $equipe_nome => $total)
+                            <tr>
+                                <td>#</td>
+                                <td>{{$equipe_nome}}</td>
+                                <td>{{$total}}</td>
+                            </tr>
+                            @empty
+                            <tr><td colspan="3">Nenhuma temporada finalizada com sprints.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {{-- MELHORIA 20261110 (playoff): campeões do mata-mata --}}
+            <div class="f1-card">
+                <h1 class="descricao-tabela">Pilotos - Playoffs</h1>
+                <div class="f1-table-wrapper mt-4">
+                    <table class="f1-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Piloto</th>
+                                <th>Títulos Playoff</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($totalTitulosPlayoffPorPiloto as $piloto_nome => $total)
+                            <tr>
+                                <td>#</td>
+                                <td>{{$piloto_nome}}</td>
+                                <td>{{$total}}</td>
+                            </tr>
+                            @empty
+                            <tr><td colspan="3">Nenhuma temporada finalizada com playoff.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
 
 

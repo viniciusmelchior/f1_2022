@@ -269,8 +269,9 @@ class PilotoController extends Controller
                                 ->where('piloto_equipes.piloto_id', $id)
                                 ->get());
     
-        //Total de Pontos tem cálculo diferente pois envolve sprints
+        //Total de Pontos (MELHORIA 20261110: sem as sprints)
         $resultados = Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')
+                                    ->where(fn ($q) => $q->whereNull('corridas.flg_sprint')->orWhere('corridas.flg_sprint', '<>', 'S')) // MELHORIA 20261110: sprints não somam
                                     ->join('piloto_equipes', 'piloto_equipes.id', '=', 'resultados.pilotoEquipe_id')
                                     ->where('resultados.user_id', Auth::user()->id)
                                     ->where('piloto_equipes.piloto_id', $modelPiloto->id)
@@ -317,7 +318,7 @@ class PilotoController extends Controller
             join pilotos on piloto_equipes.piloto_id = pilotos.id
             join temporadas on temporadas.id = corridas.temporada_id
             where temporadas.ano_id = ?
-            and resultados.user_id = ?
+            and resultados.user_id = ? and (corridas.flg_sprint is null or corridas.flg_sprint <> "S")
             and piloto_id = ?', [$pilotoTemporada->ano_id, Auth::user()->id, $pilotoTemporada->piloto_id]);
            
             array_push($pontuacaoPorTemporada, $retorno[0]->totPontos);
@@ -389,7 +390,21 @@ class PilotoController extends Controller
         // MELHORIA 20261105: sprints disputadas pelo piloto (a seção monta as estatísticas no navegador)
         $sprintsPiloto = $this->sprintsDoPiloto($modelPiloto->id);
 
-        return view('site.pilotos.show', compact('modelPiloto','totTitulos','totAbandonos', 'totCorridas', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas', 'equipes','mediaChegada','gridMedio','temporadasDisputadas','pontuacaoPorTemporada','resultadosPorCorrida','temporadas','listagemVitorias', 'listagemPolePositions', 'corridasPorEquipe','vitoriasPorPista', 'polesPorPista','pistasEmQueOPilotoNaoVenceu','pistasEmQueOPilotoNaoFoiPolePosition', 'corridaSeguidasSemVencer', 'corridaSeguidasSemPolePosition', 'sprintsPiloto'));
+        // MELHORIA 20261110: temporadas em que o piloto foi campeão da classificação das sprints
+        $titulosSprint = DB::table('titulos_sprint')
+                            ->join('piloto_equipes', 'piloto_equipes.id', '=', 'titulos_sprint.pilotoEquipe_id')
+                            ->where('titulos_sprint.user_id', Auth::user()->id)
+                            ->where('piloto_equipes.piloto_id', $modelPiloto->id)
+                            ->pluck('titulos_sprint.temporada_id')->map(fn ($t) => (int) $t)->values();
+
+        // MELHORIA 20261110 (playoff): títulos do mata-mata
+        $totTitulosPlayoff = DB::table('titulos_playoff')
+                            ->join('piloto_equipes', 'piloto_equipes.id', '=', 'titulos_playoff.pilotoEquipe_id')
+                            ->where('titulos_playoff.user_id', Auth::user()->id)
+                            ->where('piloto_equipes.piloto_id', $modelPiloto->id)
+                            ->count();
+
+        return view('site.pilotos.show', compact('modelPiloto','totTitulos','totAbandonos', 'totCorridas', 'totVitorias','totPontos', 'totPodios', 'totTopTen','piorPosicaoLargada','totPoles', 'melhorPosicaoLargada','melhorPosicaoChegada', 'piorPosicaoChegada','totVoltasRapidas', 'equipes','mediaChegada','gridMedio','temporadasDisputadas','pontuacaoPorTemporada','resultadosPorCorrida','temporadas','listagemVitorias', 'listagemPolePositions', 'corridasPorEquipe','vitoriasPorPista', 'polesPorPista','pistasEmQueOPilotoNaoVenceu','pistasEmQueOPilotoNaoFoiPolePosition', 'corridaSeguidasSemVencer', 'corridaSeguidasSemPolePosition', 'sprintsPiloto', 'titulosSprint', 'totTitulosPlayoff'));
     }
 
     /**
@@ -553,7 +568,7 @@ class PilotoController extends Controller
                                         join pilotos on piloto_equipes.piloto_id = pilotos.id
                                         join temporadas on temporadas.id = corridas.temporada_id
                                         where temporadas.id = ?
-                                        and resultados.user_id = ?
+                                        and resultados.user_id = ? and (corridas.flg_sprint is null or corridas.flg_sprint <> "S")
                                         and piloto_id = ?', [$temporada_id, $usuario_id, $piloto1_id]);
 
         $piloto1TotPontos = $piloto1TotPontos[0]->totPontos;
@@ -567,7 +582,7 @@ class PilotoController extends Controller
                                         join pilotos on piloto_equipes.piloto_id = pilotos.id
                                         join temporadas on temporadas.id = corridas.temporada_id
                                         where temporadas.id = ?
-                                        and resultados.user_id = ?
+                                        and resultados.user_id = ? and (corridas.flg_sprint is null or corridas.flg_sprint <> "S")
                                         and piloto_id = ?', [$temporada_id, $usuario_id, $piloto2_id]);
 
         $piloto2TotPontos = $piloto2TotPontos[0]->totPontos;

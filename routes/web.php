@@ -156,11 +156,15 @@ route::post('/temporadas/classificacao', [TemporadaController::class, 'postClass
 route::put('/temporadas/update/{id}', [TemporadaController::class, 'update'])->name('temporadas.update')->middleware('auth');
 route::get('/temporadas/delete/{id}', [TemporadaController::class, 'destroy'])->name('temporadas.delete')->middleware('auth');
 route::get('/temporadas/resultados/{id}/{porPontuacao?}', [TemporadaController::class, 'resultados'])->name('temporadas.resultados')->middleware('auth');
+/** 10/11/2026 - resumo completo da temporada (dados, estatísticas, curiosidades e manchetes) */
+route::get('/temporadas/resumo/{id}', [TemporadaController::class, 'resumo'])->name('temporadas.resumo')->middleware('auth');
 
 /**Corridas */
 route::get('/corridas/create', [CorridaController::class, 'create'])->name('corridas.create')->middleware('auth');
 route::post('/corridas/store', [CorridaController::class, 'store'])->name('corridas.store')->middleware('auth');
 route::get('/corridas/index/{id}', [CorridaController::class, 'index'])->name('corridas.index')->middleware('auth');
+/** 10/11/2026 - resumo completo da corrida (manchetes, marcas históricas, curiosidades) */
+route::get('/corridas/resumo/{id}', [CorridaController::class, 'resumo'])->name('corridas.resumo')->middleware('auth');
 // route::get('/corridas/edit/{id}', [CorridaController::class, 'edit'])->name('corridas.edit')->middleware('auth');
 // route::put('/corridas/update/{id}', [CorridaController::class, 'update'])->name('corridas.update')->middleware('auth');
 // route::get('/corridas/delete/{id}', [CorridaController::class, 'destroy'])->name('corridas.delete')->middleware('auth');

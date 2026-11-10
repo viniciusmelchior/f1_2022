@@ -282,6 +282,10 @@
     }));
     const titulosConstrutores = D.titulosConstrutores;
     const titulosPilotos = D.titulosPilotos.map(t => ({ temporada: t[0], piloto: t[1] }));
+    // MELHORIA 20261110: títulos da classificação só das sprints
+    const titulosSprintConstrutores = D.titulosSprintConstrutores || [];
+    const titulosSprintPilotos = (D.titulosSprintPilotos || []).map(t => ({ temporada: t[0], piloto: t[1] }));
+    const titulosPlayoffPilotos = D.titulosPlayoffPilotos || []; // MELHORIA 20261110 (playoff)
 
     // ---------- helpers de exibição ----------
     const piloto = id => D.pilotos[id] || { nome: 'Piloto #' + id, img: null, bandeira: null, link: '#' };
@@ -314,7 +318,7 @@
     }
     const ehDobradinha = rs => rs.some(r => r.chegada === 1) && rs.some(r => r.chegada === 2);
 
-    // ---------- resumo (mesmas regras da tela anterior: estatísticas de GP; pontos incluem sprints) ----------
+    // ---------- resumo (estatísticas de GP; MELHORIA 20261110: pontos também só de GP, sprints têm seção própria) ----------
     function resumo(lista) {
         const gp = lista.filter(r => !r.corrida.sprint);
         const largadas = gp.filter(r => r.largada > 0).map(r => r.largada);
@@ -330,7 +334,7 @@
             topTen: gp.filter(r => r.chegada >= 1 && r.chegada <= 10).length,
             abandonos: gp.filter(r => r.abandono).length,
             voltasRapidas: gp.filter(r => r.vr).length,
-            pontos: lista.reduce((a, r) => a + r.pontos, 0),
+            pontos: gp.reduce((a, r) => a + r.pontos, 0),
             dobradinhas: dobradinhas,
             melhorLargada: largadas.length ? Math.min(...largadas) + 'º' : '-',
             piorLargada: largadas.length ? Math.max(...largadas) + 'º' : '-',
@@ -349,9 +353,10 @@
         const filtraTitulo = t => !temporadaId || String(t) === String(temporadaId);
         const tc = titulosConstrutores.filter(filtraTitulo).length;
         const tp = titulosPilotos.filter(t => filtraTitulo(t.temporada)).length;
+        const tpo = titulosPlayoffPilotos.filter(filtraTitulo).length; // MELHORIA 20261110 (playoff)
         const sprints = new Set(lista.filter(x => x.corrida.sprint).map(x => x.corrida.id)).size;
         const principais = [
-            ['Corridas', r.corridas, r.largadas + ' largadas'], ['Títulos Construtores', tc, null, tc > 0], ['Títulos de Pilotos', tp, null, tp > 0],
+            ['Corridas', r.corridas, r.largadas + ' largadas'], ['Títulos Construtores', tc, null, tc > 0], ['Títulos de Pilotos', tp, null, tp > 0], ['Títulos Playoff', tpo, null, tpo > 0],
             ['Vitórias', r.vitorias], ['Poles', r.poles], ['Pódios', r.podios], ['Pontos', num(r.pontos)],
             ['Voltas Rápidas', r.voltasRapidas], ['Dobradinhas', r.dobradinhas],
         ];
@@ -428,10 +433,10 @@
                 '</td></tr>';
         }).join('') : vazio(8, 'Equipe ainda não disputou temporadas.');
 
-        // gráfico de pontos por temporada (inclui sprints, como a tela anterior)
+        // gráfico de pontos por temporada (MELHORIA 20261110: sem as sprints)
         const canvas = document.getElementById('graficoPontosEquipe');
         if (!window.Chart || !canvas) return;
-        const pontos = temporadas.map(t => Math.round(resultados.filter(x => x.corrida.temporada === t.id).reduce((a, x) => a + x.pontos, 0) * 10) / 10);
+        const pontos = temporadas.map(t => Math.round(resultados.filter(x => x.corrida.temporada === t.id && !x.corrida.sprint).reduce((a, x) => a + x.pontos, 0) * 10) / 10);
         const cores = temporadas.map(t => !temporadaId || String(t.id) === String(temporadaId) ? window.COR_EQUIPE : 'rgba(150,150,150,0.4)');
         if (grafico) {
             grafico.data.datasets[0].backgroundColor = cores;
@@ -466,8 +471,10 @@
             const dob = g.corridas.filter(x => ehDobradinha(x.rs)).length;
             const pts = todos.reduce((a, r) => a + r.pontos, 0);
             const t = temporadaPorId[g.id] || { nome: '-', ano: '' };
+            // MELHORIA 20261110: campeã da classificação das sprints
+            const campeaSprint = sprint && titulosSprintConstrutores.some(x => x === g.id);
             return '<tr class="sprint-temporada' + (abrir ? ' aberta' : '') + '" data-temporada="' + g.id + '" title="Clique para ver as corridas">' +
-                '<td class="fw-bold"><i class="bi bi-chevron-right sprint-seta"></i>' + esc(t.nome) + (t.ano ? ' (' + esc(t.ano) + ')' : '') + '</td>' +
+                '<td class="fw-bold"><i class="bi bi-chevron-right sprint-seta"></i>' + esc(t.nome) + (t.ano ? ' (' + esc(t.ano) + ')' : '') + (campeaSprint ? '<span class="tag-titulo"><i class="bi bi-trophy-fill"></i> Campeã Sprint</span>' : '') + '</td>' +
                 '<td><span class="badge bg-secondary">' + g.corridas.length + '</span></td>' +
                 '<td class="text-success fw-bold">' + vit + '</td><td class="fw-bold">' + pol + '</td><td class="text-primary fw-bold">' + pod + '</td>' +
                 '<td>' + dob + '</td><td class="fw-bold text-danger">' + num(pts) + '</td></tr>' +
@@ -500,12 +507,17 @@
             '<td class="fw-bold">' + num(pts) + '</td><td>' + status + '</td><td>' + acao(c.id) + '</td></tr>';
     }
 
-    function renderSprintStats(lista) {
+    function renderSprintStats(lista, temporadaId) {
         const sp = lista.filter(r => r.corrida.sprint);
         const chegadas = sp.filter(r => r.chegada > 0).map(r => r.chegada);
         const porCorrida = agruparPorCorrida(sp);
         let dob = 0; porCorrida.forEach(rs => { if (ehDobradinha(rs)) dob++; });
+        // MELHORIA 20261110: títulos da classificação das sprints
+        const filtraTitulo = t => !temporadaId || String(t) === String(temporadaId);
+        const tsc = titulosSprintConstrutores.filter(filtraTitulo).length;
+        const tsp = titulosSprintPilotos.filter(t => filtraTitulo(t.temporada)).length;
         const tiles = [
+            ['Títulos Sprint (Equipe)', tsc], ['Títulos Sprint (Pilotos)', tsp],
             ['Sprints', porCorrida.size], ['Vitórias', sp.filter(r => r.chegada === 1).length], ['Poles', sp.filter(r => r.largada === 1).length],
             ['Pódios', sp.filter(r => r.chegada >= 1 && r.chegada <= 3).length], ['Dobradinhas', dob],
             ['Pontos', num(sp.reduce((a, r) => a + r.pontos, 0))], ['Abandonos', sp.filter(r => r.abandono).length],
@@ -605,7 +617,7 @@
         renderCampeonatos(temporadaId);
         document.querySelector('[data-contador="corridas"]').textContent = renderPorTemporada('tbCorridas', lista, false, temporadaId);
         document.querySelector('[data-contador="sprints"]').textContent = renderPorTemporada('tbSprints', lista, true, temporadaId);
-        renderSprintStats(lista);
+        renderSprintStats(lista, temporadaId);
         renderListas(lista);
         renderPistas(lista);
     }
