@@ -1,16 +1,38 @@
-- pensar nos abandonos
+-- passos para gerar o select da home 
 
-## Tela de Temporadas/Corridas
-- trocar icones ok
-- pesquisa - avaliar necessidade
-- breadcrumbs ok 
-- corrigir redireceionamento do botao de adicionar ok
+1.Adicionar ROTA na sessao de scripts 
+- exemplo: urlclassificacaoGeralPorTemporada = "<?=route('ajax.classificacaoGeralPorTemporada')?>"
 
-- modal delete (assistir videos para estudo)
+2.criar rota no arquivo web
 
-* Revisar inclusao de piloto Equipe *
-- verificar se pra mesma equipe existe dois ativos na mesma temporada. Se tiver, retornar com a mensagem "Já existe uma dupla cadastrada para a equipe tal na temporada tal"
+2.1.criar função no arquivo HomeController
 
---Trabalhar inserção do campeao. 
+3. Name do select de temporada
 
-1º adicionar flg para finalizar temporada. Caso ela esteja finalizada, o botão de adicionar corrida fica desabilitado. Campao pode ser inserido de acordo com o respectivo piloto equipe
+4. id do select de temporada
+
+5. id do option "selecionar temporada" ou "geral"
+
+6. id da tabela
+
+
+#########
+
+// while($cont <= 43){
+                                        //     if($cont == 43){
+                                        //         $queryCountChegada .= '(SELECT COUNT(*) FROM resultados AS r2 JOIN corridas on (corridas.id = resultados.corrida_id) where corridas.flg_sprint = "N" AND r2.pilotoEquipe_id = piloto_equipes.id AND r2.chegada = '.$cont.') AS posicao_'.$cont.'';
+                                        //     }else{
+                                        //         $queryCountChegada .= '(SELECT COUNT(*) FROM resultados AS r2 JOIN corridas on (corridas.id = resultados.corrida_id) where corridas.flg_sprint = "N" AND r2.pilotoEquipe_id = piloto_equipes.id AND r2.chegada = '.$cont.') AS posicao_'.$cont.',';
+                                        //     }
+                                        //     $queryCountOrderBy .= ', posicao_'.$cont.' desc';
+                                        //     $cont++;
+                                        // }
+
+
+
+
+
+                                         $queryCountChegadaPilotos .= '(SELECT COUNT(*) FROM resultados AS r2 JOIN corridas on (corridas.id = resultados.corrida_id) WHERE corridas.flg_sprint = "N" AND r2.pilotoEquipe_id = piloto_equipes.id AND r2.chegada = '.$cont.') AS posicao_'.$cont.'';
+
+
+                                         $queryCountChegadaPilotos .= '(SELECT COUNT(*) FROM resultados AS r2 JOIN corridas on (corridas.id = resultados.corrida_id) WHERE corridas.flg_sprint = "N" AND r2.pilotoEquipe_id = piloto_equipes.id AND r2.chegada = '.$cont.') AS posicao_'.$cont.',';

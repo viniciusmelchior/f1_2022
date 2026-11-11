@@ -114,7 +114,7 @@
 
     /* Tabela de resultado (formulário) */
     .rc-tabela { width: 100%; border-collapse: separate; border-spacing: 0; color: var(--rc-tinta); margin: 0; }
-    .rc-tabela thead th { position: sticky; top: 0; z-index: 2; background: var(--rc-superficie); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--rc-tinta-3); font-weight: 600; padding: 10px 8px; border-bottom: 1px solid var(--rc-eixo); text-align: center; white-space: nowrap; }
+    .rc-tabela thead th { background: var(--rc-superficie); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--rc-tinta-3); font-weight: 600; padding: 10px 8px; border-bottom: 1px solid var(--rc-eixo); text-align: center; white-space: nowrap; }
     .rc-tabela thead th.text-start { text-align: left; }
     .rc-tabela td { padding: 6px 8px; border-bottom: 1px solid var(--rc-grade); vertical-align: middle; text-align: center; }
     .rc-tabela tbody tr { transition: background .1s; }
@@ -140,7 +140,7 @@
     .rc-detalhe { font-size: .75rem; color: var(--rc-tinta-2); white-space: nowrap; text-align: left !important; }
     .rc-detalhe .rc-detalhe-volta { color: var(--rc-tinta); font-weight: 600; }
     .col-pontuacao-extra { display: none; }
-    .rc-tabela-wrap { max-height: 75vh; overflow: auto; border-radius: 0 0 12px 12px; }
+    .rc-tabela-wrap { border-radius: 0 0 12px 12px; } /* MELHORIA 20261111: sem scroll interno, a tabela ocupa a altura necessária */
 
     /* KPIs */
     .rc-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 20px; }
@@ -604,6 +604,56 @@
                                 <input type="checkbox" class="form-check-input" id="gerarGridLargada" name="gerarGridLargada" value="S">
                                 <label class="form-check-label" for="gerarGridLargada"><i class="bi bi-filetype-json"></i> Gerar grid de largada (.CMPRESET para o Content Manager)</label>
                             </div>
+                        </div>
+                    </div>
+
+                    {{-- MELHORIA 20261111: punições de posição (só reordena a coluna Chegada no navegador; grava no Salvar normal) --}}
+                    <style>
+                        .pn-linha { display: grid; grid-template-columns: minmax(0, 1fr) 70px auto; gap: 8px; align-items: end; }
+                        .pn-linha input[type=number] { width: 100%; height: 38px; text-align: center; font-weight: 700; }
+                        .pn-lista { list-style: none; padding: 0; margin: 12px 0 0 0; }
+                        .pn-lista li { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--rc-grade); font-size: .85rem; }
+                        .pn-lista li b { color: #ec835a; white-space: nowrap; }
+                        .pn-lista .pn-x { border: 0; background: transparent; color: var(--rc-tinta-3); padding: 0 4px; }
+                        .pn-lista .pn-x:hover { color: var(--rc-critico); }
+                        .pn-resultado { font-size: .8rem; color: var(--rc-tinta-2); margin-top: 10px; }
+                        .pn-resultado div { padding: 2px 0; }
+                    </style>
+                    <div class="rc-card" id="cardPunicoes">
+                        <div class="rc-card-cabecalho">
+                            <h5 class="rc-card-titulo"><i class="bi bi-exclamation-octagon"></i> Punições</h5>
+                            <span class="rc-card-subtitulo">Perda de posições na chegada</span>
+                        </div>
+                        <div class="rc-card-corpo">
+                            <div class="pn-linha">
+                                <div>
+                                    <label for="pnPiloto" class="rc-rotulo">Piloto</label>
+                                    <select id="pnPiloto" class="form-control">
+                                        <option value="">selecione</option>
+                                        @foreach($model as $pilotoEquipe)
+                                            @if($pilotoEquipe->flg_super_corrida != 'S')
+                                                <option value="{{$pilotoEquipe->id}}">{{$pilotoEquipe->piloto->nome}} {{$pilotoEquipe->piloto->sobrenome}}</option>
+                                            @endif
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="pnPosicoes" class="rc-rotulo">Posições</label>
+                                    <input type="number" id="pnPosicoes" class="form-control" min="1" value="5">
+                                </div>
+                                <button type="button" class="btn btn-rc-sec" id="pnBtnAdicionar" title="Adicionar punição"><i class="bi bi-plus-lg"></i></button>
+                            </div>
+                            <ul class="pn-lista" id="pnLista"></ul>
+                            <div id="pnAvisos" class="mt-2"></div>
+                            <div class="d-flex flex-wrap gap-2 mt-2">
+                                <button type="button" class="btn btn-rc-sec d-none" id="pnBtnAplicar"><i class="bi bi-arrow-down-circle"></i> Aplicar punições</button>
+                                <button type="button" class="btn btn-rc-mini d-none" id="pnBtnDesfazer"><i class="bi bi-arrow-counterclockwise"></i> Desfazer</button>
+                            </div>
+                            <div class="form-check mt-2 mb-0">
+                                <input type="checkbox" class="form-check-input" id="pnRegistrarObs" checked>
+                                <label class="form-check-label" for="pnRegistrarObs">Registrar nas observações</label>
+                            </div>
+                            <div class="pn-resultado" id="pnResultado"></div>
                         </div>
                     </div>
 
@@ -2352,6 +2402,135 @@ document.getElementById('inputFileLargada').addEventListener('change', function(
             // $(".linha_resultados").addClass("d-none");
             location.reload()
         }
+    });
+
+    /* ============ MELHORIA 20261111: PUNIÇÕES DE POSIÇÃO ============
+       Só reordena os inputs da coluna Chegada (o Salvar normal grava). Considera apenas pilotos
+       visíveis, sem DNF e com chegada preenchida; os DNFs mantêm as posições deles.
+       Regra: quem perde N posições cai N lugares (limitado ao último). Se mais de um piloto for punido
+       e os destinos coincidirem, quem chegou originalmente melhor fica na frente. */
+    const pnPunicoes = []; // { id, nome, posicoes }
+    let pnDesfazer = null;  // { valores: [[input, valor]], obs }
+
+    function pnLinhaDoPiloto(id) {
+        return linhasFormulario().find(l => l.dataset.pilotoEquipeId == id);
+    }
+    function pnNome(linha) { return linha.cells[1].textContent.trim(); }
+    function pnChegadaInput(linha) { return linha.cells[3].querySelector('input[type="number"]'); }
+
+    function pnAviso(texto) {
+        document.getElementById('pnAvisos').innerHTML = texto
+            ? '<div class="rc-aviso alerta mb-0"><i class="bi bi-exclamation-triangle-fill"></i><div>' + texto + '</div></div>' : '';
+    }
+
+    function pnRenderizar() {
+        document.getElementById('pnLista').innerHTML = pnPunicoes.map((p, i) =>
+            '<li><span>' + p.nome + ' <b>+' + p.posicoes + ' pos.</b></span>' +
+            '<button type="button" class="pn-x" data-pn-remover="' + i + '" title="Remover"><i class="bi bi-x-lg"></i></button></li>'
+        ).join('');
+        document.getElementById('pnBtnAplicar').classList.toggle('d-none', pnPunicoes.length === 0);
+    }
+
+    document.getElementById('pnBtnAdicionar').addEventListener('click', () => {
+        const select = document.getElementById('pnPiloto');
+        const posicoes = parseInt(document.getElementById('pnPosicoes').value);
+        pnAviso('');
+        if (!select.value) { pnAviso('Selecione o piloto punido.'); return; }
+        if (!(posicoes > 0)) { pnAviso('Informe quantas posições o piloto vai perder.'); return; }
+        const linha = pnLinhaDoPiloto(select.value);
+        if (!linha) { pnAviso('Piloto não encontrado na tabela.'); return; }
+        const existente = pnPunicoes.find(p => p.id == select.value);
+        if (existente) existente.posicoes = posicoes;
+        else pnPunicoes.push({ id: select.value, nome: pnNome(linha), posicoes });
+        select.value = '';
+        atualizarSelect2(select);
+        pnRenderizar();
+    });
+
+    document.getElementById('pnLista').addEventListener('click', e => {
+        const botao = e.target.closest('[data-pn-remover]');
+        if (!botao) return;
+        pnPunicoes.splice(parseInt(botao.dataset.pnRemover), 1);
+        pnRenderizar();
+    });
+
+    document.getElementById('pnBtnAplicar').addEventListener('click', () => {
+        pnAviso('');
+        const classificados = linhasFormulario()
+            .filter(l => !l.classList.contains('d-none'))
+            .filter(l => !l.cells[4].querySelector('input[type="checkbox"]').checked)
+            .filter(l => parseInt(pnChegadaInput(l).value) > 0)
+            .sort((a, b) => parseInt(pnChegadaInput(a).value) - parseInt(pnChegadaInput(b).value) || a.dataset.ordemOriginal - b.dataset.ordemOriginal);
+
+        const invalidos = pnPunicoes.filter(p => !classificados.some(l => l.dataset.pilotoEquipeId == p.id));
+        if (invalidos.length) {
+            pnAviso('<strong>Não foi possível aplicar</strong><span class="rc-aviso-detalhe">' + invalidos.map(p => p.nome).join(', ') +
+                ': sem chegada preenchida ou marcado como DNF.</span>');
+            return;
+        }
+        const vagas = classificados.map(l => parseInt(pnChegadaInput(l).value)); // posições ocupadas, em ordem
+        if (new Set(vagas).size !== vagas.length) {
+            pnAviso('<strong>Há posições de chegada repetidas</strong><span class="rc-aviso-detalhe">Corrija a coluna Chegada antes de aplicar as punições.</span>');
+            return;
+        }
+
+        const n = classificados.length;
+        const punidos = classificados
+            .map((linha, i) => ({ linha, i, pen: (pnPunicoes.find(p => p.id == linha.dataset.pilotoEquipeId) || {}).posicoes || 0 }))
+            .filter(x => x.pen > 0)
+            .map(x => ({ ...x, alvo: Math.min(x.i + x.pen, n - 1) }))
+            .sort((a, b) => a.alvo - b.alvo || a.i - b.i); // destino igual: quem chegou melhor fica na frente
+
+        // 1) cada punido vai para o destino ou para a próxima vaga livre abaixo
+        const ocupadas = new Set();
+        punidos.forEach(p => {
+            let vaga = p.alvo;
+            while (ocupadas.has(vaga)) vaga++;
+            p.vaga = vaga;
+            ocupadas.add(vaga);
+        });
+        // 2) quem passou do último sobe mantendo a ordem relativa (ex.: dois pilotos com +100)
+        let limite = n - 1;
+        [...punidos].sort((a, b) => b.vaga - a.vaga).forEach(p => {
+            p.vaga = Math.min(p.vaga, limite);
+            limite = p.vaga - 1;
+        });
+        // 3) monta a nova ordem: punidos nas vagas deles, os demais preenchem o restante na ordem original
+        const novaOrdem = new Array(n).fill(null);
+        punidos.forEach(p => { novaOrdem[p.vaga] = p.linha; });
+        const restantes = classificados.filter(l => !punidos.some(p => p.linha === l));
+        for (let k = 0; k < n; k++) if (!novaOrdem[k]) novaOrdem[k] = restantes.shift();
+
+        const observacoes = document.getElementById('observacoes');
+        pnDesfazer = { valores: classificados.map(l => [pnChegadaInput(l), pnChegadaInput(l).value]), obs: observacoes.value };
+
+        novaOrdem.forEach((linha, k) => { pnChegadaInput(linha).value = vagas[k]; });
+
+        const resumo = punidos.slice().sort((a, b) => a.i - b.i).map(p =>
+            pnNome(p.linha) + ': +' + p.pen + ' posições (' + vagas[p.i] + 'º → ' + vagas[p.vaga] + 'º)');
+        document.getElementById('pnResultado').innerHTML = '<div class="rc-rotulo mt-1">Aplicado</div>' + resumo.map(r => '<div><i class="bi bi-arrow-down-short"></i> ' + r + '</div>').join('');
+        if (document.getElementById('pnRegistrarObs').checked) {
+            observacoes.value = (observacoes.value.trim() ? observacoes.value.trim() + '\n' : '') + 'Punições: ' + resumo.join('; ');
+        }
+
+        pnPunicoes.length = 0;
+        pnRenderizar();
+        document.getElementById('pnBtnDesfazer').classList.remove('d-none');
+        atualizarDeltasFormulario();
+        ordenarFormulario('chegada');
+        if (estadoAnalise.dados) renderizarAnalise();
+    });
+
+    document.getElementById('pnBtnDesfazer').addEventListener('click', () => {
+        if (!pnDesfazer) return;
+        pnDesfazer.valores.forEach(([input, valor]) => { input.value = valor; });
+        document.getElementById('observacoes').value = pnDesfazer.obs;
+        pnDesfazer = null;
+        document.getElementById('pnResultado').innerHTML = '';
+        document.getElementById('pnBtnDesfazer').classList.add('d-none');
+        atualizarDeltasFormulario();
+        ordenarFormulario('chegada');
+        if (estadoAnalise.dados) renderizarAnalise();
     });
 
     var swiper = new Swiper('.swiper-container', {
