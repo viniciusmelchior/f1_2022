@@ -69,6 +69,7 @@ class ResultadoController extends Controller
         }
 
         $condicoesClimaticas = CondicaoClimatica::where('user_id', Auth::user()->id)->get();
+        // $model = PilotoEquipe::where('user_id', Auth::user()->id)->where('ano_id', $corrida->temporada->ano_id)->where('flg_ativo', 'S')->orderBy('id')->orderBy('equipe_id')->get();
         $model = Resultado::where('user_id', Auth::user()->id)->where('corrida_id', $corrida->id)->orderBy('chegada')->paginate(30);
         $vencedor = Resultado::where('user_id', Auth::user()->id)->where('corrida_id', $corrida->id)->where('chegada', 1)->orderBy('chegada')->first();
         if (count($model) == 0) {
@@ -91,9 +92,7 @@ class ResultadoController extends Controller
     public function edit($id)
     {   
         $corrida = Corrida::where('id', $id)->first();
-        // $condicoesClimaticas = CondicaoClimatica::where('user_id', Auth::user()->id)->get();
-        $condicoesClimaticas = CondicaoClimatica::where('user_id', 3)->get();
-        // $model = PilotoEquipe::where('user_id', Auth::user()->id)->where('ano_id', $corrida->temporada->ano_id)->where('flg_ativo', 'S')->orderBy('id')->orderBy('equipe_id')->get();
+        $condicoesClimaticas = CondicaoClimatica::where('user_id', Auth::user()->id)->get();
         $model = PilotoEquipe::where('user_id', Auth::user()->id)->where('ano_id', $corrida->temporada->ano_id)->where('flg_ativo', 'S')->orderBy('equipe_id')->get();
 
         return view('site.resultados.form', compact('corrida', 'model', 'condicoesClimaticas'));

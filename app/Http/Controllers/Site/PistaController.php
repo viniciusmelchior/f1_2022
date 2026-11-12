@@ -21,8 +21,7 @@ class PistaController extends Controller
      */
     public function index()
     {
-        // $pistas = Pista::where('user_id', Auth::user()->id)->orderBy('nome')->get();
-        $pistas = Pista::where('user_id', 3)->orderBy('nome')->get();
+        $pistas = Pista::where('user_id', Auth::user()->id)->orderBy('nome')->get();
 
         return view('site.pistas.index', compact('pistas'));
     }

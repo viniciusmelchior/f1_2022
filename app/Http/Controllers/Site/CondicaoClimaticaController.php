@@ -16,8 +16,7 @@ class CondicaoClimaticaController extends Controller
      */
     public function index()
     {
-        // $condicaoClimaticas = CondicaoClimatica::where('user_id', Auth::user()->id)->get();
-        $condicaoClimaticas = CondicaoClimatica::where('user_id', 3)->get();
+        $condicaoClimaticas = CondicaoClimatica::where('user_id', Auth::user()->id)->get();
 
         return view('site.condicaoClimatica.index', compact('condicaoClimaticas'));
     }
