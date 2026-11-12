@@ -17,12 +17,9 @@ class EstatisticasPilotosEquipes extends Controller
     
     public function index(){
         $temporadas = Temporada::where('user_id', Auth::user()->id)->get();
-        // $pilotos  = Piloto::where('user_id', Auth::user()->id)->orderBy('nome', 'ASC')->get();
-        $pilotos  = Piloto::where('user_id', 3)->orderBy('nome', 'ASC')->get();
-        // $equipes  = Equipe::where('user_id', Auth::user()->id)->orderBy('nome', 'ASC')->get();
-        $equipes  = Equipe::where('user_id', 3)->orderBy('nome', 'ASC')->get();
-        // $meuPiloto = Piloto::where('nome', 'Vinicius')->where('sobrenome', 'Melchior')->where('user_id', Auth::user()->id)->first();
-        $meuPiloto = Piloto::where('nome', 'Vinicius')->where('sobrenome', 'Melchior')->where('user_id', 3)->first();
+        $pilotos  = Piloto::where('user_id', Auth::user()->id)->orderBy('nome', 'ASC')->get();
+        $equipes  = Equipe::where('user_id', Auth::user()->id)->orderBy('nome', 'ASC')->get();
+        $meuPiloto = Piloto::where('nome', 'Vinicius')->where('sobrenome', 'Melchior')->where('user_id', Auth::user()->id)->first();
         
         return view('site.estatisticasPilotosEquipes.index', compact('temporadas', 'pilotos', 'equipes', 'meuPiloto'));
     }

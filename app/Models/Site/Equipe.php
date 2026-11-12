@@ -79,12 +79,13 @@ class Equipe extends Model
             JOIN paises pa ON e.pais_id = pa.id
             LEFT JOIN RankingEquipeFinal s ON e.id = s.equipe_id
             WHERE e.id <> 0
-            and e.user_id = 3
+            and e.user_id = :dono_id
             ORDER BY total_corridas DESC, vitorias DESC, equipe ASC;
         ";
 
         return DB::select($sql, [
             'user_id' => $userId,
+            'dono_id' => $userId,
             'temporada_id' => $temporadaId
         ]);
     }

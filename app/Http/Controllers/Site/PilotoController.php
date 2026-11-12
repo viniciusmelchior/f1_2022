@@ -135,9 +135,8 @@ class PilotoController extends Controller
     {   
         //Dados do Piloto 
         $modelPiloto = Piloto::where('id', $id)
-                        // ->where('user_id', Auth::user()->id)
-                        ->where('user_id', 3)
-                        ->first();
+                        ->where('user_id', Auth::user()->id)
+                        ->firstOrFail();
 
         //total de corridas
         $resultados = Resultado::join('corridas', 'corridas.id', '=', 'resultados.corrida_id')

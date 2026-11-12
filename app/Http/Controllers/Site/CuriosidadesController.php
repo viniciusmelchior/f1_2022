@@ -40,7 +40,7 @@ class CuriosidadesController extends Controller
 
         $conteudo = Cache::remember($chave, now()->addDays(15), function () use ($service, $userId, $forcar, $assinatura) {
             // mesmo critério da tela de estatísticas de pilotos/equipes para identificar o piloto do usuário
-            $meuPiloto = Piloto::where('nome', 'Vinicius')->where('sobrenome', 'Melchior')->where('user_id', 3)->first(['id', 'nome', 'sobrenome']);
+            $meuPiloto = Piloto::where('nome', 'Vinicius')->where('sobrenome', 'Melchior')->where('user_id', Auth::user()->id)->first(['id', 'nome', 'sobrenome']);
             $dados = $service->gerar($userId, $forcar, $assinatura);
 
             return view('site.curiosidades._conteudo', compact('dados', 'meuPiloto'))->render();
