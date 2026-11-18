@@ -115,6 +115,8 @@ route::get('/pistas/edit/{id}', [PistaController::class, 'edit'])->name('pistas.
 route::put('/pistas/update/{id}', [PistaController::class, 'update'])->name('pistas.update')->middleware('auth');
 route::get('/pistas/show/{id}', [PistaController::class, 'show'])->name('pistas.show')->middleware('auth');
 route::get('/pistas/delete/{id}', [PistaController::class, 'destroy'])->name('pistas.delete')->middleware('auth');
+/** 17/11/2026 - histórico e estatísticas da pista (anos de referência, curiosidades, todas as corridas) */
+route::get('/pistas/historico/{id}', [PistaController::class, 'historico'])->name('pistas.historico')->middleware('auth');
 
 /**Adicionar Autor */
 route::get('/pistas/adicionarAutor', [PistaController::class, 'adicionarAutor'])->name('pistas.adicionarAutor')->middleware('auth');
