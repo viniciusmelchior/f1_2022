@@ -8,8 +8,11 @@ use App\Models\Site\Corrida;
 use App\Models\Site\Pais;
 use App\Models\Site\Pista;
 use App\Models\Site\Resultado;
+use App\Models\Site\Temporada;
+use App\Services\PistaHistoricoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class PistaController extends Controller
@@ -22,9 +25,49 @@ class PistaController extends Controller
     public function index()
     {
         // $pistas = Pista::where('user_id', Auth::user()->id)->orderBy('nome')->get();
-        $pistas = Pista::where('user_id', 3)->orderBy('nome')->get();
+        $pistas = Pista::with(['pais.continente'])->where('user_id', 3)->orderBy('nome')->get();
 
-        return view('site.pistas.index', compact('pistas'));
+        // MELHORIA 20261117: contagens numa consulta só (antes eram ~4 consultas por pista na view)
+        $estatisticas = [];
+        $linhas = DB::table('corridas as c')
+            ->leftJoin('temporadas as t', 't.id', '=', 'c.temporada_id')
+            ->where('c.user_id', Auth::user()->id)
+            ->orderBy('c.temporada_id')->orderBy('c.ordem')->orderBy('c.id')
+            ->get(['c.pista_id', 'c.flg_sprint', 'c.temporada_id', 't.des_temporada', 't.referencia']);
+        foreach ($linhas as $l) {
+            $e = &$estatisticas[$l->pista_id];
+            $e ??= ['corridas' => 0, 'sprints' => 0, 'referencias' => [], 'ultima' => null];
+            $e[$l->flg_sprint === 'S' ? 'sprints' : 'corridas']++;
+            if (filled($l->referencia)) {
+                $e['referencias'][trim($l->referencia)] = true;
+            }
+            // linhas em ordem cronológica: a última lida é a corrida mais recente
+            $e['ultima'] = ['temporada' => $l->des_temporada ?? '-', 'referencia' => $l->referencia, 'ordem' => (int) $l->temporada_id];
+            unset($e);
+        }
+        foreach ($estatisticas as &$e) {
+            $e['referencias'] = array_keys($e['referencias']);
+            sort($e['referencias'], SORT_NATURAL);
+        }
+        unset($e);
+
+        // anos de referência usados nas temporadas do usuário (filtro "já recebeu / nunca recebeu")
+        $referencias = Temporada::where('user_id', Auth::user()->id)->whereNotNull('referencia')->where('referencia', '<>', '')
+            ->pluck('referencia')->map(fn ($r) => trim($r))->unique()->sort(SORT_NATURAL)->values();
+
+        return view('site.pistas.index', compact('pistas', 'estatisticas', 'referencias'));
+    }
+
+    /**
+     * MELHORIA 20261117: histórico e estatísticas da pista (corridas e sprints separadas,
+     * anos de referência já recebidos/nunca recebidos, curiosidades e todas as corridas).
+     */
+    public function historico($id)
+    {
+        $pista = Pista::findOrFail($id);
+        $dados = (new PistaHistoricoService())->gerar(Auth::user()->id, $pista);
+
+        return view('site.pistas.historico', compact('dados', 'pista'));
     }
 
     /**
@@ -111,7 +154,12 @@ class PistaController extends Controller
         if (count($model) == 0) {
             return redirect()->back()->with('error', 'Não existem corridas cadastradas para a pista selecionada');
         }
-        return view('site.pistas.show', compact('id'));
+
+        // MELHORIA 20261117: tela remodelada, dados das corridas vêm do mesmo service do histórico
+        $pista = Pista::findOrFail($id);
+        $dados = (new PistaHistoricoService())->gerar(Auth::user()->id, $pista);
+
+        return view('site.pistas.show', compact('id', 'dados'));
     }
 
     /**
