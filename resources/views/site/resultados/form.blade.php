@@ -957,7 +957,9 @@ document.getElementById('inputFileLargada').addEventListener('change', function(
 
         // sessao de corrida: "Quick Race" / type 3 / qualquer uma com raceResult
         const sessao = sessoes.find(s => s['name'] == 'Quick Race' && (s['laps'] || []).length)
-            || sessoes.find(s => s['type'] == 3 && (s['laps'] || []).length);
+            || sessoes.find(s => s['type'] == 3 && (s['laps'] || []).length)
+            // MELHORIA 20261119: JSON gerado com falha (sem voltas) -> usa a sessao de corrida que tenha raceResult
+            || sessoes.find(s => (s['name'] == 'Quick Race' || s['type'] == 3) && (s['raceResult'] || []).length);
         if (!sessao) throw new Error('Nenhuma sessão de corrida encontrada no arquivo.');
 
         const ini = lerIni(json['__raceIni']);
@@ -970,6 +972,9 @@ document.getElementById('inputFileLargada').addEventListener('change', function(
 
         const voltas = sessao['laps'] || [];
         const totalVoltasCorrida = Number(sessao['lapsCount']) || Math.max(0, ...(sessao['lapstotal'] || [0]));
+        // MELHORIA 20261119: sem voltas no arquivo -> so a ordem de chegada (raceResult) e confiavel
+        const dadosIncompletos = voltas.length === 0;
+        const melhorVoltaExtra = (json['extras'] || []).find(e => e && e['name'] == 'bestlap' && Number(e['time']) > 0);
 
         // voltas "lentas do pelotao" (safety car / bandeira amarela / acidente): mediana da volta muito acima do normal
         const maxVoltaIndice = voltas.reduce((m, v) => Math.max(m, Number(v['lap'])), -1);
@@ -995,6 +1000,10 @@ document.getElementById('inputFileLargada').addEventListener('change', function(
             if (!melhorVolta) {
                 const v = voltasCarro.filter(v => v['time'] > 0).sort((a, b) => a['time'] - b['time'])[0];
                 if (v) melhorVolta = { car: indice, time: v['time'], lap: v['lap'] };
+            }
+            // MELHORIA 20261119: arquivo sem voltas -> "extras.bestlap" e a melhor volta do jogador (carro 0)
+            if (!melhorVolta && dadosIncompletos && indice === 0 && melhorVoltaExtra) {
+                melhorVolta = { car: 0, time: Number(melhorVoltaExtra['time']), lap: null };
             }
 
             // melhores setores
@@ -1049,7 +1058,7 @@ document.getElementById('inputFileLargada').addEventListener('change', function(
                 voltasCompletadas: voltasCompletadas,
                 tempoTotal: tempoTotal,
                 melhorVolta: melhor,
-                numeroMelhorVolta: melhorVolta ? Number(melhorVolta['lap']) + 1 : null, // lap no arquivo comeca em 0
+                numeroMelhorVolta: (melhorVolta && melhorVolta['lap'] !== null && melhorVolta['lap'] !== undefined) ? Number(melhorVolta['lap']) + 1 : null, // lap no arquivo comeca em 0
                 melhoresSetores: melhoresSetores,
                 stints: stints,
                 pneus: stints.map(s => s.pneu),
@@ -1062,17 +1071,34 @@ document.getElementById('inputFileLargada').addEventListener('change', function(
         });
 
         // ordenacao por tempo de pista
-        carros.sort((a, b) => {
+        if (dadosIncompletos) {
+            // MELHORIA 20261119: sem voltas -> ordem de chegada do proprio arquivo (raceResult)
+            const ordemChegada = (sessao['raceResult'] || []).map(Number);
+            const posChegada = idx => { const p = ordemChegada.indexOf(idx); return p === -1 ? Number.MAX_SAFE_INTEGER : p; };
+            carros.sort((a, b) => (posChegada(a.indice) - posChegada(b.indice)) || (a.indice - b.indice));
+        } else carros.sort((a, b) => {
             if (b.voltasCompletadas !== a.voltasCompletadas) return b.voltasCompletadas - a.voltasCompletadas;
             if (a.tempoTotal !== b.tempoTotal) return a.tempoTotal - b.tempoTotal;
             return a.indice - b.indice;
         });
 
         const vencedor = carros[0] || null;
-        const tempoVencedor = vencedor ? vencedor.tempoTotal : 0;
+        const tempoVencedor = dadosIncompletos ? null : (vencedor ? vencedor.tempoTotal : 0);
 
         carros.forEach((carro, i) => {
             carro.posicao = i + 1;
+            if (dadosIncompletos) {
+                // sem voltas nao da para saber tempo, gap ou abandono: fica so a posicao
+                carro.tempoTotal = null;
+                carro.terminou = true;
+                carro.abandonou = false;
+                carro.voltaAbandono = null;
+                carro.voltasAtras = 0;
+                carro.difLider = null;
+                carro.intervalo = null;
+                carro.diferenca = '-';
+                return;
+            }
             carro.terminou = carro.voltasCompletadas >= totalVoltasCorrida
                 || (carro.voltasCompletadas > 0 && carro.tempoTotal >= tempoVencedor);
             carro.abandonou = !carro.terminou;
@@ -1098,8 +1124,9 @@ document.getElementById('inputFileLargada').addEventListener('change', function(
         carros.forEach(c => { c.posicaoVolta1 = c.posicaoPorVolta[0]; });
 
         // volta mais rapida da corrida e melhores setores gerais
-        const comVolta = carros.filter(c => c.melhorVolta);
-        const voltaMaisRapida = comVolta.length ? comVolta.reduce((m, c) => (c.melhorVolta < m.melhorVolta ? c : m)) : null;
+        // MELHORIA 20261119: sem voltas so existe a melhor volta do jogador -> nao da para apontar a mais rapida da corrida
+        const comVolta = dadosIncompletos ? [] : carros.filter(c => c.melhorVolta);
+        const voltaMaisRapida = comVolta.length ?comVolta.reduce((m, c) => (c.melhorVolta < m.melhorVolta ? c : m)) : null;
         const numeroSetores = Math.max(0, ...carros.map(c => c.melhoresSetores.length));
         const melhoresSetores = [];
         for (let s = 0; s < numeroSetores; s++) {
@@ -1135,9 +1162,10 @@ document.getElementById('inputFileLargada').addEventListener('change', function(
             pistaLayout: corrida['CONFIG_TRACK'] || null,
             pistaCoordenadas: (iluminacao['__TRACK_GEOTAG_LAT'] && iluminacao['__TRACK_GEOTAG_LONG']) ? iluminacao['__TRACK_GEOTAG_LAT'] + ', ' + iluminacao['__TRACK_GEOTAG_LONG'] : null,
             sessaoNome: sessao['name'] || null,
+            dadosIncompletos: dadosIncompletos,
             totalVoltas: totalVoltasCorrida,
             tempoCorrida: tempoVencedor,
-            mediaVoltaVencedor: vencedor && vencedor.voltasCompletadas ? tempoVencedor / vencedor.voltasCompletadas : null,
+            mediaVoltaVencedor: vencedor && vencedor.voltasCompletadas && tempoVencedor ?tempoVencedor / vencedor.voltasCompletadas : null,
             vencedor: vencedor,
             jogador: jogador,
             voltaMaisRapida: voltaMaisRapida,
@@ -1441,7 +1469,7 @@ document.getElementById('inputFileLargada').addEventListener('change', function(
             const ehMaisRapida = dados.voltaMaisRapida && dados.voltaMaisRapida.indice === piloto.indice;
             if (ehMaisRapida) linha.classList.add('linha-volta-rapida');
             linha.cells[7].innerHTML =
-                '<span class="rc-detalhe-volta">' + piloto.voltasCompletadas + ' V</span> · ' +
+                (dados.dadosIncompletos ? '<span class="text-secondary">só posição</span> · ' : '<span class="rc-detalhe-volta">' + piloto.voltasCompletadas + ' V</span> · ') +
                 (piloto.melhorVolta ? '<span class="' + (ehMaisRapida ? 'rc-roxo' : '') + '">' + (ehMaisRapida ? '<i class="bi bi-lightning-charge-fill"></i> ' : '') + formatarTempo(piloto.melhorVolta) + '</span> ' : '') +
                 '· ' + piloto.pneus.map(p => htmlPneu(p)).join('') +
                 (piloto.abandonou ? ' · <span class="rc-status dnf"><i class="bi bi-x-octagon-fill"></i> V' + piloto.voltaAbandono + '</span>' : '');
@@ -1450,8 +1478,17 @@ document.getElementById('inputFileLargada').addEventListener('change', function(
         // volta mais rapida: preenche sozinho (se o mais rapido nao estiver no formulario, usa o mais rapido entre os que estao)
         const selectVoltaRapida = document.getElementById('volta_rapida');
         const opcoes = Array.from(selectVoltaRapida.options);
-        const candidatos = dados.classificacao.filter(c => c.melhorVolta && encontrados.has(c.nomeNormalizado)).sort((a, b) => a.melhorVolta - b.melhorVolta);
+        const candidatos = dados.dadosIncompletos ? [] : dados.classificacao.filter(c => c.melhorVolta && encontrados.has(c.nomeNormalizado)).sort((a, b) => a.melhorVolta - b.melhorVolta);
         const avisos = [];
+        // MELHORIA 20261119: JSON gerado com falha (sem voltas) -> avisa que so parte dos dados foi preenchida
+        if (dados.dadosIncompletos) {
+            avisos.push(['alerta',
+                '<strong>Algo deu errado na geração deste JSON: ele não tem os dados das voltas</strong>' +
+                '<span class="rc-aviso-detalhe">Foram preenchidas apenas as posições de chegada (raceResult do arquivo). ' +
+                'Abandonos, tempos, diferenças e volta mais rápida não estão no arquivo: confira e preencha manualmente.' +
+                (dados.jogador && dados.jogador.melhorVolta ? ' Sua melhor volta registrada: <b>' + formatarTempo(dados.jogador.melhorVolta) + '</b>.' : '') +
+                '</span>']);
+        }
         let escolhido = null;
         for (const c of candidatos) {
             const resolvido = trocaEquipe[c.nomeNormalizado]; // MELHORIA 20261105: vínculo da equipe certa
@@ -1467,12 +1504,14 @@ document.getElementById('inputFileLargada').addEventListener('change', function(
         if (aplicarNoFormulario) atualizarSelect2(selectVoltaRapida); // o layout aplica select2 em todos os selects
         const infoVR = document.getElementById('infoVoltaRapida');
         if (escolhido) {
-            infoVR.innerHTML = '<i class="bi bi-check-circle-fill rc-verde"></i> ' + (aplicarNoFormulario ? 'Preenchido pelo arquivo' : 'Arquivo salvo: ' + escaparHtml(escolhido.nome)) + ': <strong>' + formatarTempo(escolhido.melhorVolta) + '</strong> na volta ' + escolhido.numeroMelhorVolta;
+            infoVR.innerHTML = '<i class="bi bi-check-circle-fill rc-verde"></i> ' + (aplicarNoFormulario ? 'Preenchido pelo arquivo' : 'Arquivo salvo: ' + escaparHtml(escolhido.nome)) + ': <strong>' + formatarTempo(escolhido.melhorVolta) + '</strong>' + (escolhido.numeroMelhorVolta ? ' na volta ' + escolhido.numeroMelhorVolta : '');
             if (dados.voltaMaisRapida && escolhido.indice !== dados.voltaMaisRapida.indice) {
                 avisos.push(['alerta', 'A volta mais rápida do arquivo foi de ' + escaparHtml(dados.voltaMaisRapida.nome) + ' (' + formatarTempo(dados.voltaMaisRapida.melhorVolta) + '), que não está no formulário. Selecionado o mais rápido entre os pilotos do formulário: ' + escaparHtml(escolhido.nome) + '.']);
             }
         } else {
-            infoVR.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Nenhum piloto do arquivo encontrado na lista';
+            infoVR.innerHTML = dados.dadosIncompletos
+                ? '<i class="bi bi-exclamation-triangle"></i> O arquivo não tem as voltas: selecione a volta mais rápida manualmente'
+                : '<i class="bi bi-exclamation-triangle"></i> Nenhum piloto do arquivo encontrado na lista';
         }
 
         // condicao climatica: so altera se houver opcao compativel cadastrada
@@ -1501,7 +1540,7 @@ document.getElementById('inputFileLargada').addEventListener('change', function(
             '<div class="rc-aviso ' + a[0] + '"><i class="bi ' + (a[0] === 'alerta' ? 'bi-exclamation-triangle-fill' : 'bi-info-circle') + '"></i><div>' + a[1] + '</div></div>').join('');
 
         if (aplicarNoFormulario) {
-            marcarUpload('tileChegada', true, '<i class="bi bi-check-circle"></i> ' + encontrados.size + ' pilotos preenchidos · ' + dados.abandonos.length + ' abandono(s)');
+            marcarUpload('tileChegada', true, '<i class="bi bi-check-circle"></i> ' + encontrados.size + ' pilotos preenchidos · ' + (dados.dadosIncompletos ? 'só posições (JSON sem voltas)' : dados.abandonos.length + ' abandono(s)'));
         }
 
         // destaques do grafico: podio + voce
