@@ -19,9 +19,17 @@ use Illuminate\Support\Facades\DB;
 class TemporadaResumoService
 {
     /** sistemas de pontuação alternativos para os cenários "e se" */
+    // MELHORIA 20261120 (e se): novos sistemas; 'pole'/'vr' = bônus, 'vrTop' = VR só pontua até essa posição,
+    // 'resto' = pontos de quem chega depois da última posição listada. Cenários iguais à pontuação oficial são omitidos.
     private const SISTEMAS = [
+        'f1atual' => ['nome' => 'Pontuação atual da F1', 'regra' => '25-18-15-12-10-8-6-4-2-1 (2010 em diante)', 'pontos' => [25, 18, 15, 12, 10, 8, 6, 4, 2, 1]],
         'classica' => ['nome' => 'Pontuação clássica', 'regra' => '10-6-4-3-2-1 (1991-2002)', 'pontos' => [10, 6, 4, 3, 2, 1]],
         'anos2000' => ['nome' => 'Pontuação dos anos 2000', 'regra' => '10-8-6-5-4-3-2-1 (2003-2009)', 'pontos' => [10, 8, 6, 5, 4, 3, 2, 1]],
+        'anos60' => ['nome' => 'Pontuação dos anos 60 a 80', 'regra' => '9-6-4-3-2-1 (1961-1990)', 'pontos' => [9, 6, 4, 3, 2, 1]],
+        'anos50' => ['nome' => 'Pontuação dos anos 50', 'regra' => '8-6-4-3-2 + 1 pela volta mais rápida (1950-1959)', 'pontos' => [8, 6, 4, 3, 2], 'vr' => 1],
+        'motogp' => ['nome' => 'Pontuação da MotoGP', 'regra' => '25-20-16-13-11-10-9-8-7-6-5-4-3-2-1 (15 pontuam)', 'pontos' => [25, 20, 16, 13, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]],
+        'indy' => ['nome' => 'Pontuação da IndyCar', 'regra' => '50-40-35-32-30-28-26-24-22-20-19…, todos pontuam + 1 pela pole', 'pontos' => [50, 40, 35, 32, 30, 28, 26, 24, 22, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5], 'resto' => 5, 'pole' => 1],
+        'formulae' => ['nome' => 'Pontuação da Fórmula E', 'regra' => '25-18-15…-1 + 3 pela pole + 1 pela volta mais rápida (top 10)', 'pontos' => [25, 18, 15, 12, 10, 8, 6, 4, 2, 1], 'pole' => 3, 'vr' => 1, 'vrTop' => 10],
         'vitorias' => ['nome' => 'Só vitórias contam', 'regra' => 'quem vence mais é campeão (desempate pelos 2ºs, 3ºs…)', 'pontos' => [1]],
     ];
 
@@ -69,7 +77,7 @@ class TemporadaResumoService
         // duelos na ordem do campeonato de construtores
         usort($duelos, fn ($x, $y) => ($porEquipe[$x['equipe']['id']]['pos'] ?? 99) <=> ($porEquipe[$y['equipe']['id']]['pos'] ?? 99));
         $titulos = $this->titulos($porPiloto, $porEquipe);
-        $fatos = $this->fatos($porPiloto, $porEquipe, $evolucao, $duelos, $titulos);
+        $fatos = $this->fatos($porPiloto, $porEquipe, $evolucao, $duelos, $titulos, $this->historico());
         $cenarios = $this->cenarios($porPiloto, $evolucao);
 
         return $base + [
@@ -83,6 +91,7 @@ class TemporadaResumoService
             'aconteceu' => $fatos['aconteceu'],
             'naoAconteceu' => $fatos['nao'],
             'cenarios' => $cenarios,
+            'cenariosResumo' => $this->resumoCenarios($cenarios), // MELHORIA 20261120
             'manchetes' => $this->manchetes($porPiloto, $porEquipe, $evolucao, $duelos, $titulos, $fatos['dados']),
         ];
     }
@@ -479,20 +488,10 @@ class TemporadaResumoService
             }
         }
 
-        $duelos = [];
-        foreach ($porEquipe as $equipe => $porCorrida) {
-            $freq = [];
-            foreach ($porCorrida as $rs) {
-                foreach ($rs as $p => $r) {
-                    $freq[$p] = ($freq[$p] ?? 0) + 1;
-                }
-            }
-            arsort($freq);
-            $par = array_slice(array_keys($freq), 0, 2);
-            if (count($par) < 2) {
-                continue;
-            }
-            [$a, $b] = $par;
+        // MELHORIA 20261120 (duelos): todos os pares da equipe são confrontados; o principal é o par que
+        // mais correu junto (antes: os 2 pilotos mais frequentes, que podiam nem ter corrido juntos).
+        // Equipes com 3+ pilotos ganham 'elenco' (todos os pilotos) e 'outros' (demais confrontos).
+        $confronto = function (array $porCorrida, int $a, int $b): array {
             $d = ['juntos' => 0, 'quali' => [0, 0], 'corrida' => [0, 0], 'pontos' => [0, 0]];
             foreach ($porCorrida as $rs) {
                 if (!isset($rs[$a], $rs[$b])) {
@@ -506,9 +505,6 @@ class TemporadaResumoService
                 $d['pontos'][0] += $rs[$a]['pontos'];
                 $d['pontos'][1] += $rs[$b]['pontos'];
             }
-            if ($d['juntos'] < 2) {
-                continue;
-            }
             // quem venceu mais corridas fica à esquerda
             if ($d['corrida'][1] > $d['corrida'][0] || ($d['corrida'][1] === $d['corrida'][0] && $d['pontos'][1] > $d['pontos'][0])) {
                 [$a, $b] = [$b, $a];
@@ -516,8 +512,52 @@ class TemporadaResumoService
                 $d['corrida'] = array_reverse($d['corrida']);
                 $d['pontos'] = array_reverse($d['pontos']);
             }
-            $duelos[] = $d + ['equipe' => $this->e($equipe), 'a' => $this->p($a), 'b' => $this->p($b),
-                'diferenca' => abs($d['corrida'][0] - $d['corrida'][1])];
+            return $d + ['a' => $this->p($a), 'b' => $this->p($b), 'diferenca' => abs($d['corrida'][0] - $d['corrida'][1])];
+        };
+
+        $duelos = [];
+        foreach ($porEquipe as $equipe => $porCorrida) {
+            $freq = [];
+            $pontosEquipe = [];
+            $melhor = [];
+            foreach ($porCorrida as $rs) {
+                foreach ($rs as $p => $r) {
+                    $freq[$p] = ($freq[$p] ?? 0) + 1;
+                    $pontosEquipe[$p] = ($pontosEquipe[$p] ?? 0) + $r['pontos'];
+                    $melhor[$p] = min($melhor[$p] ?? 99, $r['chegada']);
+                }
+            }
+            arsort($freq);
+            $ids = array_keys($freq);
+            if (count($ids) < 2) {
+                continue;
+            }
+
+            $pares = [];
+            for ($i = 0; $i < count($ids); $i++) {
+                for ($j = $i + 1; $j < count($ids); $j++) {
+                    $d = $confronto($porCorrida, $ids[$i], $ids[$j]);
+                    if ($d['juntos'] > 0) {
+                        $pares[] = $d + ['ordem' => [$freq[$ids[$i]] + $freq[$ids[$j]], $pontosEquipe[$ids[$i]] + $pontosEquipe[$ids[$j]]]];
+                    }
+                }
+            }
+            // mais corridas juntos; empate (ex.: 3 carros correndo todas) → dupla mais presente e que mais pontuou
+            usort($pares, fn ($x, $y) => [$y['juntos'], $y['ordem'][0], $y['ordem'][1]] <=> [$x['juntos'], $x['ordem'][0], $x['ordem'][1]]);
+            if (!$pares || $pares[0]['juntos'] < 2) {
+                continue;
+            }
+            $principal = array_shift($pares);
+
+            $elenco = [];
+            if (count($ids) > 2) {
+                foreach ($ids as $p) {
+                    $elenco[] = ['piloto' => $this->p($p), 'corridas' => $freq[$p], 'pontos' => $pontosEquipe[$p], 'melhor' => $melhor[$p]];
+                }
+                usort($elenco, fn ($x, $y) => [$y['pontos'], $y['corridas'], $x['melhor']] <=> [$x['pontos'], $x['corridas'], $y['melhor']]);
+            }
+
+            $duelos[] = $principal + ['equipe' => $this->e($equipe), 'elenco' => $elenco, 'outros' => $pares, 'qtdPilotos' => count($ids)];
         }
         usort($duelos, fn ($x, $y) => [$y['juntos'], $x['equipe']['nome']] <=> [$x['juntos'], $y['equipe']['nome']]);
 
@@ -600,7 +640,7 @@ class TemporadaResumoService
     // FATOS (aconteceu / não aconteceu)
     // =====================================================================================
 
-    private function fatos(array $porPiloto, array $porEquipe, array $evolucao, array $duelos, array $titulos): array
+    private function fatos(array $porPiloto, array $porEquipe, array $evolucao, array $duelos, array $titulos, array $hist = []): array
     {
         $n = count($this->corridas);
         $campeao = $titulos['piloto'];
@@ -775,7 +815,354 @@ class TemporadaResumoService
             $nao[] = ['icone' => 'bi-diagram-3', 'titulo' => 'Sem tríplice coroa', 'texto' => 'O campeão do playoff (' . $titulos['playoff']['campeao']['nome'] . ') não foi o campeão geral.'];
         }
 
+        // MELHORIA 20261120 (resumo): mais fatos, incluindo marcos de carreira
+        [$sim2, $nao2] = $this->fatosExtras($porPiloto, $porEquipe, $evolucao, $duelos, $titulos, $hist, $dados);
+        $sim = array_merge($sim, $sim2);
+        $nao = array_merge($nao, $nao2);
+
         return ['aconteceu' => $sim, 'nao' => $nao, 'dados' => $dados + ['vencedores' => $vencedores, 'maior' => $maior, 'seqVit' => $seqVit, 'dobradinhas' => $dob]];
+    }
+
+    /**
+     * MELHORIA 20261120 (resumo): histórico do usuário ANTES desta temporada (temporadas de id menor, só
+     * corridas principais) — para "primeira vitória da carreira", estreantes, título defendido etc.
+     */
+    private function historico(): array
+    {
+        $h = ['temAnterior' => false, 'pilotos' => [], 'equipes' => [], 'titulos' => [], 'ultimoCampeao' => null];
+        $anteriores = DB::table('temporadas')->where('user_id', $this->usuario)->where('id', '<', $this->temporada->id)->pluck('des_temporada', 'id');
+        if ($anteriores->isEmpty()) {
+            return $h;
+        }
+        $base = DB::table('resultados as r')
+            ->join('corridas as c', 'c.id', '=', 'r.corrida_id')
+            ->join('piloto_equipes as pe', 'pe.id', '=', 'r.pilotoEquipe_id')
+            ->where('r.user_id', $this->usuario)->where('c.user_id', $this->usuario)
+            ->whereIn('c.temporada_id', $anteriores->keys())
+            ->where(fn ($q) => $q->whereNull('c.flg_sprint')->orWhere('c.flg_sprint', '<>', 'S'))
+            ->where('r.chegada', '>', 0);
+        $h['temAnterior'] = (clone $base)->exists();
+        if (!$h['temAnterior']) {
+            return $h;
+        }
+
+        $linhas = (clone $base)->whereIn('pe.piloto_id', array_keys($this->pilotos))->groupBy('pe.piloto_id')
+            ->selectRaw('pe.piloto_id, COUNT(*) AS corridas, SUM(CASE WHEN r.chegada = 1 THEN 1 ELSE 0 END) AS vitorias, '
+                . 'SUM(CASE WHEN r.chegada <= 3 THEN 1 ELSE 0 END) AS podios, SUM(CASE WHEN r.largada = 1 THEN 1 ELSE 0 END) AS poles')
+            ->get();
+        foreach ($linhas as $l) {
+            $h['pilotos'][(int) $l->piloto_id] = ['corridas' => (int) $l->corridas, 'vitorias' => (int) $l->vitorias, 'podios' => (int) $l->podios, 'poles' => (int) $l->poles];
+        }
+        $h['equipes'] = (clone $base)->whereIn('pe.equipe_id', array_keys($this->equipes))->groupBy('pe.equipe_id')
+            ->selectRaw('pe.equipe_id, SUM(CASE WHEN r.chegada = 1 THEN 1 ELSE 0 END) AS vitorias')
+            ->pluck('vitorias', 'equipe_id')->map(fn ($v) => (int) $v)->all();
+
+        $titulos = DB::table('titulos as t')->join('piloto_equipes as pe', 'pe.id', '=', 't.pilotoEquipe_id')
+            ->where('t.user_id', $this->usuario)->whereIn('t.temporada_id', $anteriores->keys())
+            ->orderBy('t.temporada_id')->get(['t.temporada_id', 'pe.piloto_id']);
+        foreach ($titulos as $t) {
+            $h['titulos'][(int) $t->piloto_id] = ($h['titulos'][(int) $t->piloto_id] ?? 0) + 1;
+            $h['ultimoCampeao'] = ['piloto' => (int) $t->piloto_id, 'temporada' => $anteriores[$t->temporada_id]];
+        }
+
+        return $h;
+    }
+
+    /** MELHORIA 20261120 (resumo): fatos adicionais (aconteceu / não aconteceu) */
+    private function fatosExtras(array $porPiloto, array $porEquipe, array $evolucao, array $duelos, array $titulos, array $hist, array $dados): array
+    {
+        $n = count($this->corridas);
+        $finalizada = $this->temporada->flg_finalizada === 'S';
+        $campeao = $titulos['piloto'];
+        $vice = $titulos['vice'];
+        $sim = [];
+        $nao = [];
+        $vencedor = fn (int $idx) => ($this->res[$idx][0]['chegada'] ?? 0) === 1 ? $this->res[$idx][0] : null;
+        $lista = fn (array $itens, int $max = 6) => implode(', ', array_slice($itens, 0, $max)) . (count($itens) > $max ? ' e mais ' . (count($itens) - $max) : '');
+
+        // ---------------- marcos de carreira ----------------
+        if (!empty($hist['temAnterior'])) {
+            $marcos = [
+                'vitorias' => ['ok' => fn ($r) => $r['chegada'] === 1, 'icone' => 'bi-trophy-fill', 'um' => 'Primeira vitória da carreira', 'varios' => 'primeiras vitórias da carreira'],
+                'podios' => ['ok' => fn ($r) => $r['chegada'] <= 3, 'icone' => 'bi-award-fill', 'um' => 'Primeiro pódio da carreira', 'varios' => 'primeiros pódios da carreira'],
+                'poles' => ['ok' => fn ($r) => $r['largada'] === 1, 'icone' => 'bi-bullseye', 'um' => 'Primeira pole da carreira', 'varios' => 'primeiras poles da carreira'],
+            ];
+            $inditas = [];
+            foreach ($marcos as $campo => $mk) {
+                $quem = [];
+                foreach ($porPiloto as $id => $p) {
+                    if (($hist['pilotos'][$id][$campo] ?? 0) > 0) {
+                        continue;
+                    }
+                    foreach ($p['chegadas'] as $idx => $r) {
+                        if ($mk['ok']($r)) {
+                            $quem[] = $p['sobrenome'] . ' (' . $this->corridas[$idx]['evento'] . ')';
+                            break;
+                        }
+                    }
+                }
+                $inditas[$campo] = $quem;
+                if ($quem) {
+                    $sim[] = ['icone' => $mk['icone'], 'titulo' => count($quem) === 1 ? $mk['um'] : count($quem) . ' ' . $mk['varios'], 'texto' => $lista($quem, 10) . '.'];
+                }
+            }
+            if (!$inditas['vitorias'] && $n > 1) {
+                $nao[] = ['icone' => 'bi-trophy', 'titulo' => 'Nenhum vencedor inédito', 'texto' => 'Todos que venceram nesta temporada já tinham vitórias em temporadas anteriores.'];
+            }
+
+            // estreantes
+            $estreantes = array_filter($porPiloto, fn ($p) => !isset($hist['pilotos'][$p['id']]));
+            if ($estreantes && count($estreantes) < count($porPiloto)) {
+                $me = reset($estreantes); // $porPiloto está na ordem do campeonato
+                $sim[] = ['icone' => 'bi-person-plus', 'titulo' => self::qtd(count($estreantes), 'estreante', 'estreantes'),
+                    'texto' => 'Melhor estreante: ' . $me['nome'] . ', ' . $me['pos'] . 'º no campeonato com ' . self::qtd(self::num($me['pontos']), 'ponto', 'pontos') . '.'];
+                if (!array_filter($estreantes, fn ($p) => $p['pontos'] > 0)) {
+                    $nao[] = ['icone' => 'bi-person-dash', 'titulo' => 'Estreantes zerados', 'texto' => count($estreantes) === 1
+                        ? $me['nome'] . ', o único estreante, não marcou pontos.'
+                        : 'Nenhum dos ' . count($estreantes) . ' estreantes marcou pontos.'];
+                }
+            }
+
+            // equipes vencendo pela primeira vez
+            $eqInedita = [];
+            foreach ($porEquipe as $id => $e) {
+                if ($e['vitorias'] > 0 && ($hist['equipes'][$id] ?? 0) === 0) {
+                    $eqInedita[] = $e['nome'];
+                }
+            }
+            if ($eqInedita) {
+                $sim[] = ['icone' => 'bi-flag', 'titulo' => count($eqInedita) === 1 ? 'Primeira vitória da equipe' : count($eqInedita) . ' equipes vencem pela primeira vez',
+                    'texto' => implode(', ', $eqInedita) . (count($eqInedita) === 1 ? ' venceu' : ' venceram') . ' pela primeira vez.'];
+            }
+
+            // títulos
+            if ($finalizada && $campeao) {
+                $antes = $hist['titulos'][$campeao['id']] ?? 0;
+                $ult = $hist['ultimoCampeao'];
+                if ($ult && $ult['piloto'] === $campeao['id']) {
+                    $sim[] = ['icone' => 'bi-shield-check', 'titulo' => 'Título defendido', 'texto' => $campeao['nome'] . ' repetiu o título da ' . $ult['temporada'] . ' e chega a ' . ($antes + 1) . ' conquistas.'];
+                } elseif ($antes > 0) {
+                    $sim[] = ['icone' => 'bi-trophy-fill', 'titulo' => ($antes + 1) . 'º título', 'texto' => $campeao['nome'] . ' soma agora ' . ($antes + 1) . ' títulos de pilotos.'];
+                } else {
+                    $sim[] = ['icone' => 'bi-trophy-fill', 'titulo' => 'Primeiro título', 'texto' => $campeao['nome'] . ' é campeão pela primeira vez.'];
+                }
+                if ($ult && $ult['piloto'] !== $campeao['id'] && isset($porPiloto[$ult['piloto']])) {
+                    $p = $porPiloto[$ult['piloto']];
+                    $nao[] = ['icone' => 'bi-shield-x', 'titulo' => 'Título não defendido', 'texto' => $p['nome'] . ', campeão da ' . $ult['temporada'] . ', terminou em ' . $p['pos'] . 'º.'];
+                }
+            }
+        }
+
+        // ---------------- aconteceu ----------------
+        $rp = $this->melhor($porPiloto, 'poles');
+        if ($rp && $rp['poles'] >= 2) {
+            $sim[] = ['icone' => 'bi-bullseye', 'titulo' => 'Rei das poles', 'texto' => $rp['nome'] . ' largou na frente ' . $rp['poles'] . ' vezes (' . self::pct($rp['poles'], $n) . ' das corridas).'];
+        }
+        $rv = $this->melhor($porPiloto, 'vr');
+        if ($rv && $rv['vr'] >= 2) {
+            $sim[] = ['icone' => 'bi-stopwatch', 'titulo' => 'Mais voltas rápidas', 'texto' => $rv['nome'] . ' fez a volta mais rápida em ' . self::qtd($rv['vr'], 'corrida', 'corridas') . '.'];
+        }
+        $sp = $this->melhor($porPiloto, 'seqPodios');
+        if ($sp && $sp['seqPodios'] >= 3) {
+            [$i, $f] = $sp['seqPodiosPeriodo'];
+            $sim[] = ['icone' => 'bi-bar-chart-fill', 'titulo' => $sp['seqPodios'] . ' pódios seguidos', 'texto' => $sp['nome'] . ' esteve no pódio da ' . $this->corridas[$i]['ordem'] . 'ª à ' . $this->corridas[$f]['ordem'] . 'ª etapa.'];
+        }
+        $spt = $this->melhor($porPiloto, 'seqPontos');
+        if ($spt && $spt['seqPontos'] >= 5 && $spt['seqPontos'] < $n) {
+            [$i, $f] = $spt['seqPontosPeriodo'];
+            $sim[] = ['icone' => 'bi-plus-circle', 'titulo' => $spt['seqPontos'] . ' corridas seguidas nos pontos', 'texto' => $spt['nome'] . ' pontuou da ' . $this->corridas[$i]['ordem'] . 'ª à ' . $this->corridas[$f]['ordem'] . 'ª etapa sem falhar.'];
+        }
+        $regulares = array_filter($porPiloto, fn ($p) => $p['corridas'] >= max(2, (int) ceil($n / 2)));
+        if ($regulares) {
+            uasort($regulares, fn ($a, $b) => $a['somaChegada'] / $a['corridas'] <=> $b['somaChegada'] / $b['corridas']);
+            $mr = reset($regulares);
+            $sim[] = ['icone' => 'bi-rulers', 'titulo' => 'Melhor média de chegada', 'texto' => $mr['nome'] . ' terminou, em média, em ' . number_format($mr['somaChegada'] / $mr['corridas'], 1, ',', '.') . 'º.'];
+        }
+        $eqV = array_filter($porEquipe, fn ($e) => $e['vitorias'] > 0);
+        if (count($eqV) >= 2) {
+            uasort($eqV, fn ($a, $b) => $b['vitorias'] <=> $a['vitorias']);
+            $sim[] = ['icone' => 'bi-flag-fill', 'titulo' => count($eqV) . ' equipes venceram', 'texto' => implode(', ', array_map(fn ($e) => $e['nome'] . ' (' . $e['vitorias'] . ')', $eqV)) . '.'];
+        }
+        $comPodio = count(array_filter($porPiloto, fn ($p) => $p['podios'] > 0));
+        $pontuaram = count(array_filter($porPiloto, fn ($p) => $p['pontuou'] > 0));
+        $sim[] = ['icone' => 'bi-people-fill', 'titulo' => self::qtd($comPodio, 'piloto no pódio', 'pilotos no pódio'),
+            'texto' => self::qtd($comPodio, 'piloto subiu', 'pilotos diferentes subiram') . ' ao pódio e ' . $pontuaram . ' de ' . count($porPiloto) . ' marcaram pontos ao menos uma vez.'];
+
+        $poleRuim = null;
+        $zebras = [];
+        $quebraVitoria = [];
+        $semAbandono = [];
+        $maisSafety = null;
+        $poleVenceu = 0;
+        $corteZebra = max(4, (int) ceil(count($porEquipe) / 2) + 1);
+        $ultimaCorrida = [];
+        foreach ($this->corridas as $idx => $c) {
+            $ab = 0;
+            foreach ($this->res[$idx] as $r) {
+                $ab += $r['abandono'];
+                if ($r['largada'] === 1) {
+                    $poleVenceu += $r['chegada'] === 1;
+                    if (!$poleRuim || $r['chegada'] > $poleRuim['r']['chegada']) {
+                        $poleRuim = ['r' => $r, 'idx' => $idx];
+                    }
+                }
+                if ($r['chegada'] === 1) {
+                    $posEq = $porEquipe[$r['equipe']]['pos'] ?? 0;
+                    if ($posEq >= $corteZebra) {
+                        $zebras[] = $this->p($r['piloto'])['sobrenome'] . ' com a ' . $this->e($r['equipe'])['nome'] . ' (' . $c['evento'] . ', ' . $posEq . 'ª força)';
+                    }
+                    $prev = $ultimaCorrida[$r['piloto']] ?? null;
+                    if ($prev && $prev['abandono']) {
+                        $quebraVitoria[] = $this->p($r['piloto'])['sobrenome'] . ' (' . $c['evento'] . ')';
+                    }
+                }
+                $ultimaCorrida[$r['piloto']] = $r;
+            }
+            if ($ab === 0) {
+                $semAbandono[] = $c['evento'];
+            }
+            if ($c['safety'] !== null && (!$maisSafety || $c['safety'] > $maisSafety['qtd'])) {
+                $maisSafety = ['idx' => $idx, 'qtd' => $c['safety']];
+            }
+        }
+        if ($poleRuim && $poleRuim['r']['chegada'] >= 6) {
+            $r = $poleRuim['r'];
+            $sim[] = ['icone' => 'bi-arrow-down-circle', 'titulo' => 'Pole desperdiçada', 'texto' => $this->p($r['piloto'])['nome'] . ' largou na pole na ' . $this->etapa($poleRuim['idx']) . ' e '
+                . ($r['abandono'] ? 'abandonou.' : 'terminou só em ' . $r['chegada'] . 'º.')];
+        }
+        if ($zebras) {
+            $sim[] = ['icone' => 'bi-emoji-sunglasses', 'titulo' => count($zebras) === 1 ? 'Deu zebra' : count($zebras) . ' zebras', 'texto' => 'Vitória de equipe do pelotão: ' . $lista($zebras, 4) . '.'];
+        }
+        if ($quebraVitoria) {
+            $sim[] = ['icone' => 'bi-arrow-repeat', 'titulo' => 'Da quebra à vitória', 'texto' => 'Venceram logo depois de abandonar a corrida anterior: ' . $lista($quebraVitoria) . '.'];
+        }
+        if ($semAbandono && $n > 1) {
+            $sim[] = ['icone' => 'bi-check-all', 'titulo' => self::qtd(count($semAbandono), 'corrida sem abandonos', 'corridas sem abandonos'), 'texto' => 'Todos receberam a bandeirada: ' . $lista($semAbandono) . '.'];
+        } elseif ($n >= 3) {
+            $nao[] = ['icone' => 'bi-check-all', 'titulo' => 'Nenhuma corrida limpa', 'texto' => 'Todas as ' . $n . ' corridas tiveram pelo menos um abandono.'];
+        }
+        if ($maisSafety && $maisSafety['qtd'] >= 2) {
+            $sim[] = ['icone' => 'bi-exclamation-diamond', 'titulo' => self::qtd($maisSafety['qtd'], 'safety car', 'safety cars') . ' numa corrida', 'texto' => 'A ' . $this->etapa($maisSafety['idx']) . ' foi a mais interrompida da temporada.'];
+        }
+        if ($n >= 3) {
+            $mv = null;
+            foreach ($evolucao['lideres'] as $i => $l) {
+                if (!$mv || $l['vantagem'] > $mv['vantagem']) {
+                    $mv = $l + ['idx' => $i];
+                }
+            }
+            if ($mv && $mv['vantagem'] > 0) {
+                $sim[] = ['icone' => 'bi-arrows-expand', 'titulo' => 'Maior vantagem: ' . self::num($mv['vantagem']) . ' pts', 'texto' => $mv['piloto']['nome'] . ' chegou a liderar com essa folga após a ' . $this->etapa($mv['idx']) . '.'];
+            }
+        }
+        if ($finalizada && $evolucao['garantido'] && $evolucao['garantido']['restantes'] > 0) {
+            $g = $evolucao['garantido'];
+            $sim[] = ['icone' => 'bi-calendar-check', 'titulo' => 'Título antecipado', 'texto' => 'A conquista foi garantida na ' . $this->etapa($g['idx']) . ', com ' . self::qtd($g['restantes'], 'corrida', 'corridas') . ' de antecedência.'];
+        }
+        $w0 = $vencedor(0);
+        $wl = $vencedor($n - 1);
+        if ($finalizada && $n >= 3 && $w0 && $wl && $w0['piloto'] === $wl['piloto']) {
+            $sim[] = ['icone' => 'bi-bookmarks', 'titulo' => 'Abriu e fechou vencendo', 'texto' => $this->p($w0['piloto'])['nome'] . ' venceu a primeira (' . $this->corridas[0]['evento'] . ') e a última corrida (' . $this->corridas[$n - 1]['evento'] . ').'];
+        }
+        $trocas = array_filter($porPiloto, fn ($p) => count($p['equipes']) > 1);
+        if ($trocas) {
+            $sim[] = ['icone' => 'bi-arrow-left-right', 'titulo' => count($trocas) === 1 ? 'Trocou de equipe' : count($trocas) . ' trocas de equipe',
+                'texto' => $lista(array_map(fn ($p) => $p['sobrenome'] . ' (' . implode(' → ', array_map(fn ($e) => $this->e($e)['nome'], array_values($p['equipes']))) . ')', $trocas), 4) . '.'];
+        }
+        $atropelos = array_filter($duelos, fn ($d) => $d['juntos'] >= 4 && $d['corrida'][1] === 0);
+        if ($atropelos) {
+            usort($atropelos, fn ($a, $b) => $b['juntos'] <=> $a['juntos']);
+            $d = $atropelos[0];
+            $sim[] = ['icone' => 'bi-person-x', 'titulo' => 'Atropelo interno: ' . $d['corrida'][0] . ' a 0', 'texto' => 'Na ' . $d['equipe']['nome'] . ', ' . $d['a']['nome'] . ' chegou à frente de ' . $d['b']['nome'] . ' em todas as ' . $d['juntos'] . ' corridas que fizeram juntos.'];
+        }
+
+        // MELHORIA 20261120 (podio): trio de pódio que mais se repetiu (mesmos 3 pilotos, em qualquer ordem)
+        $trios = [];
+        foreach ($this->corridas as $idx => $c) {
+            $podio = array_values(array_filter($this->res[$idx], fn ($r) => $r['chegada'] <= 3));
+            if (count($podio) < 3) {
+                continue;
+            }
+            $ordem = array_map(fn ($r) => $r['piloto'], $podio); // já vem por chegada
+            $ids = $ordem;
+            sort($ids);
+            $chave = implode('-', $ids);
+            $trios[$chave]['corridas'][] = $idx;
+            $trios[$chave]['ordens'][implode('-', $ordem)][] = $idx;
+        }
+        uasort($trios, fn ($a, $b) => count($b['corridas']) <=> count($a['corridas']));
+        $top = reset($trios);
+        if ($top && count($top['corridas']) >= 2) {
+            uasort($top['ordens'], fn ($a, $b) => count($b) <=> count($a));
+            $ordemMais = array_key_first($top['ordens']);
+            $vezesOrdem = count($top['ordens'][$ordemMais]);
+            $nomes = array_map(fn ($id) => $this->p((int) $id)['sobrenome'], explode('-', $ordemMais));
+            $empatados = count(array_filter($trios, fn ($t) => count($t['corridas']) === count($top['corridas']))) - 1;
+            $texto = implode(', ', $nomes) . ' dividiram o pódio em ' . count($top['corridas']) . ' de ' . $n . ' corridas ('
+                . $lista(array_map(fn ($i) => $this->corridas[$i]['evento'], $top['corridas']), 5) . ').';
+            $texto .= $vezesOrdem >= 2
+                ? ' Na ordem ' . implode('-', $nomes) . ', foram ' . $vezesOrdem . ' vezes.'
+                : ' Nunca repetiram a mesma ordem.';
+            if ($empatados > 0) {
+                $texto .= ' Outro' . ($empatados > 1 ? 's ' . $empatados . ' trios' : ' trio') . ' se repetiu o mesmo número de vezes.';
+            }
+            $sim[] = ['icone' => 'bi-bar-chart-steps', 'titulo' => 'Pódio mais repetido (' . count($top['corridas']) . 'x)', 'texto' => $texto];
+        } elseif ($trios && $n >= 3) {
+            $nao[] = ['icone' => 'bi-bar-chart-steps', 'titulo' => 'Nenhum pódio repetido', 'texto' => 'Nenhum trio de pilotos dividiu o pódio mais de uma vez.'];
+        }
+
+        // ---------------- não aconteceu ----------------
+        if ($n > 1 && $poleVenceu === 0) {
+            $nao[] = ['icone' => 'bi-bullseye', 'titulo' => 'A pole nunca venceu', 'texto' => 'Em nenhuma das ' . $n . ' corridas o pole position recebeu a bandeirada em primeiro.'];
+        }
+        foreach ($porPiloto as $p) {
+            if ($p['poles'] >= 2 && $p['vitorias'] === 0) {
+                $nao[] = ['icone' => 'bi-bullseye', 'titulo' => $p['poles'] . ' poles, nenhuma vitória', 'texto' => $p['nome'] . ' foi rápido no sábado, mas não converteu nenhuma largada na frente em vitória.'];
+            }
+        }
+        if ($campeao && $campeao['vitorias'] === 0) {
+            $nao[] = ['icone' => 'bi-trophy', 'titulo' => 'Campeão sem vitória', 'texto' => $campeao['nome'] . ' ' . ($finalizada ? 'foi campeão' : 'lidera') . ' sem vencer nenhuma corrida.'];
+        }
+        if ($campeao && $campeao['vr'] === 0 && array_filter(array_column($this->corridas, 'volta_rapida'))) {
+            $nao[] = ['icone' => 'bi-stopwatch', 'titulo' => 'Campeão sem volta mais rápida', 'texto' => $campeao['nome'] . ' não marcou a volta mais rápida em nenhuma corrida.'];
+        }
+        if ($vice && $n > 1 && !in_array($vice['id'], $evolucao['idLideres'], true)) {
+            $nao[] = ['icone' => 'bi-arrow-up', 'titulo' => 'O vice nunca liderou', 'texto' => $vice['nome'] . ' não esteve na ponta do campeonato em nenhuma etapa.'];
+        }
+        if ($finalizada && $campeao && $n >= 3 && $w0 && $w0['piloto'] !== $campeao['id']) {
+            $p = $porPiloto[$w0['piloto']] ?? null;
+            $nao[] = ['icone' => 'bi-skip-start', 'titulo' => 'Vencer a abertura não bastou', 'texto' => $this->p($w0['piloto'])['nome'] . ' venceu a ' . $this->etapa(0) . ($p ? ' e terminou o campeonato em ' . $p['pos'] . 'º.' : ', mas não levou o título.')];
+        }
+        if ($finalizada && $campeao && $n >= 4) {
+            $meio = $evolucao['metade'];
+            $liderMeio = $evolucao['idLideres'][$meio];
+            if ($liderMeio !== $campeao['id'] && isset($porPiloto[$liderMeio])) {
+                $nao[] = ['icone' => 'bi-hourglass-bottom', 'titulo' => 'O líder da metade não segurou', 'texto' => $porPiloto[$liderMeio]['nome'] . ' liderava após a ' . $this->etapa($meio) . ' e terminou em ' . $porPiloto[$liderMeio]['pos'] . 'º.'];
+            }
+        }
+        foreach (array_slice($porEquipe, 0, 3, true) as $e) {
+            if ($e['vitorias'] === 0) {
+                $nao[] = ['icone' => 'bi-flag', 'titulo' => $e['pos'] . 'ª dos construtores sem vencer', 'texto' => $e['nome'] . ' terminou entre as três melhores equipes sem nenhuma vitória.'];
+            }
+        }
+        $eqZero = array_filter($porEquipe, fn ($e) => $e['pontos'] <= 0);
+        if ($eqZero) {
+            $nao[] = ['icone' => 'bi-x-circle', 'titulo' => count($eqZero) === 1 ? 'Equipe sem pontos' : count($eqZero) . ' equipes sem pontos', 'texto' => implode(', ', array_column($eqZero, 'nome')) . (count($eqZero) === 1 ? ' não marcou' : ' não marcaram') . ' nenhum ponto.'];
+        }
+        $pilZero = array_filter($porPiloto, fn ($p) => $p['corridas'] >= 3 && $p['pontos'] <= 0);
+        if ($pilZero) {
+            $nao[] = ['icone' => 'bi-dash-circle', 'titulo' => self::qtd(count($pilZero), 'piloto zerado', 'pilotos zerados'), 'texto' => 'Correram 3 ou mais vezes sem marcar pontos: ' . $lista(array_column($pilZero, 'sobrenome'), 8) . '.'];
+        }
+        $maisVit = $this->melhor($porPiloto, 'vitorias');
+        if ($n >= 6 && $maisVit && $maisVit['vitorias'] <= $n / 3) {
+            $nao[] = ['icone' => 'bi-pie-chart', 'titulo' => 'Ninguém dominou', 'texto' => 'Nenhum piloto venceu mais de um terço das corridas (o máximo foi ' . self::qtd($maisVit['vitorias'], 'vitória', 'vitórias') . ').'];
+        }
+        $integrais = array_filter($porPiloto, fn ($p) => $p['corridas'] === $n);
+        if ($n >= 4 && $integrais && !array_filter($integrais, fn ($p) => $p['abandonos'] === 0)) {
+            $nao[] = ['icone' => 'bi-tools', 'titulo' => 'Ninguém escapou dos abandonos', 'texto' => 'Todos os pilotos que disputaram as ' . $n . ' corridas abandonaram pelo menos uma vez.'];
+        }
+
+        return [$sim, $nao];
     }
 
     private function melhor(array $lista, string $campo)
@@ -804,12 +1191,19 @@ class TemporadaResumoService
             $contagem = [];
             foreach ($this->corridas as $idx => $c) {
                 foreach ($this->res[$idx] as $r) {
-                    $pontos[$r['piloto']] = ($pontos[$r['piloto']] ?? 0) + ($s['pontos'][$r['chegada'] - 1] ?? 0);
+                    $pts = $s['pontos'][$r['chegada'] - 1] ?? ($s['resto'] ?? 0);
+                    $pts += $r['largada'] === 1 ? ($s['pole'] ?? 0) : 0;
+                    $pts += $r['vr'] && $r['chegada'] <= ($s['vrTop'] ?? 99) ? ($s['vr'] ?? 0) : 0;
+                    $pontos[$r['piloto']] = ($pontos[$r['piloto']] ?? 0) + $pts;
                     $contagem[$r['piloto']][$r['chegada']] = ($contagem[$r['piloto']][$r['chegada']] ?? 0) + 1;
                 }
             }
+            if ($chave !== 'vitorias' && $this->igualOficial($pontos, $porPiloto)) {
+                continue; // MELHORIA 20261120: é a própria pontuação da temporada
+            }
             $cenarios[] = $this->cenario($s['nome'], $s['regra'], $pontos, $contagem, $real, $chave === 'vitorias' ? 'vitórias' : 'pts');
         }
+        $cenarios = array_merge($cenarios, $this->cenariosExtras($porPiloto, $real)); // MELHORIA 20261120
 
         // descartando o pior resultado de cada piloto (regra usada em várias épocas da F1)
         if (count($this->corridas) >= 4) {
@@ -858,12 +1252,28 @@ class TemporadaResumoService
                 'mudou' => $ordem[0] !== $real,
                 'lista' => $this->listaCenario($ordem, fn ($id) => self::num($evolucao['pontosApos'][$meio][$id]) . ' pts'),
             ];
+
+            // MELHORIA 20261120 (e se): o inverso — só a segunda metade conta
+            $pontos = [];
+            $contagem = [];
+            foreach ($this->corridas as $idx => $c) {
+                if ($idx <= $meio) {
+                    continue;
+                }
+                foreach ($this->res[$idx] as $r) {
+                    $pontos[$r['piloto']] = ($pontos[$r['piloto']] ?? 0) + $r['pontos'];
+                    $contagem[$r['piloto']][$r['chegada']] = ($contagem[$r['piloto']][$r['chegada']] ?? 0) + 1;
+                }
+            }
+            if ($pontos) {
+                $cenarios[] = $this->cenario('Se a temporada começasse na metade', 'só os pontos a partir da ' . $this->corridas[$meio + 1]['ordem'] . 'ª etapa (' . $this->corridas[$meio + 1]['evento'] . ')', $pontos, $contagem, $real);
+            }
         }
 
         return $cenarios;
     }
 
-    private function cenario(string $nome, string $regra, array $pontos, array $contagem, int $real, string $unidade = 'pts'): array
+    private function cenario(string $nome, string $regra, array $pontos, array $contagem, int $real, string $unidade = 'pts', ?callable $formato = null): array
     {
         $ordem = $this->ordenar($pontos, $contagem);
         return [
@@ -871,7 +1281,149 @@ class TemporadaResumoService
             'regra' => $regra,
             'campeao' => $this->p($ordem[0]),
             'mudou' => $ordem[0] !== $real,
-            'lista' => $this->listaCenario($ordem, fn ($id) => $unidade === 'vitórias' ? self::qtd($pontos[$id], 'vitória', 'vitórias') : self::num($pontos[$id]) . ' ' . $unidade),
+            'lista' => $this->listaCenario($ordem, $formato ?? fn ($id) => $unidade === 'vitórias' ? self::qtd($pontos[$id], 'vitória', 'vitórias') : self::num($pontos[$id]) . ' ' . $unidade),
+        ];
+    }
+
+    /** MELHORIA 20261120 (e se): true quando o cenário dá exatamente os pontos oficiais de todos os pilotos */
+    private function igualOficial(array $pontos, array $porPiloto): bool
+    {
+        foreach ($porPiloto as $id => $p) {
+            if (abs(($pontos[$id] ?? 0) - $p['pontos']) > 0.001) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /** MELHORIA 20261120 (e se): cenários além das tabelas de pontos */
+    private function cenariosExtras(array $porPiloto, int $real): array
+    {
+        $out = [];
+        $n = count($this->corridas);
+        $contagem = [];
+        $maxGrid = 0;
+        foreach ($this->corridas as $idx => $c) {
+            foreach ($this->res[$idx] as $r) {
+                $contagem[$r['piloto']][$r['chegada']] = ($contagem[$r['piloto']][$r['chegada']] ?? 0) + 1;
+                $maxGrid = max($maxGrid, $r['chegada']);
+            }
+        }
+        $soma = function (callable $porCorrida) {
+            $pontos = [];
+            foreach ($this->corridas as $idx => $c) {
+                foreach ($this->res[$idx] as $r) {
+                    $pontos[$r['piloto']] = ($pontos[$r['piloto']] ?? 0) + $porCorrida($r, $idx);
+                }
+            }
+            return $pontos;
+        };
+
+        // todos pontuam, em escala linear
+        $pontos = $soma(fn ($r) => max(0, $maxGrid - $r['chegada'] + 1));
+        if (!$this->igualOficial($pontos, $porPiloto)) {
+            $out[] = $this->cenario('Todos pontuam', 'escala linear: 1º ganha ' . $maxGrid . ', o último ganha 1', $pontos, $contagem, $real);
+        }
+
+        // quadro de medalhas
+        $medalhas = [];
+        foreach ($porPiloto as $id => $p) {
+            $medalhas[$id] = [0, 0, 0];
+            foreach ($p['chegadas'] as $r) {
+                if ($r['chegada'] <= 3) {
+                    $medalhas[$id][$r['chegada'] - 1]++;
+                }
+            }
+        }
+        $pontos = array_map(fn ($m) => $m[0] * 1000000 + $m[1] * 1000 + $m[2], $medalhas);
+        $out[] = $this->cenario('Quadro de medalhas', 'como nas Olimpíadas: ouro decide, depois prata e bronze', $pontos, $contagem, $real, 'pts',
+            fn ($id) => array_sum($medalhas[$id]) ? $medalhas[$id][0] . ' · ' . $medalhas[$id][1] . ' · ' . $medalhas[$id][2] : '—');
+
+        // pole e volta mais rápida valendo ponto
+        $pontos = [];
+        foreach ($porPiloto as $id => $p) {
+            $pontos[$id] = $p['pontos'] + $p['poles'] + $p['vr'];
+        }
+        if (!$this->igualOficial($pontos, $porPiloto)) {
+            $out[] = $this->cenario('Se pole e volta rápida valessem 1 ponto', 'pontos oficiais + 1 por pole + 1 por volta mais rápida', $pontos, $contagem, $real);
+        }
+
+        if ($n >= 3) {
+            // pontos dobrados na última corrida (Abu Dhabi 2014)
+            $ultima = $n - 1;
+            $pontos = [];
+            foreach ($porPiloto as $id => $p) {
+                $pontos[$id] = $p['pontos'] + ($p['pontosCorrida'][$ultima] ?? 0);
+            }
+            if (!$this->igualOficial($pontos, $porPiloto)) {
+                $out[] = $this->cenario('Pontos dobrados na última corrida', 'a ' . $this->corridas[$ultima]['ordem'] . 'ª etapa (' . $this->corridas[$ultima]['evento'] . ') vale o dobro, como em Abu Dhabi 2014', $pontos, $contagem, $real);
+            }
+        }
+
+        if ($n >= 6) {
+            // só os melhores resultados contam (descartes dos anos 80)
+            $k = (int) ceil($n * 0.7);
+            $pontos = [];
+            foreach ($porPiloto as $id => $p) {
+                $lista = array_values($p['pontosCorrida']);
+                rsort($lista);
+                $pontos[$id] = array_sum(array_slice($lista, 0, $k));
+            }
+            if ($k < $n && !$this->igualOficial($pontos, $porPiloto)) {
+                $out[] = $this->cenario('Só os ' . $k . ' melhores resultados', 'cada piloto descarta os ' . ($n - $k) . ' piores, como na F1 dos anos 80', $pontos, $contagem, $real);
+            }
+        }
+
+        // o grid valendo pontos (campeonato de classificação)
+        $tabela = self::SISTEMAS['f1atual']['pontos'];
+        $pontos = [];
+        $contagemGrid = [];
+        foreach ($this->corridas as $idx => $c) {
+            foreach ($this->res[$idx] as $r) {
+                if ($r['largada'] <= 0) {
+                    continue;
+                }
+                $pontos[$r['piloto']] = ($pontos[$r['piloto']] ?? 0) + ($tabela[$r['largada'] - 1] ?? 0);
+                $contagemGrid[$r['piloto']][$r['largada']] = ($contagemGrid[$r['piloto']][$r['largada']] ?? 0) + 1;
+            }
+        }
+        if ($pontos && array_sum($pontos) > 0) {
+            $out[] = $this->cenario('Se o grid valesse pontos', 'campeonato de classificação: 25-18-15… pela posição de largada', $pontos, $contagemGrid, $real);
+        }
+
+        // melhor média de chegada
+        if ($n >= 2) {
+            $minimo = (int) ceil($n / 2);
+            $pontos = [];
+            $media = [];
+            foreach ($porPiloto as $id => $p) {
+                if ($p['corridas'] >= $minimo) {
+                    $media[$id] = $p['somaChegada'] / $p['corridas'];
+                    $pontos[$id] = -$media[$id];
+                }
+            }
+            if ($pontos) {
+                $out[] = $this->cenario('Melhor média de chegada', 'menor posição média vence (mínimo de ' . self::qtd($minimo, 'corrida', 'corridas') . ')', $pontos, $contagem, $real, 'pts',
+                    fn ($id) => 'média ' . number_format($media[$id], 1, ',', '.'));
+            }
+        }
+
+        return $out;
+    }
+
+    /** MELHORIA 20261120 (e se): quem seria campeão em quantos cenários */
+    private function resumoCenarios(array $cenarios): array
+    {
+        $porCampeao = [];
+        foreach ($cenarios as $c) {
+            $id = $c['campeao']['id'];
+            $porCampeao[$id] = ['piloto' => $c['campeao'], 'qtd' => ($porCampeao[$id]['qtd'] ?? 0) + 1];
+        }
+        usort($porCampeao, fn ($a, $b) => $b['qtd'] <=> $a['qtd']);
+        return [
+            'total' => count($cenarios),
+            'mudaram' => count(array_filter($cenarios, fn ($c) => $c['mudou'])),
+            'campeoes' => $porCampeao,
         ];
     }
 

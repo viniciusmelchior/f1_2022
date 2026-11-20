@@ -57,7 +57,7 @@
     .cal-titulo-card h2::before { content: ''; width: 6px; height: 22px; background: var(--f1-red); border-radius: 3px; }
     .cal-form { padding: 16px 18px; display: grid; gap: 12px; grid-template-columns: 90px 1.1fr 1.6fr 1.1fr 1.5fr 120px 95px 95px; }
     .cal-form .cal-obs { grid-column: 1 / -1; }
-    .cal-sprint-box { grid-column: 1 / -1; border: 1px dashed #e0b400; background: #fffbea; border-radius: 10px; padding: 12px 14px; display: none; gap: 12px; grid-template-columns: 1.4fr 1.1fr 1.1fr 1.5fr 120px 95px 95px; }
+    .cal-sprint-box { grid-column: 1 / -1; border: 1px dashed #e0b400; background: #fffbea; border-radius: 10px; padding: 12px 14px; display: none; gap: 12px; grid-template-columns: 1.1fr 1.6fr 1.1fr 1.5fr 120px 95px 95px; } /* mesmas larguras da corrida */
     .cal-sprint-box.on { display: grid; }
     .cal-sprint-box .cal-obs { grid-column: 1 / -1; }
     .cal-sprint-box h3 { grid-column: 1 / -1; margin: 0; font-size: .85rem; font-weight: 900; text-transform: uppercase; color: #8a6d00; letter-spacing: 1px; }
@@ -293,8 +293,8 @@
             </div>
             <div class="cal-sprint-box" id="boxSprint">
                 <h3><i class="bi bi-lightning-charge-fill"></i> Sprint — pista própria, mesmo número da etapa</h3>
-                <div class="cal-campo"><label for="f_sprint_nome">Nome</label><input type="text" id="f_sprint_nome" data-sug="listaNomes" maxlength="150" placeholder="ex.: Sprint da Coreia"></div>
                 <div class="cal-campo"><label for="f_sprint_continente">Continente</label><input type="text" id="f_sprint_continente" data-sug="listaContinentes" maxlength="80" placeholder="mesmo da etapa"></div>
+                <div class="cal-campo"><label for="f_sprint_nome">Nome</label><input type="text" id="f_sprint_nome" data-sug="listaNomes" maxlength="150" placeholder="ex.: Sprint da Coreia"></div>
                 <div class="cal-campo"><label for="f_sprint_sede">Sede (país)</label><input type="text" id="f_sprint_sede" data-sug="listaSedes" maxlength="100" placeholder="automático pelo nome"></div>
                 <div class="cal-campo"><label for="f_sprint_pista">Pista</label><input type="text" id="f_sprint_pista" data-sug="listaPistas" maxlength="150"></div>
                 <div class="cal-campo"><label for="f_sprint_tempo">Tempo</label><input type="text" id="f_sprint_tempo" maxlength="40"></div>

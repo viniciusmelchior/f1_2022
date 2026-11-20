@@ -60,7 +60,9 @@
                                 @endforeach
                             </div>
                         @endif
-                        <span class="cur-barra" aria-hidden="true"><span style="width: {{ max(3, round($item['valor'] / $maximo * 100)) }}%"></span></span>
+                        @if(empty($semBarra)){{-- 20261120: $semBarra para rankings em que menor é melhor --}}
+                            <span class="cur-barra" aria-hidden="true"><span style="width: {{ max(3, round($item['valor'] / $maximo * 100)) }}%"></span></span>
+                        @endif
                     </div>
                     <div class="cur-valor">
                         <strong>{{ $formatar($item['valor']) }}{{ $item['sufixo'] ?? $sufixo }}</strong>
