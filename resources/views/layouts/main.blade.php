@@ -245,6 +245,16 @@
               <li><a class="link_name" href="#">Setting</a></li>
             </ul>
           </li> --}}
+          {{-- MELHORIA 20261119: planejamento do calendário --}}
+          <li>
+            <a href="{{route('calendario.index')}}">
+              <i class='bx bx-calendar'></i>
+              <span class="link_name">Calendário</span>
+            </a>
+            <ul class="sub-menu blank">
+              <li><a class="link_name" href="{{route('calendario.index')}}">Calendário</a></li>
+            </ul>
+          </li>
 @can('admin')
           <li>
             <a href="{{route('usuarios.index')}}">
@@ -316,7 +326,7 @@
     });
 
   $(document).ready(function() {
-      $('select:not(#selectReplicarPiloto, #qtdResultados, #temporada, #tipoConsulta, #pilotos_ignorados, #equipes_ignoradas, #flg_sprint, #filtroRefPista, #filtroSituacaoPista, #filtroRefHistorico)').select2({
+      $('select:not(#selectReplicarPiloto, #qtdResultados, #temporada, #tipoConsulta, #pilotos_ignorados, #equipes_ignoradas, #flg_sprint, #filtroRefPista, #filtroSituacaoPista, #filtroRefHistorico, #calSelTemporada, #calDuplicarDe, #calFiltroContinente, #calFiltroTipo)').select2({
         theme: 'classic'
       });
   });

@@ -16,6 +16,7 @@ use App\Http\Controllers\Site\TemporadaController;
 use App\Http\Controllers\Site\PDFController;
 use App\Http\Controllers\Site\SkinController;
 use App\Http\Controllers\Site\UsuarioController;
+use App\Http\Controllers\Site\CalendarioController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Site\EstatisticasPilotosEquipes;
 use Illuminate\Support\Facades\Route;
@@ -259,3 +260,15 @@ route::get('/curiosidades', [\App\Http\Controllers\Site\CuriosidadesController::
 route::get('/usuarios/index', [UsuarioController::class, 'index'])->name('usuarios.index')->middleware(['auth', 'can:admin']);
 route::post('/usuarios/entrarComo/{id}', [UsuarioController::class, 'entrarComo'])->name('usuarios.entrarComo')->middleware(['auth', 'can:admin']);
 route::post('/usuarios/voltar', [UsuarioController::class, 'voltar'])->name('usuarios.voltar')->middleware('auth');
+
+/** 19/11/2026 - planejamento do calendário das temporadas (formulário + grid + anotações) */
+route::post('/calendario/temporada/store', [CalendarioController::class, 'storeTemporada'])->name('calendario.temporada.store')->middleware('auth');
+route::post('/calendario/temporada/update/{id}', [CalendarioController::class, 'updateTemporada'])->name('calendario.temporada.update')->middleware('auth');
+route::post('/calendario/temporada/delete/{id}', [CalendarioController::class, 'destroyTemporada'])->name('calendario.temporada.delete')->middleware('auth');
+route::post('/calendario/temporada/renumerar/{id}', [CalendarioController::class, 'renumerar'])->name('calendario.temporada.renumerar')->middleware('auth');
+route::post('/calendario/etapa/gerar/{temporadaId}', [CalendarioController::class, 'gerarEtapas'])->name('calendario.etapa.gerar')->middleware('auth');
+route::post('/calendario/etapa/salvar/{temporadaId}', [CalendarioController::class, 'salvarEtapa'])->name('calendario.etapa.salvar')->middleware('auth');
+route::post('/calendario/etapa/mover/{id}', [CalendarioController::class, 'moverEtapa'])->name('calendario.etapa.mover')->middleware('auth');
+route::post('/calendario/etapa/delete/{id}', [CalendarioController::class, 'destroyEtapa'])->name('calendario.etapa.delete')->middleware('auth');
+route::get('/calendario/exportar/excel', [CalendarioController::class, 'exportar'])->name('calendario.exportar')->middleware('auth');
+route::get('/calendario/{id?}', [CalendarioController::class, 'index'])->name('calendario.index')->middleware('auth');
