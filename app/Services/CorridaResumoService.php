@@ -14,8 +14,7 @@ use Illuminate\Support\Facades\DB;
  * não aconteceram de UMA corrida.
  *
  * O histórico considera só corridas do mesmo tipo (principal x sprint), em ordem cronológica
- * (ordem de lançamento dos resultados — menor resultados.id de cada corrida, igual à tela do piloto;
- * MELHORIA 20261119 para temporadas simultâneas), até a corrida exibida inclusive.
+ * (temporada, ordem, id — mesmo critério da tela de curiosidades), até a corrida exibida inclusive.
  */
 class CorridaResumoService
 {
@@ -87,27 +86,17 @@ class CorridaResumoService
     {
         $c = $this->corrida;
         $filtroTipo = $this->sprint ? "c.flg_sprint = 'S'" : "(c.flg_sprint IS NULL OR c.flg_sprint <> 'S')";
-
-        // MELHORIA 20261119 (temporadas simultâneas): a sequência cronológica deixa de ser (temporada, ordem)
-        // e passa a ser a ordem em que os resultados foram lançados — o menor resultados.id de cada corrida
-        // (mesmo critério da tela do piloto). Assim corridas de temporadas disputadas em paralelo se intercalam.
-        $marco = DB::table('resultados')->where('user_id', $this->usuario)->where('corrida_id', $c->id)->min('id');
-        if ($marco === null) {
-            $this->idx = -1; // corrida ainda sem resultado
-            return;
-        }
         $linhas = DB::select("
             SELECT r.corrida_id, r.pilotoEquipe_id AS pe, r.largada, r.chegada, r.pontuacao, r.flg_abandono,
                    pe.piloto_id, pe.equipe_id, c.temporada_id, c.ordem, c.pista_id, c.volta_rapida
               FROM resultados r
               JOIN corridas c ON c.id = r.corrida_id
               JOIN piloto_equipes pe ON pe.id = r.pilotoEquipe_id
-              JOIN (SELECT corrida_id, MIN(id) AS marco FROM resultados WHERE user_id = ? GROUP BY corrida_id) m ON m.corrida_id = r.corrida_id
              WHERE r.user_id = ? AND c.user_id = ? AND {$filtroTipo}
                AND r.chegada IS NOT NULL AND r.chegada > 0 AND pe.piloto_id <> 0
-               AND m.marco <= ?
-             ORDER BY m.marco, c.id, r.chegada, r.id
-        ", [$this->usuario, $this->usuario, $this->usuario, $marco]);
+               AND (c.temporada_id < ? OR (c.temporada_id = ? AND (c.ordem < ? OR (c.ordem = ? AND c.id <= ?))))
+             ORDER BY c.temporada_id, c.ordem, c.id, r.chegada, r.id
+        ", [$this->usuario, $this->usuario, $c->temporada_id, $c->temporada_id, $c->ordem, $c->ordem, $c->id]);
 
         $porId = [];
         $idsP = $idsE = $idsPista = [];
