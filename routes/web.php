@@ -271,4 +271,7 @@ route::post('/calendario/etapa/salvar/{temporadaId}', [CalendarioController::cla
 route::post('/calendario/etapa/mover/{id}', [CalendarioController::class, 'moverEtapa'])->name('calendario.etapa.mover')->middleware('auth');
 route::post('/calendario/etapa/delete/{id}', [CalendarioController::class, 'destroyEtapa'])->name('calendario.etapa.delete')->middleware('auth');
 route::get('/calendario/exportar/excel', [CalendarioController::class, 'exportar'])->name('calendario.exportar')->middleware('auth');
+/** 26/11/2026 - lançar a etapa do calendário como corrida oficial */
+route::get('/calendario/etapa/oficial/{id}', [CalendarioController::class, 'dadosOficial'])->name('calendario.etapa.oficial')->middleware('auth');
+route::post('/calendario/etapa/oficial/{id}', [CalendarioController::class, 'cadastrarOficial'])->name('calendario.etapa.oficial.store')->middleware('auth');
 route::get('/calendario/{id?}', [CalendarioController::class, 'index'])->name('calendario.index')->middleware('auth');

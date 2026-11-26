@@ -6,9 +6,12 @@ use App\Exports\CalendarioExport;
 use App\Http\Controllers\Controller;
 use App\Models\Site\CalendarioEtapa;
 use App\Models\Site\CalendarioTemporada;
+use App\Models\Site\Corrida;
+use App\Services\CalendarioOficialService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 
 /**
@@ -284,6 +287,67 @@ class CalendarioController extends Controller
         });
 
         return response()->json(['ok' => true, 'etapas' => $this->etapasGrid($temporada)]);
+    }
+
+    /**
+     * MELHORIA 20261126: dados do modal "cadastrar oficialmente" — procura no banco a temporada, o evento
+     * e a pista da etapa (ou da sprint) do calendário (JSON).
+     */
+    public function dadosOficial(Request $request, $id, CalendarioOficialService $oficial)
+    {
+        $etapa = $this->etapaDoUsuario($id);
+        $sprint = $request->query('parte') === 'sprint';
+        abort_if($sprint && $etapa->flg_sprint !== 'S', 404);
+
+        return response()->json($oficial->preparar($etapa, $sprint, Auth::user()->id));
+    }
+
+    /**
+     * MELHORIA 20261126: lança a corrida na temporada oficial escolhida, com os mesmos campos de
+     * CorridaController::store(). O calendário (rascunho) não é alterado.
+     */
+    public function cadastrarOficial(Request $request, $id, CalendarioOficialService $oficial)
+    {
+        $this->etapaDoUsuario($id);
+        $usuario = Auth::user()->id;
+
+        $dados = $request->validate([
+            'temporada_id' => ['required', 'integer', Rule::exists('temporadas', 'id')->where('user_id', $usuario)],
+            'evento_id' => ['required', 'integer', Rule::exists('eventos', 'id')->where('user_id', CalendarioOficialService::USUARIO_CATALOGO)],
+            'pista_id' => ['required', 'integer', Rule::exists('pistas', 'id')->where('user_id', CalendarioOficialService::USUARIO_CATALOGO)],
+            'ordem' => 'required|integer|min:1|max:999',
+            'flg_sprint' => 'required|in:S,N',
+            'confirmar' => 'nullable|boolean',
+        ], [
+            'temporada_id.required' => 'Selecione a temporada.',
+            'evento_id.required' => 'Selecione o evento.',
+            'pista_id.required' => 'Selecione a pista.',
+            'ordem.required' => 'Informe a ordem da corrida.',
+            'ordem.min' => 'A ordem deve ser 1 ou maior.',
+        ]);
+
+        if (!$request->boolean('confirmar')) {
+            $repetidas = $oficial->repetidas($usuario, (int) $dados['temporada_id'], $dados['flg_sprint'], (int) $dados['ordem'], (int) $dados['evento_id']);
+            if ($repetidas) {
+                return response()->json(['ok' => false, 'repetidas' => $repetidas]);
+            }
+        }
+
+        $corrida = new Corrida();
+        $corrida->temporada_id = $dados['temporada_id'];
+        $corrida->pista_id = $dados['pista_id'];
+        $corrida->ordem = $dados['ordem'];
+        $corrida->user_id = $usuario;
+        $corrida->flg_sprint = $dados['flg_sprint'];
+        $corrida->evento_id = $dados['evento_id'];
+        $corrida->save();
+
+        return response()->json([
+            'ok' => true,
+            'mensagem' => ($corrida->flg_sprint === 'S' ? 'Sprint' : 'Corrida') . ' "' . $corrida->evento->des_nome . '" (' . $corrida->pista->nome . ') lançada na '
+                . $oficial->rotuloTemporada($corrida->temporada) . ', ordem ' . $corrida->ordem . '.',
+            'url' => route('corridas.index', [$corrida->temporada_id]),
+        ]);
     }
 
     /** MELHORIA 20261119: backup em Excel de todas as temporadas do calendário (uma aba por temporada). */

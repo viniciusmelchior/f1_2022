@@ -104,6 +104,33 @@
     .cal-acao:hover { background: #fff6dc; color: #92600a; }
     .cal-acao.del { color: #d92d20; }
     .cal-acao.del:hover { background: #fde2e1; color: #b42318; }
+    /* MELHORIA 20261126: cadastrar oficialmente */
+    .cal-acao.oficial { color: #15803d; }
+    .cal-acao.oficial:hover { background: #dcfce7; color: #166534; }
+    #calOficial .cal-modal-caixa { max-width: 640px; position: relative; } /* relative: a lista do select2 acompanha o modal */
+    #formOficial { display: flex; flex-direction: column; gap: 14px; padding: 18px; }
+    #formOficial[hidden], #calOficial [hidden] { display: none !important; }
+    #formOficial .cal-campo .select2-container { width: 100% !important; }
+    #formOficial .cal-campo .select2-selection { min-height: 40px; display: flex; align-items: center; border-radius: 8px; border-color: #d6d6d6; }
+    #formOficial .cal-campo .select2-selection__rendered { flex: 1; }
+    #formOficial .cal-campo .select2-selection__arrow { height: 38px; }
+    #formOficial .cal-campo.nao .select2-selection { border: 2px solid #d92d20; }
+    #formOficial .cal-campo.atencao .select2-selection { border: 2px solid #e0a100; }
+    #formOficial #of_ordem { width: 110px; }
+    .cal-of-status { font-size: .85rem; font-weight: 700; }
+    .cal-of-status:empty { display: none; }
+    .cal-of-status.ok { color: #166534; }
+    .cal-of-status.atencao { color: #92600a; }
+    .cal-of-status.nao { color: #b42318; }
+    #formOficial .cal-switch { align-self: flex-start; }
+    #formOficial .cal-msg, #calOficial .cal-of-aviso { margin: 0; }
+    .cal-of-aviso { background: #fff6cc; border: 1px solid #f0d36b; color: #7a5c00; border-radius: 8px; padding: 10px 14px; font-weight: 700; font-size: .95rem; }
+    .cal-of-aviso ul { margin: 6px 0; padding-left: 20px; }
+    .cal-of-carregando { padding: 30px; text-align: center; color: var(--ink-3); }
+    .cal-of-pronto { padding: 26px 18px; text-align: center; }
+    .cal-of-pronto i { font-size: 2.4rem; color: #15803d; }
+    .cal-of-pronto p { font-weight: 800; margin: 10px 0 18px; }
+    .cal-of-pronto .cal-acoes-form { justify-content: center; }
     .cal-vazio { padding: 30px; text-align: center; color: var(--ink-3); font-size: 1.05rem; }
     .cal-anot { padding: 16px 18px; }
     .cal-anot textarea { width: 100%; min-height: 320px; resize: vertical; border: 1px solid #d6d6d6; border-radius: 10px; padding: 14px 16px; font-size: 1.02rem; line-height: 1.55; font-family: inherit; background: #fffef8; }
@@ -381,6 +408,53 @@
             <div class="cal-modal-corpo" id="calModalCorpo"></div>
         </div>
     </div>
+
+    {{-- MELHORIA 20261126: MODAL "CADASTRAR OFICIALMENTE" — mesmo formulário de corridas/adicionar, pré-preenchido --}}
+    <div class="cal-modal" id="calOficial" aria-hidden="true">
+        <div class="cal-modal-caixa" role="dialog" aria-modal="true" aria-labelledby="calOficialTitulo">
+            <div class="cal-modal-topo">
+                <h2 id="calOficialTitulo">Cadastrar oficialmente</h2>
+                <button type="button" class="cal-modal-fechar" data-of-fechar title="Fechar (Esc)">&times;</button>
+            </div>
+            <div class="cal-of-carregando" id="ofCarregando">Procurando temporada, evento e pista...</div>
+            <form id="formOficial" autocomplete="off" hidden novalidate>
+                <div class="cal-campo" data-of="temporada">
+                    <label for="of_temporada">Temporada</label>
+                    <select id="of_temporada"></select>
+                    <span class="cal-of-status"></span>
+                </div>
+                <div class="cal-campo" data-of="evento">
+                    <label for="of_evento">Evento</label>
+                    <select id="of_evento"></select>
+                    <span class="cal-of-status"></span>
+                </div>
+                <div class="cal-campo" data-of="pista">
+                    <label for="of_pista">Pista</label>
+                    <select id="of_pista"></select>
+                    <span class="cal-of-status"></span>
+                </div>
+                <div class="cal-campo">
+                    <label for="of_ordem">Ordem</label>
+                    <input type="number" id="of_ordem" min="1" max="999" step="1">
+                </div>
+                <label class="cal-switch"><input type="checkbox" id="of_sprint"> <i class="bi bi-lightning-charge-fill"></i> Corrida Sprint</label>
+                <div class="cal-of-aviso" id="ofRepetidas" hidden></div>
+                <div class="cal-msg" id="msgOficial"></div>
+                <div class="cal-acoes-form">
+                    <button class="cal-btn prim" type="submit" id="ofSalvar"><i class="bi bi-check2"></i> Salvar</button>
+                    <button class="cal-btn sec" type="button" data-of-fechar><i class="bi bi-x-lg"></i> Cancelar</button>
+                </div>
+            </form>
+            <div class="cal-of-pronto" id="ofPronto" hidden>
+                <i class="bi bi-check-circle-fill"></i>
+                <p id="ofProntoTexto"></p>
+                <div class="cal-acoes-form">
+                    <a class="cal-btn prim" id="ofProntoLink" href="#"><i class="bi bi-flag-fill"></i> Ver corridas da temporada</a>
+                    <button class="cal-btn sec" type="button" data-of-fechar>Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
     @endif
 </div>
 
@@ -414,6 +488,7 @@
     var URL_TEMPORADA = @js(route('calendario.temporada.update', [$temporada->id]));
     var URL_RENUMERAR = @js(route('calendario.temporada.renumerar', [$temporada->id]));
     var URL_GERAR = @js(route('calendario.etapa.gerar', [$temporada->id]));
+    var URL_OFICIAL = @js(route('calendario.etapa.oficial', ['__ID__']));
     var etapas = @json($etapas);
     var SUG = @json($sugestoes); // valores já digitados em todos os calendários (autocompletar)
 
@@ -547,7 +622,8 @@
             '<td class="nowrap" data-campo="tempo">' + val(e.tempo) + '</td>' +
             '<td data-campo="voltas">' + val(e.voltas) + '</td>' +
             '<td class="esq cal-obs-cel" data-campo="observacoes">' + quebra(e.observacoes) + '</td>' +
-            '<td class="nowrap"><button type="button" class="cal-acao" data-editar="' + e.id + '" data-parte="corrida" title="Editar corrida"><i class="bi bi-pencil-square"></i></button>' +
+            '<td class="nowrap"><button type="button" class="cal-acao oficial" data-oficial="' + e.id + '" data-parte="corrida" title="Cadastrar oficialmente a corrida"><i class="bi bi-plus-square"></i></button>' +
+            '<button type="button" class="cal-acao" data-editar="' + e.id + '" data-parte="corrida" title="Editar corrida"><i class="bi bi-pencil-square"></i></button>' +
             '<button type="button" class="cal-acao del" data-excluir="' + e.id + '" title="Excluir"><i class="bi bi-trash"></i></button></td></tr>';
     }
     function linhaSprint(e) {
@@ -561,7 +637,8 @@
             '<td class="nowrap" data-campo="sprint_tempo">' + val(e.sprint_tempo) + '</td>' +
             '<td data-campo="sprint_voltas">' + val(e.sprint_voltas) + '</td>' +
             '<td class="esq cal-obs-cel" data-campo="sprint_observacoes">' + quebra(e.sprint_observacoes) + '</td>' +
-            '<td class="nowrap"><button type="button" class="cal-acao" data-editar="' + e.id + '" data-parte="sprint" title="Editar sprint"><i class="bi bi-pencil-square"></i></button>' +
+            '<td class="nowrap"><button type="button" class="cal-acao oficial" data-oficial="' + e.id + '" data-parte="sprint" title="Cadastrar oficialmente a sprint"><i class="bi bi-plus-square"></i></button>' +
+            '<button type="button" class="cal-acao" data-editar="' + e.id + '" data-parte="sprint" title="Editar sprint"><i class="bi bi-pencil-square"></i></button>' +
             '<button type="button" class="cal-acao del" data-excluir-sprint="' + e.id + '" title="Excluir só a sprint"><i class="bi bi-trash"></i></button></td></tr>';
     }
 
@@ -716,6 +793,7 @@
         if (td && !e.target.closest('.cal-inline')) { editarCelula(td); return; }
         var b = e.target.closest('button'); if (!b) return;
         if (b.dataset.editar) abrirModal(parseInt(b.dataset.editar, 10), b.dataset.parte);
+        if (b.dataset.oficial) abrirOficial(parseInt(b.dataset.oficial, 10), b.dataset.parte);
         if (b.dataset.excluirSprint) {
             // MELHORIA 20261119: exclui só a sprint — a corrida da etapa e a numeração continuam iguais
             var es = etapas.find(function (x) { return x.id === parseInt(b.dataset.excluirSprint, 10); });
@@ -938,6 +1016,130 @@
             })
             .catch(function (err) { mensagem('msgForm', err.message); })
             .finally(function () { btn.disabled = false; });
+    });
+
+    // ---------- MELHORIA 20261126: CADASTRAR OFICIALMENTE ----------
+    // O calendário é rascunho (texto livre); o servidor procura temporada, evento e pista no cadastro.
+    var ofModal = document.getElementById('calOficial'), ofForm = document.getElementById('formOficial');
+    var ofSelects = { temporada: $('#of_temporada'), evento: $('#of_evento'), pista: $('#of_pista') };
+    var ofDados = null, ofEtapaId = null, ofPedido = 0, ofConfirmar = false, ofEnviando = false;
+    var OF_ICONES = { ok: 'bi-check-circle-fill', atencao: 'bi-exclamation-triangle-fill', nao: 'bi-x-circle-fill' };
+    function ofAberto() { return ofModal.classList.contains('on'); }
+    function ofStatus(campo, status, texto) {
+        var box = ofForm.querySelector('[data-of="' + campo + '"]');
+        box.classList.remove('ok', 'atencao', 'nao'); if (status) box.classList.add(status);
+        var s = box.querySelector('.cal-of-status');
+        s.className = 'cal-of-status ' + (status || '');
+        s.innerHTML = texto ? '<i class="bi ' + OF_ICONES[status] + '"></i> ' + esc(texto) : '';
+    }
+    // mudou alguma escolha: o aviso de corrida repetida deixa de valer
+    function ofLimparAviso() {
+        ofConfirmar = false;
+        document.getElementById('ofRepetidas').hidden = true;
+        document.getElementById('ofSalvar').innerHTML = '<i class="bi bi-check2"></i> Salvar';
+    }
+    function ofTemporadaEscolhida() {
+        var id = parseInt(ofSelects.temporada.val(), 10);
+        return ofDados.temporadas.find(function (t) { return t.id === id; });
+    }
+    function ofPreencher(campo, lista, busca) {
+        var sel = ofSelects[campo];
+        if (sel.hasClass('select2-hidden-accessible')) sel.select2('destroy'); // o select2 global do layout é refeito aqui
+        sel.html('<option value="">Selecione...</option>' + lista.map(function (o) { return '<option value="' + o.id + '">' + esc(o.texto) + '</option>'; }).join(''));
+        sel.val(busca.id ? String(busca.id) : '');
+        // dropdownParent: sem isso a lista abre atrás do modal
+        sel.select2({ theme: 'classic', width: '100%', dropdownParent: $(ofModal).find('.cal-modal-caixa') });
+        ofStatus(campo, busca.status, busca.mensagem);
+    }
+    function abrirOficial(id, parte) {
+        var e = etapas.find(function (x) { return x.id === id; }); if (!e) return;
+        var sprint = parte === 'sprint', pedido = ++ofPedido;
+        ofEtapaId = id; ofDados = null;
+        var nome = sprint ? e.sprint_nome : e.nome;
+        document.getElementById('calOficialTitulo').textContent = 'Cadastrar ' + (sprint ? 'sprint' : 'corrida') + ' — etapa ' + e.ordem + (nome ? ' · ' + nome : '');
+        ofModal.querySelector('.cal-modal-caixa').classList.toggle('sprint', sprint);
+        ofForm.hidden = true; document.getElementById('ofPronto').hidden = true;
+        document.getElementById('ofCarregando').hidden = false;
+        document.getElementById('msgOficial').className = 'cal-msg';
+        ofLimparAviso();
+        ofModal.classList.add('on'); ofModal.setAttribute('aria-hidden', 'false'); document.body.classList.add('cal-sem-scroll');
+        fetch(URL_OFICIAL.replace('__ID__', id) + '?parte=' + parte, { headers: { 'Accept': 'application/json' } })
+            .then(function (r) { if (!r.ok) throw new Error(r.status === 401 || r.status === 419 ? 'Sessão expirada. Recarregue a página.' : 'Erro ' + r.status); return r.json(); })
+            .then(function (j) {
+                if (pedido !== ofPedido || !ofAberto()) return; // modal fechado ou outra etapa aberta
+                ofDados = j;
+                document.getElementById('ofCarregando').hidden = true; ofForm.hidden = false;
+                ofPreencher('temporada', j.temporadas, j.busca.temporada);
+                ofPreencher('evento', j.eventos, j.busca.evento);
+                ofPreencher('pista', j.pistas, j.busca.pista);
+                document.getElementById('of_ordem').value = j.ordem;
+                document.getElementById('of_sprint').checked = j.flg_sprint === 'S';
+                var t = ofTemporadaEscolhida();
+                if (t && t.finalizada && j.busca.temporada.status === 'ok') ofStatus('temporada', 'atencao', j.busca.temporada.mensagem + ' Atenção: ela está finalizada.');
+                document.getElementById('ofSalvar').focus();
+            })
+            .catch(function (err) {
+                if (pedido !== ofPedido) return;
+                document.getElementById('ofCarregando').textContent = 'Não foi possível carregar: ' + err.message;
+            });
+    }
+    function fecharOficial() {
+        if (!ofAberto() || ofEnviando) return;
+        ofPedido++;
+        Object.keys(ofSelects).forEach(function (c) { if (ofSelects[c].hasClass('select2-hidden-accessible')) ofSelects[c].select2('close'); });
+        ofModal.classList.remove('on'); ofModal.setAttribute('aria-hidden', 'true'); document.body.classList.remove('cal-sem-scroll');
+        document.getElementById('ofCarregando').textContent = 'Procurando temporada, evento e pista...';
+    }
+    ofModal.querySelectorAll('[data-of-fechar]').forEach(function (b) { b.addEventListener('click', fecharOficial); });
+    ofModal.addEventListener('mousedown', function (ev) { if (ev.target === ofModal) fecharOficial(); });
+    // fase de captura: com uma lista do select2 aberta, o Esc fecha só a lista
+    document.addEventListener('keydown', function (ev) {
+        if (ev.key === 'Escape' && ofAberto() && !document.querySelector('.select2-container--open')) fecharOficial();
+    }, true);
+    Object.keys(ofSelects).forEach(function (campo) {
+        ofSelects[campo].on('select2:select', function () {
+            ofLimparAviso();
+            if (campo === 'temporada') {
+                var t = ofTemporadaEscolhida();
+                if (t && t.finalizada) ofStatus(campo, 'atencao', 'Esta temporada está finalizada.'); else ofStatus(campo, '', '');
+            } else {
+                ofStatus(campo, '', '');
+            }
+        });
+    });
+    ['of_ordem', 'of_sprint'].forEach(function (id) { document.getElementById(id).addEventListener('input', ofLimparAviso); });
+    ofForm.addEventListener('submit', function (ev) {
+        ev.preventDefault();
+        var dados = {
+            temporada_id: ofSelects.temporada.val() || null,
+            evento_id: ofSelects.evento.val() || null,
+            pista_id: ofSelects.pista.val() || null,
+            ordem: document.getElementById('of_ordem').value || null,
+            flg_sprint: document.getElementById('of_sprint').checked ? 'S' : 'N',
+            confirmar: ofConfirmar
+        };
+        var falta = ['temporada', 'evento', 'pista'].filter(function (c) { return !dados[c + '_id']; });
+        if (falta.length) { mensagem('msgOficial', 'Selecione: ' + falta.join(', ') + '.'); return; }
+        var btn = document.getElementById('ofSalvar'); btn.disabled = true; ofEnviando = true;
+        enviar(URL_OFICIAL.replace('__ID__', ofEtapaId), dados)
+            .then(function (j) {
+                if (!j.ok && j.repetidas) { // já existe algo parecido na temporada: pede um segundo clique
+                    ofConfirmar = true;
+                    var aviso = document.getElementById('ofRepetidas');
+                    aviso.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Esta temporada já tem ' + (dados.flg_sprint === 'S' ? 'sprint' : 'corrida') +
+                        ' com a mesma ordem ou o mesmo evento:<ul>' + j.repetidas.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>Confira antes de lançar.';
+                    aviso.hidden = false;
+                    btn.innerHTML = '<i class="bi bi-check2-all"></i> Lançar mesmo assim';
+                    return;
+                }
+                if (!j.ok) throw new Error('Não foi possível lançar a corrida.');
+                ofForm.hidden = true;
+                document.getElementById('ofProntoTexto').textContent = j.mensagem;
+                document.getElementById('ofProntoLink').href = j.url;
+                document.getElementById('ofPronto').hidden = false;
+            })
+            .catch(function (err) { mensagem('msgOficial', err.message); })
+            .finally(function () { btn.disabled = false; ofEnviando = false; });
     });
 
     // ---------- GERAR ETAPAS VAZIAS (só a ordem) ----------
