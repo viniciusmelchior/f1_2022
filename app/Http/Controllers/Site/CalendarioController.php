@@ -313,8 +313,8 @@ class CalendarioController extends Controller
 
         $dados = $request->validate([
             'temporada_id' => ['required', 'integer', Rule::exists('temporadas', 'id')->where('user_id', $usuario)],
-            'evento_id' => ['required', 'integer', Rule::exists('eventos', 'id')->where('user_id', CalendarioOficialService::USUARIO_CATALOGO)],
-            'pista_id' => ['required', 'integer', Rule::exists('pistas', 'id')->where('user_id', CalendarioOficialService::USUARIO_CATALOGO)],
+            'evento_id' => ['required', 'integer', Rule::exists('eventos', 'id')->where('user_id', $usuario)],
+            'pista_id' => ['required', 'integer', Rule::exists('pistas', 'id')->where('user_id', $usuario)],
             'ordem' => 'required|integer|min:1|max:999',
             'flg_sprint' => 'required|in:S,N',
             'confirmar' => 'nullable|boolean',

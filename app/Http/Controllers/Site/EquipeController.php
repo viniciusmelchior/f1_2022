@@ -92,8 +92,7 @@ class EquipeController extends Controller
         $userId = Auth::user()->id;
 
         $modelEquipe = Equipe::with('pais')
-                                // ->where('user_id', Auth::user()->id)
-                                ->where('user_id', 3)
+                                ->where('user_id', Auth::user()->id)
                                 ->where('id', $id)
                                 ->firstOrFail();
 

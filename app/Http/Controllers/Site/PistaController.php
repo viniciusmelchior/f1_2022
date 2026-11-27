@@ -24,8 +24,7 @@ class PistaController extends Controller
      */
     public function index()
     {
-        // $pistas = Pista::where('user_id', Auth::user()->id)->orderBy('nome')->get();
-        $pistas = Pista::with(['pais.continente'])->where('user_id', 3)->orderBy('nome')->get();
+        $pistas = Pista::with(['pais.continente'])->where('user_id', Auth::user()->id)->orderBy('nome')->get();
 
         // MELHORIA 20261117: contagens numa consulta só (antes eram ~4 consultas por pista na view)
         $estatisticas = [];
