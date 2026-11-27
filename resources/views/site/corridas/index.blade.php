@@ -44,7 +44,35 @@
     }
     .btn-chaveamento .bi-arrow-right { transition: transform .15s; }
     .btn-chaveamento:hover .bi-arrow-right { transform: translateX(2px); }
-    .resumo-po { display: inline-flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 10px; font-size: 0.85rem; color: #5c636a; }
+    .resumo-po { display: inline-flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 0.85rem; color: #5c636a; }
+    /* MELHORIA 20261127: barra acima da tabela (resumo do playoff + chave para exibir/ocultar sprints) */
+    .barra-corridas { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+    .filtro-sprint {
+        display: inline-flex; align-items: center; gap: 10px; margin: 0 0 0 auto; padding: 6px 8px 6px 12px;
+        border: 1px solid #d3d6da; border-radius: 999px; background-color: #fff;
+        font-size: 0.82rem; font-weight: 600; color: #5c636a; cursor: pointer; user-select: none;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        transition: border-color .15s, color .15s, box-shadow .15s;
+    }
+    .filtro-sprint:first-child { margin-left: 0; }
+    .filtro-sprint:hover { border-color: #e10600; color: #15151e; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12); }
+    .filtro-sprint > .bi { color: #e10600; }
+    .filtro-sprint .qtd { min-width: 22px; padding: 1px 7px; border-radius: 999px; background-color: #fde8e7; color: #b00500; font-size: 0.72rem; font-weight: 700; text-align: center; }
+    .filtro-sprint input {
+        -webkit-appearance: none; -moz-appearance: none; appearance: none;
+        position: relative; flex-shrink: 0; width: 38px; height: 22px; margin: 0;
+        border: 0; border-radius: 999px; background-color: #c4c8cd; cursor: pointer; outline: none;
+        transition: background-color .2s, box-shadow .15s;
+    }
+    .filtro-sprint input::after {
+        content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px;
+        border-radius: 50%; background-color: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        transition: transform .2s;
+    }
+    .filtro-sprint input:checked { background-color: #e10600; }
+    .filtro-sprint input:checked::after { transform: translateX(16px); }
+    .filtro-sprint input:focus-visible { box-shadow: 0 0 0 3px rgba(225, 6, 0, 0.3); }
+    #tabelaCorridas.ocultar-sprints tr.linha-sprint { display: none; }
   </style>
 
   {{-- MELHORIA 20261110: largura total (antes container fixo + tabela a 70% gerava rolagem lateral) --}}
@@ -57,11 +85,25 @@
         </ol>
     </nav>
     
-    @if(!empty($fasesPlayoff))
-        <div class="resumo-po">
-            <strong>Playoff:</strong>
-            <span>{{ $temporada->playoffQtdClassificados() }} classificados · {{ $temporada->playoffQtdClassificatorias() }} {{ $temporada->playoffQtdClassificatorias() === 1 ? 'classificatória' : 'classificatórias' }} + {{ $temporada->playoffCorridasMataMata() }} de mata-mata ({{ $temporada->qtd_corridas }} corridas)</span>
-            <a href="{{ route('temporadas.classificacao', [$temporada->id]) }}?aba=playoff" class="btn-chaveamento ms-1"><i class="bi bi-diagram-3"></i> Ver chaveamento <i class="bi bi-arrow-right"></i></a>
+    {{-- MELHORIA 20261127: a chave de sprints só aparece quando a temporada tem sprint --}}
+    @php $qtdSprints = $corridas->where('flg_sprint', 'S')->count(); @endphp
+    @if(!empty($fasesPlayoff) || $qtdSprints > 0)
+        <div class="barra-corridas">
+            @if(!empty($fasesPlayoff))
+                <div class="resumo-po">
+                    <strong>Playoff:</strong>
+                    <span>{{ $temporada->playoffQtdClassificados() }} classificados · {{ $temporada->playoffQtdClassificatorias() }} {{ $temporada->playoffQtdClassificatorias() === 1 ? 'classificatória' : 'classificatórias' }} + {{ $temporada->playoffCorridasMataMata() }} de mata-mata ({{ $temporada->qtd_corridas }} corridas)</span>
+                    <a href="{{ route('temporadas.classificacao', [$temporada->id]) }}?aba=playoff" class="btn-chaveamento ms-1"><i class="bi bi-diagram-3"></i> Ver chaveamento <i class="bi bi-arrow-right"></i></a>
+                </div>
+            @endif
+            @if($qtdSprints > 0)
+                <label class="filtro-sprint" for="exibirSprints">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                    <span>Exibir sprints</span>
+                    <span class="qtd">{{ $qtdSprints }}</span>
+                    <input type="checkbox" id="exibirSprints" autocomplete="off" checked>
+                </label>
+            @endif
         </div>
     @endif
 
@@ -83,7 +125,7 @@
             </thead>
             <tbody>
                 @foreach ($corridas as $key => $corrida)
-                    <tr @if($corrida->flg_sprint == 'S') style="color:red; font-style: italic;" @endif>
+                    <tr @if($corrida->flg_sprint == 'S') class="linha-sprint" style="color:red; font-style: italic;" @endif>
                         {{-- <td>@if($corrida->flg_sprint != 'S') {{$corrida->ordem}} @endif</td> --}}
                         <td>{{$corrida->flg_sprint != 'S' ? $corrida->ordem : 'Sprint' }}</td>
                         @if(!empty($fasesPlayoff))
@@ -203,7 +245,23 @@
 </form>
 <script>
     $(document).ready(function () {
-       $('.deleteCorrida').click(function (e) { 
+       // MELHORIA 20261127: exibir/ocultar sprints (a escolha fica salva no navegador)
+       var chkSprints = document.getElementById('exibirSprints');
+       var tabela = document.getElementById('tabelaCorridas');
+       if (chkSprints && tabela) {
+           var chaveSprints = 'corridas.exibirSprints';
+           try { chkSprints.checked = localStorage.getItem(chaveSprints) !== 'N'; } catch (e) {}
+           var aplicarFiltroSprints = function () {
+               tabela.classList.toggle('ocultar-sprints', !chkSprints.checked);
+           };
+           chkSprints.addEventListener('change', function () {
+               aplicarFiltroSprints();
+               try { localStorage.setItem(chaveSprints, chkSprints.checked ? 'S' : 'N'); } catch (e) {}
+           });
+           aplicarFiltroSprints();
+       }
+
+       $('.deleteCorrida').click(function (e) {
            e.preventDefault();
            var corrida_id = $(this).val();
            $('#corrida_id').val(corrida_id);
