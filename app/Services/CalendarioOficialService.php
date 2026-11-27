@@ -17,9 +17,6 @@ use Illuminate\Support\Str;
  */
 class CalendarioOficialService
 {
-    /** Eventos e pistas oficiais: o mesmo catálogo usado em CorridaController::adicionar(). */
-    public const USUARIO_CATALOGO = 3;
-
     private const OK = 'ok';
     private const ATENCAO = 'atencao';
     private const NAO = 'nao';
@@ -29,22 +26,23 @@ class CalendarioOficialService
         return Temporada::with('ano')->where('user_id', $usuarioId)->orderByDesc('id')->get();
     }
 
-    public function eventos(): Collection
+    /** Eventos e pistas do próprio usuário: o mesmo critério de CorridaController::adicionar(). */
+    public function eventos(int $usuarioId): Collection
     {
-        return Evento::where('user_id', self::USUARIO_CATALOGO)->orderBy('des_nome')->get();
+        return Evento::where('user_id', $usuarioId)->orderBy('des_nome')->get();
     }
 
-    public function pistas(): Collection
+    public function pistas(int $usuarioId): Collection
     {
-        return Pista::with('pais')->where('user_id', self::USUARIO_CATALOGO)->where('flg_ativo', 'S')->orderBy('nome')->get();
+        return Pista::with('pais')->where('user_id', $usuarioId)->where('flg_ativo', 'S')->orderBy('nome')->get();
     }
 
     /** Dados do modal: listas dos selects + o que foi encontrado para cada um. */
     public function preparar(CalendarioEtapa $etapa, bool $sprint, int $usuarioId): array
     {
         $temporadas = $this->temporadas($usuarioId);
-        $eventos = $this->eventos();
-        $pistas = $this->pistas();
+        $eventos = $this->eventos($usuarioId);
+        $pistas = $this->pistas($usuarioId);
 
         $nome = trim((string) ($sprint ? $etapa->sprint_nome : $etapa->nome));
         $pista = trim((string) ($sprint ? $etapa->sprint_pista : $etapa->pista));

@@ -121,4 +121,26 @@ class CatalogScopedToLoggedInUserTest extends TestCase
         $this->actingAs($this->outro)->get(route('estatisticas.pilotos.equipes.index'))->assertOk()
             ->assertSee('Alonso')->assertDontSee('Barrichello');
     }
+
+    public function test_the_calendar_registers_races_with_the_catalog_of_the_logged_in_account(): void
+    {
+        foreach ([[$this->outro, 1], [$this->dono3, 2]] as [$user, $n]) {
+            $this->insert('eventos', ['id' => $n, 'user_id' => $user->id, 'des_nome' => 'Evento '.$n]);
+            DB::table('pistas')->where('id', $n)->update(['flg_ativo' => 'S']);
+            $this->insert('calendario_temporadas', ['id' => $n, 'user_id' => $user->id, 'nome' => 'T'.$n]);
+            $this->insert('calendario_etapas', ['id' => $n, 'calendario_temporada_id' => $n, 'ordem' => 2, 'flg_sprint' => 'N']);
+
+            $dados = $this->actingAs($user)->getJson(route('calendario.etapa.oficial', [$n]))->assertOk()->json();
+            $this->assertSame([$n], array_column($dados['eventos'], 'id'));
+            $this->assertSame([$n], array_column($dados['pistas'], 'id'));
+        }
+
+        $corrida = ['temporada_id' => 1, 'ordem' => 2, 'flg_sprint' => 'N'];
+
+        $this->actingAs($this->outro)->postJson('/calendario/etapa/oficial/1', $corrida + ['evento_id' => 2, 'pista_id' => 2])
+            ->assertStatus(422)->assertJsonValidationErrors(['evento_id', 'pista_id']);
+        $this->actingAs($this->outro)->postJson('/calendario/etapa/oficial/1', $corrida + ['evento_id' => 1, 'pista_id' => 1])
+            ->assertOk()->assertJson(['ok' => true]);
+        $this->assertDatabaseHas('corridas', ['user_id' => $this->outro->id, 'ordem' => 2, 'evento_id' => 1, 'pista_id' => 1]);
+    }
 }
