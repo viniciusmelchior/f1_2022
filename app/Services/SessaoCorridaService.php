@@ -126,7 +126,7 @@ class SessaoCorridaService
                     'total_abandonos' => count(array_filter($corridaAnalise['classificacao'], fn ($c) => $c['abandonou'])),
                     'total_paradas' => array_sum(array_map(fn ($c) => count($c['paradas']), $corridaAnalise['classificacao'])),
                     'tempo_corrida_ms' => $corridaAnalise['tempoCorrida'],
-                    'media_volta_vencedor_ms' => $vencedor && $vencedor['voltasCompletadas'] ? (int) round($corridaAnalise['tempoCorrida'] / $vencedor['voltasCompletadas']) : null,
+                    'media_volta_vencedor_ms' => $vencedor && $vencedor['voltasCompletadas'] && $corridaAnalise['tempoCorrida'] ? (int) round($corridaAnalise['tempoCorrida'] / $vencedor['voltasCompletadas']) : null,
                     'vencedor_piloto_equipe_id' => $vencedor ? ($mapa[$vencedor['nomeNormalizado']]->id ?? null) : null,
                     'vencedor_nome' => $vencedor['nome'] ?? null,
                     'volta_mais_rapida_ms' => $vmr['melhorVolta'] ?? null,
@@ -636,6 +636,15 @@ class SessaoCorridaService
             }
         }
         if (!$sessao) {
+            // MELHORIA 20261119: JSON gerado com falha (sem voltas) -> sessão de corrida que tenha raceResult
+            foreach ($json['sessions'] ?? [] as $s) {
+                if ((($s['name'] ?? '') === 'Quick Race' || ($s['type'] ?? null) == 3) && !empty($s['raceResult'])) {
+                    $sessao = $s;
+                    break;
+                }
+            }
+        }
+        if (!$sessao) {
             return null;
         }
         $contexto = $this->lerContexto($json);
@@ -643,6 +652,15 @@ class SessaoCorridaService
         $laps = $sessao['laps'] ?? [];
         $lapstotal = $sessao['lapstotal'] ?? [];
         $totalVoltas = (int) ($sessao['lapsCount'] ?? 0) ?: ($lapstotal ? max($lapstotal) : 0);
+        // MELHORIA 20261119: sem voltas no arquivo -> só a ordem de chegada (raceResult) é confiável
+        $incompleto = empty($laps);
+        $melhorVoltaExtra = null;
+        foreach ($json['extras'] ?? [] as $e) {
+            if (($e['name'] ?? '') === 'bestlap' && (int) ($e['time'] ?? 0) > 0) {
+                $melhorVoltaExtra = (int) $e['time'];
+                break;
+            }
+        }
 
         // voltas lentas do pelotão (mediana da volta > 1.5x a mediana geral)
         $maxVolta = -1;
@@ -686,6 +704,10 @@ class SessaoCorridaService
                         $melhor = ['time' => $v['tempo'], 'lap' => $i];
                     }
                 }
+            }
+            // MELHORIA 20261119: arquivo sem voltas -> "extras.bestlap" é a melhor volta do jogador (carro 0)
+            if (!$melhor && $incompleto && $indice === 0 && $melhorVoltaExtra) {
+                $melhor = ['time' => $melhorVoltaExtra, 'lap' => null];
             }
 
             $melhoresSetores = [];
@@ -739,7 +761,7 @@ class SessaoCorridaService
                 'voltasCompletadas' => $voltasCompletadas,
                 'tempoTotal' => $tempoTotal,
                 'melhorVolta' => $tempoMelhor,
-                'numeroMelhorVolta' => $melhor ? $melhor['lap'] + 1 : null,
+                'numeroMelhorVolta' => ($melhor && $melhor['lap'] !== null) ? $melhor['lap'] + 1 : null,
                 'melhoresSetores' => $melhoresSetores,
                 'pneus' => array_column($stints, 'pneu'),
                 'paradas' => $paradas,
@@ -750,7 +772,15 @@ class SessaoCorridaService
             ];
         }
 
-        usort($carros, function ($a, $b) {
+        if ($incompleto) {
+            // MELHORIA 20261119: sem voltas -> ordem de chegada do próprio arquivo (raceResult)
+            $ordemChegada = array_map('intval', $sessao['raceResult'] ?? []);
+            $posChegada = function ($idx) use ($ordemChegada) {
+                $p = array_search($idx, $ordemChegada, true);
+                return $p === false ? PHP_INT_MAX : $p;
+            };
+            usort($carros, fn ($a, $b) => ($posChegada($a['indice']) <=> $posChegada($b['indice'])) ?: ($a['indice'] <=> $b['indice']));
+        } else usort($carros, function ($a, $b) {
             if ($b['voltasCompletadas'] !== $a['voltasCompletadas']) {
                 return $b['voltasCompletadas'] <=> $a['voltasCompletadas'];
             }
@@ -761,9 +791,19 @@ class SessaoCorridaService
         });
 
         $vencedor = $carros[0] ?? null;
-        $tempoVencedor = $vencedor['tempoTotal'] ?? 0;
+        $tempoVencedor = $incompleto ? null : ($vencedor['tempoTotal'] ?? 0);
         foreach ($carros as $i => &$c) {
             $c['posicao'] = $i + 1;
+            if ($incompleto) {
+                // sem voltas não dá para saber tempo, gap ou abandono: fica só a posição
+                $c['tempoTotal'] = null;
+                $c['abandonou'] = false;
+                $c['voltaAbandono'] = null;
+                $c['voltasAtras'] = 0;
+                $c['difLider'] = null;
+                $c['intervalo'] = null;
+                continue;
+            }
             $terminou = $c['voltasCompletadas'] >= $totalVoltas || ($c['voltasCompletadas'] > 0 && $c['tempoTotal'] >= $tempoVencedor);
             $c['abandonou'] = !$terminou;
             $c['voltaAbandono'] = $terminou ? null : $c['voltasCompletadas'] + 1;
@@ -793,7 +833,7 @@ class SessaoCorridaService
 
         $vmr = null;
         foreach ($carros as $c) {
-            if ($c['melhorVolta'] && (!$vmr || $c['melhorVolta'] < $vmr['melhorVolta'])) {
+            if (!$incompleto && $c['melhorVolta'] && (!$vmr || $c['melhorVolta'] < $vmr['melhorVolta'])) {
                 $vmr = $c;
             }
         }
@@ -821,6 +861,7 @@ class SessaoCorridaService
 
         return [
             'info' => $contexto['info'] + ['sessao_nome' => $sessao['name'] ?? null],
+            'dadosIncompletos' => $incompleto,
             'totalVoltas' => $totalVoltas,
             'tempoCorrida' => $tempoVencedor,
             'classificacao' => $carros,

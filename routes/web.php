@@ -16,6 +16,7 @@ use App\Http\Controllers\Site\TemporadaController;
 use App\Http\Controllers\Site\PDFController;
 use App\Http\Controllers\Site\SkinController;
 use App\Http\Controllers\Site\UsuarioController;
+use App\Http\Controllers\Site\CalendarioController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Site\EstatisticasPilotosEquipes;
 use Illuminate\Support\Facades\Route;
@@ -115,6 +116,8 @@ route::get('/pistas/edit/{id}', [PistaController::class, 'edit'])->name('pistas.
 route::put('/pistas/update/{id}', [PistaController::class, 'update'])->name('pistas.update')->middleware('auth');
 route::get('/pistas/show/{id}', [PistaController::class, 'show'])->name('pistas.show')->middleware('auth');
 route::get('/pistas/delete/{id}', [PistaController::class, 'destroy'])->name('pistas.delete')->middleware('auth');
+/** 17/11/2026 - histórico e estatísticas da pista (anos de referência, curiosidades, todas as corridas) */
+route::get('/pistas/historico/{id}', [PistaController::class, 'historico'])->name('pistas.historico')->middleware('auth');
 
 /**Adicionar Autor */
 route::get('/pistas/adicionarAutor', [PistaController::class, 'adicionarAutor'])->name('pistas.adicionarAutor')->middleware('auth');
@@ -257,3 +260,18 @@ route::get('/curiosidades', [\App\Http\Controllers\Site\CuriosidadesController::
 route::get('/usuarios/index', [UsuarioController::class, 'index'])->name('usuarios.index')->middleware(['auth', 'can:admin']);
 route::post('/usuarios/entrarComo/{id}', [UsuarioController::class, 'entrarComo'])->name('usuarios.entrarComo')->middleware(['auth', 'can:admin']);
 route::post('/usuarios/voltar', [UsuarioController::class, 'voltar'])->name('usuarios.voltar')->middleware('auth');
+
+/** 19/11/2026 - planejamento do calendário das temporadas (formulário + grid + anotações) */
+route::post('/calendario/temporada/store', [CalendarioController::class, 'storeTemporada'])->name('calendario.temporada.store')->middleware('auth');
+route::post('/calendario/temporada/update/{id}', [CalendarioController::class, 'updateTemporada'])->name('calendario.temporada.update')->middleware('auth');
+route::post('/calendario/temporada/delete/{id}', [CalendarioController::class, 'destroyTemporada'])->name('calendario.temporada.delete')->middleware('auth');
+route::post('/calendario/temporada/renumerar/{id}', [CalendarioController::class, 'renumerar'])->name('calendario.temporada.renumerar')->middleware('auth');
+route::post('/calendario/etapa/gerar/{temporadaId}', [CalendarioController::class, 'gerarEtapas'])->name('calendario.etapa.gerar')->middleware('auth');
+route::post('/calendario/etapa/salvar/{temporadaId}', [CalendarioController::class, 'salvarEtapa'])->name('calendario.etapa.salvar')->middleware('auth');
+route::post('/calendario/etapa/mover/{id}', [CalendarioController::class, 'moverEtapa'])->name('calendario.etapa.mover')->middleware('auth');
+route::post('/calendario/etapa/delete/{id}', [CalendarioController::class, 'destroyEtapa'])->name('calendario.etapa.delete')->middleware('auth');
+route::get('/calendario/exportar/excel', [CalendarioController::class, 'exportar'])->name('calendario.exportar')->middleware('auth');
+/** 26/11/2026 - lançar a etapa do calendário como corrida oficial */
+route::get('/calendario/etapa/oficial/{id}', [CalendarioController::class, 'dadosOficial'])->name('calendario.etapa.oficial')->middleware('auth');
+route::post('/calendario/etapa/oficial/{id}', [CalendarioController::class, 'cadastrarOficial'])->name('calendario.etapa.oficial.store')->middleware('auth');
+route::get('/calendario/{id?}', [CalendarioController::class, 'index'])->name('calendario.index')->middleware('auth');

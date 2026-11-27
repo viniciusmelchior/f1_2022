@@ -24,12 +24,13 @@ class CuriosidadesController extends Controller
         $forcar = $request->boolean('recalcular');
         // o HTML guarda URLs absolutas (asset/route), então o endereço de acesso também entra na chave
         $assinatura = $service->assinatura($userId).'_'.substr(md5(url('/')), 0, 8);
-        $chave = 'curiosidades_html_v2_'.$userId.'_'.$assinatura;
+        // 20261120 - v3: novos cards e correção do "ocultar meu piloto" (HTML antigo em cache tinha o piloto errado)
+        $chave = 'curiosidades_html_v3_'.$userId.'_'.$assinatura;
 
         // dados mudaram: descarta o cache da versão anterior para não acumular arquivos
         $anterior = Cache::get('curiosidades_assinatura_'.$userId);
         if ($anterior && $anterior !== $assinatura) {
-            Cache::forget('curiosidades_html_v2_'.$userId.'_'.$anterior);
+            Cache::forget('curiosidades_html_v3_'.$userId.'_'.$anterior);
             $service->esquecer($userId, $anterior);
         }
         Cache::forever('curiosidades_assinatura_'.$userId, $assinatura);
@@ -39,8 +40,8 @@ class CuriosidadesController extends Controller
         }
 
         $conteudo = Cache::remember($chave, now()->addDays(15), function () use ($service, $userId, $forcar, $assinatura) {
-            // mesmo critério da tela de estatísticas de pilotos/equipes para identificar o piloto do usuário
-            $meuPiloto = Piloto::where('nome', 'Vinicius')->where('sobrenome', 'Melchior')->where('user_id', Auth::user()->id)->first(['id', 'nome', 'sobrenome']);
+            // 20261120 - antes era user_id = 3 fixo: nas outras contas o id não batia com nenhum ranking e o "ocultar meu piloto" não fazia nada
+            $meuPiloto = Piloto::where('nome', 'Vinicius')->where('sobrenome', 'Melchior')->where('user_id', $userId)->first(['id', 'nome', 'sobrenome']);
             $dados = $service->gerar($userId, $forcar, $assinatura);
 
             return view('site.curiosidades._conteudo', compact('dados', 'meuPiloto'))->render();

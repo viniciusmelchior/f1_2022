@@ -294,7 +294,21 @@
     @if(count($dados['duelos']))
     <section class="res-secao" id="duelos">
         <h2>Duelos de companheiros</h2>
-        <p class="res-sub">Só as corridas em que os dois correram pela equipe. Largada = quem largou na frente; corrida = quem chegou na frente.</p>
+        <p class="res-sub">Só as corridas em que os dois correram pela equipe. Largada = quem largou na frente; corrida = quem chegou na frente. Em equipes com mais de dois pilotos, o duelo principal é a dupla que mais correu junta e os demais confrontos aparecem abaixo.</p>
+        <style>
+            /* MELHORIA 20261120 (duelos): equipes com 3+ pilotos */
+            .res-duelo-elenco { margin-top: 12px; padding-top: 8px; border-top: 1px dashed #e5e7eb; }
+            .res-duelo-elenco > small { display: block; margin: 6px 0 2px; color: var(--ink-3); font-size: .68rem; text-transform: uppercase; letter-spacing: 1px; text-align: center; }
+            .res-duelo-membro { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: .8rem; color: var(--ink-2); }
+            .res-duelo-membro .res-foto { width: 24px; height: 24px; }
+            .res-duelo-membro .nome { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 800; color: var(--ink-1); }
+            .res-duelo-membro b { min-width: 52px; text-align: right; color: var(--ink-1); }
+            .res-duelo-outro { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 6px; align-items: center; padding: 3px 0; font-size: .8rem; }
+            .res-duelo-outro a { color: var(--ink-1); font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+            .res-duelo-outro a:last-of-type { text-align: right; }
+            .res-duelo-outro b { padding: 1px 8px; border-radius: 999px; background: #f4f5f7; }
+            .res-duelo-outro span { grid-column: 1 / -1; margin-top: -3px; color: var(--ink-3); font-size: .7rem; text-align: center; }
+        </style>
         <div class="res-grid-3" id="gradeDuelos">
             @foreach($dados['duelos'] as $iDuelo => $d)
                 @php
@@ -311,6 +325,32 @@
                     <div class="res-duelo-linha"><small>Corrida</small><b>{{ $d['corrida'][0] }}</b>{!! $barra($d['corrida'][0], $d['corrida'][1]) !!}<b>{{ $d['corrida'][1] }}</b></div>
                     <div class="res-duelo-linha"><small>Largada</small><b>{{ $d['quali'][0] }}</b>{!! $barra($d['quali'][0], $d['quali'][1]) !!}<b>{{ $d['quali'][1] }}</b></div>
                     <div class="res-duelo-linha"><small>Pontos</small><b>{{ $num($d['pontos'][0]) }}</b>{!! $barra($d['pontos'][0], $d['pontos'][1]) !!}<b>{{ $num($d['pontos'][1]) }}</b></div>
+                    {{-- MELHORIA 20261120 (duelos): equipes com 3+ pilotos — elenco completo e demais confrontos --}}
+                    @if(!empty($d['elenco']))
+                        <div class="res-duelo-elenco">
+                            <small>{{ $d['qtdPilotos'] }} pilotos pela equipe</small>
+                            @foreach($d['elenco'] as $x)
+                                <div class="res-duelo-membro">
+                                    <img class="res-foto" src="{{ $x['piloto']['img'] }}" alt="" loading="lazy">
+                                    <a class="nome" href="{{ $x['piloto']['url'] }}" title="{{ $x['piloto']['nome'] }}">{{ $x['piloto']['sobrenome'] }}</a>
+                                    <span title="Corridas pela equipe">{{ $x['corridas'] }} {{ $x['corridas'] == 1 ? 'corrida' : 'corridas' }}</span>
+                                    <span title="Melhor chegada pela equipe">melhor {{ $x['melhor'] }}º</span>
+                                    <b>{{ $num($x['pontos']) }} pts</b>
+                                </div>
+                            @endforeach
+                            @if(count($d['outros']))
+                                <small>Outros confrontos</small>
+                                @foreach($d['outros'] as $o)
+                                    <div class="res-duelo-outro" title="Largada {{ $o['quali'][0] }} x {{ $o['quali'][1] }} · pontos {{ $num($o['pontos'][0]) }} x {{ $num($o['pontos'][1]) }}">
+                                        <a href="{{ $o['a']['url'] }}">{{ $o['a']['sobrenome'] }}</a>
+                                        <b>{{ $o['corrida'][0] }} x {{ $o['corrida'][1] }}</b>
+                                        <a href="{{ $o['b']['url'] }}">{{ $o['b']['sobrenome'] }}</a>
+                                        <span>{{ $o['juntos'] }} {{ $o['juntos'] == 1 ? 'corrida junto' : 'corridas juntos' }}</span>
+                                    </div>
+                                @endforeach
+                            @endif
+                        </div>
+                    @endif
                 </div>
             @endforeach
         </div>
@@ -350,6 +390,26 @@
     <section class="res-secao" id="e-se">
         <h2>E se…?</h2>
         <p class="res-sub">Os mesmos resultados de chegada, contados de outro jeito, com a classificação completa de cada cenário. As setas comparam com a posição oficial. Nenhum desses cenários altera a classificação.</p>
+        {{-- MELHORIA 20261120 (e se): quem seria campeão em quantos cenários --}}
+        @if(!empty($dados['cenariosResumo']['total']))
+            @php $cr = $dados['cenariosResumo']; @endphp
+            <style>
+                .res-ese-resumo { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 12px 16px; margin-bottom: 14px; }
+                .res-ese-resumo > span:first-child { flex-basis: 100%; color: var(--ink-2); font-size: .9rem; }
+                .res-ese-chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 3px; border-radius: 999px; background: #f4f5f7; font-size: .85rem; font-weight: 700; color: var(--ink-1); }
+                .res-ese-chip .res-foto { width: 26px; height: 26px; }
+                .res-ese-chip b { color: var(--f1-red); }
+            </style>
+            <div class="res-card res-ese-resumo">
+                <span>Em <b>{{ $cr['mudaram'] }}</b> de {{ $cr['total'] }} cenários o campeão seria outro. Campeão por cenário:</span>
+                @foreach($cr['campeoes'] as $x)
+                    <a class="res-ese-chip" href="{{ $x['piloto']['url'] }}" title="{{ $x['piloto']['nome'] }}">
+                        <img class="res-foto" src="{{ $x['piloto']['img'] }}" alt="" loading="lazy">
+                        {{ $x['piloto']['sobrenome'] }} <b>{{ $x['qtd'] }}</b>
+                    </a>
+                @endforeach
+            </div>
+        @endif
         <div class="res-grid-3">
             @foreach($dados['cenarios'] as $c)
                 <div class="res-card res-cenario">

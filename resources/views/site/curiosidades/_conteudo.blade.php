@@ -8,6 +8,7 @@
     $car = $dados['carreira'];
     $cor = $dados['corridas'];
     $temp = $dados['temporadas'];
+    $x = $dados['extras']; // 20261120
     $num = fn ($v) => number_format($v, 0, ',', '.');
     $dec = fn ($v) => number_format($v, 1, ',', '.');
     $graficosJs = [
@@ -173,6 +174,9 @@
     .cur-trio .nomes { flex: 1; font-size: 12px; color: var(--ink-2); line-height: 1.3; }
     .cur-trio .nomes b { color: var(--ink-1); font-size: 13px; }
     .cur-trio .num { font-size: 1.3rem; font-weight: 900; }
+    /* 20261120 - logos de equipe no trio (a regra de img acima é para as fotos dos pilotos) */
+    .cur-trio .fotos .cur-logo { width: 38px; height: 38px; }
+    .cur-trio .fotos .cur-logo img { width: auto; height: auto; max-width: 100%; max-height: 100%; margin: 0; border: 0; border-radius: 0; background: none; object-fit: contain; }
 
     .cur-rodape { margin-top: 30px; text-align: center; font-size: 12px; color: var(--ink-3); }
 
@@ -238,7 +242,9 @@
     {{-- ===================== NAV ===================== --}}
     <nav class="cur-nav" id="curNav">
         <a href="#jejuns">Jejuns</a>
+        <a href="#nunca">Nunca aconteceu</a>
         <a href="#sequencias">Sequências</a>
+        <a href="#pistas">Pistas &amp; Países</a>
         <a href="#casa">Em casa</a>
         <a href="#continentes">Continentes</a>
         <a href="#abandonos">Abandonos</a>
@@ -265,6 +271,21 @@
         </div>
     </section>
 
+    {{-- ===================== NUNCA ACONTECEU (20261120) ===================== --}}
+    <section class="cur-secao" id="nunca">
+        <h2>Nunca aconteceu</h2>
+        <p class="cur-sub">Tabus que seguem de pé: pistas que nunca deram vitória, equipes que nunca chegaram lá e marcas nunca quebradas.</p>
+        <div class="cur-grid">
+            @include('site.curiosidades._ranking', ['titulo' => 'Pistas em que mais correu e nunca venceu', 'icone' => 'bi-sign-stop-fill', 'itens' => $x['pistaSemVencer'], 'unidade' => 'GPs', 'filtroAtivo' => true, 'descricao' => 'Piloto × pista: mais GPs disputados na mesma pista sem nenhuma vitória (mín. 3)'])
+            @include('site.curiosidades._ranking', ['titulo' => 'Nunca abandonaram', 'icone' => 'bi-shield-fill-check', 'itens' => $x['nuncaAbandonou'], 'unidade' => 'GPs', 'filtroAtivo' => true, 'descricao' => 'Receberam a bandeirada em todos os GPs da carreira'])
+            @include('site.curiosidades._ranking', ['titulo' => 'Equipes que nunca venceram', 'icone' => 'bi-car-front', 'itens' => $x['equipesNuncaVenceram'], 'unidade' => 'GPs', 'filtroAtivo' => true])
+            @include('site.curiosidades._ranking', ['titulo' => 'Equipes que nunca fizeram pole', 'icone' => 'bi-stopwatch', 'itens' => $x['equipesNuncaPole'], 'unidade' => 'GPs', 'filtroAtivo' => true])
+            @include('site.curiosidades._ranking', ['titulo' => 'Venceram, mas nunca fizeram dobradinha', 'icone' => 'bi-2-circle', 'itens' => $x['equipesSemDobradinha'], 'unidade' => 'vitórias', 'filtroAtivo' => true, 'descricao' => 'Equipes com vitórias e nenhum 1-2'])
+            @include('site.curiosidades._lista_local', ['titulo' => 'Pistas sem bis', 'icone' => 'bi-dice-5-fill', 'itens' => $x['semBis'], 'unidade' => 'GPs', 'descricao' => 'Ninguém venceu duas vezes na pista (mín. 2 GPs)'])
+            @include('site.curiosidades._lista_local', ['titulo' => 'A pole nunca venceu aqui', 'icone' => 'bi-x-circle-fill', 'itens' => $x['poleNunca'], 'unidade' => 'GPs', 'descricao' => 'Pistas em que quem largou em 1º nunca ganhou (mín. 3 GPs)'])
+        </div>
+    </section>
+
     {{-- ===================== SEQUÊNCIAS ===================== --}}
     <section class="cur-secao" id="sequencias">
         <h2>Sequências</h2>
@@ -276,6 +297,19 @@
             @include('site.curiosidades._ranking', ['titulo' => 'Top 10 consecutivos', 'icone' => 'bi-list-ol', 'itens' => $s['top10'], 'unidade' => 'seguidos'])
             @include('site.curiosidades._ranking', ['titulo' => 'GPs seguidos sem abandonar', 'icone' => 'bi-shield-fill-check', 'itens' => $s['semAband'], 'unidade' => 'GPs'])
             @include('site.curiosidades._ranking', ['titulo' => 'Equipes: vitórias consecutivas', 'icone' => 'bi-lightning-charge-fill', 'itens' => $s['equipes'], 'unidade' => 'GPs', 'descricao' => 'GPs seguidos do calendário vencidos pela mesma equipe'])
+        </div>
+    </section>
+
+    {{-- ===================== PISTAS & PAÍSES (20261120) ===================== --}}
+    <section class="cur-secao" id="pistas">
+        <h2>Pistas &amp; Países</h2>
+        <p class="cur-sub">Onde mais se correu e quem manda em cada lugar. O número grande é de GPs; sprints e super corridas aparecem só no detalhe.</p>
+        <div class="cur-grid">
+            @include('site.curiosidades._lista_local', ['titulo' => 'Pistas que mais receberam GPs', 'icone' => 'bi-geo-alt-fill', 'itens' => $x['pistasSedes'], 'unidade' => 'GPs'])
+            @include('site.curiosidades._lista_local', ['titulo' => 'Países que mais receberam GPs', 'icone' => 'bi-flag-fill', 'itens' => $x['paisesSedes'], 'unidade' => 'GPs'])
+            @include('site.curiosidades._lista_local', ['titulo' => 'Pistas mais democráticas', 'icone' => 'bi-people-fill', 'itens' => $x['democraticas'], 'unidade' => 'vencedores', 'descricao' => 'Vencedores diferentes / GPs disputados na pista (mín. 3 GPs)'])
+            @include('site.curiosidades._ranking', ['titulo' => 'Venceram em mais pistas', 'icone' => 'bi-map-fill', 'itens' => $x['maisPistas'], 'unidade' => 'pistas', 'filtroAtivo' => true, 'descricao' => 'Pistas diferentes com pelo menos uma vitória'])
+            @include('site.curiosidades._ranking', ['titulo' => 'Equipes donas da pista', 'icone' => 'bi-pin-map', 'itens' => $x['donasEquipe'], 'unidade' => 'vitórias', 'descricao' => 'Mais vitórias de uma equipe na mesma pista'])
         </div>
     </section>
 
@@ -494,6 +528,9 @@
             @include('site.curiosidades._ranking', ['titulo' => 'Mais GPs disputados', 'icone' => 'bi-flag', 'itens' => $car['corridas'], 'unidade' => 'GPs', 'filtroAtivo' => true])
             @include('site.curiosidades._ranking', ['titulo' => 'Hat-tricks', 'icone' => 'bi-stars', 'itens' => $car['hatTricks'], 'unidade' => 'hat-tricks', 'descricao' => 'Pole position + vitória + volta mais rápida no mesmo GP'])
             @include('site.curiosidades._ranking', ['titulo' => 'Dobradinhas', 'icone' => 'bi-1-circle-fill', 'itens' => $car['dobradinhas'], 'unidade' => '1-2', 'descricao' => 'GPs com 1º e 2º lugar da mesma equipe'])
+            {{-- 20261120 --}}
+            @include('site.curiosidades._ranking', ['titulo' => 'Voltas mais rápidas', 'icone' => 'bi-lightning-fill', 'itens' => $x['voltasRapidas'], 'unidade' => 'voltas', 'filtroAtivo' => true])
+            @include('site.curiosidades._ranking', ['titulo' => 'Estreias de sonho', 'icone' => 'bi-balloon-heart-fill', 'itens' => $x['estreias'], 'unidade' => 'na estreia', 'semBarra' => true, 'descricao' => 'Pódio no primeiro GP da carreira (o grid da primeira corrida do histórico não conta)'])
 
             <article class="cur-card cur-largo">
                 <header class="cur-card-header"><div><h3><i class="bi bi-1-square-fill"></i> Venceram uma única vez</h3><p>{{ count($car['umaVitoria']) }} pilotos têm exatamente uma vitória — ordenados por GPs disputados</p></div></header>
@@ -585,6 +622,37 @@
                     @endforeach
                 </div>
             </article>
+
+            {{-- 20261120 - pódio na ordem exata e combinação de equipes --}}
+            <article class="cur-card">
+                <header class="cur-card-header"><div><h3><i class="bi bi-list-ol"></i> Pódio idêntico</h3><p>Os mesmos três pilotos na mesma ordem: 1º, 2º e 3º</p></div></header>
+                <div>
+                    @forelse($x['podiosExatos'] as $t)
+                        <div class="cur-trio" data-cur-ocultavel data-piloto="{{ implode(',', array_column($t['pilotos'], 'id')) }}">
+                            <div class="fotos">@foreach($t['pilotos'] as $tp)<img src="{{ $tp['img'] }}" alt="{{ $tp['nome'] }}" title="{{ $loop->iteration }}º {{ $tp['nome'] }}" loading="lazy">@endforeach</div>
+                            <div class="nomes"><b>@foreach($t['pilotos'] as $tp){{ $loop->iteration }}º {{ $tp['nome'] }}@if(!$loop->last) · @endif @endforeach</b><br>último: {{ $t['ultima']['evento'] }} · {{ $t['ultima']['temporada'] }}</div>
+                            <div class="num">{{ $t['valor'] }}×</div>
+                        </div>
+                    @empty
+                        <p class="cur-vazio">Nenhum pódio se repetiu na mesma ordem.</p>
+                    @endforelse
+                </div>
+            </article>
+
+            <article class="cur-card">
+                <header class="cur-card-header"><div><h3><i class="bi bi-building"></i> Pódio de equipes mais repetido</h3><p>As mesmas equipes nas três posições do pódio, em qualquer ordem</p></div></header>
+                <div>
+                    @forelse($x['podiosEquipes'] as $t)
+                        <div class="cur-trio">
+                            <div class="fotos" style="gap: 4px;">@foreach($t['equipes'] as $te)@include('site.curiosidades._avatar', ['q' => $te, 'classe' => ''])@endforeach</div>
+                            <div class="nomes"><b>{{ implode(' · ', array_column($t['equipes'], 'nome')) }}</b><br>último: {{ $t['ultima']['evento'] }} · {{ $t['ultima']['temporada'] }}</div>
+                            <div class="num">{{ $t['valor'] }}×</div>
+                        </div>
+                    @empty
+                        <p class="cur-vazio">Nenhuma combinação se repetiu.</p>
+                    @endforelse
+                </div>
+            </article>
         </div>
     </section>
 
@@ -664,7 +732,8 @@
     const MEU_PILOTO = @json($meuPiloto->id ?? null);
     const CHAVE = 'curiosidades.ocultarMeuPiloto';
     const pagina = document.querySelector('.cur-page');
-    let ocultarMeu = MEU_PILOTO && localStorage.getItem(CHAVE) === '1';
+    let ocultarMeu = false;
+    try { ocultarMeu = !!MEU_PILOTO && localStorage.getItem(CHAVE) === '1'; } catch (e) {}
 
     const ehMeu = el => MEU_PILOTO && (el.dataset.piloto || '').split(',').includes(String(MEU_PILOTO));
 
@@ -725,7 +794,7 @@
         chave.checked = !!ocultarMeu;
         chave.addEventListener('change', () => {
             ocultarMeu = chave.checked;
-            localStorage.setItem(CHAVE, ocultarMeu ? '1' : '0');
+            try { localStorage.setItem(CHAVE, ocultarMeu ? '1' : '0'); } catch (e) {}
             aplicar();
         });
     }

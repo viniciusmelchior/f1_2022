@@ -39,7 +39,7 @@ class CuriosidadesService
     /** Dados da tela. $assinatura evita recalcular a assinatura quando o chamador já a tem */
     public function gerar(int $userId, bool $forcar = false, ?string $assinatura = null): array
     {
-        $chave = 'curiosidades_v3_'.$userId.'_'.($assinatura ?? $this->assinatura($userId));
+        $chave = 'curiosidades_v4_'.$userId.'_'.($assinatura ?? $this->assinatura($userId));
         if ($forcar) {
             Cache::forget($chave);
         }
@@ -49,7 +49,7 @@ class CuriosidadesService
 
     public function esquecer(int $userId, string $assinatura): void
     {
-        Cache::forget('curiosidades_v3_'.$userId.'_'.$assinatura);
+        Cache::forget('curiosidades_v4_'.$userId.'_'.$assinatura);
     }
 
     /** Checksum barato (~30 ms) de tudo que influencia a tela: qualquer alteração gera uma chave de cache nova */
@@ -362,6 +362,10 @@ class CuriosidadesService
         $recordesEquipe = [];
         $vencedoresDistintos = [];
         $polesDistintos = [];
+        // 20261120 - acumuladores dos novos cards (só leitura dos mesmos dados, nada do que já existia muda)
+        $triosOrdem = [];
+        $triosEquipe = [];
+        $equipePista = [];
 
         foreach ($this->corridas as $idx => $c) {
             $paisCorrida = $this->paisDaPista($c['pista_id']);
@@ -370,8 +374,9 @@ class CuriosidadesService
 
             $T[$tid] ??= ['corridas' => 0, 'abandonos' => 0, 'vencedores' => [], 'poleVenceu' => 0, 'equipes' => []];
             $T[$tid]['corridas']++;
-            $pistasAc[$c['pista_id']] ??= ['corridas' => 0, 'abandonos' => 0, 'vencedores' => []];
+            $pistasAc[$c['pista_id']] ??= ['corridas' => 0, 'abandonos' => 0, 'vencedores' => [], 'vitPor' => [], 'poleVenceu' => 0, 'temporadas' => []];
             $pistasAc[$c['pista_id']]['corridas']++;
+            $pistasAc[$c['pista_id']]['temporadas'][$tid] = true;
             $continentesAc[$contCorrida ?? 0] ??= ['corridas' => 0, 'pilotos' => [], 'equipes' => [], 'paises' => []];
             $continentesAc[$contCorrida ?? 0]['corridas']++;
             $paisesSede[$paisCorrida ?? 0] ??= ['corridas' => 0, 'locais' => 0, 'vencedoresLocais' => []];
@@ -415,9 +420,33 @@ class CuriosidadesService
                     'casa' => ['corridas' => 0, 'vitorias' => 0, 'podios' => 0, 'somaChegada' => 0, 'chegadas' => 0],
                     'fora' => ['corridas' => 0, 'vitorias' => 0, 'somaChegada' => 0, 'chegadas' => 0],
                     'primeira' => $idx, 'ultima' => $idx,
+                    // 20261120
+                    'vr' => 0, 'vrVit' => 0, 'pistas' => [],
+                    'estreia' => ['idx' => $idx, 'chegada' => $r['chegada'], 'largada' => $r['largada'], 'equipe' => $eid, 'abandono' => $r['abandono']],
                 ];
                 $p = &$P[$pid];
                 $p['corridas']++;
+
+                // 20261120 - desempenho do piloto em cada pista e voltas mais rápidas
+                $pp = &$p['pistas'][$c['pista_id']];
+                $pp ??= ['corridas' => 0, 'vitorias' => 0, 'podios' => 0, 'melhor' => null];
+                $pp['corridas']++;
+                if ($venceu) {
+                    $pp['vitorias']++;
+                }
+                if ($podio) {
+                    $pp['podios']++;
+                }
+                if (!$r['abandono'] && $r['chegada'] >= 1 && ($pp['melhor'] === null || $r['chegada'] < $pp['melhor'])) {
+                    $pp['melhor'] = $r['chegada'];
+                }
+                unset($pp);
+                if ($c['volta_rapida'] !== null && $c['volta_rapida'] === $r['pe']) {
+                    $p['vr']++;
+                    if ($venceu) {
+                        $p['vrVit']++;
+                    }
+                }
                 $p['ultima'] = $idx;
                 $p['equipes'][$eid] = ($p['equipes'][$eid] ?? 0) + 1;
                 $p['temporadas'][$tid] = true;
@@ -479,12 +508,21 @@ class CuriosidadesService
 
                 // ---------- equipe (uma vez por corrida) ----------
                 $E[$eid] ??= ['corridas' => 0, 'vitorias' => 0, 'poles' => 0, 'ultVit' => null, 'desdeVit' => 0,
-                              'pilotos' => [], 'dobradinhas' => 0, 'vitCasa' => 0, 'temporadas' => []];
+                              'pilotos' => [], 'dobradinhas' => 0, 'vitCasa' => 0, 'temporadas' => [], 'podios' => 0, 'melhor' => null];
                 $E[$eid]['pilotos'][$pid] = true;
+                // 20261120 - pódios e melhor resultado da equipe (para os cards de "nunca venceu")
+                if ($podio) {
+                    $E[$eid]['podios']++;
+                }
+                if (!$r['abandono'] && $r['chegada'] >= 1 && ($E[$eid]['melhor'] === null || $r['chegada'] < $E[$eid]['melhor'])) {
+                    $E[$eid]['melhor'] = $r['chegada'];
+                }
                 $E[$eid]['temporadas'][$tid] = true;
                 if (!isset($equipesNaCorrida[$eid])) {
                     $equipesNaCorrida[$eid] = true;
                     $E[$eid]['corridas']++;
+                } else {
+                    $E[$eid]['doisCarros'] = true; // 20261120 - só equipe com 2 carros na mesma corrida pode fazer dobradinha
                 }
 
                 // ---------- escaladas / quedas ----------
@@ -525,6 +563,12 @@ class CuriosidadesService
                 $vencedoresDistintos[$vp] = true;
                 $T[$tid]['vencedores'][$vp] = ($T[$tid]['vencedores'][$vp] ?? 0) + 1;
                 $pistasAc[$c['pista_id']]['vencedores'][$vp] = true;
+                // 20261120
+                $pistasAc[$c['pista_id']]['vitPor'][$vp] = ($pistasAc[$c['pista_id']]['vitPor'][$vp] ?? 0) + 1;
+                if ($vencedor['largada'] === 1) {
+                    $pistasAc[$c['pista_id']]['poleVenceu']++;
+                }
+                $equipePista[$ve.'-'.$c['pista_id']] = ($equipePista[$ve.'-'.$c['pista_id']] ?? 0) + 1;
                 $continentesAc[$contCorrida ?? 0]['pilotos'][$vp] = ($continentesAc[$contCorrida ?? 0]['pilotos'][$vp] ?? 0) + 1;
                 $continentesAc[$contCorrida ?? 0]['equipes'][$ve] = ($continentesAc[$contCorrida ?? 0]['equipes'][$ve] ?? 0) + 1;
                 $paisVencedor = isset($this->pilotos[$vp]) ? (int) $this->pilotos[$vp]->pais_id : 0;
@@ -573,6 +617,15 @@ class CuriosidadesService
                     sort($trio);
                     $k = implode('-', $trio);
                     $trios[$k] = ['pilotos' => $trio, 'valor' => ($trios[$k]['valor'] ?? 0) + 1, 'ultima' => $idx];
+
+                    // 20261120 - pódio na ordem exata (1º, 2º, 3º) e combinação de equipes no pódio (qualquer ordem)
+                    $ordem = [$vp, $porChegada[2]['piloto'], $porChegada[3]['piloto']];
+                    $k = implode('-', $ordem);
+                    $triosOrdem[$k] = ['pilotos' => $ordem, 'valor' => ($triosOrdem[$k]['valor'] ?? 0) + 1, 'ultima' => $idx];
+                    $eqs = [$ve, $porChegada[2]['equipe'], $porChegada[3]['equipe']];
+                    sort($eqs);
+                    $k = implode('-', $eqs);
+                    $triosEquipe[$k] = ['equipes' => $eqs, 'valor' => ($triosEquipe[$k]['valor'] ?? 0) + 1, 'ultima' => $idx];
                 }
 
                 // vitórias consecutivas de uma equipe no calendário
@@ -612,6 +665,8 @@ class CuriosidadesService
         $dados['carreira'] = $this->carreira($P, $E);
         $dados['corridas'] = $this->recordesCorrida($P, $E, $escaladas, $quedas, $vitoriasDeTras, $gridVencedor, $pilotoPista, $trios);
         $dados['temporadas'] = $this->temporadasDados($T, $temporadaPiloto, $userId);
+        // 20261120 - pistas & países, "nunca aconteceu", pódios exatos/equipes, voltas rápidas e estreias
+        $dados['extras'] = $this->extras($P, $E, $pistasAc, $pilotoPista, $equipePista, $triosOrdem, $triosEquipe, $userId);
 
         $dados['tempo_ms'] = (int) round((microtime(true) - $inicio) * 1000);
 
@@ -1119,6 +1174,222 @@ class CuriosidadesService
             'menosDisputadas' => array_slice(array_reverse($maisDisputadas), 0, 8),
             'dominio' => array_slice($dominio, 0, 12),
             'campeoesMenosVitorias' => array_slice($campeoes, 0, 10),
+        ];
+    }
+
+    // =====================================================================================
+    // 20261120 - NOVOS BLOCOS
+    // =====================================================================================
+
+    /** Pista no formato das listas simples (bandeira, nome, link) */
+    private function pistaInfo(int $id): array
+    {
+        $pista = $this->pistas[$id] ?? null;
+        $pais = $this->pais($pista->pais_id ?? null);
+
+        return ['id' => $id, 'nome' => $pista->nome ?? 'Pista #'.$id, 'bandeira' => $pais['bandeira'], 'pais' => $pais['nome'], 'url' => route('pistas.show', $id)];
+    }
+
+    /**
+     * Sprints e super corridas (com resultado lançado) por pista. Elas ficam fora de todo o resto da tela;
+     * aqui servem só para mostrar, ao lado dos GPs, quantas vezes cada pista/país recebeu uma sprint.
+     */
+    private function sedesSprint(int $userId): array
+    {
+        $linhas = DB::select("
+            SELECT c.pista_id,
+                   SUM(COALESCE(c.flg_super_corrida, 'N') <> 'S') AS sprints,
+                   SUM(COALESCE(c.flg_super_corrida, 'N') = 'S') AS super
+              FROM corridas c
+             WHERE c.user_id = ?
+               AND c.flg_sprint = 'S'
+               AND EXISTS (SELECT 1 FROM resultados r WHERE r.corrida_id = c.id)
+             GROUP BY c.pista_id
+        ", [$userId]);
+
+        $saida = [];
+        foreach ($linhas as $l) {
+            $saida[(int) $l->pista_id] = ['sprints' => (int) $l->sprints, 'super' => (int) $l->super];
+        }
+
+        // pistas que só receberam sprints ainda não foram carregadas
+        $faltando = array_diff(array_keys($saida), $this->pistas->keys()->all());
+        if ($faltando) {
+            $this->pistas = $this->pistas->union(DB::table('pistas')->whereIn('id', $faltando)->get(['id', 'nome', 'pais_id'])->keyBy('id'));
+        }
+
+        return $saida;
+    }
+
+    private function extras(array $P, array $E, array $pistasAc, array $pilotoPista, array $equipePista, array $triosOrdem, array $triosEquipe, int $userId): array
+    {
+        $v = self::porValor();
+        $sprints = $this->sedesSprint($userId);
+
+        // ---------- pistas e países que mais receberam corridas ----------
+        $pistas = $paises = [];
+        foreach (array_unique(array_merge(array_keys($pistasAc), array_keys($sprints))) as $pistaId) {
+            $s = $pistasAc[$pistaId] ?? ['corridas' => 0, 'vitPor' => [], 'temporadas' => []];
+            $sp = $sprints[$pistaId] ?? ['sprints' => 0, 'super' => 0];
+            $info = $this->pistaInfo($pistaId);
+            arsort($s['vitPor']);
+            $partes = [self::qtd($sp['sprints'], 'sprint', 'sprints')];
+            if ($sp['super'] > 0) {
+                $partes[] = self::qtd($sp['super'], 'super corrida', 'super corridas');
+            }
+            $partes[] = 'em '.self::qtd(count($s['temporadas']), 'temporada', 'temporadas');
+            $pistas[] = $info + [
+                'valor' => $s['corridas'], 'desempate' => $sp['sprints'] + $sp['super'],
+                'detalhe' => implode(' · ', $partes),
+                // até 3: se o "ocultar meu piloto" esconder o primeiro, a tela mostra o seguinte
+                'lideres' => array_map(fn ($pid) => $this->piloto($pid) + ['vitorias' => $s['vitPor'][$pid]], array_slice(array_keys($s['vitPor']), 0, 3)),
+            ];
+
+            $paisId = (int) ($this->pistas[$pistaId]->pais_id ?? 0);
+            if ($paisId) {
+                $paises[$paisId] ??= ['gps' => 0, 'sprints' => 0, 'super' => 0, 'pistas' => []];
+                $paises[$paisId]['gps'] += $s['corridas'];
+                $paises[$paisId]['sprints'] += $sp['sprints'];
+                $paises[$paisId]['super'] += $sp['super'];
+                $paises[$paisId]['pistas'][$pistaId] = $info['nome'];
+            }
+        }
+        usort($pistas, $v);
+
+        $paisesSaida = [];
+        foreach ($paises as $paisId => $p) {
+            $partes = [self::qtd($p['sprints'], 'sprint', 'sprints')];
+            if ($p['super'] > 0) {
+                $partes[] = self::qtd($p['super'], 'super corrida', 'super corridas');
+            }
+            $nomes = array_slice($p['pistas'], 0, 4);
+            $resto = count($p['pistas']) - count($nomes);
+            $partes[] = self::qtd(count($p['pistas']), 'pista', 'pistas').': '.implode(', ', $nomes).($resto > 0 ? ' e mais '.$resto : '');
+            $pais = $this->pais($paisId);
+            $paisesSaida[] = ['nome' => $pais['nome'], 'bandeira' => $pais['bandeira'], 'url' => null,
+                'valor' => $p['gps'], 'desempate' => $p['sprints'] + $p['super'], 'detalhe' => implode(' · ', $partes)];
+        }
+        usort($paisesSaida, $v);
+
+        // ---------- pistas: democráticas, sem bis, pole nunca venceu, equipes donas ----------
+        $democraticas = $semBis = $poleNunca = [];
+        foreach ($pistasAc as $pistaId => $s) {
+            $info = $this->pistaInfo($pistaId);
+            $vencedores = count($s['vitPor']);
+            if ($s['corridas'] >= 3) {
+                $democraticas[] = $info + ['valor' => $vencedores, 'de' => $s['corridas'], 'desempate' => self::pct($vencedores, $s['corridas']),
+                    'detalhe' => self::pctTxt($vencedores, $s['corridas']).' dos GPs com um vencedor diferente'];
+                if ($s['poleVenceu'] === 0) {
+                    $poleNunca[] = $info + ['valor' => $s['corridas'], 'desempate' => 0, 'detalhe' => 'Nenhum dos '.$s['corridas'].' GPs foi vencido por quem largou na pole'];
+                }
+            }
+            if ($s['corridas'] >= 2 && $vencedores > 0 && max($s['vitPor']) === 1) {
+                $semBis[] = $info + ['valor' => $s['corridas'], 'desempate' => 0, 'detalhe' => $vencedores.' vencedores diferentes: ninguém venceu duas vezes'];
+            }
+        }
+        usort($democraticas, $v);
+        usort($semBis, $v);
+        usort($poleNunca, $v);
+
+        $donasEquipe = [];
+        foreach ($equipePista as $k => $n) {
+            if ($n < 2) {
+                continue;
+            }
+            [$eid, $pistaId] = array_map('intval', explode('-', $k));
+            $info = $this->pistaInfo($pistaId);
+            $donasEquipe[] = ['quem' => $this->equipe($eid), 'valor' => $n, 'desempate' => $pistasAc[$pistaId]['corridas'] ?? 0,
+                'detalhe' => $info['nome'].' · '.self::pctTxt($n, $pistasAc[$pistaId]['corridas'] ?? 0).' dos GPs na pista', 'link' => $info['url']];
+        }
+
+        // ---------- pilotos ----------
+        $pistaSemVencer = $nuncaAbandonou = $maisPistas = $voltasRapidas = $estreias = [];
+        foreach ($P as $pid => $p) {
+            $quem = $this->piloto($pid);
+
+            foreach ($p['pistas'] as $pistaId => $pp) {
+                if ($pp['vitorias'] === 0 && $pp['corridas'] >= 3) {
+                    $info = $this->pistaInfo($pistaId);
+                    $pistaSemVencer[] = ['quem' => $quem, 'valor' => $pp['corridas'], 'desempate' => $pp['podios'],
+                        'detalhe' => $info['nome'].' · melhor resultado: '.($pp['melhor'] ? $pp['melhor'].'º' : 'nunca terminou').' · '.self::qtd($pp['podios'], 'pódio', 'pódios'),
+                        'link' => $info['url'], 'tag' => $pp['podios'] > 0 ? 'bateu na trave' : null];
+                }
+            }
+
+            if ($p['abandonos'] === 0 && $p['corridas'] >= 2) {
+                $nuncaAbandonou[] = ['quem' => $quem, 'valor' => $p['corridas'], 'desempate' => $p['vitorias'],
+                    'detalhe' => self::qtd($p['vitorias'], 'vitória', 'vitórias').' · '.self::qtd($p['podios'], 'pódio', 'pódios').' · '.self::qtd(count($p['temporadas']), 'temporada', 'temporadas')];
+            }
+
+            $pistasVit = array_filter($p['pistas'], fn ($pp) => $pp['vitorias'] > 0);
+            if (count($pistasVit) >= 2) {
+                $maisPistas[] = ['quem' => $quem, 'valor' => count($pistasVit), 'desempate' => $p['vitorias'],
+                    'detalhe' => 'de '.self::qtd(count($p['pistas']), 'pista disputada', 'pistas disputadas').' · '.self::qtd($p['vitorias'], 'vitória', 'vitórias')];
+            }
+
+            if ($p['vr'] > 0) {
+                $voltasRapidas[] = ['quem' => $quem, 'valor' => $p['vr'], 'desempate' => -$p['corridas'],
+                    'detalhe' => self::pctTxt($p['vr'], $p['corridas']).' dos GPs · '.self::qtd($p['vrVit'], 'vitória', 'vitórias').' com volta rápida'];
+            }
+
+            // estreia: o grid da primeira corrida do histórico não conta (todo mundo "estreou" ali)
+            $es = $p['estreia'];
+            if ($es['idx'] > 0 && !$es['abandono'] && $es['chegada'] >= 1 && $es['chegada'] <= 3) {
+                $ref = $this->corrida($es['idx']);
+                $estreias[] = ['quem' => $quem, 'valor' => $es['chegada'], 'idx' => $es['idx'], 'sufixo' => 'º',
+                    'detalhe' => $ref['evento'].' · '.$ref['temporada'], 'link' => $ref['url'],
+                    'extra' => 'Largou em P'.$es['largada'].' · '.$this->equipe($es['equipe'])['nome'],
+                    'tag' => $es['chegada'] === 1 ? 'venceu' : null];
+            }
+        }
+
+        // ---------- equipes ----------
+        $equipesNuncaVenceram = $equipesNuncaPole = $equipesSemDobradinha = [];
+        foreach ($E as $eid => $e) {
+            $quem = $this->equipe($eid);
+            if ($e['vitorias'] === 0) {
+                $equipesNuncaVenceram[] = ['quem' => $quem, 'valor' => $e['corridas'], 'desempate' => $e['podios'],
+                    'detalhe' => 'melhor resultado: '.($e['melhor'] ? $e['melhor'].'º' : '—').' · '.self::qtd($e['podios'], 'pódio', 'pódios').' · '.self::qtd(count($e['pilotos']), 'piloto', 'pilotos')];
+            }
+            if ($e['poles'] === 0) {
+                $equipesNuncaPole[] = ['quem' => $quem, 'valor' => $e['corridas'], 'desempate' => $e['vitorias'],
+                    'detalhe' => self::qtd($e['vitorias'], 'vitória', 'vitórias').' sem nunca largar na frente'];
+            }
+            if ($e['vitorias'] > 0 && $e['dobradinhas'] === 0 && !empty($e['doisCarros'])) {
+                $equipesSemDobradinha[] = ['quem' => $quem, 'valor' => $e['vitorias'], 'desempate' => $e['corridas'],
+                    'detalhe' => 'em '.self::qtd($e['corridas'], 'GP', 'GPs').' · '.self::qtd($e['podios'], 'pódio', 'pódios').', nenhum 1-2'];
+            }
+        }
+
+        // ---------- pódios: ordem exata e equipes ----------
+        $ordenar = fn ($a, $b) => [$b['valor'], $b['ultima']] <=> [$a['valor'], $a['ultima']];
+        usort($triosOrdem, $ordenar);
+        usort($triosEquipe, $ordenar);
+        $podiosExatos = array_map(fn ($t) => ['pilotos' => array_map(fn ($p) => $this->piloto($p), $t['pilotos']), 'valor' => $t['valor'], 'ultima' => $this->corrida($t['ultima'])],
+            array_slice(array_filter($triosOrdem, fn ($t) => $t['valor'] >= 2), 0, 8));
+        $podiosEquipes = array_map(fn ($t) => ['equipes' => array_map(fn ($e) => $this->equipe($e), $t['equipes']), 'valor' => $t['valor'], 'ultima' => $this->corrida($t['ultima'])],
+            array_slice(array_filter($triosEquipe, fn ($t) => $t['valor'] >= 2), 0, 8));
+
+        // estreia: melhor posição primeiro, mais recente desempata
+        $porEstreia = fn ($a, $b) => [$a['valor'], -$a['idx']] <=> [$b['valor'], -$b['idx']];
+
+        return [
+            'pistasSedes' => array_slice($pistas, 0, 30),
+            'paisesSedes' => array_slice($paisesSaida, 0, 30),
+            'democraticas' => array_slice($democraticas, 0, 20),
+            'semBis' => array_slice($semBis, 0, 20),
+            'poleNunca' => array_slice($poleNunca, 0, 20),
+            'donasEquipe' => $this->ranking($donasEquipe, $v),
+            'maisPistas' => $this->ranking($maisPistas, $v),
+            'pistaSemVencer' => $this->ranking($pistaSemVencer, $v),
+            'nuncaAbandonou' => $this->ranking($nuncaAbandonou, $v),
+            'voltasRapidas' => $this->ranking($voltasRapidas, $v),
+            'estreias' => $this->ranking($estreias, $porEstreia),
+            'equipesNuncaVenceram' => $this->ranking($equipesNuncaVenceram, $v),
+            'equipesNuncaPole' => $this->ranking($equipesNuncaPole, $v),
+            'equipesSemDobradinha' => $this->ranking($equipesSemDobradinha, $v),
+            'podiosExatos' => $podiosExatos,
+            'podiosEquipes' => $podiosEquipes,
         ];
     }
 }
